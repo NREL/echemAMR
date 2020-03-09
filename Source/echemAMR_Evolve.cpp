@@ -141,7 +141,7 @@ void echemAMR::timeStep (int lev, Real time, int iteration)
 // advance a single level for a single time step, updates flux registers
 void echemAMR::Advance (int lev, Real time, Real dt_lev, int iteration, int ncycle)
 {
-    constexpr int num_grow = 3; 
+    constexpr int num_grow = 1; 
 
     std::swap(phi_old[lev], phi_new[lev]);
     t_old[lev] = t_new[lev];
@@ -186,6 +186,7 @@ void echemAMR::Advance (int lev, Real time, Real dt_lev, int iteration, int ncyc
 	uface[i].resize(amrex::grow(bxtmp,1),1);
     }
 */
+    int ncomp=S_new.nComp();
 
     // Build temporary multiFabs to work on.
     Array<MultiFab, AMREX_SPACEDIM> fluxcalc;
@@ -203,66 +204,11 @@ void echemAMR::Advance (int lev, Real time, Real dt_lev, int iteration, int ncyc
     {
 	for (MFIter mfi(S_new,TilingIfNotGPU()); mfi.isValid(); ++mfi)
 	{
-
-        // ======== GET FACE VELOCITY =========
+	    const Box& bx = mfi.tilebox();
             GpuArray<Box, AMREX_SPACEDIM> nbx;
             AMREX_D_TERM(nbx[0] = mfi.nodaltilebox(0);,
                          nbx[1] = mfi.nodaltilebox(1);,
                          nbx[2] = mfi.nodaltilebox(2););
-
-            AMREX_D_TERM(const Box& ngbxx = amrex::grow(mfi.nodaltilebox(0),1);,
-                         const Box& ngbxy = amrex::grow(mfi.nodaltilebox(1),1);,
-                         const Box& ngbxz = amrex::grow(mfi.nodaltilebox(2),1););
-
-            GpuArray<Array4<Real>, AMREX_SPACEDIM> vel{ AMREX_D_DECL( facevel[0].array(mfi),
-                                                                      facevel[1].array(mfi),
-                                                                      facevel[2].array(mfi)) };
-
-            const Box& psibox = Box(IntVect(AMREX_D_DECL(std::min(ngbxx.smallEnd(0)-1, ngbxy.smallEnd(0)-1),
-                                                         std::min(ngbxx.smallEnd(1)-1, ngbxy.smallEnd(0)-1),
-                                                         0)),
-                                    IntVect(AMREX_D_DECL(std::max(ngbxx.bigEnd(0),   ngbxy.bigEnd(0)+1),
-                                                         std::max(ngbxx.bigEnd(1)+1, ngbxy.bigEnd(1)),
-                                                         0)));
-
-            FArrayBox psifab(psibox, 1);
-            Elixir psieli = psifab.elixir();
-            Array4<Real> psi = psifab.array();
-            GeometryData geomdata = geom[lev].data();
-            auto prob_lo = geom[lev].ProbLoArray();
-            auto dx = geom[lev].CellSizeArray();
-
-            amrex::launch(psibox,
-            [=] AMREX_GPU_DEVICE (const Box& tbx)
-            {
-                get_face_velocity_psi(tbx, ctr_time,
-                                      psi, geomdata); 
-            });
-
-            AMREX_D_TERM(
-                         amrex::ParallelFor(ngbxx,
-                         [=] AMREX_GPU_DEVICE (int i, int j, int k)
-                         {
-                             get_face_velocity_x(i, j, k, vel[0], psi, prob_lo, dx); 
-                         });,
-
-                         amrex::ParallelFor(ngbxy,
-                         [=] AMREX_GPU_DEVICE (int i, int j, int k)
-                         {
-                             get_face_velocity_y(i, j, k, vel[1], psi, prob_lo, dx);
-                         });,
-
-                         amrex::ParallelFor(ngbxz,
-                         [=] AMREX_GPU_DEVICE (int i, int j, int k)
-                         {
-                             get_face_velocity_z(i, j, k, vel[2], psi, prob_lo, dx);
-                         });
-                        );
-
-        // ======== FLUX CALC AND UPDATE =========
-
-	    const Box& bx = mfi.tilebox();
-            const Box& gbx = amrex::grow(bx, 1);
 
             Array4<Real> statein  = Sborder.array(mfi);
             Array4<Real> stateout = S_new.array(mfi);
@@ -270,248 +216,67 @@ void echemAMR::Advance (int lev, Real time, Real dt_lev, int iteration, int ncyc
             GpuArray<Array4<Real>, AMREX_SPACEDIM> flux{ AMREX_D_DECL(fluxcalc[0].array(mfi),
                                                                       fluxcalc[1].array(mfi),
                                                                       fluxcalc[2].array(mfi)) };
-
-            AMREX_D_TERM(const Box& dqbxx = amrex::grow(bx, IntVect{2, 1, 1});,
-                         const Box& dqbxy = amrex::grow(bx, IntVect{1, 2, 1});,
-                         const Box& dqbxz = amrex::grow(bx, IntVect{1, 1, 2}););
-
-            FArrayBox slope2fab (amrex::grow(bx, 2), 1);
-            Elixir slope2eli = slope2fab.elixir();
-            Array4<Real> slope2 = slope2fab.array();
-            FArrayBox slope4fab (amrex::grow(bx, 1), 1);
-            Elixir slope4eli = slope4fab.elixir();
-            Array4<Real> slope4 = slope4fab.array();
-
-            // compute longitudinal fluxes
-            // ===========================
-
-            // x -------------------------
-            FArrayBox phixfab (gbx, 1);
-            Elixir phixeli = phixfab.elixir();
-            Array4<Real> phix = phixfab.array();
-
-            amrex::launch(dqbxx,
-            [=] AMREX_GPU_DEVICE (const Box& tbx)
+            amrex::ParallelFor(amrex::growHi(bx,0,1),ncomp,
+            [=] AMREX_GPU_DEVICE (int i, int j, int k, int n)
             {
-                slopex2(tbx, statein, slope2);
+                compute_flux_x(i, j, k, n, statein, flux[0], dx);
             });
 
-            amrex::launch(gbx,
-            [=] AMREX_GPU_DEVICE (const Box& tbx)
+            amrex::ParallelFor(amrex::growHi(bx,1,1),ncomp,
+            [=] AMREX_GPU_DEVICE (int i, int j, int k, int n)
             {
-                slopex4(tbx, statein, slope2, slope4);
+                compute_flux_y(i, j, k, n, statein, flux[1], dtdx);
             });
 
-            amrex::ParallelFor(amrex::growLo(gbx, 0, -1),
-            [=] AMREX_GPU_DEVICE (int i, int j, int k)
+            amrex::ParallelFor(amrex::growHi(bx,2,1),ncomp,
+            [=] AMREX_GPU_DEVICE (int i, int j, int k, int n)
             {
-                flux_x(i, j, k, statein, vel[0], phix, slope4, dtdx); 
-            });
-
-            // y -------------------------
-            FArrayBox phiyfab (gbx, 1);
-            Elixir phiyeli = phiyfab.elixir();
-            Array4<Real> phiy = phiyfab.array();
-
-            amrex::launch(dqbxy,
-            [=] AMREX_GPU_DEVICE (const Box& tbx)
-            {
-                slopey2(tbx, statein, slope2);
-            });
-
-            amrex::launch(gbx,
-            [=] AMREX_GPU_DEVICE (const Box& tbx)
-            {
-                slopey4(tbx, statein, slope2, slope4);
-            });
-
-            amrex::ParallelFor(amrex::growLo(gbx, 1, -1),
-            [=] AMREX_GPU_DEVICE (int i, int j, int k)
-            {
-                flux_y(i, j, k, statein, vel[1], phiy, slope4, dtdx); 
-            });
-
-            // z -------------------------
-            FArrayBox phizfab (gbx, 1);
-            Elixir phizeli = phizfab.elixir();
-            Array4<Real> phiz = phizfab.array();
-
-            amrex::launch(dqbxz,
-            [=] AMREX_GPU_DEVICE (const Box& tbx)
-            {
-                slopez2(tbx, statein, slope2);
-            });
-
-            amrex::launch(gbx,
-            [=] AMREX_GPU_DEVICE (const Box& tbx)
-            {
-                slopez4(tbx, statein, slope2, slope4);
-            });
-
-            amrex::ParallelFor(amrex::growLo(gbx, 2, -1),
-            [=] AMREX_GPU_DEVICE (int i, int j, int k)
-            {
-                flux_z(i, j, k, statein, vel[2], phiz, slope4, dtdx); 
-            });
-
-            // compute transverse fluxes
-            // ===========================
-
-            AMREX_D_TERM(const Box& gbxx = amrex::grow(bx, 0, 1);,
-                         const Box& gbxy = amrex::grow(bx, 1, 1);,
-                         const Box& gbxz = amrex::grow(bx, 2, 1););
-
-            // xy & xz --------------------
-            FArrayBox phix_yfab (gbx, 1);
-            FArrayBox phix_zfab (gbx, 1);
-            Elixir phix_yeli = phix_yfab.elixir();
-            Elixir phix_zeli = phix_zfab.elixir();
-            Array4<Real> phix_y = phix_yfab.array();
-            Array4<Real> phix_z = phix_zfab.array();
-
-            amrex::ParallelFor(amrex::growHi(gbxz, 0, 1),
-            [=] AMREX_GPU_DEVICE (int i, int j, int k)
-            {
-                flux_xy(i, j, k, 
-                        AMREX_D_DECL(vel[0], vel[1], vel[2]),
-                        AMREX_D_DECL(phix, phiy, phiz),
-                        phix_y, dtdx);
-            }); 
-
-            amrex::ParallelFor(amrex::growHi(gbxy, 0, 1),
-            [=] AMREX_GPU_DEVICE (int i, int j, int k)
-            {
-                flux_xz(i, j, k,
-                        AMREX_D_DECL(vel[0], vel[1], vel[2]),
-                        AMREX_D_DECL(phix, phiy, phiz),
-                        phix_z, dtdx);
-            }); 
-
-            // yz & yz --------------------
-            FArrayBox phiy_xfab (gbx, 1);
-            FArrayBox phiy_zfab (gbx, 1);
-            Elixir phiy_xeli = phiy_xfab.elixir();
-            Elixir phiy_zeli = phiy_zfab.elixir();
-            Array4<Real> phiy_x = phiy_xfab.array();
-            Array4<Real> phiy_z = phiy_zfab.array();
-
-            amrex::ParallelFor(amrex::growHi(gbxz, 1, 1),
-            [=] AMREX_GPU_DEVICE (int i, int j, int k)
-            {
-                flux_yx(i, j, k,
-                        AMREX_D_DECL(vel[0], vel[1], vel[2]),
-                        AMREX_D_DECL(phix, phiy, phiz),
-                        phiy_x, dtdx);
-            }); 
-
-            amrex::ParallelFor(amrex::growHi(gbxx, 1, 1),
-            [=] AMREX_GPU_DEVICE (int i, int j, int k)
-            {
-                flux_yz(i, j, k,
-                        AMREX_D_DECL(vel[0], vel[1], vel[2]),
-                        AMREX_D_DECL(phix, phiy, phiz),
-                        phiy_z, dtdx);
-            }); 
-
-            // zx & zy --------------------
-            FArrayBox phiz_xfab (gbx, 1);
-            FArrayBox phiz_yfab (gbx, 1);
-            Elixir phiz_xeli = phiz_xfab.elixir();
-            Elixir phiz_yeli = phiz_yfab.elixir();
-            Array4<Real> phiz_x = phiz_xfab.array();
-            Array4<Real> phiz_y = phiz_yfab.array();
-
-            amrex::ParallelFor(amrex::growHi(gbxy, 2, 1),
-            [=] AMREX_GPU_DEVICE (int i, int j, int k)
-            {
-                flux_zx(i, j, k, 
-                        AMREX_D_DECL(vel[0], vel[1], vel[2]),
-                        AMREX_D_DECL(phix, phiy, phiz),
-                        phiz_x, dtdx);
-            }); 
-
-            amrex::ParallelFor(amrex::growHi(gbxx, 2, 1),
-            [=] AMREX_GPU_DEVICE (int i, int j, int k)
-            {
-                flux_zy(i, j, k,
-                        AMREX_D_DECL(vel[0], vel[1], vel[2]),
-                        AMREX_D_DECL(phix, phiy, phiz),
-                        phiz_y, dtdx);
-            }); 
-
-            // final edge states 
-            // ===========================
-            amrex::ParallelFor(amrex::growHi(bx, 0, 1),
-            [=] AMREX_GPU_DEVICE (int i, int j, int k)
-            {
-                combine_flux_x(i, j, k,
-                               vel[0], vel[1], vel[2],
-                               phix, phiy_z, phiz_y,
-                               flux[0], dtdx);
-            });
-
-            amrex::ParallelFor(amrex::growHi(bx, 1, 1),
-            [=] AMREX_GPU_DEVICE (int i, int j, int k)
-            {
-                combine_flux_y(i, j, k,
-                               vel[0], vel[1], vel[2],
-                               phiy, phix_z, phiz_x,
-                               flux[1], dtdx);
-            });
-
-            amrex::ParallelFor(amrex::growHi(bx, 2, 1),
-            [=] AMREX_GPU_DEVICE (int i, int j, int k)
-            {
-                combine_flux_z(i, j, k,
-                               vel[0], vel[1], vel[2],
-                               phiz, phix_y, phiy_x,
-                               flux[2], dtdx);
+                compute_flux_z(i, j, k, n, statein, flux[2], dtdx);
             });
 
             // compute new state (stateout) and scale fluxes based on face area.
             // ===========================
 
             // Do a conservative update 
-            amrex::ParallelFor(bx,
-            [=] AMREX_GPU_DEVICE (int i, int j, int k)
+            amrex::ParallelFor(bx,ncomp,
+            [=] AMREX_GPU_DEVICE (int i, int j, int k,int n)
             {
-                conservative(i, j, k,
+                conservative(i, j, k, n,
                              statein, stateout,
                              AMREX_D_DECL(flux[0], flux[1], flux[2]),
                              dtdx);
             });
 
-            // Scale by face area in order to correctly reflux
-            AMREX_D_TERM(
-                         amrex::ParallelFor(amrex::growHi(bx, 0, 1),
-                         [=] AMREX_GPU_DEVICE (int i, int j, int k)
-                         {
-                             flux_scale_x(i, j, k, flux[0], dt_lev, dx);
-                         });,
- 
-                         amrex::ParallelFor(amrex::growHi(bx, 1, 1),
-                         [=] AMREX_GPU_DEVICE (int i, int j, int k)
-                         {
-                             flux_scale_y(i, j, k, flux[1], dt_lev, dx);
-                         });,
+            amrex::ParallelFor(amrex::growHi(bx, 0, 1),ncomp,
+                    [=] AMREX_GPU_DEVICE (int i, int j, int k,int n)
+                    {
+                        flux_scale_x(i, j, k, n, flux[0], dt_lev, dx);
+                    });
 
-                         amrex::ParallelFor(amrex::growHi(bx, 2, 1),
-                         [=] AMREX_GPU_DEVICE (int i, int j, int k)
-                         {
-                             flux_scale_z(i, j, k, flux[2], dt_lev, dx);
-                         });
-                        );
+            amrex::ParallelFor(amrex::growHi(bx, 1, 1),ncomp,
+                    [=] AMREX_GPU_DEVICE (int i, int j, int k,int n)
+                    {
+                        flux_scale_y(i, j, k, n, flux[1], dt_lev, dx);
+                    });
+
+            amrex::ParallelFor(amrex::growHi(bx, 2, 1),ncomp,
+                    [=] AMREX_GPU_DEVICE (int i, int j, int k,int n)
+                    {
+                        flux_scale_z(i, j, k, n, flux[2], dt_lev, dx);
+                    });
 
             GpuArray<Array4<Real>, AMREX_SPACEDIM> fluxout{ AMREX_D_DECL(fluxes[0].array(mfi),
-                                                                         fluxes[1].array(mfi),
-                                                                         fluxes[2].array(mfi)) };
-          
-            if (do_reflux) {
-                for (int idim = 0; idim < BL_SPACEDIM; ++idim) {
-                    amrex::ParallelFor(nbx[idim],
-                    [=] AMREX_GPU_DEVICE (int i, int j, int k)
+                    fluxes[1].array(mfi),
+                    fluxes[2].array(mfi)) };
+
+            if (do_reflux) 
+            {
+                for (int idim = 0; idim < BL_SPACEDIM; ++idim) 
+                {
+                    amrex::ParallelFor(nbx[idim],ncomp,
+                            [=] AMREX_GPU_DEVICE (int i, int j, int k,int n)
                     {
-                        fluxout[idim](i,j,k) = flux[idim](i,j,k);
+                        fluxout[idim](i,j,k,n) = flux[idim](i,j,k,n);
                     });
                 }
             }
@@ -521,15 +286,15 @@ void echemAMR::Advance (int lev, Real time, Real dt_lev, int iteration, int ncyc
     // ======== CFL CHECK, MOVED OUTSIDE MFITER LOOP =========
 
     AMREX_D_TERM(Real umax = facevel[0].norm0(0,0,false);,
-                 Real vmax = facevel[1].norm0(0,0,false);,
-                 Real wmax = facevel[2].norm0(0,0,false););
+            Real vmax = facevel[1].norm0(0,0,false);,
+            Real wmax = facevel[2].norm0(0,0,false););
 
     if (AMREX_D_TERM(umax*dt_lev > dx[0], ||
-                     vmax*dt_lev > dx[1], ||
-                     wmax*dt_lev > dx[2]))
+                vmax*dt_lev > dx[1], ||
+                wmax*dt_lev > dx[2]))
     {
         amrex::Print() << "umax = " << umax << ", vmax = " << vmax << ", wmax = " << wmax 
-                       << ", dt = " << ctr_time << " dx = " << dx[1] << " " << dx[2] << " " << dx[3] << std::endl;
+            << ", dt = " << ctr_time << " dx = " << dx[1] << " " << dx[2] << " " << dx[3] << std::endl;
         amrex::Abort("CFL violation. use smaller adv.cfl.");
     }
 
@@ -544,17 +309,17 @@ void echemAMR::Advance (int lev, Real time, Real dt_lev, int iteration, int ncyc
     // NOTE: the flux register associated with flux_reg[lev] is associated
     // with the lev/lev-1 interface (and has grid spacing associated with lev-1)
     if (do_reflux) { 
-	if (flux_reg[lev+1]) {
-	    for (int i = 0; i < BL_SPACEDIM; ++i) {
-	        // update the lev+1/lev flux register (index lev+1)   
-	        flux_reg[lev+1]->CrseInit(fluxes[i],i,0,0,fluxes[i].nComp(), -1.0);
-	    }	    
-	}
-	if (flux_reg[lev]) {
-	    for (int i = 0; i < BL_SPACEDIM; ++i) {
-	        // update the lev/lev-1 flux register (index lev) 
-		flux_reg[lev]->FineAdd(fluxes[i],i,0,0,fluxes[i].nComp(), 1.0);
-	    }
-	}
+        if (flux_reg[lev+1]) {
+            for (int i = 0; i < BL_SPACEDIM; ++i) {
+                // update the lev+1/lev flux register (index lev+1)   
+                flux_reg[lev+1]->CrseInit(fluxes[i],i,0,0,fluxes[i].nComp(), -1.0);
+            }	    
+        }
+        if (flux_reg[lev]) {
+            for (int i = 0; i < BL_SPACEDIM; ++i) {
+                // update the lev/lev-1 flux register (index lev) 
+                flux_reg[lev]->FineAdd(fluxes[i],i,0,0,fluxes[i].nComp(), 1.0);
+            }
+        }
     }
 }
