@@ -13,6 +13,7 @@
 
 #include <echemAMR.H>
 #include<Chemistry.H>
+#include<Transport.H>
 
 // advance solution to final time
 void echemAMR::Evolve ()
@@ -190,12 +191,12 @@ void echemAMR::Advance (int lev, Real time, Real dt_lev, int iteration, int ncyc
 
     // Build temporary multiFabs to work on.
     Array<MultiFab, AMREX_SPACEDIM> fluxcalc;
-    Array<MultiFab, AMREX_SPACEDIM> facevel;
+    MultiFab dcoeff(grids[lev], dmap[lev], S_new.nComp(), num_grow);
+
     for (int idim = 0; idim < AMREX_SPACEDIM; ++idim) {
         BoxArray ba = amrex::convert(S_new.boxArray(), IntVect::TheDimensionVector(idim));
 
-        fluxcalc[idim].define (ba,         S_new.DistributionMap(), S_new.nComp(), 0);
-        facevel [idim].define (ba.grow(1), S_new.DistributionMap(),             1, 0);
+        fluxcalc[idim].define (ba,S_new.DistributionMap(), S_new.nComp(), 0);
     }
 
 #ifdef _OPENMP
@@ -205,6 +206,8 @@ void echemAMR::Advance (int lev, Real time, Real dt_lev, int iteration, int ncyc
 	for (MFIter mfi(S_new,TilingIfNotGPU()); mfi.isValid(); ++mfi)
 	{
 	    const Box& bx = mfi.tilebox();
+            const Box& gbx = amrex::grow(bx,num_grow);
+
             GpuArray<Box, AMREX_SPACEDIM> nbx;
             AMREX_D_TERM(nbx[0] = mfi.nodaltilebox(0);,
                          nbx[1] = mfi.nodaltilebox(1);,
@@ -212,26 +215,37 @@ void echemAMR::Advance (int lev, Real time, Real dt_lev, int iteration, int ncyc
 
             Array4<Real> statein  = Sborder.array(mfi);
             Array4<Real> stateout = S_new.array(mfi);
+            Array4<Real> diffcoeff = dcoeff.array(mfi);
 
             GpuArray<Array4<Real>, AMREX_SPACEDIM> flux{ AMREX_D_DECL(fluxcalc[0].array(mfi),
                                                                       fluxcalc[1].array(mfi),
                                                                       fluxcalc[2].array(mfi)) };
+            auto prob_lo = geom[lev].ProbLoArray();
+
+            
+            amrex::ParallelFor(gbx,ncomp,
+            [=] AMREX_GPU_DEVICE (int i, int j, int k, int n)
+            {
+                compute_dcoeff(i, j, k, n, statein, diffcoeff, prob_lo, dx, new_time);
+            });
+
+
             amrex::ParallelFor(amrex::growHi(bx,0,1),ncomp,
             [=] AMREX_GPU_DEVICE (int i, int j, int k, int n)
             {
-                compute_flux_x(i, j, k, n, statein, flux[0], dx);
+                compute_flux_x(i, j, k, n, statein, diffcoeff, flux[0], dx);
             });
 
             amrex::ParallelFor(amrex::growHi(bx,1,1),ncomp,
             [=] AMREX_GPU_DEVICE (int i, int j, int k, int n)
             {
-                compute_flux_y(i, j, k, n, statein, flux[1], dtdx);
+                compute_flux_y(i, j, k, n, statein, diffcoeff, flux[1], dx);
             });
 
             amrex::ParallelFor(amrex::growHi(bx,2,1),ncomp,
             [=] AMREX_GPU_DEVICE (int i, int j, int k, int n)
             {
-                compute_flux_z(i, j, k, n, statein, flux[2], dtdx);
+                compute_flux_z(i, j, k, n, statein, diffcoeff, flux[2], dx);
             });
 
             // compute new state (stateout) and scale fluxes based on face area.
@@ -281,21 +295,6 @@ void echemAMR::Advance (int lev, Real time, Real dt_lev, int iteration, int ncyc
                 }
             }
         }
-    }
-
-    // ======== CFL CHECK, MOVED OUTSIDE MFITER LOOP =========
-
-    AMREX_D_TERM(Real umax = facevel[0].norm0(0,0,false);,
-            Real vmax = facevel[1].norm0(0,0,false);,
-            Real wmax = facevel[2].norm0(0,0,false););
-
-    if (AMREX_D_TERM(umax*dt_lev > dx[0], ||
-                vmax*dt_lev > dx[1], ||
-                wmax*dt_lev > dx[2]))
-    {
-        amrex::Print() << "umax = " << umax << ", vmax = " << vmax << ", wmax = " << wmax 
-            << ", dt = " << ctr_time << " dx = " << dx[1] << " " << dx[2] << " " << dx[3] << std::endl;
-        amrex::Abort("CFL violation. use smaller adv.cfl.");
     }
 
     // ======== END OF GPU EDIT, (FOR NOW) =========

@@ -9,7 +9,7 @@ using namespace amrex;
 
 AMREX_GPU_DEVICE
 AMREX_FORCE_INLINE
-void conservative(int i, int j, int k, 
+void conservative(int i, int j, int k, int n, 
                   Array4<Real> const& uin,
                   Array4<Real> const& uout,
                   AMREX_D_DECL(Array4<Real> const& flxx,
@@ -17,40 +17,41 @@ void conservative(int i, int j, int k,
                                Array4<Real> const& flxz),
                   const GpuArray<Real, AMREX_SPACEDIM>& dtdx)
 {
-    uout(i,j,k) = uin(i,j,k) + 
-                  ( (flxx(i,j,k) - flxx(i+1,j,k)) * dtdx[0] 
-                  + (flxy(i,j,k) - flxy(i,j+1,k)) * dtdx[1] 
-                  + (flxz(i,j,k) - flxz(i,j,k+1)) * dtdx[2] );
+    //remember, we are solve dudt + del.F = 0
+    uout(i,j,k,n) = uin(i,j,k,n) + 
+                  ( (flxx(i,j,k,n) - flxx(i+1,j,k,n)) * dtdx[0] 
+                  + (flxy(i,j,k,n) - flxy(i,j+1,k,n)) * dtdx[1] 
+                  + (flxz(i,j,k,n) - flxz(i,j,k+1,n)) * dtdx[2] );
 }
 
 AMREX_GPU_DEVICE
 AMREX_FORCE_INLINE
-void flux_scale_x(int i, int j, int k,
+void flux_scale_x(int i, int j, int k,int n,
                   Array4<Real> const& flxx,
                   Real dt,
                   const GpuArray<Real, AMREX_SPACEDIM>& dx)
 {
-   flxx(i,j,k) = flxx(i,j,k) * (dt * dx[1]*dx[2]);
+   flxx(i,j,k,n) = flxx(i,j,k,n) * (dt * dx[1]*dx[2]);
 }
 
 AMREX_GPU_DEVICE
 AMREX_FORCE_INLINE
-void flux_scale_y(int i, int j, int k,
+void flux_scale_y(int i, int j, int k,int n,
                   Array4<Real> const& flxy,
                   Real dt,
                   const GpuArray<Real, AMREX_SPACEDIM>& dx)
 {
-   flxy(i,j,k) = flxy(i,j,k) * (dt * dx[0]*dx[2]);
+   flxy(i,j,k,n) = flxy(i,j,k,n) * (dt * dx[0]*dx[2]);
 }
 
 AMREX_GPU_DEVICE
 AMREX_FORCE_INLINE
-void flux_scale_z(int i, int j ,int k,
+void flux_scale_z(int i, int j ,int k,int n,
                   Array4<Real> const& flxz,
                   Real dt,
                   const GpuArray<Real, AMREX_SPACEDIM>& dx)
 {
-    flxz(i,j,k) = flxz(i,j,k) * (dt * dx[0]*dx[1]);
+    flxz(i,j,k,n) = flxz(i,j,k,n) * (dt * dx[0]*dx[1]);
 }
 
 #endif

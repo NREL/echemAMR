@@ -46,8 +46,10 @@ echemAMR::echemAMR ()
     phi_old.resize(nlevs_max);
 
     // periodic boundaries
-    int bc_lo[] = {BCType::int_dir, BCType::int_dir, BCType::int_dir};
-    int bc_hi[] = {BCType::int_dir, BCType::int_dir, BCType::int_dir};
+    //int bc_lo[] = {BCType::int_dir, BCType::int_dir, BCType::int_dir};
+    //int bc_hi[] = {BCType::int_dir, BCType::int_dir, BCType::int_dir};
+    int bc_lo[] = {BCType::foextrap, BCType::foextrap, BCType::foextrap};
+    int bc_hi[] = {BCType::foextrap, BCType::foextrap, BCType::foextrap};
 
 /*
     // walls (Neumann)
@@ -55,15 +57,18 @@ echemAMR::echemAMR ()
     int bc_hi[] = {FOEXTRAP, FOEXTRAP, FOEXTRAP};
 */
 
-    bcs.resize(1);     // Setup 1-component
+    bcs.resize(electrochem::nspecies);     // Setup 1-component
     for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
     {
         // lo-side BCs
         if (bc_lo[idim] == BCType::int_dir  ||  // periodic uses "internal Dirichlet"
             bc_lo[idim] == BCType::foextrap ||  // first-order extrapolation
             bc_lo[idim] == BCType::ext_dir ) 
-        {  // external Dirichlet
-            bcs[0].setLo(idim, bc_lo[idim]);
+        {  
+            for(int sp=0;sp<electrochem::nspecies;sp++)
+            {
+                bcs[sp].setLo(idim, bc_lo[idim]);
+            }
         }
         else 
         {
@@ -74,8 +79,11 @@ echemAMR::echemAMR ()
         if (bc_hi[idim] == BCType::int_dir  ||  // periodic uses "internal Dirichlet"
             bc_hi[idim] == BCType::foextrap ||  // first-order extrapolation
             bc_hi[idim] == BCType::ext_dir ) 
-        {  // external Dirichlet
-            bcs[0].setHi(idim, bc_hi[idim]);
+        {  
+            for(int sp=0;sp<electrochem::nspecies;sp++)
+            {
+                bcs[sp].setHi(idim, bc_hi[idim]);
+            }
         }
         else 
         {

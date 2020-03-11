@@ -69,7 +69,7 @@ public:
     void Advance (int lev, amrex::Real time, amrex::Real dt_lev, int iteration, int ncycle);
 
     // compute dt from CFL considerations
-    Real EstTimeStep (int lev, bool local=false) const;
+    Real EstTimeStep (int lev, bool local=false);
 
 private:
 
