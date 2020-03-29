@@ -4,13 +4,13 @@
 #include <AMReX_Box.H>
 #include <AMReX_FArrayBox.H>
 #include <AMReX_Geometry.H>
+#include <Chemistry.H>
 
 using namespace amrex;
 
 AMREX_GPU_DEVICE
 AMREX_INLINE
-void
-initdata(Box const& bx, Array4<Real> const& phi, GeometryData const& geomdata)
+void initdata(Box const& bx, Array4<Real> const& phi, GeometryData const& geomdata)
 {
     const auto lo = lbound(bx);
     const auto hi = ubound(bx);    
@@ -33,9 +33,35 @@ initdata(Box const& bx, Array4<Real> const& phi, GeometryData const& geomdata)
 #else
                 Real r2 = (pow(x-0.5, 2) + pow((y-0.5),2) + pow((z-0.5),2)) / 0.005;
 #endif
-                phi(i,j,k,0) = std::exp(-r2);
-                phi(i,j,k,1) = std::exp(-r2);
+                phi(i,j,k,0) = 0.0;
+                phi(i,j,k,1) = 0.0;
             }
+        }
+    }
+}
+
+AMREX_GPU_DEVICE
+AMREX_FORCE_INLINE
+void externalbc(const amrex::Real x[AMREX_SPACEDIM],
+        const amrex::Real s_int[],
+        amrex::Real s_ext[],
+        const int idir,
+        const int sgn,
+        const amrex::Real time,
+        amrex::GeometryData const& geomdata)
+{
+    if(sgn==1)
+    {
+        for(int i=0;i<electrochem::nspecies;i++)
+        {
+            s_ext[i]=1.0;
+        }
+    }
+    else
+    {
+        for(int i=0;i<electrochem::nspecies;i++)
+        {
+            s_ext[i]=0.0;
         }
     }
 }

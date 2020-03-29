@@ -4,7 +4,7 @@
 #include <Prob.H>
 #include <advance_3d.H>
 #include <compute_diff_flux_3d.H>
-#include <Tagging.H>
-#include <bc_fill.H>
+#include <echemAMR_Tagging.H>
+#include <echemAMR_BCFill.H>
 
 #endif

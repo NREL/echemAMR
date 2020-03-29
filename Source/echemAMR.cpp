@@ -45,11 +45,12 @@ echemAMR::echemAMR ()
     phi_new.resize(nlevs_max);
     phi_old.resize(nlevs_max);
 
-    // periodic boundaries
-    //int bc_lo[] = {BCType::int_dir, BCType::int_dir, BCType::int_dir};
-    //int bc_hi[] = {BCType::int_dir, BCType::int_dir, BCType::int_dir};
-    int bc_lo[] = {BCType::foextrap, BCType::foextrap, BCType::foextrap};
-    int bc_hi[] = {BCType::foextrap, BCType::foextrap, BCType::foextrap};
+    amrex::Vector<int> bc_lo{BCType::foextrap, BCType::foextrap, BCType::foextrap};
+    amrex::Vector<int> bc_hi{BCType::foextrap, BCType::foextrap, BCType::foextrap};
+
+    ParmParse pp("echemamr");
+    pp.queryarr("lo_bc", bc_lo, 0, AMREX_SPACEDIM);
+    pp.queryarr("hi_bc", bc_hi, 0, AMREX_SPACEDIM);
 
 /*
     // walls (Neumann)
@@ -149,7 +150,7 @@ void echemAMR::ErrorEst (int lev, TagBoxArray& tags, Real time, int ngrow)
         // for that particular level
         // in subroutine state_error, you could use more elaborate tagging, such
         // as more advanced logical expressions, or gradients, etc.
-	ParmParse pp("adv");
+	ParmParse pp("echemamr");
 	int n = pp.countval("phierr");
 	if (n > 0) 
         {
@@ -206,7 +207,7 @@ void echemAMR::ReadParameters ()
     }
 
     {
-	ParmParse pp("adv");
+	ParmParse pp("echemamr");
 	
 	pp.query("cfl", cfl);
         pp.query("do_reflux", do_reflux);
