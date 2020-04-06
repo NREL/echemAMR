@@ -35,7 +35,7 @@ echemamr.lo_bc = 3 2 2
 echemamr.hi_bc = 3 2 2
 
 # Tagging
-echemamr.phierr = 0.5 0.5 0.5
+echemamr.phierr = 0.1 0.1 0.1
 
 # PLOTFILES
 amr.plot_file  = plt    # root name of plot file

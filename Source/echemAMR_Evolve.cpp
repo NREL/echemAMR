@@ -138,186 +138,145 @@ void echemAMR::timeStep (int lev, Real time, int iteration)
     }
     
 }
-
-// advance a single level for a single time step, updates flux registers
-void echemAMR::Advance (int lev, Real time, Real dt_lev, int iteration, int ncycle)
+void echemAMR::Advance(int lev, Real time, Real dt_lev,int iteration,int ncycle)
 {
     constexpr int num_grow = 1; 
-
-    std::swap(phi_old[lev], phi_new[lev]);
-    t_old[lev] = t_new[lev];
-    t_new[lev] += dt_lev;
-
-    MultiFab& S_new = phi_new[lev];
-
-    const Real old_time = t_old[lev];
-    const Real new_time = t_new[lev];
-    const Real ctr_time = 0.5*(old_time+new_time);
-
-    const auto dx = geom[lev].CellSizeArray();
-    GpuArray<Real, AMREX_SPACEDIM> dtdx;
-    for (int i=0; i<AMREX_SPACEDIM; ++i)
-    {
-        dtdx[i] = dt_lev/(dx[i]);
-    }
-
-    const Real* prob_lo = geom[lev].ProbLo();
-
-    MultiFab fluxes[BL_SPACEDIM];
-    if (do_reflux)
-    {
-	for (int i = 0; i < BL_SPACEDIM; ++i)
-	{
-	    BoxArray ba = grids[lev];
-	    ba.surroundingNodes(i);
-	    fluxes[i].define(ba, dmap[lev], S_new.nComp(), 0);
-	}
-    }
+    std::swap(phi_old[lev], phi_new[lev]); //old becomes new and new becomes old
+    t_old[lev] = t_new[lev];  //old time is now current time (time)
+    t_new[lev] += dt_lev;     //new time is ahead
+    MultiFab& S_new = phi_new[lev];  //this is the old value, beware!
+    MultiFab& S_old = phi_old[lev]; //current value
 
     // State with ghost cells
     MultiFab Sborder(grids[lev], dmap[lev], S_new.nComp(), num_grow);
-    FillPatch(lev, time, Sborder, 0, Sborder.nComp());
+    //source term 
+    MultiFab dsdt(grids[lev],dmap[lev],S_new.nComp(),0);
+
+    //stage 1
+    
+    //time is current time which is t_old
+    FillPatch(lev, time, Sborder, 0, Sborder.nComp()); 
+    //compute dsdt for 1/2 timestep
+    compute_dsdt(lev, num_grow, Sborder, dsdt, time, 0.5*dt_lev, false); 
+    //S_new=S_old+0.5*dt*dsdt //sold is the current value
+    MultiFab::LinComb(S_new, 1.0, Sborder, 0, 0.5*dt_lev, dsdt, 0, 0, S_new.nComp(), 0);
+
+    //stage 2
+    
+    //time+dt_lev lets me pick S_new for sborder
+    FillPatch(lev, time+dt_lev, Sborder, 0, Sborder.nComp()); 
+    //dsdt for full time-step
+    compute_dsdt(lev, num_grow, Sborder, dsdt, time+0.5*dt_lev, dt_lev, true); 
+    //S_new=S_old+dt*dsdt
+    MultiFab::LinComb(S_new, 1.0, S_old, 0, dt_lev, dsdt, 0, 0, S_new.nComp(), 0);
 
 
-/*
-    // Allocate fabs for fluxes and Godunov velocities. (Kept for reference).
-    for (int i = 0; i < BL_SPACEDIM ; i++) {
-	const Box& bxtmp = amrex::surroundingNodes(bx,i);
-	flux[i].resize(bxtmp,S_new.nComp());
-	uface[i].resize(amrex::grow(bxtmp,1),1);
-    }
-*/
-    int ncomp=S_new.nComp();
+}
+
+// advance a single level for a single time step, updates flux registers
+void echemAMR::compute_dsdt (int lev, const int num_grow, 
+        MultiFab &Sborder, MultiFab &dsdt, Real time, Real dt, bool reflux_this_stage)
+{
+
+    const auto dx = geom[lev].CellSizeArray();
+    const Real* prob_lo = geom[lev].ProbLo();
+
+    int ncomp=Sborder.nComp();
 
     // Build temporary multiFabs to work on.
-    Array<MultiFab, AMREX_SPACEDIM> fluxcalc;
-    MultiFab dcoeff(grids[lev], dmap[lev], S_new.nComp(), num_grow);
-
-    for (int idim = 0; idim < AMREX_SPACEDIM; ++idim) {
-        BoxArray ba = amrex::convert(S_new.boxArray(), IntVect::TheDimensionVector(idim));
-
-        fluxcalc[idim].define (ba,S_new.DistributionMap(), S_new.nComp(), 0);
+    Array<MultiFab, AMREX_SPACEDIM> flux;
+    for (int idim = 0; idim < AMREX_SPACEDIM; ++idim) 
+    {
+        BoxArray ba = amrex::convert(dsdt.boxArray(), IntVect::TheDimensionVector(idim));
+        flux[idim].define (ba,dsdt.DistributionMap(), ncomp, 0);
     }
 
 #ifdef _OPENMP
 #pragma omp parallel if (Gpu::notInLaunchRegion())
 #endif
     {
-	for (MFIter mfi(S_new,TilingIfNotGPU()); mfi.isValid(); ++mfi)
+	for (MFIter mfi(dsdt,TilingIfNotGPU()); mfi.isValid(); ++mfi)
 	{
 	    const Box& bx = mfi.tilebox();
             const Box& gbx = amrex::grow(bx,num_grow);
+
+            FArrayBox dcoeff_fab(gbx,dsdt.nComp());
+            Elixir dcoeff_fab_eli=dcoeff_fab.elixir();
 
             GpuArray<Box, AMREX_SPACEDIM> nbx;
             AMREX_D_TERM(nbx[0] = mfi.nodaltilebox(0);,
                          nbx[1] = mfi.nodaltilebox(1);,
                          nbx[2] = mfi.nodaltilebox(2););
 
-            Array4<Real> statein  = Sborder.array(mfi);
-            Array4<Real> stateout = S_new.array(mfi);
-            Array4<Real> diffcoeff = dcoeff.array(mfi);
+            Array4<Real> sborder_arr  = Sborder.array(mfi);
+            Array4<Real> dcoeff_arr   = dcoeff_fab.array();
+            Array4<Real> dsdt_arr     = dsdt.array(mfi);
 
-            GpuArray<Array4<Real>, AMREX_SPACEDIM> flux{ AMREX_D_DECL(fluxcalc[0].array(mfi),
-                                                                      fluxcalc[1].array(mfi),
-                                                                      fluxcalc[2].array(mfi)) };
+            GpuArray<Array4<Real>, AMREX_SPACEDIM> flux_arr{ AMREX_D_DECL(flux[0].array(mfi),
+                                                                          flux[1].array(mfi),
+                                                                          flux[2].array(mfi)) };
             auto prob_lo = geom[lev].ProbLoArray();
 
             
             amrex::ParallelFor(gbx,ncomp,
             [=] AMREX_GPU_DEVICE (int i, int j, int k, int n)
             {
-                compute_dcoeff(i, j, k, n, statein, diffcoeff, prob_lo, dx, new_time);
+                compute_dcoeff(i, j, k, n, sborder_arr, dcoeff_arr, prob_lo, dx, time);
             });
 
 
             amrex::ParallelFor(amrex::growHi(bx,0,1),ncomp,
             [=] AMREX_GPU_DEVICE (int i, int j, int k, int n)
             {
-                compute_flux_x(i, j, k, n, statein, diffcoeff, flux[0], dx);
+                compute_flux_x(i, j, k, n, sborder_arr, dcoeff_arr, flux_arr[0], dx);
             });
 
             amrex::ParallelFor(amrex::growHi(bx,1,1),ncomp,
             [=] AMREX_GPU_DEVICE (int i, int j, int k, int n)
             {
-                compute_flux_y(i, j, k, n, statein, diffcoeff, flux[1], dx);
+                compute_flux_y(i, j, k, n, sborder_arr, dcoeff_arr, flux_arr[1], dx);
             });
 
             amrex::ParallelFor(amrex::growHi(bx,2,1),ncomp,
             [=] AMREX_GPU_DEVICE (int i, int j, int k, int n)
             {
-                compute_flux_z(i, j, k, n, statein, diffcoeff, flux[2], dx);
+                compute_flux_z(i, j, k, n, sborder_arr, dcoeff_arr, flux_arr[2], dx);
             });
 
-            // compute new state (stateout) and scale fluxes based on face area.
-            // ===========================
-
-            // Do a conservative update 
+            // update residual
             amrex::ParallelFor(bx,ncomp,
             [=] AMREX_GPU_DEVICE (int i, int j, int k,int n)
             {
-                conservative(i, j, k, n,
-                             statein, stateout,
-                             AMREX_D_DECL(flux[0], flux[1], flux[2]),
-                             dtdx);
+                update_residual(i, j, k, n, dsdt_arr,
+                             AMREX_D_DECL(flux_arr[0], flux_arr[1], flux_arr[2]),
+                             dx);
             });
 
-            amrex::ParallelFor(amrex::growHi(bx, 0, 1),ncomp,
-                    [=] AMREX_GPU_DEVICE (int i, int j, int k,int n)
-                    {
-                        flux_scale_x(i, j, k, n, flux[0], dt_lev, dx);
-                    });
-
-            amrex::ParallelFor(amrex::growHi(bx, 1, 1),ncomp,
-                    [=] AMREX_GPU_DEVICE (int i, int j, int k,int n)
-                    {
-                        flux_scale_y(i, j, k, n, flux[1], dt_lev, dx);
-                    });
-
-            amrex::ParallelFor(amrex::growHi(bx, 2, 1),ncomp,
-                    [=] AMREX_GPU_DEVICE (int i, int j, int k,int n)
-                    {
-                        flux_scale_z(i, j, k, n, flux[2], dt_lev, dx);
-                    });
-
-            GpuArray<Array4<Real>, AMREX_SPACEDIM> fluxout{ AMREX_D_DECL(fluxes[0].array(mfi),
-                    fluxes[1].array(mfi),
-                    fluxes[2].array(mfi)) };
-
-            if (do_reflux) 
-            {
-                for (int idim = 0; idim < BL_SPACEDIM; ++idim) 
-                {
-                    amrex::ParallelFor(nbx[idim],ncomp,
-                            [=] AMREX_GPU_DEVICE (int i, int j, int k,int n)
-                    {
-                        fluxout[idim](i,j,k,n) = flux[idim](i,j,k,n);
-                    });
-                }
-            }
         }
     }
 
-    // ======== END OF GPU EDIT, (FOR NOW) =========
-
-    // increment or decrement the flux registers by area and time-weighted fluxes
-    // Note that the fluxes have already been scaled by dt and area
-    // In this example we are solving phi_t = -div(+F)
-    // The fluxes contain, e.g., F_{i+1/2,j} = (phi*u)_{i+1/2,j}
-    // Keep this in mind when considering the different sign convention for updating
-    // the flux registers from the coarse or fine grid perspective
-    // NOTE: the flux register associated with flux_reg[lev] is associated
-    // with the lev/lev-1 interface (and has grid spacing associated with lev-1)
-    if (do_reflux) { 
-        if (flux_reg[lev+1]) {
-            for (int i = 0; i < BL_SPACEDIM; ++i) {
+    if (do_reflux and reflux_this_stage) 
+    { 
+        if (flux_reg[lev+1]) 
+        {
+            for (int i = 0; i < BL_SPACEDIM; ++i) 
+            {
                 // update the lev+1/lev flux register (index lev+1)   
-                flux_reg[lev+1]->CrseInit(fluxes[i],i,0,0,fluxes[i].nComp(), -1.0);
+                const Real dA = (i == 0) ? dx[1]*dx[2] 
+                    : ((i == 1) ? dx[0]*dx[2] : dx[0]*dx[1]);
+                const Real scale = -dt*dA;
+                flux_reg[lev+1]->CrseInit(flux[i], i, 0, 0, ncomp, scale);
             }	    
         }
-        if (flux_reg[lev]) {
-            for (int i = 0; i < BL_SPACEDIM; ++i) {
+        if (flux_reg[lev]) 
+        {
+            for (int i = 0; i < BL_SPACEDIM; ++i) 
+            {
                 // update the lev/lev-1 flux register (index lev) 
-                flux_reg[lev]->FineAdd(fluxes[i],i,0,0,fluxes[i].nComp(), 1.0);
+                const Real dA = (i == 0) ? dx[1]*dx[2] 
+                    : ((i == 1) ? dx[0]*dx[2] : dx[0]*dx[1]);
+                const Real scale = dt*dA;
+                flux_reg[lev]->FineAdd(flux[i], i, 0, 0, ncomp, scale);
             }
         }
     }

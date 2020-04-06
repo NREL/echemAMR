@@ -172,9 +172,9 @@ void echemAMR::ErrorEst (int lev, TagBoxArray& tags, Real time, int ngrow)
 	
 	for (MFIter mfi(state,TilingIfNotGPU()); mfi.isValid(); ++mfi)
 	{
-	    const Box& bx  = mfi.tilebox();
+	    const Box& bx       = mfi.tilebox();
             const auto statefab = state.array(mfi);
-            const auto tagfab  = tags.array(mfi);
+            const auto tagfab   = tags.array(mfi);
             Real phierror = phierr[lev];
 	    
             amrex::ParallelFor(bx,

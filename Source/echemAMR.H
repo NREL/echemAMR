@@ -67,6 +67,8 @@ public:
 
     // advance a single level for a single time step, updates flux registers
     void Advance (int lev, amrex::Real time, amrex::Real dt_lev, int iteration, int ncycle);
+    void compute_dsdt (int lev, const int num_grow, MultiFab &Sborder, 
+            MultiFab &dsdt, Real time, Real dt, bool reflux_this_stage);
 
     // compute dt from CFL considerations
     Real EstTimeStep (int lev, bool local=false);
