@@ -71,10 +71,11 @@ Real echemAMR::EstTimeStep (int lev, bool local)
             Array4<Real> dcoeffarray = dcoeff.array(mfi);
             auto prob_lo = geom[lev].ProbLoArray();
 
-            amrex::ParallelFor(bx,S_new.nComp(),
-                    [=] AMREX_GPU_DEVICE (int i, int j, int k, int n)
+            amrex::ParallelFor(bx,
+                    [=] AMREX_GPU_DEVICE (int i, int j, int k)
                     {
-                    compute_dcoeff(i, j, k, n, statearray, dcoeffarray, prob_lo, dx, cur_time);
+                    electrochem_transport::compute_dcoeff(i, j, k, statearray, dcoeffarray, prob_lo, 
+                            dx, cur_time);
                     });
 
         }

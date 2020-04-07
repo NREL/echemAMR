@@ -14,6 +14,7 @@
 #include <echemAMR.H>
 #include<Chemistry.H>
 #include<Transport.H>
+#include<Reactions.H>
 
 // advance solution to final time
 void echemAMR::Evolve ()
@@ -200,8 +201,10 @@ void echemAMR::compute_dsdt (int lev, const int num_grow,
 	    const Box& bx = mfi.tilebox();
             const Box& gbx = amrex::grow(bx,num_grow);
 
-            FArrayBox dcoeff_fab(gbx,dsdt.nComp());
+            FArrayBox dcoeff_fab(gbx,ncomp);
+            FArrayBox reactsource_fab(bx,ncomp);
             Elixir dcoeff_fab_eli=dcoeff_fab.elixir();
+            Elixir reactsource_fab_eli=reactsource_fab.elixir();
 
             GpuArray<Box, AMREX_SPACEDIM> nbx;
             AMREX_D_TERM(nbx[0] = mfi.nodaltilebox(0);,
@@ -211,6 +214,7 @@ void echemAMR::compute_dsdt (int lev, const int num_grow,
             Array4<Real> sborder_arr  = Sborder.array(mfi);
             Array4<Real> dcoeff_arr   = dcoeff_fab.array();
             Array4<Real> dsdt_arr     = dsdt.array(mfi);
+            Array4<Real> reactsource_arr = reactsource_fab.array();
 
             GpuArray<Array4<Real>, AMREX_SPACEDIM> flux_arr{ AMREX_D_DECL(flux[0].array(mfi),
                                                                           flux[1].array(mfi),
@@ -218,10 +222,17 @@ void echemAMR::compute_dsdt (int lev, const int num_grow,
             auto prob_lo = geom[lev].ProbLoArray();
 
             
-            amrex::ParallelFor(gbx,ncomp,
-            [=] AMREX_GPU_DEVICE (int i, int j, int k, int n)
+            amrex::ParallelFor(gbx,
+            [=] AMREX_GPU_DEVICE (int i, int j, int k)
             {
-                compute_dcoeff(i, j, k, n, sborder_arr, dcoeff_arr, prob_lo, dx, time);
+                electrochem_transport::compute_dcoeff(i, j, k, sborder_arr, dcoeff_arr, prob_lo, dx, time);
+            });
+            
+            amrex::ParallelFor(bx,
+            [=] AMREX_GPU_DEVICE (int i, int j, int k)
+            {
+                electrochem_reactions::compute_react_source(i, j, k, sborder_arr, reactsource_arr, 
+                        prob_lo, dx, time);
             });
 
 
@@ -247,10 +258,11 @@ void echemAMR::compute_dsdt (int lev, const int num_grow,
             amrex::ParallelFor(bx,ncomp,
             [=] AMREX_GPU_DEVICE (int i, int j, int k,int n)
             {
-                update_residual(i, j, k, n, dsdt_arr,
-                             AMREX_D_DECL(flux_arr[0], flux_arr[1], flux_arr[2]),
+                update_residual(i, j, k, n, dsdt_arr,reactsource_arr,
+                        AMREX_D_DECL(flux_arr[0], flux_arr[1], flux_arr[2]),
                              dx);
             });
+
 
         }
     }

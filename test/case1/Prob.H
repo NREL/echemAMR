@@ -32,8 +32,8 @@ void initdata(Box const& bx, Array4<Real> const& phi, GeometryData const& geomda
             {
                 Real x = prob_lo[0] + (0.5+i) * dx[0]; 
                 Real r2 = (pow(x-0.5, 2) + pow((y-0.5),2) + pow((z-0.5),2)) / 0.005;
-                phi(i,j,k,0) = 0.0;
-                phi(i,j,k,1) = 0.0;
+                phi(i,j,k,electrochem::S1_ID) = 0.0;
+                phi(i,j,k,electrochem::S2_ID) = 0.0;
             }
         }
     }
@@ -49,19 +49,15 @@ void externalbc(const amrex::Real x[AMREX_SPACEDIM],
         const amrex::Real time,
         amrex::GeometryData const& geomdata)
 {
-    if(sgn==1)
+    if(sgn==1) //left lo side
     {
-        for(int i=0;i<electrochem::nspecies;i++)
-        {
-            s_ext[i]=1.0;
-        }
+        s_ext[electrochem::S1_ID]=0.0;
+        s_ext[electrochem::S2_ID]=1.0;
     }
     else
     {
-        for(int i=0;i<electrochem::nspecies;i++)
-        {
-            s_ext[i]=0.0;
-        }
+        s_ext[electrochem::S1_ID]=0.0;
+        s_ext[electrochem::S2_ID]=0.0;
     }
 }
 

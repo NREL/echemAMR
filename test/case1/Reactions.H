@@ -1,5 +1,5 @@
-#ifndef _TRANSPORT_H_
-#define _TRANSPORT_H_
+#ifndef _REACTIONS_H_
+#define _REACTIONS_H_
 
 #include <AMReX_Geometry.H>
 #include <AMReX_FArrayBox.H>
@@ -7,18 +7,18 @@
 #include <Chemistry.H>
 
 using namespace amrex;
-namespace electrochem_transport
+namespace electrochem_reactions
 {
     AMREX_GPU_DEVICE AMREX_INLINE
-        void compute_dcoeff(int i, int j, int k,
+        void compute_react_source(int i, int j, int k,
                 Array4<Real> const& phi,
-                Array4<Real> const& dcoeff,
+                Array4<Real> const& reactsource,
                 GpuArray<Real, AMREX_SPACEDIM> prob_lo,
                 GpuArray<Real, AMREX_SPACEDIM> dx,
                 const Real time)
         {
-            dcoeff(i,j,k,electrochem::S1_ID)=1.0;
-            dcoeff(i,j,k,electrochem::S2_ID)=0.1;
+            reactsource(i,j,k,electrochem::S1_ID) = 1.0;
+            reactsource(i,j,k,electrochem::S2_ID) = 0.0;
         }
 }
 #endif
