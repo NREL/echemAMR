@@ -16,6 +16,7 @@ namespace electrochem
     extern amrex::Vector<std::string> specnames;
     void init();
     void close();
+    int find_id(std::string specname);
 
 }
 #endif

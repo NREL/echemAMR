@@ -9,10 +9,19 @@ void
 state_error (int i, int j, int k,
              amrex::Array4<char> const& tag,
              amrex::Array4<amrex::Real const> const& state,
-             amrex::Real phierr, char tagval)
+             amrex::Real *refine_phi, amrex::Real *refine_phi_comps,
+             int ntagvars,
+             char tagval)
 {
-    if (state(i,j,k,0) > phierr)
-        tag(i,j,k) = tagval;
+
+    for(int c=0;c<ntagvars;c++)
+    {
+        int comp = refine_phi_comps[c];
+        if (state(i,j,k,comp) > refine_phi[comp])
+        {
+            tag(i,j,k) = tagval;
+        }
+    }
 }
 
 #endif

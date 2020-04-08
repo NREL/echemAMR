@@ -139,7 +139,8 @@ void echemAMR::InitData ()
 void echemAMR::ErrorEst (int lev, TagBoxArray& tags, Real time, int ngrow)
 {
     static bool first = true;
-    static Vector<Real> phierr;
+    static Vector<Real> refine_phi;
+    static Vector<Real> refine_phi_comps;
 
     // only do this during the first call to ErrorEst
     if (first)
@@ -151,14 +152,28 @@ void echemAMR::ErrorEst (int lev, TagBoxArray& tags, Real time, int ngrow)
         // in subroutine state_error, you could use more elaborate tagging, such
         // as more advanced logical expressions, or gradients, etc.
 	ParmParse pp("echemamr");
-	int n = pp.countval("phierr");
-	if (n > 0) 
+        if (pp.contains("tagged_vars"))
         {
-	    pp.getarr("phierr", phierr, 0, n);
-	}
+	    int nvars = pp.countval("tagged_vars");
+            refine_phi.resize(nvars);
+            refine_phi_comps.resize(nvars);
+            std::string varname;
+            for(int i=0; i<nvars; i++)
+            {
+                pp.get("tagged_vars",varname,i);
+                pp.get((varname+"_refine").c_str(),refine_phi[i]);
+                int varname_id=electrochem::find_id(varname);
+                if(varname_id == -1)
+                {
+                    Print()<<"Variable name:"<<varname<<" not found for tagging\n";
+                    amrex::Abort("Invalid tagging variable");
+                }
+                refine_phi_comps[i]=varname_id;
+            }
+        }
     }
 
-    if (lev >= phierr.size()) return;
+    if(refine_phi.size() == 0) return;
 
 //    const int clearval = TagBox::CLEAR;
     const int   tagval = TagBox::SET;
@@ -175,12 +190,13 @@ void echemAMR::ErrorEst (int lev, TagBoxArray& tags, Real time, int ngrow)
 	    const Box& bx       = mfi.tilebox();
             const auto statefab = state.array(mfi);
             const auto tagfab   = tags.array(mfi);
-            Real phierror = phierr[lev];
 	    
             amrex::ParallelFor(bx,
             [=] AMREX_GPU_DEVICE (int i, int j, int k) noexcept
             {
-                state_error(i, j, k, tagfab, statefab, phierror, tagval);
+                state_error(i, j, k, tagfab, statefab, 
+                        refine_phi.dataPtr(), refine_phi_comps.dataPtr(), 
+                        refine_phi.size(), tagval);
             });
 	}
     }
