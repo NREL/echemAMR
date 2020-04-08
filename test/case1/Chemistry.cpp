@@ -2,11 +2,7 @@
 
 namespace electrochem
 {
-    const int nspecies=2;
-    amrex::Vector<std::string> specnames(2);
-
-    const int S1_ID=0;
-    const int S2_ID=1; 
+    amrex::Vector<std::string> specnames(nspecies);
 
     void init()
     {

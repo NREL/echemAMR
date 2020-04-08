@@ -30,8 +30,8 @@ struct AmrCoreFill
             const int* bc = bcr->data();
             const int NVAR=electrochem::nspecies;
 
-            amrex::Real s_int[NVAR] = {0.0};
-            amrex::Real s_ext[NVAR] = {0.0};
+            amrex::Real s_int[electrochem::nspecies] = {0.0};
+            amrex::Real s_ext[electrochem::nspecies] = {0.0};
 
             // xlo and xhi
             int idir = 0;

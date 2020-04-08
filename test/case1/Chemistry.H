@@ -11,8 +11,9 @@
 
 namespace electrochem
 {
-    extern const int nspecies;
-    extern const int S1_ID,S2_ID;
+    const int nspecies=2;
+    const int S1_ID=0;
+    const int S2_ID=1;
     extern amrex::Vector<std::string> specnames;
     void init();
     void close();
