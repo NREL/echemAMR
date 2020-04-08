@@ -12,7 +12,7 @@ amr.n_cell           =  64   64   8
 amr.v              = 1       # verbosity in Amr
 
 # REFINEMENT
-amr.max_level       = 0       # maximum level number allowed
+amr.max_level       = 1       # maximum level number allowed
 amr.blocking_factor = 8       # block factor in grid generation
 amr.max_grid_size   = 8
 
@@ -36,8 +36,10 @@ echemamr.hi_bc = 3 2 2
 
 # Tagging
 echemamr.tagged_vars = S1 S2
-echemamr.S1_refine = 0.2
-echemamr.S2_refine = 0.1
+echemamr.S1_refine = 1e20
+echemamr.S1_refinegrad = 0.0005
+echemamr.S2_refine = 1e20
+echemamr.S2_refinegrad = 1e20
 
 # PLOTFILES
 amr.plot_file  = plt    # root name of plot file

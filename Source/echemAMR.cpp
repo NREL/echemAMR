@@ -140,6 +140,7 @@ void echemAMR::ErrorEst (int lev, TagBoxArray& tags, Real time, int ngrow)
 {
     static bool first = true;
     static Vector<Real> refine_phi;
+    static Vector<Real> refine_phigrad;
     static Vector<Real> refine_phi_comps;
 
     // only do this during the first call to ErrorEst
@@ -156,12 +157,14 @@ void echemAMR::ErrorEst (int lev, TagBoxArray& tags, Real time, int ngrow)
         {
 	    int nvars = pp.countval("tagged_vars");
             refine_phi.resize(nvars);
+            refine_phigrad.resize(nvars);
             refine_phi_comps.resize(nvars);
             std::string varname;
             for(int i=0; i<nvars; i++)
             {
                 pp.get("tagged_vars",varname,i);
                 pp.get((varname+"_refine").c_str(),refine_phi[i]);
+                pp.get((varname+"_refinegrad").c_str(),refine_phigrad[i]);
                 int varname_id=electrochem::find_id(varname);
                 if(varname_id == -1)
                 {
@@ -179,23 +182,33 @@ void echemAMR::ErrorEst (int lev, TagBoxArray& tags, Real time, int ngrow)
     const int   tagval = TagBox::SET;
 
     const MultiFab& state = phi_new[lev];
+    MultiFab Sborder(grids[lev], dmap[lev], state.nComp(), 1);
+    FillPatch(lev, time, Sborder, 0, Sborder.nComp()); 
 
 #ifdef _OPENMP
 #pragma omp parallel if(Gpu::notInLaunchRegion())
 #endif
     {
 	
-	for (MFIter mfi(state,TilingIfNotGPU()); mfi.isValid(); ++mfi)
+	for (MFIter mfi(Sborder,TilingIfNotGPU()); mfi.isValid(); ++mfi)
 	{
 	    const Box& bx       = mfi.tilebox();
-            const auto statefab = state.array(mfi);
+            const auto statefab = Sborder.array(mfi);
             const auto tagfab   = tags.array(mfi);
 	    
             amrex::ParallelFor(bx,
             [=] AMREX_GPU_DEVICE (int i, int j, int k) noexcept
             {
-                state_error(i, j, k, tagfab, statefab, 
+                state_based_refinement (i, j, k, tagfab, statefab, 
                         refine_phi.dataPtr(), refine_phi_comps.dataPtr(), 
+                        refine_phi.size(), tagval);
+            });
+            
+            amrex::ParallelFor(bx,
+            [=] AMREX_GPU_DEVICE (int i, int j, int k) noexcept
+            {
+                stategrad_based_refinement (i, j, k, tagfab, statefab, 
+                        refine_phigrad.dataPtr(), refine_phi_comps.dataPtr(), 
                         refine_phi.size(), tagval);
             });
 	}
