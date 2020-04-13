@@ -1,5 +1,5 @@
-#ifndef TAGGING_H
-#define TAGGING_H
+#ifndef ECHEMAMR_TAGGING_H
+#define ECHEMAMR_TAGGING_H
 
 #include <AMReX_Array4.H>
 

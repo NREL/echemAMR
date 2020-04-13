@@ -1,4 +1,4 @@
 CEXE_sources += main.cpp echemAMR.cpp echemAMR_Evolve.cpp echemAMR_Plot.cpp
 CEXE_sources += echemAMR_GridWork.cpp echemAMR_TimeStep.cpp 
 
-CEXE_headers += echemAMR.H Kernels_3d.H Tagging.H echemAMR_BCfill.H
+CEXE_headers += echemAMR.H Kernels_3d.H echemAMR_Tagging.H echemAMR_BCfill.H
