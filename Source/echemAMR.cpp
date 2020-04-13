@@ -139,9 +139,6 @@ void echemAMR::InitData ()
 void echemAMR::ErrorEst (int lev, TagBoxArray& tags, Real time, int ngrow)
 {
     static bool first = true;
-    static Vector<Real> refine_phi;
-    static Vector<Real> refine_phigrad;
-    static Vector<Real> refine_phi_comps;
 
     // only do this during the first call to ErrorEst
     if (first)
@@ -195,21 +192,26 @@ void echemAMR::ErrorEst (int lev, TagBoxArray& tags, Real time, int ngrow)
 	    const Box& bx       = mfi.tilebox();
             const auto statefab = Sborder.array(mfi);
             const auto tagfab   = tags.array(mfi);
+            
+            amrex::Real *refine_phi_dat = refine_phi.data();
+            amrex::Real *refine_phigrad_dat = refine_phigrad.data();
+            int *refine_phi_comps_dat = refine_phi_comps.data();
+            int ntagged_comps=refine_phi_comps.size();
 	    
             amrex::ParallelFor(bx,
             [=] AMREX_GPU_DEVICE (int i, int j, int k) noexcept
             {
                 state_based_refinement (i, j, k, tagfab, statefab, 
-                        refine_phi.dataPtr(), refine_phi_comps.dataPtr(), 
-                        refine_phi.size(), tagval);
+                        refine_phi_dat, refine_phi_comps_dat, 
+                        ntagged_comps, tagval);
             });
             
             amrex::ParallelFor(bx,
             [=] AMREX_GPU_DEVICE (int i, int j, int k) noexcept
             {
                 stategrad_based_refinement (i, j, k, tagfab, statefab, 
-                        refine_phigrad.dataPtr(), refine_phi_comps.dataPtr(), 
-                        refine_phi.size(), tagval);
+                        refine_phigrad_dat, refine_phi_comps_dat, 
+                        ntagged_comps, tagval);
             });
 	}
     }

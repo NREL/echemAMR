@@ -129,6 +129,9 @@ private:
 
     ////////////////
     // private data members
+    amrex::Gpu::ManagedVector<Real> refine_phi;
+    amrex::Gpu::ManagedVector<Real> refine_phigrad;
+    amrex::Gpu::ManagedVector<int> refine_phi_comps;
 
     amrex::Vector<int> istep;      // which step?
     amrex::Vector<int> nsubsteps;  // how many substeps on each level?

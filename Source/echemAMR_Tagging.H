@@ -8,7 +8,7 @@ AMREX_FORCE_INLINE
 void state_based_refinement (int i, int j, int k,
              amrex::Array4<char> const& tag,
              amrex::Array4<amrex::Real const> const& state,
-             amrex::Real *refine_phi, amrex::Real *refine_phi_comps,
+             amrex::Real *refine_phi, int *refine_phi_comps,
              int ntagvars,
              char tagval)
 {
@@ -29,7 +29,7 @@ void stategrad_based_refinement (int i, int j, int k,
              amrex::Array4<char> const& tag,
              amrex::Array4<amrex::Real const> const& state,
              amrex::Real *refine_phigrad, 
-             amrex::Real *refine_phi_comps,
+             int *refine_phi_comps,
              int ntagvars,
              char tagval)
 {
