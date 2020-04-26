@@ -16,7 +16,7 @@ void state_based_refinement (int i, int j, int k,
     for(int c=0;c<ntagvars;c++)
     {
         int comp = refine_phi_comps[c];
-        if (state(i,j,k,comp) > refine_phi[comp])
+        if (state(i,j,k,comp) > refine_phi[c])
         {
             tag(i,j,k) = tagval;
         }
@@ -50,7 +50,7 @@ void stategrad_based_refinement (int i, int j, int k,
         amrex::Real gradzminus = std::abs(state(i, j,   k, comp) - state(i, j, k-1, comp));
         amrex::Real gradz = amrex::max(gradzplus,gradzminus);
 
-        if (amrex::max(gradx, grady, gradz) > refine_phigrad[comp]) 
+        if (amrex::max(gradx, grady, gradz) > refine_phigrad[c]) 
         {
             tag(i, j, k) = tagval;
         }
