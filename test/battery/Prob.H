@@ -1,0 +1,99 @@
+#ifndef _PROB_H_
+#define _PROB_H_
+
+#include <AMReX_Box.H>
+#include <AMReX_FArrayBox.H>
+#include <AMReX_Geometry.H>
+#include <Chemistry.H>
+
+using namespace amrex;
+
+AMREX_GPU_DEVICE
+AMREX_INLINE
+void initdata(Box const& bx, Array4<Real> const& phi, GeometryData const& geomdata)
+{
+    const auto lo = lbound(bx);
+    const auto hi = ubound(bx);    
+
+    const Real* AMREX_RESTRICT prob_lo = geomdata.ProbLo();
+    const Real* AMREX_RESTRICT dx      = geomdata.CellSize();
+
+#ifdef _OPENMP
+#pragma omp parallel for collapse(2) if (GPU::notInLaunchRegion)
+#endif
+    for (int k = lo.z; k <= hi.z; ++k) 
+    {
+        const Real z = prob_lo[2] + (0.5+k) * dx[2];
+        for (int j = lo.y; j <= hi.y; ++j)
+        {
+            const Real y = prob_lo[1] + (0.5+j) * dx[1];
+            AMREX_PRAGMA_SIMD
+            for (int i = lo.x; i <= hi.x; ++i) 
+            {
+                const Real x = prob_lo[0] + (0.5+i) * dx[0];
+
+                // initial conditions
+                // Concentration
+                phi(i,j,k,electrochem::CO_ID) = 3000.0 + 10.0*std::sin(3.14*x);
+                // Potential
+                phi(i,j,k,electrochem::PO_ID) = -3.0 + 0.1*x;
+
+                // electrolyte
+                phi(i,j,k,electrochem::AC_ID) = -1.0;
+                phi(i,j,k,electrochem::ES_ID) =  1.0;
+
+                // electrolyte + Separator
+                constexpr amrex::Real s_xlo = 0.45;
+                constexpr amrex::Real s_xhi = 0.55;
+                if(x > s_xlo && x < s_xhi) {
+                    phi(i,j,k,electrochem::AC_ID) = -1.0;
+                    phi(i,j,k,electrochem::ES_ID) = -1.0;
+                }
+
+                // anode
+                constexpr amrex::Real a_yhi = 0.4;
+                constexpr amrex::Real a_ylo = 0.1;
+                constexpr amrex::Real a_x = 0.2;
+                if(y < a_yhi && y > a_ylo && x < a_x) {
+                    phi(i,j,k,electrochem::AC_ID) =  1.0;
+                    phi(i,j,k,electrochem::ES_ID) = -1.0;
+                }
+
+                // cathode
+                constexpr amrex::Real c_yhi = 0.4;
+                constexpr amrex::Real c_ylo = 0.1;
+                constexpr amrex::Real c_x = 0.8;
+                if(y < c_yhi && y > c_ylo && x > c_x) {
+                    phi(i,j,k,electrochem::AC_ID) = 1.0;
+                    phi(i,j,k,electrochem::ES_ID) = 1.0;
+                }
+
+
+            }
+        }
+    }
+}
+
+AMREX_GPU_DEVICE
+AMREX_FORCE_INLINE
+void externalbc(const amrex::Real x[AMREX_SPACEDIM],
+        const amrex::Real s_int[],
+        amrex::Real s_ext[],
+        const int idir,
+        const int sgn,
+        const amrex::Real time,
+        amrex::GeometryData const& geomdata)
+{
+    if(sgn==1) //left lo side
+    {
+        s_ext[electrochem::CO_ID]=0.0;
+        s_ext[electrochem::PO_ID]=1.0;
+    }
+    else
+    {
+        s_ext[electrochem::CO_ID]=0.0;
+        s_ext[electrochem::PO_ID]=0.0;
+    }
+}
+
+#endif
