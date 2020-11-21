@@ -40,10 +40,10 @@ namespace electrochem_transport
                 const Real KeC = amrex::max(-0.00000025*con*(con-4000.0), eps);
                 // FIXME: put the actual equation for DeC, tplus, KD here
                 const Real DeC = amrex::max(3.5e-10 - 3.5e-10/4000.0*con, eps);
-                const Real tplus = 0.4 + 0.1/4000.0*con;
-                const Real AC = 1.0 + 25.0/4000.0*con;
+                const Real tplus = amrex::max(0.4 + 0.1/4000.0*con, eps);
+                const Real AC = amrex::max(1.0 + 25.0/4000.0*con, eps);
                 const Real RTF = electrochem::R_gas_const*electrochem::T0/electrochem::Faraday_const;
-                const Real KD = min((1.0-tplus)*(1.0+AC)*2.0*KeC*RTF, -eps);
+                const Real KD = amrex::min((1.0-tplus)*(1.0+AC)*2.0*KeC*RTF, -eps);
 
                 dcoeff(i,j,k,electrochem::CO_ID) = DeC - tplus*KD/electrochem::Faraday_const;
                 dcoeff(i,j,k,electrochem::PO_ID) = 1.0e-6;//KeC;

@@ -37,10 +37,10 @@ namespace electrochem_reactions
                 const Real KeC = amrex::max(-0.00000025*con*(con-4000.0), eps);
 
                 // FIXME: put the actual equation for tplus, KD here
-                const Real tplus = 0.4 + 0.1/4000.0*con;
-                const Real AC = 1.0 + 25.0/4000.0*con;
+                const Real tplus = amrex::max(0.4 + 0.1/4000.0*con, eps);
+                const Real AC = amrex::max(1.0 + 25.0/4000.0*con, eps);
                 const Real RTF = electrochem::R_gas_const*electrochem::T0/electrochem::Faraday_const;
-                const Real KD = min((1.0-tplus)*(1.0+AC)*2.0*KeC*RTF, -eps);
+                const Real KD = amrex::min((1.0-tplus)*(1.0+AC)*2.0*KeC*RTF, -eps);
 
                 // FIXME: should probably average KeC and tplus over faces but for now use value at center
                 // FIXME: check sign on this
