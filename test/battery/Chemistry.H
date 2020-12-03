@@ -13,10 +13,8 @@ namespace electrochem
 {
     const int nspecies=4;
 
-    const int CO_ID=0;
-    const int PO_ID=1;
-    const int AC_ID=2;
-    const int ES_ID=3;
+    enum species {CO_ID = 0, PO_ID, AC_ID, ES_ID, last_ID=ES_ID};
+    enum component {cathode = 0, anode, electrolyte, electrolyte_separator, last_comp=electrolyte_separator};
 
     const amrex::Real K_a = 1.0e-3; // conductivity anode
     const amrex::Real K_c = 2.0e-3; // conductivity cathode
@@ -30,6 +28,20 @@ namespace electrochem
     void init();
     void close();
     int find_id(std::string specname);
+
+    AMREX_GPU_DEVICE AMREX_FORCE_INLINE
+    int level_set_to_component(int i, int j, int k, amrex::Array4<amrex::Real> const& phase){
+
+        if(phase(i,j,k,AC_ID) > 0.0) // electrode
+            return phase(i,j,k,ES_ID) > 0.0 ? cathode : anode;
+        else
+            return phase(i,j,k,ES_ID) > 0.0 ? electrolyte : electrolyte_separator;
+    }
+
+     AMREX_GPU_DEVICE AMREX_FORCE_INLINE
+     bool is_electrode(int i, int j, int k, amrex::Array4<amrex::Real> const& phase){
+         return (phase(i,j,k,AC_ID) > 0.0) ? true : false;
+     }
 
 }
 #endif
