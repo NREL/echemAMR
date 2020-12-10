@@ -17,21 +17,23 @@ namespace electrochem_transport
                 GpuArray<Real, AMREX_SPACEDIM> dx,
                 const Real time)
         {
-            if(phi(i,j,k,electrochem::AC_ID) > 0.0) {
-                /* electrodes */
-                if(phi(i,j,k,electrochem::ES_ID) > 0.0) {
-                    // cathode
-                    dcoeff(i,j,k,electrochem::PO_ID) = electrochem::K_c;
-                    dcoeff(i,j,k,electrochem::CO_ID) = electrochem::D_c;
-                } else {
-                    // anode
-                    dcoeff(i,j,k,electrochem::PO_ID) = electrochem::K_a;
-                    dcoeff(i,j,k,electrochem::CO_ID) = electrochem::D_a;
-                }
+
+
+            const int comp = electrochem::level_set_to_component(i,j,k,phi);
+
+            if(comp == electrochem::cathode){
+
+                dcoeff(i,j,k,electrochem::PO_ID) = electrochem::K_c;
+                dcoeff(i,j,k,electrochem::CO_ID) = electrochem::D_c;
+
+            } else if (comp == electrochem::anode){
+
+                dcoeff(i,j,k,electrochem::PO_ID) = electrochem::K_a;
+                dcoeff(i,j,k,electrochem::CO_ID) = electrochem::D_a;
+
             } else {
 
-                /* electrolyte */
-
+                /* electrolyte or separator */
                 constexpr Real eps = 1.0e-12;
                 // concentration
                 const Real con = phi(i,j,k,electrochem::CO_ID);
@@ -46,14 +48,11 @@ namespace electrochem_transport
                 const Real KD = amrex::min((1.0-tplus)*(1.0+AC)*2.0*KeC*RTF, -eps);
 
                 dcoeff(i,j,k,electrochem::CO_ID) = DeC - tplus*KD/electrochem::Faraday_const;
-                dcoeff(i,j,k,electrochem::PO_ID) = 1.0e-6;//KeC;
-
-
-//              amrex::Print() << i << ' ' << j << ' ' << k << ' ' << KeC << ' ' << DeC  << ' ' << -tplus*KD/electrochem::Faraday_const << std::endl;
+                dcoeff(i,j,k,electrochem::PO_ID) = KeC;
 
             }
 
-            // no diffusion yet
+            // no diffusion for level sets
             dcoeff(i,j,k,electrochem::AC_ID)=0.0;
             dcoeff(i,j,k,electrochem::ES_ID)=0.0;
         }

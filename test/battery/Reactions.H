@@ -19,15 +19,12 @@ namespace electrochem_reactions
         {
 
             // FIXME: add Neummann bc's to potential and concentration source terms
+            if(electrochem::is_electrode(i,j,k,phi)){
 
-            if(phi(i,j,k,electrochem::AC_ID) > 0.0) {
-                /* electrodes */
                 reactsource(i,j,k,electrochem::PO_ID) = 0.0;
                 reactsource(i,j,k,electrochem::CO_ID) = 0.0;
 
             } else {
-
-                /* electrolyte */
 
                 constexpr Real eps = 1.0e-12;
                 // concentration
@@ -51,13 +48,14 @@ namespace electrochem_reactions
 
                 // FIXME: should probably average KD over faces but for now use use value at center
                 // FIXME: check sign on this
+                // FIXME: this should be KDstar
                 reactsource(i,j,k,electrochem::PO_ID) = KD * ( (phi(i-1,j,k,electrochem::CO_ID) - 2.0*phi(i,j,k,electrochem::CO_ID) + phi(i+1,j,k,electrochem::CO_ID))/dx[0]/dx[0]
                                                               +(phi(i,j-1,k,electrochem::CO_ID) - 2.0*phi(i,j,k,electrochem::CO_ID) + phi(i,j+1,k,electrochem::CO_ID))/dx[1]/dx[1]
                                                               +(phi(i,j,k-1,electrochem::CO_ID) - 2.0*phi(i,j,k,electrochem::CO_ID) + phi(i,j,k+1,electrochem::CO_ID))/dx[2]/dx[2]);
 
             }
 
-
+            // level sets have no source terms
             reactsource(i,j,k,electrochem::AC_ID) = 0.0;
             reactsource(i,j,k,electrochem::ES_ID) = 0.0;
         }
