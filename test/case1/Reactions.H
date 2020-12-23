@@ -14,6 +14,7 @@ namespace electrochem_reactions
                 Array4<Real> const& phi,
                 Array4<Real> const& reactsource,
                 GpuArray<Real, AMREX_SPACEDIM> prob_lo,
+                GpuArray<Real, AMREX_SPACEDIM> prob_hi,
                 GpuArray<Real, AMREX_SPACEDIM> dx,
                 const Real time)
         {
