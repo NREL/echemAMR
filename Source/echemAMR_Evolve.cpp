@@ -38,16 +38,19 @@ void echemAMR::Evolve ()
                        << " DT = " << dt[0]  << std::endl;
 
 	// sync up time
-	for (lev = 0; lev <= finest_level; ++lev) {
+	for (lev = 0; lev <= finest_level; ++lev) 
+        {
 	    t_new[lev] = cur_time;
 	}
 
-	if (plot_int > 0 && (step+1) % plot_int == 0) {
+	if (plot_int > 0 && (step+1) % plot_int == 0) 
+        {
 	    last_plot_file_step = step+1;
 	    WritePlotFile();
 	}
 
-        if (chk_int > 0 && (step+1) % chk_int == 0) {
+        if (chk_int > 0 && (step+1) % chk_int == 0) 
+        {
             WriteCheckpointFile();
         }
 
@@ -62,7 +65,8 @@ void echemAMR::Evolve ()
 	if (cur_time >= stop_time - 1.e-6*dt[0]) break;
     }
 
-    if (plot_int > 0 && istep[0] > last_plot_file_step) {
+    if (plot_int > 0 && istep[0] > last_plot_file_step) 
+    {
 	WritePlotFile();
     }
 
@@ -92,19 +96,22 @@ void echemAMR::timeStep (int lev, Real time, int iteration)
 		regrid(lev, time);
 
                 // mark that we have regridded this level already
-		for (int k = lev; k <= finest_level; ++k) {
+		for (int k = lev; k <= finest_level; ++k) 
+                {
 		    last_regrid_step[k] = istep[k];
 		}
 
                 // if there are newly created levels, set the time step
-		for (int k = old_finest+1; k <= finest_level; ++k) {
+		for (int k = old_finest+1; k <= finest_level; ++k) 
+                {
 		    dt[k] = dt[k-1] / MaxRefRatio(k-1);
 		}
 	    }
 	}
     }
 
-    if (Verbose()) {
+    if (Verbose()) 
+    {
 	amrex::Print() << "[Level " << lev << " step " << istep[lev]+1 << "] ";
 	amrex::Print() << "ADVANCE with time = " << t_new[lev] 
                        << " dt = " << dt[lev] << std::endl;
@@ -141,7 +148,7 @@ void echemAMR::timeStep (int lev, Real time, int iteration)
 }
 void echemAMR::Advance(int lev, Real time, Real dt_lev,int iteration,int ncycle)
 {
-    constexpr int num_grow = 1; 
+    constexpr int num_grow = 2; 
     std::swap(phi_old[lev], phi_new[lev]); //old becomes new and new becomes old
     t_old[lev] = t_new[lev];  //old time is now current time (time)
     t_new[lev] += dt_lev;     //new time is ahead
@@ -180,7 +187,8 @@ void echemAMR::compute_dsdt (int lev, const int num_grow,
 {
 
     const auto dx = geom[lev].CellSizeArray();
-    const Real* prob_lo = geom[lev].ProbLo();
+    auto prob_lo = geom[lev].ProbLoArray();
+    auto prob_hi = geom[lev].ProbHiArray();
 
     int ncomp=Sborder.nComp();
 
@@ -202,8 +210,15 @@ void echemAMR::compute_dsdt (int lev, const int num_grow,
             const Box& gbx = amrex::grow(bx,num_grow);
 
             FArrayBox dcoeff_fab(gbx,ncomp);
+            FArrayBox velx_fab(gbx,ncomp);
+            FArrayBox vely_fab(gbx,ncomp);
+            FArrayBox velz_fab(gbx,ncomp);
             FArrayBox reactsource_fab(bx,ncomp);
+            
             Elixir dcoeff_fab_eli=dcoeff_fab.elixir();
+            Elixir velx_fab_eli=velx_fab.elixir();
+            Elixir vely_fab_eli=vely_fab.elixir();
+            Elixir velz_fab_eli=velz_fab.elixir();
             Elixir reactsource_fab_eli=reactsource_fab.elixir();
 
             GpuArray<Box, AMREX_SPACEDIM> nbx;
@@ -215,43 +230,52 @@ void echemAMR::compute_dsdt (int lev, const int num_grow,
             Array4<Real> dcoeff_arr   = dcoeff_fab.array();
             Array4<Real> dsdt_arr     = dsdt.array(mfi);
             Array4<Real> reactsource_arr = reactsource_fab.array();
+            Array4<Real> velx_arr      = velx_fab.array();
+            Array4<Real> vely_arr      = vely_fab.array();
+            Array4<Real> velz_arr      = velz_fab.array();
 
             GpuArray<Array4<Real>, AMREX_SPACEDIM> flux_arr{ AMREX_D_DECL(flux[0].array(mfi),
                                                                           flux[1].array(mfi),
                                                                           flux[2].array(mfi)) };
-            auto prob_lo = geom[lev].ProbLoArray();
+            
+            amrex::ParallelFor(gbx,
+            [=] AMREX_GPU_DEVICE (int i, int j, int k)
+            {
+                electrochem_transport::compute_vel(i, j, k, sborder_arr, velx_arr, 
+                        vely_arr, velz_arr, prob_lo, prob_hi, dx, time);
+            });
 
             
             amrex::ParallelFor(gbx,
             [=] AMREX_GPU_DEVICE (int i, int j, int k)
             {
-                electrochem_transport::compute_dcoeff(i, j, k, sborder_arr, dcoeff_arr, prob_lo, dx, time);
+                electrochem_transport::compute_dcoeff(i, j, k, sborder_arr, 
+                        dcoeff_arr, prob_lo, prob_hi, dx, time);
             });
             
             amrex::ParallelFor(bx,
             [=] AMREX_GPU_DEVICE (int i, int j, int k)
             {
                 electrochem_reactions::compute_react_source(i, j, k, sborder_arr, reactsource_arr, 
-                        prob_lo, dx, time);
+                        prob_lo, prob_hi, dx, time);
             });
-
 
             amrex::ParallelFor(amrex::growHi(bx,0,1),ncomp,
             [=] AMREX_GPU_DEVICE (int i, int j, int k, int n)
             {
-                compute_flux_x(i, j, k, n, sborder_arr, dcoeff_arr, flux_arr[0], dx);
+                compute_flux_x(i, j, k, n, sborder_arr, velx_arr, dcoeff_arr, flux_arr[0], dx);
             });
 
             amrex::ParallelFor(amrex::growHi(bx,1,1),ncomp,
             [=] AMREX_GPU_DEVICE (int i, int j, int k, int n)
             {
-                compute_flux_y(i, j, k, n, sborder_arr, dcoeff_arr, flux_arr[1], dx);
+                compute_flux_y(i, j, k, n, sborder_arr, vely_arr, dcoeff_arr, flux_arr[1], dx);
             });
 
             amrex::ParallelFor(amrex::growHi(bx,2,1),ncomp,
             [=] AMREX_GPU_DEVICE (int i, int j, int k, int n)
             {
-                compute_flux_z(i, j, k, n, sborder_arr, dcoeff_arr, flux_arr[2], dx);
+                compute_flux_z(i, j, k, n, sborder_arr, velz_arr, dcoeff_arr, flux_arr[2], dx);
             });
 
             // update residual
@@ -262,8 +286,6 @@ void echemAMR::compute_dsdt (int lev, const int num_grow,
                         AMREX_D_DECL(flux_arr[0], flux_arr[1], flux_arr[2]),
                              dx);
             });
-
-
         }
     }
 

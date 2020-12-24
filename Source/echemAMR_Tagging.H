@@ -16,7 +16,7 @@ void state_based_refinement (int i, int j, int k,
     for(int c=0;c<ntagvars;c++)
     {
         int comp = refine_phi_comps[c];
-        if (state(i,j,k,comp) > refine_phi[c])
+        if (std::abs(state(i,j,k,comp)) > refine_phi[c])
         {
             tag(i,j,k) = tagval;
         }
