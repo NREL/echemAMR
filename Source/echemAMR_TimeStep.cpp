@@ -57,7 +57,7 @@ Real echemAMR::EstTimeStep (int lev, bool local)
 
     Real dt_est = std::numeric_limits<Real>::max();
     auto prob_lo = geom[lev].ProbLoArray();
-    auto prob_hi = geom[lev].ProbLoArray();
+    auto prob_hi = geom[lev].ProbHiArray();
     const auto dx = geom[lev].CellSizeArray();
     
     const Real cur_time = t_new[lev];

@@ -188,7 +188,7 @@ void echemAMR::compute_dsdt (int lev, const int num_grow,
 
     const auto dx = geom[lev].CellSizeArray();
     auto prob_lo = geom[lev].ProbLoArray();
-    auto prob_hi = geom[lev].ProbLoArray();
+    auto prob_hi = geom[lev].ProbHiArray();
 
     int ncomp=Sborder.nComp();
 

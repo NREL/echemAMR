@@ -33,8 +33,8 @@ echemamr.hi_bc = 2 3 2
 # Tagging
 echemamr.tagged_vars = S1 S2
 echemamr.S1_refine = 1e20
-echemamr.S2_refine = 0.12
-echemamr.S1_refinegrad = 0.08
+echemamr.S2_refine = 0.11
+echemamr.S1_refinegrad = 0.2
 echemamr.S2_refinegrad = 1e20
 
 # PLOTFILES

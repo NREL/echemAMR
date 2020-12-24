@@ -21,10 +21,20 @@ void compute_flux_x(int i, int j, int k,int n,
     
     //find face vel
     Real smallval  = 1e-10;
-    Real r_left    = (phi(i-1,j,k,n) - phi(i-2,j,k,n))/(phi(i,j,k,n) - phi(i-1,j,k,n) + smallval);
+    Real dtr=phi(i,j,k,n) - phi(i-1,j,k,n);
+    if(!(std::abs(dtr) > 0.0))
+    {
+        dtr=dtr+smallval;
+    }
+    Real r_left    = (phi(i-1,j,k,n) - phi(i-2,j,k,n))/dtr;
     Real lim_left  = std::max(0.0,std::min(1.0,r_left));
 
-    Real r_right   = (phi(i,j,k,n)  - phi(i-1,j,k,n)) / (phi(i+1,j,k,n) - phi(i,j,k,n) + smallval);
+    dtr=phi(i+1,j,k,n) - phi(i,j,k,n);
+    if(!(std::abs(dtr) > 0.0))
+    {
+        dtr=dtr+smallval;
+    }
+    Real r_right   = (phi(i,j,k,n)  - phi(i-1,j,k,n))/dtr;
     Real lim_right = std::max(0.0,std::min(1.0,r_right));
     
     Real phi_L     = phi(i-1,j,k,n) + 0.5 * lim_left  * (phi(i-1,j,k,n) - phi(i-2,j,k,n));
@@ -49,10 +59,20 @@ void compute_flux_y(int i, int j, int k,int n,
     
     //find face vel
     Real smallval=1e-10;
-    Real r_left=(phi(i,j-1,k,n) - phi(i,j-2,k,n))/(phi(i,j,k,n) - phi(i,j-1,k,n) + smallval);
+    Real dtr=phi(i,j,k,n) - phi(i,j-1,k,n);
+    if(!(std::abs(dtr) > 0.0))
+    {
+        dtr=dtr+smallval;
+    }
+    Real r_left=(phi(i,j-1,k,n) - phi(i,j-2,k,n))/dtr;
     Real lim_left=std::max(0.0,std::min(1.0,r_left));
-
-    Real r_right=(phi(i,j,k,n) - phi(i,j-1,k,n)) /(phi(i,j+1,k,n) - phi(i,j,k,n) + smallval);
+    
+    dtr=phi(i,j+1,k,n) - phi(i,j,k,n);
+    if(!(std::abs(dtr) > 0.0))
+    {
+        dtr=dtr+smallval;
+    }
+    Real r_right=(phi(i,j,k,n) - phi(i,j-1,k,n))/dtr;
     Real lim_right=std::max(0.0,std::min(1.0,r_right));
     
     Real phi_L  = phi(i,j-1,k,n) + 0.5 * lim_left  * (phi(i,j-1,k,n) - phi(i,j-2,k,n));
@@ -77,10 +97,21 @@ void compute_flux_z(int i, int j, int k,int n,
     
     //find face vel
     Real smallval=1e-10;
-    Real r_left=(phi(i,j,k-1,n) - phi(i,j,k-2,n))/(phi(i,j,k,n) - phi(i,j,k-1,n) + smallval);
-    Real lim_left=std::max(0.0,std::min(1.0,r_left));
 
-    Real r_right=(phi(i,j,k,n) - phi(i,j,k-1,n)) /(phi(i,j,k+1,n) - phi(i,j,k,n) + smallval);
+    Real dtr=phi(i,j,k,n) - phi(i,j,k-1,n);
+    if(!(std::abs(dtr) > 0.0))
+    {
+        dtr=dtr+smallval;
+    }
+    Real r_left=(phi(i,j,k-1,n) - phi(i,j,k-2,n))/dtr;
+    Real lim_left=std::max(0.0,std::min(1.0,r_left));
+    
+    dtr=phi(i,j,k+1,n) - phi(i,j,k,n);
+    if(!(std::abs(dtr) > 0.0))
+    {
+        dtr=dtr+smallval;
+    }
+    Real r_right=(phi(i,j,k,n) - phi(i,j,k-1,n))/dtr;
     Real lim_right=std::max(0.0,std::min(1.0,r_right));
     
     Real phi_L  = phi(i,j,k-1,n) + 0.5 * lim_left  * (phi(i,j,k-1,n) - phi(i,j,k-2,n));
