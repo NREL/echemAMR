@@ -18,6 +18,8 @@ void initdata(Box const& bx, Array4<Real> const& phi, GeometryData const& geomda
     const Real* AMREX_RESTRICT prob_lo = geomdata.ProbLo();
     const Real* AMREX_RESTRICT dx      = geomdata.CellSize();
 
+    const int ncomp = phi.nComp();
+
 #ifdef _OPENMP
 #pragma omp parallel for collapse(2) if (GPU::notInLaunchRegion)
 #endif
@@ -32,43 +34,43 @@ void initdata(Box const& bx, Array4<Real> const& phi, GeometryData const& geomda
             {
                 const Real x = prob_lo[0] + (0.5+i) * dx[0];
 
+                for(int n = 0; n < ncomp; ++n){
+                    phi(i,j,k,n) = -1.0;
+                }
+
                 // initial conditions
                 // Concentration
                 phi(i,j,k,electrochem::CO_ID) = 3000.0 + 10.0*std::sin(3.14*x);
                 // Potential
                 phi(i,j,k,electrochem::PO_ID) = -3.0 + 0.1*x;
 
-                // electrolyte
-                phi(i,j,k,electrochem::AC_ID) = -1.0;
-                phi(i,j,k,electrochem::ES_ID) =  1.0;
 
-                // electrolyte + Separator
+                // Separator
                 constexpr amrex::Real s_xlo = 0.45;
                 constexpr amrex::Real s_xhi = 0.55;
-                if(x > s_xlo && x < s_xhi) {
-                    phi(i,j,k,electrochem::AC_ID) = -1.0;
-                    phi(i,j,k,electrochem::ES_ID) = -1.0;
-                }
-
                 // anode
                 constexpr amrex::Real a_yhi = 0.4;
                 constexpr amrex::Real a_ylo = 0.1;
                 constexpr amrex::Real a_x = 0.2;
-                if(y < a_yhi && y > a_ylo && x < a_x) {
-                    phi(i,j,k,electrochem::AC_ID) =  1.0;
-                    phi(i,j,k,electrochem::ES_ID) = -1.0;
-                }
-
                 // cathode
                 constexpr amrex::Real c_yhi = 0.4;
                 constexpr amrex::Real c_ylo = 0.1;
                 constexpr amrex::Real c_x = 0.8;
-                if(y < c_yhi && y > c_ylo && x > c_x) {
-                    phi(i,j,k,electrochem::AC_ID) = 1.0;
-                    phi(i,j,k,electrochem::ES_ID) = 1.0;
+
+                if(x > s_xlo && x < s_xhi) {
+                    phi(i,j,k,electrochem::S_ID) = 1.0;
+                } else if(x < a_x && y < a_yhi && y > a_ylo) {
+                    phi(i,j,k,electrochem::A_ID) = 1.0;
+                } else if(x > c_x && y < c_yhi && y > c_ylo) {
+                    phi(i,j,k,electrochem::C_ID) = 1.0;
+                } else {
+                    phi(i,j,k,electrochem::E_ID) = 1.0;
                 }
 
-
+                // this has a check in it to make sure we don't have
+                // multiple fields specified in the same cell
+                // FIXME: disable for now
+//                electrochem::level_set_to_component(i,j,k,phi);
             }
         }
     }
