@@ -19,6 +19,11 @@ namespace electrochem_reactions
                 const Real time)
         {
 
+
+            for(int n=0;n<reactsource.nComp();++n) {
+                reactsource(i,j,k,n) = 0.0;
+            }
+
             // FIXME: add Neummann bc's to potential and concentration source terms
             if(electrochem::is_electrode(i,j,k,phi)){
 
@@ -56,9 +61,6 @@ namespace electrochem_reactions
 
             }
 
-            // level sets have no source terms
-            reactsource(i,j,k,electrochem::AC_ID) = 0.0;
-            reactsource(i,j,k,electrochem::ES_ID) = 0.0;
         }
 }
 #endif

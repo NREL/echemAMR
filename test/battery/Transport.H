@@ -20,6 +20,10 @@ namespace electrochem_transport
         {
 
 
+            for(int n=0; n < phi.nComp(); ++n) {
+                dcoeff(i,j,k,n) = 0.0;
+            }
+
             const int comp = electrochem::level_set_to_component(i,j,k,phi);
 
             if(comp == electrochem::cathode){
@@ -53,9 +57,6 @@ namespace electrochem_transport
 
             }
 
-            // no diffusion for level sets
-            dcoeff(i,j,k,electrochem::AC_ID)=0.0;
-            dcoeff(i,j,k,electrochem::ES_ID)=0.0;
         }
         
     AMREX_GPU_DEVICE AMREX_INLINE
@@ -69,20 +70,13 @@ namespace electrochem_transport
                 GpuArray<Real, AMREX_SPACEDIM> dx,
                 const Real time)
         {
-            velx(i,j,k,electrochem::CO_ID)=0.0;
-            velx(i,j,k,electrochem::PO_ID)=0.0;
-            velx(i,j,k,electrochem::AC_ID)=0.0;
-            velx(i,j,k,electrochem::ES_ID)=0.0;
-            
-            vely(i,j,k,electrochem::CO_ID)=0.0;
-            vely(i,j,k,electrochem::PO_ID)=0.0;
-            vely(i,j,k,electrochem::AC_ID)=0.0;
-            vely(i,j,k,electrochem::ES_ID)=0.0;
-            
-            velz(i,j,k,electrochem::CO_ID)=0.0;
-            velz(i,j,k,electrochem::PO_ID)=0.0;
-            velz(i,j,k,electrochem::AC_ID)=0.0;
-            velz(i,j,k,electrochem::ES_ID)=0.0;
+
+            for(int n = 0; n < phi.nComp(); ++n) {
+                velx(i,j,k,n) = 0.0;
+                vely(i,j,k,n) = 0.0;
+                velz(i,j,k,n) = 0.0;
+            }
+
         }
 }
 #endif

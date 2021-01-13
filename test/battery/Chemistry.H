@@ -11,10 +11,10 @@
 
 namespace electrochem
 {
-    const int nspecies=4;
+    const int nspecies=6;
 
-    enum species {CO_ID = 0, PO_ID, AC_ID, ES_ID, last_ID=ES_ID};
-    enum component {cathode = 0, anode, electrolyte, electrolyte_separator, last_comp=electrolyte_separator};
+    enum species {CO_ID = 0, PO_ID, A_ID, C_ID, E_ID, S_ID, last_ID = S_ID};
+    enum component {anode = 0, cathode, electrolyte, separator, last_comp = separator};
 
     const amrex::Real K_a = 1.0e-3; // conductivity anode
     const amrex::Real K_c = 2.0e-3; // conductivity cathode
@@ -32,15 +32,38 @@ namespace electrochem
     AMREX_GPU_DEVICE AMREX_FORCE_INLINE
     int level_set_to_component(int i, int j, int k, amrex::Array4<amrex::Real> const& phase){
 
-        if(phase(i,j,k,AC_ID) > 0.0) // electrode
-            return phase(i,j,k,ES_ID) > 0.0 ? cathode : anode;
-        else
-            return phase(i,j,k,ES_ID) > 0.0 ? electrolyte : electrolyte_separator;
+        int comp = -1;
+        int ncomp = 0;
+
+        if(phase(i,j,k,A_ID) > 0.0) {comp = anode; ++ncomp;}
+        if(phase(i,j,k,C_ID) > 0.0) {comp = cathode; ++ncomp;}
+        if(phase(i,j,k,E_ID) > 0.0) {comp = electrolyte; ++ncomp;}
+        if(phase(i,j,k,S_ID) > 0.0) {comp = separator; ++ncomp;}
+
+        // FIXME: need to make sure we only do this for real cells and not ghost cells
+//        if(comp == -1) {
+//            amrex::Print() << i << ' ' << j << ' ' << k << std::endl;
+//            amrex::Abort("error component not found");
+//        }
+//
+//        if(ncomp > 1) {
+//            amrex::Print() << i << ' ' << j << ' ' << k << std::endl;
+//            amrex::Abort("too many components found");
+//        }
+
+        return comp;
+
     }
 
      AMREX_GPU_DEVICE AMREX_FORCE_INLINE
      bool is_electrode(int i, int j, int k, amrex::Array4<amrex::Real> const& phase){
-         return (phase(i,j,k,AC_ID) > 0.0) ? true : false;
+
+         auto comp = level_set_to_component(i,j,k,phase);
+
+         if(comp == anode || comp == cathode)
+             return true;
+         else
+             return false;
      }
 
 }
