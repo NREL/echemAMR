@@ -18,8 +18,8 @@ namespace electrochem_reactions
                 GpuArray<Real, AMREX_SPACEDIM> dx,
                 const Real time)
         {
-            reactsource(i,j,k,electrochem::S1_ID) = 0.0;
-            reactsource(i,j,k,electrochem::S2_ID) = 1.0;
+            reactsource(i,j,k,S1_ID) = 0.0;
+            reactsource(i,j,k,S2_ID) = 1.0;
         }
 }
 #endif

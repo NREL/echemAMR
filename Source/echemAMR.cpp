@@ -45,8 +45,6 @@ echemAMR::echemAMR ()
     phi_new.resize(nlevs_max);
     phi_old.resize(nlevs_max);
 
-    amrex::Vector<int> bc_lo{BCType::foextrap, BCType::foextrap, BCType::foextrap};
-    amrex::Vector<int> bc_hi{BCType::foextrap, BCType::foextrap, BCType::foextrap};
 
     ParmParse pp("echemamr");
     pp.queryarr("lo_bc", bc_lo, 0, AMREX_SPACEDIM);
@@ -57,8 +55,7 @@ echemAMR::echemAMR ()
     int bc_lo[] = {FOEXTRAP, FOEXTRAP, FOEXTRAP};
     int bc_hi[] = {FOEXTRAP, FOEXTRAP, FOEXTRAP};
 */
-
-    bcs.resize(electrochem::nspecies);     // Setup 1-component
+    bcs.resize(NVAR);
     for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
     {
         // lo-side BCs
@@ -66,7 +63,7 @@ echemAMR::echemAMR ()
             bc_lo[idim] == BCType::foextrap ||  // first-order extrapolation
             bc_lo[idim] == BCType::ext_dir ) 
         {  
-            for(int sp=0;sp<electrochem::nspecies;sp++)
+            for(int sp=0;sp<NVAR;sp++)
             {
                 bcs[sp].setLo(idim, bc_lo[idim]);
             }
@@ -81,7 +78,7 @@ echemAMR::echemAMR ()
             bc_hi[idim] == BCType::foextrap ||  // first-order extrapolation
             bc_hi[idim] == BCType::ext_dir ) 
         {  
-            for(int sp=0;sp<electrochem::nspecies;sp++)
+            for(int sp=0;sp<NVAR;sp++)
             {
                 bcs[sp].setHi(idim, bc_hi[idim]);
             }
@@ -143,13 +140,13 @@ void echemAMR::ErrorEst (int lev, TagBoxArray& tags, Real time, int ngrow)
     // only do this during the first call to ErrorEst
     if (first)
     {
-	first = false;
+        first = false;
         // read in an array of "phierr", which is the tagging threshold
         // in this example, we tag values of "phi" which are greater than phierr
         // for that particular level
         // in subroutine state_error, you could use more elaborate tagging, such
         // as more advanced logical expressions, or gradients, etc.
-	ParmParse pp("echemamr");
+        ParmParse pp("echemamr");
         if (pp.contains("tagged_vars"))
         {
 	    int nvars = pp.countval("tagged_vars");
@@ -242,6 +239,7 @@ void echemAMR::ReadParameters ()
 	
 	pp.query("cfl", cfl);
         pp.query("do_reflux", do_reflux);
+        pp.query("potential_solve",potential_solve);
     }
 }
 

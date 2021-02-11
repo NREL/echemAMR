@@ -40,7 +40,17 @@ Vector<const MultiFab*> echemAMR::PlotFileMF () const
 // set plotfile variable names
 Vector<std::string> echemAMR::PlotFileVarNames () const
 {
-    return {electrochem::specnames};
+    Vector<std::string> allnames;
+
+    allnames.resize(NVAR);
+
+    for(int i=0;i<NUM_SPECIES;i++)
+    {
+        allnames[i]=electrochem::specnames[i];
+    }
+    allnames[NVAR-1]="Potential";
+
+    return {allnames};
 }
 
 // write plotfile to disk
@@ -51,8 +61,6 @@ void echemAMR::WritePlotFile () const
     const auto& varnames = PlotFileVarNames();
     
     amrex::Print() << "Writing plotfile " << plotfilename << "\n";
-
-    amrex::Print() << "varnames:" << varnames[0] << "\t" << varnames[1] <<"\n";
 
     amrex::WriteMultiLevelPlotfile(plotfilename, finest_level+1, mf, varnames,
 				   Geom(), t_new[0], istep, refRatio());

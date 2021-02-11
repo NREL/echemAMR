@@ -9,15 +9,17 @@
 #include <AMReX_FArrayBox.H>
 #include <AMReX_Box.H>
 
+#define NUM_SPECIES 2
+#define S1_ID 0
+#define S2_ID 1
+#define POT_ID 2
+#define NVAR NUM_SPECIES+1 
+
 namespace electrochem
 {
-    const int nspecies=2;
-    const int S1_ID=0;
-    const int S2_ID=1;
     extern amrex::Vector<std::string> specnames;
     void init();
     void close();
     int find_id(std::string specname);
-
 }
 #endif

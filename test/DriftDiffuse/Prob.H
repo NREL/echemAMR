@@ -31,8 +31,10 @@ void initdata(Box const& bx, Array4<Real> const& phi, GeometryData const& geomda
             AMREX_PRAGMA_SIMD
             for (int i = lo.x; i <= hi.x; ++i) 
             {
-                phi(i,j,k,electrochem::S1_ID) = 0.0;
-                phi(i,j,k,electrochem::S2_ID) = 0.0;
+                Real x = prob_lo[0] + (0.5+i) * dx[0];
+                phi(i,j,k,S1_ID)  = 0.0;
+                phi(i,j,k,S2_ID)  = 0.0;
+                phi(i,j,k,POT_ID) = 0.0;
             }
         }
     }
@@ -53,14 +55,16 @@ void externalbc(const amrex::Real x[AMREX_SPACEDIM],
     {
         dirc_val_S1=0.0;
         dirc_val_S2=0.0;
+        s_ext[POT_ID]=1.0;
     }
     else
     {
         dirc_val_S1=1.0;
         dirc_val_S2=0.0;
+        s_ext[POT_ID]=0.0;
     }
 
-    s_ext[electrochem::S1_ID]=2.0*dirc_val_S1-s_int[electrochem::S1_ID];
-    s_ext[electrochem::S2_ID]=2.0*dirc_val_S2-s_int[electrochem::S2_ID];
+    s_ext[S1_ID]=2.0*dirc_val_S1-s_int[S1_ID];
+    s_ext[S2_ID]=2.0*dirc_val_S2-s_int[S2_ID];
 }
 #endif

@@ -29,8 +29,10 @@ void echemAMR::MakeNewLevelFromCoarse (int lev, Real time, const BoxArray& ba,
     t_new[lev] = time;
     t_old[lev] = time - 1.e200;
 
-    if (lev > 0 && do_reflux) {
-	flux_reg[lev].reset(new FluxRegister(ba, dm, refRatio(lev-1), lev, ncomp));
+    if (lev > 0 && do_reflux) 
+    {
+	flux_reg[lev].reset(new 
+                FluxRegister(ba, dm, refRatio(lev-1), lev, ncomp));
     }
 
     FillCoarsePatch(lev, time, phi_new[lev], 0, ncomp);
@@ -56,7 +58,8 @@ void echemAMR::RemakeLevel (int lev, Real time, const BoxArray& ba,
     t_new[lev] = time;
     t_old[lev] = time - 1.e200;
 
-    if (lev > 0 && do_reflux) {
+    if (lev > 0 && do_reflux) 
+    {
 	flux_reg[lev].reset(new FluxRegister(ba, dm, refRatio(lev-1), lev, ncomp));
     }    
 }
@@ -77,7 +80,7 @@ void echemAMR::MakeNewLevelFromScratch (int lev, Real time, const BoxArray& ba,
 					  const DistributionMapping& dm)
 {
     const int nghost = 0;
-    int ncomp=electrochem::nspecies;
+    int ncomp = NVAR;
 
     phi_new[lev].define(ba, dm, ncomp, nghost);
     phi_old[lev].define(ba, dm, ncomp, nghost);
@@ -85,8 +88,10 @@ void echemAMR::MakeNewLevelFromScratch (int lev, Real time, const BoxArray& ba,
     t_new[lev] = time;
     t_old[lev] = time - 1.e200;
 
-    if (lev > 0 && do_reflux) {
-	flux_reg[lev].reset(new FluxRegister(ba, dm, refRatio(lev-1), lev, ncomp));
+    if (lev > 0 && do_reflux) 
+    {
+	flux_reg[lev].reset(new FluxRegister(ba, dm, 
+                    refRatio(lev-1), lev, ncomp));
     }
 
     Real cur_time = t_new[lev];

@@ -1,12 +1,18 @@
 #ifndef echemAMR_H_
 #define echemAMR_H_
 
+#include <AMReX_MLMG.H>
+
 #include <string>
 #include <limits>
 #include <memory>
 
 #ifdef _OPENMP
 #include <omp.h>
+#endif
+
+#ifdef AMREX_USE_HYPRE
+#include <AMReX_Hypre.H>
 #endif
 
 #include <AMReX_AmrCore.H>
@@ -70,6 +76,8 @@ public:
     void compute_dsdt (int lev, const int num_grow, MultiFab &Sborder, 
             MultiFab &dsdt, Real time, Real dt, bool reflux_this_stage);
 
+    void solve_potential(Real current_time);
+
     // compute dt from CFL considerations
     Real EstTimeStep (int lev, bool local=false);
 
@@ -127,6 +135,7 @@ private:
     // utility to skip to next line in Header
     static void GotoNextLine (std::istream& is);
 
+
     ////////////////
     // private data members
     amrex::Gpu::ManagedVector<Real> refine_phi;
@@ -168,6 +177,9 @@ private:
     // if >= 0 we restart from a checkpoint
     std::string restart_chkfile = "";
 
+    amrex::Vector<int> bc_lo{BCType::foextrap, BCType::foextrap, BCType::foextrap};
+    amrex::Vector<int> bc_hi{BCType::foextrap, BCType::foextrap, BCType::foextrap};
+
     // advective cfl number - dt = cfl*dx/umax
     amrex::Real cfl = 0.7;
 
@@ -177,6 +189,9 @@ private:
 
     // hyperbolic refluxing as part of multilevel synchronization
     int do_reflux = 1;
+
+    //poission solve required
+    int potential_solve=0;
 
     // plotfile prefix and frequency
     std::string plot_file {"plt"};

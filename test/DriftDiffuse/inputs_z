@@ -22,6 +22,7 @@ amr.regrid_int      = 2       # how often to regrid
 echemamr.cfl            = 0.8    
 
 echemamr.do_reflux = 1
+echemamr.potential_solve = 1
 
 #periodic 0
 #extdir 3

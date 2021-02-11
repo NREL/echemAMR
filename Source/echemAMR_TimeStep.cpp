@@ -62,10 +62,21 @@ Real echemAMR::EstTimeStep (int lev, bool local)
     
     const Real cur_time = t_new[lev];
     MultiFab& S_new = phi_new[lev];
+   
+    //need fillpatched data for velocity calculation 
+    constexpr int num_grow = 2; 
+    MultiFab Sborder(grids[lev], dmap[lev], S_new.nComp(), num_grow);
+    FillPatch(lev, cur_time, Sborder, 0, Sborder.nComp()); 
 
     MultiFab dcoeff(S_new.boxArray(), S_new.DistributionMap(), S_new.nComp(), 0);
     MultiFab vel(S_new.boxArray(), S_new.DistributionMap(), S_new.nComp(), 0);
+    
+    //set sane default values
+    dcoeff.setVal(1.0);
+    vel.setVal(1.0);
+
     int ncomp=S_new.nComp();
+
 #ifdef _OPENMP
 #pragma omp parallel if (Gpu::notInLaunchRegion())
 #endif
@@ -73,46 +84,78 @@ Real echemAMR::EstTimeStep (int lev, bool local)
         for (MFIter mfi(S_new, TilingIfNotGPU()); mfi.isValid(); ++mfi) 
         {
             const Box& bx = mfi.tilebox();
-            Array4<Real> statearray = S_new.array(mfi);
+            Box bx_x=convert(bx, {1,0,0});
+            Box bx_y=convert(bx, {0,1,0});
+            Box bx_z=convert(bx, {0,0,1});
+            
+            Array4<Real> statearray = Sborder.array(mfi);
             Array4<Real> dcoeffarray = dcoeff.array(mfi);
+            Array4<Real> velarray  = vel.array(mfi);
 
-            FArrayBox velx_fab(bx,ncomp);
-            FArrayBox vely_fab(bx,ncomp);
-            FArrayBox velz_fab(bx,ncomp);
+            FArrayBox velx_fab(bx_x,ncomp);
+            FArrayBox vely_fab(bx_y,ncomp);
+            FArrayBox velz_fab(bx_z,ncomp);
+            
+            Elixir velx_fab_eli=velx_fab.elixir();
+            Elixir vely_fab_eli=vely_fab.elixir();
+            Elixir velz_fab_eli=velz_fab.elixir();
+            
+            velx_fab.setVal<RunOn::Device>(0.0);
+            vely_fab.setVal<RunOn::Device>(0.0);
+            velz_fab.setVal<RunOn::Device>(0.0);
+            
             Array4<Real> velxarray = velx_fab.array();
             Array4<Real> velyarray = vely_fab.array();
             Array4<Real> velzarray = velz_fab.array();
-            Array4<Real> velarray  = vel.array(mfi);
 
             amrex::ParallelFor(bx,
                     [=] AMREX_GPU_DEVICE (int i, int j, int k)
             {
-                electrochem_transport::compute_dcoeff(i, j, k, statearray, dcoeffarray, 
-                        prob_lo, prob_hi,
+                electrochem_transport::compute_dcoeff(i, j, k, statearray, 
+                        dcoeffarray, prob_lo, prob_hi,
                         dx, cur_time);
+            });
+
+            amrex::ParallelFor(bx_x,
+                  [=] AMREX_GPU_DEVICE (int i, int j, int k)
+            {
+                electrochem_transport::compute_velx(i, j, k, statearray,
+                        velxarray,prob_lo, prob_hi, dx, cur_time);
+            });
+            
+            amrex::ParallelFor(bx_y,
+                  [=] AMREX_GPU_DEVICE (int i, int j, int k)
+            {
+                electrochem_transport::compute_vely(i, j, k, statearray,
+                        velyarray,prob_lo, prob_hi, dx, cur_time);
+            });
+
+            amrex::ParallelFor(bx_z,
+                  [=] AMREX_GPU_DEVICE (int i, int j, int k)
+            {
+                electrochem_transport::compute_velz(i, j, k, statearray,
+                        velzarray,prob_lo, prob_hi, dx, cur_time);
             });
 
             amrex::ParallelFor(bx,
                   [=] AMREX_GPU_DEVICE (int i, int j, int k)
             {
-                electrochem_transport::compute_vel(i, j, k, statearray, velxarray, velyarray, velzarray,
-                        prob_lo, prob_hi, dx, cur_time);
-
                 for(int comp=0;comp<ncomp;comp++)
                 {
-                    velarray(i,j,k,comp)=sqrt(velxarray(i,j,k,comp)*velxarray(i,j,k,comp) +
-                            velyarray(i,j,k,comp)*velyarray(i,j,k,comp) +
-                            velzarray(i,j,k,comp)*velzarray(i,j,k,comp));
+                    Real vx=0.5*(velxarray(i,j,k,comp)+velxarray(i+1,j,k,comp));
+                    Real vy=0.5*(velyarray(i,j,k,comp)+velyarray(i,j+1,k,comp));
+                    Real vz=0.5*(velzarray(i,j,k,comp)+velzarray(i,j,k+1,comp));
 
+                    velarray(i,j,k,comp)=sqrt(vx*vx + vy*vy + vz*vz);
                 }
             });
-
         }
     }
 
 
     Real maxdcoeff=dcoeff.norm0(0,0,true);
-    for(int comp=0;comp<ncomp;comp++)
+    //only loop over species
+    for(int comp=0;comp<NUM_SPECIES;comp++)
     {
         Real diffcomp=dcoeff.norm0(comp,0,true);
         if(diffcomp > maxdcoeff)
@@ -126,7 +169,7 @@ Real echemAMR::EstTimeStep (int lev, bool local)
     }
     
     Real maxvel=vel.norm0(0,0,true);
-    for(int comp=0;comp<ncomp;comp++)
+    for(int comp=0;comp<NUM_SPECIES;comp++)
     {
         Real velcomp=vel.norm0(comp,0,true);
         if(velcomp > maxvel)
