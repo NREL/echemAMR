@@ -9,11 +9,19 @@
 #include <AMReX_FArrayBox.H>
 #include <AMReX_Box.H>
 
+#define NUM_SPECIES 6
+#define CO_ID 0
+#define PO_ID 1
+#define A_ID 2
+#define C_ID 3
+#define E_ID 4
+#define S_ID 5
+#define POT_ID 6
+#define NVAR NUM_SPECIES+1
+
 namespace electrochem
 {
-    const int nspecies=6;
 
-    enum species {CO_ID = 0, PO_ID, A_ID, C_ID, E_ID, S_ID, last_ID = S_ID};
     enum component {anode = 0, cathode, electrolyte, separator, last_comp = separator};
 
     const amrex::Real K_a = 1.0e-3; // conductivity anode
