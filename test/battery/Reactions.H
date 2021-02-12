@@ -27,14 +27,14 @@ namespace electrochem_reactions
             // FIXME: add Neummann bc's to potential and concentration source terms
             if(electrochem::is_electrode(i,j,k,phi)){
 
-                reactsource(i,j,k,electrochem::PO_ID) = 0.0;
-                reactsource(i,j,k,electrochem::CO_ID) = 0.0;
+                reactsource(i,j,k,PO_ID) = 0.0;
+                reactsource(i,j,k,CO_ID) = 0.0;
 
             } else {
 
                 constexpr Real eps = 1.0e-12;
                 // concentration
-                const Real con = phi(i,j,k,electrochem::CO_ID);
+                const Real con = phi(i,j,k,CO_ID);
 
                 // FIXME: put the actual equation for KeC here
                 const Real KeC = amrex::max(-0.00000025*con*(con-4000.0), eps);
@@ -47,20 +47,22 @@ namespace electrochem_reactions
 
                 // FIXME: should probably average KeC and tplus over faces but for now use value at center
                 // FIXME: check sign on this
-                reactsource(i,j,k,electrochem::CO_ID) = tplus / electrochem::Faraday_const * KeC
-                                                        * ( (phi(i-1,j,k,electrochem::PO_ID) - 2.0*phi(i,j,k,electrochem::PO_ID) + phi(i+1,j,k,electrochem::PO_ID))/dx[0]/dx[0]
-                                                           +(phi(i,j-1,k,electrochem::PO_ID) - 2.0*phi(i,j,k,electrochem::PO_ID) + phi(i,j+1,k,electrochem::PO_ID))/dx[1]/dx[1]
-                                                           +(phi(i,j,k-1,electrochem::PO_ID) - 2.0*phi(i,j,k,electrochem::PO_ID) + phi(i,j,k+1,electrochem::PO_ID))/dx[2]/dx[2]);
+                reactsource(i,j,k,CO_ID) = tplus / electrochem::Faraday_const * KeC
+                                                        * ( (phi(i-1,j,k,PO_ID) - 2.0*phi(i,j,k,PO_ID) + phi(i+1,j,k,PO_ID))/dx[0]/dx[0]
+                                                           +(phi(i,j-1,k,PO_ID) - 2.0*phi(i,j,k,PO_ID) + phi(i,j+1,k,PO_ID))/dx[1]/dx[1]
+                                                           +(phi(i,j,k-1,PO_ID) - 2.0*phi(i,j,k,PO_ID) + phi(i,j,k+1,PO_ID))/dx[2]/dx[2]);
 
                 // FIXME: should probably average KD over faces but for now use use value at center
                 // FIXME: check sign on this
                 // FIXME: this should be KDstar
-                reactsource(i,j,k,electrochem::PO_ID) = KD * ( (phi(i-1,j,k,electrochem::CO_ID) - 2.0*phi(i,j,k,electrochem::CO_ID) + phi(i+1,j,k,electrochem::CO_ID))/dx[0]/dx[0]
-                                                              +(phi(i,j-1,k,electrochem::CO_ID) - 2.0*phi(i,j,k,electrochem::CO_ID) + phi(i,j+1,k,electrochem::CO_ID))/dx[1]/dx[1]
-                                                              +(phi(i,j,k-1,electrochem::CO_ID) - 2.0*phi(i,j,k,electrochem::CO_ID) + phi(i,j,k+1,electrochem::CO_ID))/dx[2]/dx[2]);
+                reactsource(i,j,k,PO_ID) = KD * ( (phi(i-1,j,k,CO_ID) - 2.0*phi(i,j,k,CO_ID) + phi(i+1,j,k,CO_ID))/dx[0]/dx[0]
+                                                              +(phi(i,j-1,k,CO_ID) - 2.0*phi(i,j,k,CO_ID) + phi(i,j+1,k,CO_ID))/dx[1]/dx[1]
+                                                              +(phi(i,j,k-1,CO_ID) - 2.0*phi(i,j,k,CO_ID) + phi(i,j,k+1,CO_ID))/dx[2]/dx[2]);
 
             }
 
         }
+
+
 }
 #endif

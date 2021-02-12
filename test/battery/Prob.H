@@ -40,9 +40,9 @@ void initdata(Box const& bx, Array4<Real> const& phi, GeometryData const& geomda
 
                 // initial conditions
                 // Concentration
-                phi(i,j,k,electrochem::CO_ID) = 3000.0 + 10.0*std::sin(3.14*x);
+                phi(i,j,k,CO_ID) = 3000.0 + 10.0*std::sin(3.14*x);
                 // Potential
-                phi(i,j,k,electrochem::PO_ID) = -3.0 + 0.1*x;
+                phi(i,j,k,PO_ID) = -3.0 + 0.1*x;
 
 
                 // Separator
@@ -58,13 +58,13 @@ void initdata(Box const& bx, Array4<Real> const& phi, GeometryData const& geomda
                 constexpr amrex::Real c_x = 0.8;
 
                 if(x > s_xlo && x < s_xhi) {
-                    phi(i,j,k,electrochem::S_ID) = 1.0;
+                    phi(i,j,k,S_ID) = 1.0;
                 } else if(x < a_x && y < a_yhi && y > a_ylo) {
-                    phi(i,j,k,electrochem::A_ID) = 1.0;
+                    phi(i,j,k,A_ID) = 1.0;
                 } else if(x > c_x && y < c_yhi && y > c_ylo) {
-                    phi(i,j,k,electrochem::C_ID) = 1.0;
+                    phi(i,j,k,C_ID) = 1.0;
                 } else {
-                    phi(i,j,k,electrochem::E_ID) = 1.0;
+                    phi(i,j,k,E_ID) = 1.0;
                 }
 
                 // this has a check in it to make sure we don't have
@@ -88,13 +88,13 @@ void externalbc(const amrex::Real x[AMREX_SPACEDIM],
 {
     if(sgn==1) //left lo side
     {
-        s_ext[electrochem::CO_ID]=0.0;
-        s_ext[electrochem::PO_ID]=1.0;
+        s_ext[CO_ID]=0.0;
+        s_ext[PO_ID]=1.0;
     }
     else
     {
-        s_ext[electrochem::CO_ID]=0.0;
-        s_ext[electrochem::PO_ID]=0.0;
+        s_ext[CO_ID]=0.0;
+        s_ext[PO_ID]=0.0;
     }
 }
 

@@ -28,20 +28,20 @@ namespace electrochem_transport
 
             if(comp == electrochem::cathode){
 
-                dcoeff(i,j,k,electrochem::PO_ID) = electrochem::K_c;
-                dcoeff(i,j,k,electrochem::CO_ID) = electrochem::D_c;
+                dcoeff(i,j,k,PO_ID) = electrochem::K_c;
+                dcoeff(i,j,k,CO_ID) = electrochem::D_c;
 
             } else if (comp == electrochem::anode){
 
-                dcoeff(i,j,k,electrochem::PO_ID) = electrochem::K_a;
-                dcoeff(i,j,k,electrochem::CO_ID) = electrochem::D_a;
+                dcoeff(i,j,k,PO_ID) = electrochem::K_a;
+                dcoeff(i,j,k,CO_ID) = electrochem::D_a;
 
             } else {
 
                 /* electrolyte or separator */
                 constexpr Real eps = 1.0e-12;
                 // concentration
-                const Real con = phi(i,j,k,electrochem::CO_ID);
+                const Real con = phi(i,j,k,CO_ID);
 
                 // FIXME: put the actual equation for KeC here
                 const Real KeC = amrex::max(-0.00000025*con*(con-4000.0), eps);
@@ -52,32 +52,83 @@ namespace electrochem_transport
                 const Real RTF = electrochem::R_gas_const*electrochem::T0/electrochem::Faraday_const;
                 const Real KD = amrex::min((1.0-tplus)*(1.0+AC)*2.0*KeC*RTF, -eps);
 
-                dcoeff(i,j,k,electrochem::CO_ID) = DeC - tplus*KD/electrochem::Faraday_const;
-                dcoeff(i,j,k,electrochem::PO_ID) = KeC;
+                dcoeff(i,j,k,CO_ID) = DeC - tplus*KD/electrochem::Faraday_const;
+                dcoeff(i,j,k,PO_ID) = KeC;
 
             }
 
         }
-        
+
     AMREX_GPU_DEVICE AMREX_INLINE
-        void compute_vel(int i, int j, int k,
-                Array4<Real> const& phi,
-                Array4<Real> const& velx,
-                Array4<Real> const& vely,
-                Array4<Real> const& velz,
-                GpuArray<Real, AMREX_SPACEDIM> prob_lo,
-                GpuArray<Real, AMREX_SPACEDIM> prob_hi,
-                GpuArray<Real, AMREX_SPACEDIM> dx,
-                const Real time)
-        {
-
-            for(int n = 0; n < phi.nComp(); ++n) {
-                velx(i,j,k,n) = 0.0;
-                vely(i,j,k,n) = 0.0;
-                velz(i,j,k,n) = 0.0;
-            }
-
+    void compute_potential_dcoeff(int i, int j, int k,
+            Array4<Real> const& phi,
+            Array4<Real> const& dcoeff,
+            GpuArray<Real, AMREX_SPACEDIM> prob_lo,
+            GpuArray<Real, AMREX_SPACEDIM> prob_hi,
+            GpuArray<Real, AMREX_SPACEDIM> dx,
+            const Real time)
+    {
+        for(int n=0; n < phi.nComp(); ++n) {
+            dcoeff(i,j,k,n) = 0.0;
         }
+    }
+
+    AMREX_GPU_DEVICE AMREX_INLINE
+    void compute_potential_source(int i, int j, int k,
+            Array4<Real> const& phi,
+            Array4<Real> const& potsource,
+            GpuArray<Real, AMREX_SPACEDIM> prob_lo,
+            GpuArray<Real, AMREX_SPACEDIM> prob_hi,
+            GpuArray<Real, AMREX_SPACEDIM> dx,
+            const Real time)
+    {
+        for(int n=0;n<potsource.nComp();++n) {
+            potsource(i,j,k,n) = 0.0;
+        }
+    }
+
+    AMREX_GPU_DEVICE AMREX_INLINE
+    void compute_velx(int i, int j, int k,
+            Array4<Real> const& phi,
+            Array4<Real> const& velx,
+            GpuArray<Real, AMREX_SPACEDIM> prob_lo,
+            GpuArray<Real, AMREX_SPACEDIM> prob_hi,
+            GpuArray<Real, AMREX_SPACEDIM> dx,
+            const Real time)
+    {
+        for(int n = 0; n < phi.nComp(); ++n) {
+            velx(i,j,k,n) = 0.0;
+        }
+    }
+
+    AMREX_GPU_DEVICE AMREX_INLINE
+    void compute_vely(int i, int j, int k,
+            Array4<Real> const& phi,
+            Array4<Real> const& vely,
+            GpuArray<Real, AMREX_SPACEDIM> prob_lo,
+            GpuArray<Real, AMREX_SPACEDIM> prob_hi,
+            GpuArray<Real, AMREX_SPACEDIM> dx,
+            const Real time)
+    {
+        for(int n = 0; n < phi.nComp(); ++n) {
+            vely(i,j,k,n) = 0.0;
+        }
+    }
+
+    AMREX_GPU_DEVICE AMREX_INLINE
+    void compute_velz(int i, int j, int k,
+            Array4<Real> const& phi,
+            Array4<Real> const& velz,
+            GpuArray<Real, AMREX_SPACEDIM> prob_lo,
+            GpuArray<Real, AMREX_SPACEDIM> prob_hi,
+            GpuArray<Real, AMREX_SPACEDIM> dx,
+            const Real time)
+    {
+        for(int n = 0; n < phi.nComp(); ++n) {
+            velz(i,j,k,n) = 0.0;
+        }
+    }
+
 }
 #endif
 
