@@ -14,14 +14,29 @@
 
 #include <echemAMR.H>
 #include<Chemistry.H>
+#include<ChemistryProbParm.H>
 
 using namespace amrex;
+
+ProbParm* echemAMR::h_prob_parm = nullptr;
+ProbParm* echemAMR::d_prob_parm = nullptr;
 
 // constructor - reads in parameters from inputs file
 //             - sizes multilevel arrays and data structures
 //             - initializes BCRec boundary condition object
 echemAMR::echemAMR ()
 {
+
+    h_prob_parm = new ProbParm{};
+    d_prob_parm = (ProbParm*)The_Arena()->alloc(sizeof(ProbParm));
+
+#ifdef AMREX_USE_GPU
+    amrex::Gpu::htod_memcpy(echemAMR::d_prob_parm, echemAMR::h_prob_parm, sizeof(ProbParm));
+#else
+    std::memcpy(echemAMR::d_prob_parm, echemAMR::h_prob_parm, sizeof(ProbParm));
+#endif
+
+
     ReadParameters();
 
     // Geometry on all levels has been defined already.
@@ -100,7 +115,8 @@ echemAMR::echemAMR ()
 
 echemAMR::~echemAMR ()
 {
-
+    delete h_prob_parm;
+    The_Arena()->free(d_prob_parm);
 }
 // initializes multilevel data
 void echemAMR::InitData ()

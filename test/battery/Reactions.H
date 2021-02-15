@@ -5,6 +5,7 @@
 #include <AMReX_FArrayBox.H>
 #include <AMReX_REAL.H>
 #include <Chemistry.H>
+#include <ChemistryProbParm.H>
 
 using namespace amrex;
 namespace electrochem_reactions
@@ -16,7 +17,8 @@ namespace electrochem_reactions
                 GpuArray<Real, AMREX_SPACEDIM> prob_lo,
                 GpuArray<Real, AMREX_SPACEDIM> prob_hi,
                 GpuArray<Real, AMREX_SPACEDIM> dx,
-                const Real time)
+                const Real time,
+                ProbParm const& prob_parm)
         {
 
 
@@ -32,22 +34,16 @@ namespace electrochem_reactions
 
             } else {
 
-                constexpr Real eps = 1.0e-12;
                 // concentration
                 const Real con = phi(i,j,k,CO_ID);
 
-                // FIXME: put the actual equation for KeC here
-                const Real KeC = amrex::max(-0.00000025*con*(con-4000.0), eps);
-
-                // FIXME: put the actual equation for tplus, KD here
-                const Real tplus = amrex::max(0.4 + 0.1/4000.0*con, eps);
-                const Real AC = amrex::max(1.0 + 25.0/4000.0*con, eps);
-                const Real RTF = electrochem::R_gas_const*electrochem::T0/electrochem::Faraday_const;
-                const Real KD = amrex::min((1.0-tplus)*(1.0+AC)*2.0*KeC*RTF, -eps);
+                const Real KeC = electrochem::KeC(con);
+                const Real tplus = electrochem::tplus(con);
+                const Real KD = electrochem::KD(con, prob_parm);
 
                 // FIXME: should probably average KeC and tplus over faces but for now use value at center
                 // FIXME: check sign on this
-                reactsource(i,j,k,CO_ID) = tplus / electrochem::Faraday_const * KeC
+                reactsource(i,j,k,CO_ID) = tplus / prob_parm.Faraday_const * KeC
                                                         * ( (phi(i-1,j,k,PO_ID) - 2.0*phi(i,j,k,PO_ID) + phi(i+1,j,k,PO_ID))/dx[0]/dx[0]
                                                            +(phi(i,j-1,k,PO_ID) - 2.0*phi(i,j,k,PO_ID) + phi(i,j+1,k,PO_ID))/dx[1]/dx[1]
                                                            +(phi(i,j,k-1,PO_ID) - 2.0*phi(i,j,k,PO_ID) + phi(i,j,k+1,PO_ID))/dx[2]/dx[2]);
@@ -56,8 +52,8 @@ namespace electrochem_reactions
                 // FIXME: check sign on this
                 // FIXME: this should be KDstar
                 reactsource(i,j,k,PO_ID) = KD * ( (phi(i-1,j,k,CO_ID) - 2.0*phi(i,j,k,CO_ID) + phi(i+1,j,k,CO_ID))/dx[0]/dx[0]
-                                                              +(phi(i,j-1,k,CO_ID) - 2.0*phi(i,j,k,CO_ID) + phi(i,j+1,k,CO_ID))/dx[1]/dx[1]
-                                                              +(phi(i,j,k-1,CO_ID) - 2.0*phi(i,j,k,CO_ID) + phi(i,j,k+1,CO_ID))/dx[2]/dx[2]);
+                                                 +(phi(i,j-1,k,CO_ID) - 2.0*phi(i,j,k,CO_ID) + phi(i,j+1,k,CO_ID))/dx[1]/dx[1]
+                                                 +(phi(i,j,k-1,CO_ID) - 2.0*phi(i,j,k,CO_ID) + phi(i,j,k+1,CO_ID))/dx[2]/dx[2]);
 
             }
 

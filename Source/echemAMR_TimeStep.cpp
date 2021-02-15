@@ -113,7 +113,7 @@ Real echemAMR::EstTimeStep (int lev, bool local)
             {
                 electrochem_transport::compute_dcoeff(i, j, k, statearray, 
                         dcoeffarray, prob_lo, prob_hi,
-                        dx, cur_time);
+                        dx, cur_time, *d_prob_parm);
             });
 
             amrex::ParallelFor(bx_x,

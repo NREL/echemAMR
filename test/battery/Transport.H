@@ -16,9 +16,9 @@ namespace electrochem_transport
                 GpuArray<Real, AMREX_SPACEDIM> prob_lo,
                 GpuArray<Real, AMREX_SPACEDIM> prob_hi,
                 GpuArray<Real, AMREX_SPACEDIM> dx,
-                const Real time)
+                const Real time,
+                ProbParm const& prob_parm)
         {
-
 
             for(int n=0; n < phi.nComp(); ++n) {
                 dcoeff(i,j,k,n) = 0.0;
@@ -28,32 +28,27 @@ namespace electrochem_transport
 
             if(comp == electrochem::cathode){
 
-                dcoeff(i,j,k,PO_ID) = electrochem::K_c;
-                dcoeff(i,j,k,CO_ID) = electrochem::D_c;
+                dcoeff(i,j,k,PO_ID) = prob_parm.K_c;
+                dcoeff(i,j,k,CO_ID) = prob_parm.D_c;
 
             } else if (comp == electrochem::anode){
 
-                dcoeff(i,j,k,PO_ID) = electrochem::K_a;
-                dcoeff(i,j,k,CO_ID) = electrochem::D_a;
+                dcoeff(i,j,k,PO_ID) = prob_parm.K_a;
+                dcoeff(i,j,k,CO_ID) = prob_parm.D_a;
 
             } else {
 
                 /* electrolyte or separator */
-                constexpr Real eps = 1.0e-12;
+
                 // concentration
                 const Real con = phi(i,j,k,CO_ID);
 
-                // FIXME: put the actual equation for KeC here
-                const Real KeC = amrex::max(-0.00000025*con*(con-4000.0), eps);
-                // FIXME: put the actual equation for DeC, tplus, KD here
-                const Real DeC = amrex::max(3.5e-10 - 3.5e-10/4000.0*con, eps);
-                const Real tplus = amrex::max(0.4 + 0.1/4000.0*con, eps);
-                const Real AC = amrex::max(1.0 + 25.0/4000.0*con, eps);
-                const Real RTF = electrochem::R_gas_const*electrochem::T0/electrochem::Faraday_const;
-                const Real KD = amrex::min((1.0-tplus)*(1.0+AC)*2.0*KeC*RTF, -eps);
+                const Real DeC = electrochem::DeC(con);
+                const Real tplus = electrochem::tplus(con);
+                const Real KD = electrochem::KD(con, prob_parm);
 
-                dcoeff(i,j,k,CO_ID) = DeC - tplus*KD/electrochem::Faraday_const;
-                dcoeff(i,j,k,PO_ID) = KeC;
+                dcoeff(i,j,k,CO_ID) = DeC - tplus*KD/prob_parm.Faraday_const;
+                dcoeff(i,j,k,PO_ID) = electrochem::KeC(con);
 
             }
 
@@ -66,11 +61,31 @@ namespace electrochem_transport
             GpuArray<Real, AMREX_SPACEDIM> prob_lo,
             GpuArray<Real, AMREX_SPACEDIM> prob_hi,
             GpuArray<Real, AMREX_SPACEDIM> dx,
-            const Real time)
+            const Real time,
+            ProbParm const& prob_parm)
     {
         for(int n=0; n < phi.nComp(); ++n) {
             dcoeff(i,j,k,n) = 0.0;
         }
+
+        const int comp = electrochem::level_set_to_component(i,j,k,phi);
+
+        if(comp == electrochem::cathode){
+
+            dcoeff(i,j,k,POT_ID) = prob_parm.K_c;
+
+        } else if (comp == electrochem::anode){
+
+            dcoeff(i,j,k,POT_ID) = prob_parm.K_a;
+
+        } else {
+
+            /* electrolyte or separator */
+            dcoeff(i,j,k,POT_ID) = electrochem::KeC(phi(i,j,k,CO_ID));
+
+        }
+
+
     }
 
     AMREX_GPU_DEVICE AMREX_INLINE
@@ -80,11 +95,31 @@ namespace electrochem_transport
             GpuArray<Real, AMREX_SPACEDIM> prob_lo,
             GpuArray<Real, AMREX_SPACEDIM> prob_hi,
             GpuArray<Real, AMREX_SPACEDIM> dx,
-            const Real time)
+            const Real time,
+            ProbParm& prob_parm)
     {
-        for(int n=0;n<potsource.nComp();++n) {
-            potsource(i,j,k,n) = 0.0;
+
+        // FIXME: add Neummann bc's to potential and concentration source terms
+        if(electrochem::is_electrode(i,j,k,phi)){
+
+            potsource(i,j,k,POT_ID) = 0.0;
+
+        } else {
+
+            // concentration
+            const Real con = phi(i,j,k,CO_ID);
+            const Real KD = electrochem::KD(con, prob_parm);
+
+            // FIXME: should probably average KD over faces but for now use use value at center
+            // FIXME: check sign on this
+            // FIXME: this should be KDstar
+            // FIXME: need to account for walls
+            potsource(i,j,k,POT_ID) = KD * ( (phi(i-1,j,k,CO_ID) - 2.0*phi(i,j,k,CO_ID) + phi(i+1,j,k,CO_ID))/dx[0]/dx[0]
+                                            +(phi(i,j-1,k,CO_ID) - 2.0*phi(i,j,k,CO_ID) + phi(i,j+1,k,CO_ID))/dx[1]/dx[1]
+                                            +(phi(i,j,k-1,CO_ID) - 2.0*phi(i,j,k,CO_ID) + phi(i,j,k+1,CO_ID))/dx[2]/dx[2]);
         }
+
+
     }
 
     AMREX_GPU_DEVICE AMREX_INLINE

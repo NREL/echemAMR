@@ -8,6 +8,7 @@
 #include <AMReX_Geometry.H>
 #include <AMReX_FArrayBox.H>
 #include <AMReX_Box.H>
+#include <ChemistryProbParm.H>
 
 #define NUM_SPECIES 6
 #define CO_ID 0
@@ -19,18 +20,12 @@
 #define POT_ID 6
 #define NVAR NUM_SPECIES+1
 
+#define myeps 1.0e-12
+
 namespace electrochem
 {
 
     enum component {anode = 0, cathode, electrolyte, separator, last_comp = separator};
-
-    const amrex::Real K_a = 1.0e-3; // conductivity anode
-    const amrex::Real K_c = 2.0e-3; // conductivity cathode
-    const amrex::Real D_a = 3.0e-3; // diffusivity anode
-    const amrex::Real D_c = 4.0e-3; // diffusivity cathode
-    const amrex::Real Faraday_const = 96487.0;
-    const amrex::Real R_gas_const = 8.31446261815324;
-    const amrex::Real T0 = 300.0; // temperature Kelvin
 
     extern amrex::Vector<std::string> specnames;
     void init();
@@ -73,6 +68,47 @@ namespace electrochem
          else
              return false;
      }
+
+
+    AMREX_GPU_DEVICE AMREX_FORCE_INLINE
+    amrex::Real KeC(amrex::Real con)
+    {
+        return amrex::max(-0.00000025*con*(con-4000.0), myeps);
+    }
+
+    AMREX_GPU_DEVICE AMREX_FORCE_INLINE
+    amrex::Real DeC(amrex::Real con)
+    {
+        return amrex::max(3.5e-10 - 3.5e-10/4000.0*con, myeps);
+    }
+
+    AMREX_GPU_DEVICE AMREX_FORCE_INLINE
+    amrex::Real tplus(amrex::Real con)
+    {
+        return amrex::max(0.4 + 0.1/4000.0*con, myeps);
+    }
+
+    AMREX_GPU_DEVICE AMREX_FORCE_INLINE
+    amrex::Real AC(amrex::Real con)
+    {
+        return amrex::max(1.0 + 25.0/4000.0*con, myeps);
+    }
+
+    AMREX_GPU_DEVICE AMREX_FORCE_INLINE
+    amrex::Real KD(amrex::Real con, const ProbParm& prob_parm)
+    {
+        const amrex::Real RTF = prob_parm.R_gas_const*prob_parm.T0/prob_parm.Faraday_const;
+        return amrex::min((1.0-tplus(con))*(1.0+AC(con))*2.0*KeC(con)*RTF, -myeps);
+    }
+
+    AMREX_GPU_DEVICE AMREX_FORCE_INLINE
+    amrex::Real KDstar(amrex::Real con, const ProbParm& prob_parm)
+    {
+        return 0.0;
+    }
+
+
+
 
 }
 #endif

@@ -16,7 +16,8 @@ namespace electrochem_transport
                 GpuArray<Real, AMREX_SPACEDIM> prob_lo,
                 GpuArray<Real, AMREX_SPACEDIM> prob_hi,
                 GpuArray<Real, AMREX_SPACEDIM> dx,
-                const Real time)
+                const Real time,
+                ProbParm const& prob_parm)
         {
             dcoeff(i,j,k,S1_ID)   = 0.1;
             dcoeff(i,j,k,S2_ID)   = 1.0;
@@ -127,7 +128,8 @@ namespace electrochem_transport
                 GpuArray<Real, AMREX_SPACEDIM> prob_lo,
                 GpuArray<Real, AMREX_SPACEDIM> prob_hi,
                 GpuArray<Real, AMREX_SPACEDIM> dx,
-                const Real time)
+                const Real time,
+                ProbParm const& prob_parm)
         {
             dcoeff(i,j,k)=1.0;
         }
@@ -138,7 +140,8 @@ namespace electrochem_transport
                 GpuArray<Real, AMREX_SPACEDIM> prob_lo,
                 GpuArray<Real, AMREX_SPACEDIM> prob_hi,
                 GpuArray<Real, AMREX_SPACEDIM> dx,
-                const Real time)
+                const Real time,
+                ProbParm const& prob_parm)
         {
             source(i,j,k)=0.0;
         }

@@ -18,6 +18,8 @@
 #include <AMReX_AmrCore.H>
 #include <AMReX_FluxRegister.H>
 #include <AMReX_BCRec.H>
+#include <ChemistryProbParm.H>
+
 #if defined(BL_USE_SENSEI_INSITU)
 namespace amrex {
 class AmrMeshInSituBridge;
@@ -204,6 +206,10 @@ private:
 #if defined(BL_USE_SENSEI_INSITU)
     amrex::AmrMeshInSituBridge *insitu_bridge;
 #endif
+
+public:
+    static ProbParm* h_prob_parm;
+    static ProbParm* d_prob_parm;
 };
 
 #endif

@@ -15,7 +15,11 @@
 #include<Chemistry.H>
 #include<Transport.H>
 #include<Reactions.H>
+#include<ChemistryProbParm.H>
 #include <AMReX_MLABecLaplacian.H>
+
+//ProbParm* echemAMR::h_prob_parm = nullptr;
+//ProbParm* echemAMR::d_prob_parm = nullptr;
 
 // advance solution to final time
 void echemAMR::Evolve ()
@@ -198,13 +202,13 @@ void echemAMR::solve_potential(Real current_time)
             [=] AMREX_GPU_DEVICE (int i, int j, int k)
             {
                 electrochem_transport::compute_potential_dcoeff
-                (i, j, k, phi_arr, bcoeff_arr, prob_lo, prob_hi, dx, time);
+                (i, j, k, phi_arr, bcoeff_arr, prob_lo, prob_hi, dx, time, *d_prob_parm);
             });
             amrex::ParallelFor(bx,
             [=] AMREX_GPU_DEVICE (int i, int j, int k)
             {
                 electrochem_transport::compute_potential_source
-                (i, j, k, phi_arr, rhs_arr, prob_lo, prob_hi, dx, time);
+                (i, j, k, phi_arr, rhs_arr, prob_lo, prob_hi, dx, time, *d_prob_parm);
             });
         }
     }
@@ -465,14 +469,14 @@ void echemAMR::compute_dsdt (int lev, const int num_grow,
             [=] AMREX_GPU_DEVICE (int i, int j, int k)
             {
                 electrochem_transport::compute_dcoeff(i, j, k, sborder_arr, 
-                        dcoeff_arr, prob_lo, prob_hi, dx, time);
+                        dcoeff_arr, prob_lo, prob_hi, dx, time, *d_prob_parm);
             });
-            
+
             amrex::ParallelFor(bx,
             [=] AMREX_GPU_DEVICE (int i, int j, int k)
             {
                 electrochem_reactions::compute_react_source(i, j, k, sborder_arr, reactsource_arr, 
-                        prob_lo, prob_hi, dx, time);
+                        prob_lo, prob_hi, dx, time, *d_prob_parm);
             });
 
             amrex::ParallelFor(bx_x,ncomp,
