@@ -44,7 +44,7 @@ namespace electrochem_transport
                 const Real con = phi(i,j,k,CO_ID);
 
                 const Real DeC = electrochem::DeC(con);
-                const Real tplus = electrochem::tplus(con);
+                const Real tplus = electrochem::t_plus(con);
                 const Real KD = electrochem::KD(con, prob_parm);
 
                 dcoeff(i,j,k,CO_ID) = DeC - tplus*KD/prob_parm.Faraday_const;

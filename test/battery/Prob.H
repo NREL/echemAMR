@@ -16,9 +16,14 @@ void initdata(Box const& bx, Array4<Real> const& phi, GeometryData const& geomda
     const auto hi = ubound(bx);    
 
     const Real* AMREX_RESTRICT prob_lo = geomdata.ProbLo();
+    const Real* AMREX_RESTRICT prob_hi = geomdata.ProbHi();
     const Real* AMREX_RESTRICT dx      = geomdata.CellSize();
 
     const int ncomp = phi.nComp();
+
+    const Real Lx = prob_hi[0] - prob_lo[0];
+    const Real Ly = prob_hi[1] - prob_lo[1];
+    const Real Lz = prob_hi[2] - prob_lo[2];
 
 #ifdef _OPENMP
 #pragma omp parallel for collapse(2) if (GPU::notInLaunchRegion)
@@ -38,33 +43,57 @@ void initdata(Box const& bx, Array4<Real> const& phi, GeometryData const& geomda
                     phi(i,j,k,n) = -1.0;
                 }
 
-                // initial conditions
-                // Concentration
-                phi(i,j,k,CO_ID) = 3000.0 + 10.0*std::sin(3.14*x);
-                // Potential
-                phi(i,j,k,PO_ID) = -3.0 + 0.1*x;
-
-
+                // FIXME: pass prob parm or more inputs so that we can have control over initial condition parameters
                 // Separator
-                constexpr amrex::Real s_xlo = 0.45;
-                constexpr amrex::Real s_xhi = 0.55;
+                const amrex::Real s_xlo = 0.45*Lx;
+                const amrex::Real s_xhi = 0.55*Lx;
                 // anode
-                constexpr amrex::Real a_yhi = 0.4;
-                constexpr amrex::Real a_ylo = 0.1;
-                constexpr amrex::Real a_x = 0.2;
+                const amrex::Real a_yhi = 0.8*Ly;
+                const amrex::Real a_ylo = 0.2*Ly;
+                const amrex::Real a_x = 0.25*Lx;
                 // cathode
-                constexpr amrex::Real c_yhi = 0.4;
-                constexpr amrex::Real c_ylo = 0.1;
-                constexpr amrex::Real c_x = 0.8;
+                const amrex::Real c_yhi = 0.8*Ly;
+                const amrex::Real c_ylo = 0.2*Ly;
+                const amrex::Real c_x = 0.75*Lx;
 
-                if(x > s_xlo && x < s_xhi) {
-                    phi(i,j,k,S_ID) = 1.0;
-                } else if(x < a_x && y < a_yhi && y > a_ylo) {
-                    phi(i,j,k,A_ID) = 1.0;
-                } else if(x > c_x && y < c_yhi && y > c_ylo) {
-                    phi(i,j,k,C_ID) = 1.0;
-                } else {
-                    phi(i,j,k,E_ID) = 1.0;
+                bool comp_found = false;
+                for(int jj = 0; jj < 3; ++jj){
+                    Real y0 = jj*Ly/2.0;
+                    for(int kk = 0; kk < 3; ++kk){
+                        Real z0 = kk*Lz/2.0;
+                        // cathode
+                        for(int ii = 0; ii < 5; ++ii){
+                            Real x0 = ii*.35*Lx/4.0;
+                            Real r = std::sqrt((x-x0)*(x-x0) + (y-y0)*(y-y0) + (z-z0)*(z-z0));
+                            if(r < Lx/20.0){
+                                phi(i,j,k,C_ID) = 1.0;
+                                phi(i,j,k,CO_ID) = 10000.0;
+                                comp_found = true;
+                            }
+                        }
+                        // anode
+                        for(int ii = 0; ii < 5; ++ii){
+                            Real x0 = 0.65*Lx + ii*.35*Lx/4.0;
+                            Real r = std::sqrt((x-x0)*(x-x0) + (y-y0)*(y-y0) + (z-z0)*(z-z0));
+                            if(r < Lx/20.0){
+                                phi(i,j,k,A_ID) = 1.0;
+                                phi(i,j,k,CO_ID) = 1000.0;
+                                comp_found = true;
+                            }
+                        }
+                    }
+                }
+
+                if(!comp_found){
+                    if(x > s_xlo && x < s_xhi) {
+                        // separator
+                        phi(i,j,k,S_ID) = 1.0;
+                        phi(i,j,k,CO_ID) = 1200.0;
+                    } else {
+                        // electrolyte
+                        phi(i,j,k,E_ID) = 1.0;
+                        phi(i,j,k,CO_ID) = 1200.0;
+                    }
                 }
 
                 // this has a check in it to make sure we don't have

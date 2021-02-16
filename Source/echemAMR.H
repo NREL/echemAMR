@@ -20,12 +20,6 @@
 #include <AMReX_BCRec.H>
 #include <ChemistryProbParm.H>
 
-#if defined(BL_USE_SENSEI_INSITU)
-namespace amrex {
-class AmrMeshInSituBridge;
-}
-#endif
-
 using namespace amrex;
 
 class echemAMR

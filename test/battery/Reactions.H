@@ -6,10 +6,24 @@
 #include <AMReX_REAL.H>
 #include <Chemistry.H>
 #include <ChemistryProbParm.H>
-
+#include<AMReX_Tuple.H>
+#include<tuple>
 using namespace amrex;
 namespace electrochem_reactions
 {
+
+
+    std::tuple <int, int, int> get_indexijk(int i, int j, int k, int dir, int mp){
+        if (dir==0)
+            return std::make_tuple(i+mp,j,k);
+        else if (dir == 1)
+            return std::make_tuple(i,j+mp,k);
+        else
+            return std::make_tuple(i,j,k+mp);
+
+    }
+
+
     AMREX_GPU_DEVICE AMREX_INLINE
         void compute_react_source(int i, int j, int k,
                 Array4<Real> const& phi,
@@ -38,7 +52,7 @@ namespace electrochem_reactions
                 const Real con = phi(i,j,k,CO_ID);
 
                 const Real KeC = electrochem::KeC(con);
-                const Real tplus = electrochem::tplus(con);
+                const Real tplus = electrochem::t_plus(con);
                 const Real KD = electrochem::KD(con, prob_parm);
 
                 // FIXME: should probably average KeC and tplus over faces but for now use value at center
@@ -57,8 +71,15 @@ namespace electrochem_reactions
 
             }
 
+
+            /* add intercalation reaction */
+            for(int dir = 0; dir < AMREX_SPACEDIM; ++dir){
+                amrex::Real normal = 1.0/dx[dir];
+                reactsource(i,j,k,CO_ID) += electrochem::ic_reaction(i,j,k,dir,+normal,phi,prob_parm);
+                reactsource(i,j,k,CO_ID) += electrochem::ic_reaction(i,j,k,dir,-normal,phi,prob_parm);
+            }
+
+
         }
-
-
 }
 #endif
