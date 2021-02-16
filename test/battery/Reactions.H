@@ -63,7 +63,9 @@ namespace electrochem_reactions
         for(int dir = 0; dir < AMREX_SPACEDIM; ++dir){
             amrex::Real normal = 1.0/dx[dir];
             reactsource(i,j,k,CO_ID) += electrochem::ic_reaction(i,j,k,dir,+normal,phi,prob_parm);
+            reactsource(i,j,k,PO_ID) += electrochem::ic_reaction(i,j,k,dir,+normal,phi,prob_parm)/prob_parm.Faraday_const;
             reactsource(i,j,k,CO_ID) += electrochem::ic_reaction(i,j,k,dir,-normal,phi,prob_parm);
+            reactsource(i,j,k,PO_ID) += electrochem::ic_reaction(i,j,k,dir,-normal,phi,prob_parm)/prob_parm.Faraday_const;
         }
 
 

@@ -2,7 +2,7 @@
 
 namespace electrochem
 {
-    amrex::Vector<std::string> specnames(NVAR);
+    amrex::Vector<std::string> specnames(NUM_SPECIES);
 
     void init()
     {
@@ -12,7 +12,6 @@ namespace electrochem
         specnames[C_ID]="Cathode";
         specnames[E_ID]="Electrolyte";
         specnames[S_ID]="Separator";
-        specnames[POT_ID]="Potential2";
 
     }    
     void close()

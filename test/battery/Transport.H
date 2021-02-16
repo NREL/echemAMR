@@ -64,24 +64,21 @@ namespace electrochem_transport
             const Real time,
             ProbParm const& prob_parm)
     {
-        for(int n=0; n < phi.nComp(); ++n) {
-            dcoeff(i,j,k,n) = 0.0;
-        }
 
         const int comp = electrochem::level_set_to_component(i,j,k,phi);
 
         if(comp == electrochem::cathode){
 
-            dcoeff(i,j,k,POT_ID) = prob_parm.K_c;
+            dcoeff(i,j,k) = prob_parm.K_c;
 
         } else if (comp == electrochem::anode){
 
-            dcoeff(i,j,k,POT_ID) = prob_parm.K_a;
+            dcoeff(i,j,k) = prob_parm.K_a;
 
         } else {
 
             /* electrolyte or separator */
-            dcoeff(i,j,k,POT_ID) = electrochem::KeC(phi(i,j,k,CO_ID));
+            dcoeff(i,j,k) = electrochem::KeC(phi(i,j,k,CO_ID));
 
         }
 
@@ -102,7 +99,7 @@ namespace electrochem_transport
         // FIXME: add Neummann bc's to potential and concentration source terms
         if(electrochem::is_electrode(i,j,k,phi)){
 
-            potsource(i,j,k,POT_ID) = 0.0;
+            potsource(i,j,k) = 0.0;
 
         } else {
 
@@ -114,9 +111,16 @@ namespace electrochem_transport
             // FIXME: check sign on this
             // FIXME: this should be KDstar
             // FIXME: need to account for walls
-            potsource(i,j,k,POT_ID) = KD * ( (phi(i-1,j,k,CO_ID) - 2.0*phi(i,j,k,CO_ID) + phi(i+1,j,k,CO_ID))/dx[0]/dx[0]
+            potsource(i,j,k) = KD * ( (phi(i-1,j,k,CO_ID) - 2.0*phi(i,j,k,CO_ID) + phi(i+1,j,k,CO_ID))/dx[0]/dx[0]
                                             +(phi(i,j-1,k,CO_ID) - 2.0*phi(i,j,k,CO_ID) + phi(i,j+1,k,CO_ID))/dx[1]/dx[1]
                                             +(phi(i,j,k-1,CO_ID) - 2.0*phi(i,j,k,CO_ID) + phi(i,j,k+1,CO_ID))/dx[2]/dx[2]);
+        }
+
+        /* add intercalation reaction */
+        for(int dir = 0; dir < AMREX_SPACEDIM; ++dir){
+            amrex::Real normal = 1.0/dx[dir];
+            potsource(i,j,k) += electrochem::ic_reaction(i,j,k,dir,+normal,phi,prob_parm)/prob_parm.Faraday_const;
+            potsource(i,j,k) += electrochem::ic_reaction(i,j,k,dir,-normal,phi,prob_parm)/prob_parm.Faraday_const;
         }
 
 

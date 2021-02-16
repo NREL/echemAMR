@@ -10,14 +10,14 @@
 #include <AMReX_Box.H>
 #include <ChemistryProbParm.H>
 
-#define NUM_SPECIES 6
+#define NUM_SPECIES 5
 #define CO_ID 0
-#define PO_ID 1
-#define A_ID 2
-#define C_ID 3
-#define E_ID 4
-#define S_ID 5
-#define POT_ID 6
+#define A_ID 1
+#define C_ID 2
+#define E_ID 3
+#define S_ID 4
+#define PO_ID 5
+//#define PO_ID 6
 #define NVAR NUM_SPECIES+1
 
 #define myeps 1.0e-12
