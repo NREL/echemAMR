@@ -8,29 +8,23 @@
 #include <AMReX_Geometry.H>
 #include <AMReX_FArrayBox.H>
 #include <AMReX_Box.H>
+#include <ChemistryProbParm.H>
 
-#define NUM_SPECIES 6
+#define NUM_SPECIES 5
 #define CO_ID 0
-#define PO_ID 1
-#define A_ID 2
-#define C_ID 3
-#define E_ID 4
-#define S_ID 5
-#define POT_ID 6
+#define A_ID 1
+#define C_ID 2
+#define E_ID 3
+#define S_ID 4
+#define PO_ID 5
 #define NVAR NUM_SPECIES+1
+
+#define myeps 1.0e-12
 
 namespace electrochem
 {
 
     enum component {anode = 0, cathode, electrolyte, separator, last_comp = separator};
-
-    const amrex::Real K_a = 1.0e-3; // conductivity anode
-    const amrex::Real K_c = 2.0e-3; // conductivity cathode
-    const amrex::Real D_a = 3.0e-3; // diffusivity anode
-    const amrex::Real D_c = 4.0e-3; // diffusivity cathode
-    const amrex::Real Faraday_const = 96487.0;
-    const amrex::Real R_gas_const = 8.31446261815324;
-    const amrex::Real T0 = 300.0; // temperature Kelvin
 
     extern amrex::Vector<std::string> specnames;
     void init();
@@ -73,6 +67,187 @@ namespace electrochem
          else
              return false;
      }
+
+
+    // Electrolyte conductivity
+    // Ce in mol.m-3
+    AMREX_GPU_DEVICE AMREX_FORCE_INLINE
+    amrex::Real KeC(amrex::Real Ce)
+    {
+        constexpr amrex::Real a4 = -3.334591539362114e-14;
+        constexpr amrex::Real a3 = 3.867473118129116e-10;
+        constexpr amrex::Real a2 = -1.559193894834466e-06;
+        constexpr amrex::Real a1 = 0.002182354774294;
+        constexpr amrex::Real a0 = 0.0;
+        return amrex::max((((a4 * Ce + a3) * Ce + a2) * Ce + a1) * Ce + a0, myeps);
+    }
+
+    // Electrolyte diffusion coefficient
+    // Ce in mol.m-3
+    AMREX_GPU_DEVICE AMREX_FORCE_INLINE
+    amrex::Real DeC(amrex::Real Ce)
+    {
+        constexpr amrex::Real a4 = 7.414554029503555e-25;
+        constexpr amrex::Real a3 = -1.159860784909586e-20;
+        constexpr amrex::Real a2 = 7.492287453960106e-17;
+        constexpr amrex::Real a1 = -2.451314899670142e-13;
+        constexpr amrex::Real a0 = 3.396397365975209e-10;
+        return amrex::max((((a4 * Ce + a3) * Ce + a2) * Ce + a1) * Ce + a0, myeps); // [m2.s-1]
+    }
+
+    // Transference number
+    // Ce in mol.m-3
+    AMREX_GPU_DEVICE AMREX_FORCE_INLINE
+    amrex::Real t_plus(amrex::Real Ce)
+    {
+        constexpr amrex::Real a2 = -2.266955710225041e-09;
+        constexpr amrex::Real a1 = 2.125258249150030e-05;
+        constexpr amrex::Real a0 = 0.440686353438825;
+        return amrex::max( (a2 * Ce + a1) * Ce + a0, myeps);
+    }
+
+    // Electrolyte activity
+    // Ce in mol.m-3
+    AMREX_GPU_DEVICE AMREX_FORCE_INLINE
+    amrex::Real Activity(amrex::Real Ce)
+    {
+        // Valid for temperature = 30 + 273.15 K
+        constexpr amrex::Real a2 = 1.598531153290851e-06;
+        constexpr amrex::Real a1 = -1.997682922513610e-04;
+        constexpr amrex::Real a0 = 0.806611708428853;
+        return amrex::max((a2 * Ce + a1) * Ce + a0, myeps);
+    }
+
+    AMREX_GPU_DEVICE AMREX_FORCE_INLINE
+    amrex::Real KD(amrex::Real con, const ProbParm& prob_parm)
+    {
+        const amrex::Real RTF = prob_parm.R_gas_const*prob_parm.T0/prob_parm.Faraday_const;
+        // FIXME: there is a sign mismatch... double check this tplus-1 vs 1-tplus
+        return amrex::min((1.0 - t_plus(con)) * (1.0 + Activity(con)) * 2.0 * KeC(con) * RTF, -myeps);
+    }
+
+    AMREX_GPU_DEVICE AMREX_FORCE_INLINE
+    amrex::Real KDstar(amrex::Real con, const ProbParm& prob_parm)
+    {
+        return 0.0;
+    }
+
+
+    AMREX_GPU_DEVICE AMREX_FORCE_INLINE
+    amrex::Real intercalation_function(amrex::Real Ca, amrex::Real Ce)
+    {
+        return Ca * Ce;
+    }
+
+    AMREX_GPU_DEVICE AMREX_FORCE_INLINE
+    amrex::Real intercalation_reaction_anode(amrex::Real Ca, amrex::Real phi_a, amrex::Real Ce, amrex::Real phi_e, const ProbParm& prob_parm)
+    {
+        const amrex::Real ia = intercalation_function(Ca, Ce);
+        const amrex::Real eta_alpha = phi_a - phi_e;// FIXME - OCP?
+        const amrex::Real FRT = prob_parm.Faraday_const/(prob_parm.R_gas_const * prob_parm.T0);
+        return 2.0 * ia * std::sinh(0.5 * FRT * eta_alpha);
+    }
+
+    AMREX_GPU_DEVICE AMREX_FORCE_INLINE
+    amrex::Real intercalation_reaction_cathode(amrex::Real Cc, amrex::Real phi_c, amrex::Real Ce, amrex::Real phi_e, const ProbParm& prob_parm)
+    {
+        // these are the same for now
+        return intercalation_reaction_anode(Cc, phi_c, Ce, phi_e, prob_parm);
+    }
+
+
+    AMREX_GPU_DEVICE AMREX_FORCE_INLINE
+    amrex::Real ic_reaction(const int i, const int j, const int k, const int dir, const amrex::Real normal, amrex::Array4<amrex::Real> const& phi, const ProbParm& prob_parm)
+    {
+
+        // components
+        const int c0 = level_set_to_component(i,j,k,phi);
+        int cm1,cp1;
+
+        // shifted indices
+        int ileft, iright;
+        int jleft, jright;
+        int kleft, kright;
+
+        switch (dir) {
+            case 0:
+                cm1 = level_set_to_component(i-1,j,k,phi);
+                cp1 = level_set_to_component(i+1,j,k,phi);
+                ileft = i-1;
+                iright = i+1;
+                break;
+            case 1:
+                cm1 = level_set_to_component(i,j-1,k,phi);
+                cp1 = level_set_to_component(i,j+1,k,phi);
+                jleft = j-1;
+                jright = j+1;
+                break;
+            case 2:
+                cm1 = level_set_to_component(i,j,k-1,phi);
+                cp1 = level_set_to_component(i,j,k+1,phi);
+                kleft = k-1;
+                kright = k+1;
+                break;
+            default:
+                amrex::Abort("bad direction");
+                break;
+        }
+
+        int cl,cr;
+
+        if(normal > 0.0) {
+            cl = c0;
+            cr = cp1;
+            ileft = i;
+            jleft = j;
+            kleft = k;
+        } else {
+            cl = cm1;
+            cr = c0;
+            iright = i;
+            jright = j;
+            kright = k;
+        }
+
+        amrex::Real reaction = 0.0;
+
+        if(cl == cathode && cr == electrolyte ){
+            const amrex::Real Cc = phi(ileft,jleft,kleft,CO_ID);
+            const amrex::Real Pc = phi(ileft,jleft,kleft,PO_ID);
+            const amrex::Real Ce = phi(iright,jright,kright,CO_ID);
+            const amrex::Real Pe = phi(iright,jright,kright,PO_ID);
+            reaction = -normal*intercalation_reaction_cathode(Cc, Pc, Ce, Pe, prob_parm);
+        }
+
+        if(cl == electrolyte && cr == cathode){
+            const amrex::Real Ce = phi(ileft,jleft,kleft,CO_ID);
+            const amrex::Real Pe = phi(ileft,jleft,kleft,PO_ID);
+            const amrex::Real Cc = phi(iright,jright,kright,CO_ID);
+            const amrex::Real Pc = phi(iright,jright,kright,PO_ID);
+            reaction = normal*intercalation_reaction_cathode(Cc, Pc, Ce, Pe, prob_parm);
+        }
+
+        if(cl == electrolyte && cr == anode){
+            const amrex::Real Ce = phi(ileft,jleft,kleft,CO_ID);
+            const amrex::Real Pe = phi(ileft,jleft,kleft,PO_ID);
+            const amrex::Real Ca = phi(iright,jright,kright,CO_ID);
+            const amrex::Real Pa = phi(iright,jright,kright,PO_ID);
+            reaction = -normal*intercalation_reaction_anode(Ca, Pa, Ce, Pe, prob_parm);
+        }
+
+        if(cl == anode && cr == electrolyte){
+            const amrex::Real Ca = phi(ileft,jleft,kleft,CO_ID);
+            const amrex::Real Pa = phi(ileft,jleft,kleft,PO_ID);
+            const amrex::Real Ce = phi(iright,jright,kright,CO_ID);
+            const amrex::Real Pe = phi(iright,jright,kright,PO_ID);
+            reaction = normal*intercalation_reaction_anode(Ca, Pa, Ce, Pe, prob_parm);
+        }
+
+
+        return reaction;
+
+    }
+
 
 }
 #endif

@@ -12,7 +12,6 @@ namespace electrochem
         specnames[C_ID]="Cathode";
         specnames[E_ID]="Electrolyte";
         specnames[S_ID]="Separator";
-        specnames[POT_ID]="Potential2";
 
     }    
     void close()
@@ -29,4 +28,5 @@ namespace electrochem
         }
         return(loc);
     }
+
 }
