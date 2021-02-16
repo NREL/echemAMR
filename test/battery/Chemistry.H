@@ -143,8 +143,6 @@ namespace electrochem
     AMREX_GPU_DEVICE AMREX_FORCE_INLINE
     amrex::Real intercalation_reaction_anode(amrex::Real Ca, amrex::Real phi_a, amrex::Real Ce, amrex::Real phi_e, const ProbParm& prob_parm)
     {
-        constexpr amrex::Real fact = 1.0/12.0e6;
-        return fact*Ce*Ca;
         const amrex::Real ia = intercalation_function(Ca, Ce);
         const amrex::Real eta_alpha = phi_a - phi_e;// FIXME - OCP?
         const amrex::Real FRT = prob_parm.Faraday_const/(prob_parm.R_gas_const * prob_parm.T0);
@@ -206,26 +204,34 @@ namespace electrochem
 
             if(c0 == cathode && cp1 == electrolyte ){
                 const amrex::Real Cc = phi(i,j,k,CO_ID);
+                const amrex::Real Pc = phi(i,j,k,PO_ID);
                 const amrex::Real Ce = phi(ip1,jp1,kp1,CO_ID);
-                reaction = -normal*intercalation_reaction_cathode(Cc, 0.0, Ce, 0.0, prob_parm);
+                const amrex::Real Pe = phi(ip1,jp1,kp1,PO_ID);
+                reaction = -normal*intercalation_reaction_cathode(Cc, Pc, Ce, Pe, prob_parm);
             }
 
             if(c0 == electrolyte && cp1 == anode){
                 const amrex::Real Ce = phi(i,j,k,CO_ID);
+                const amrex::Real Pe = phi(i,j,k,PO_ID);
                 const amrex::Real Ca = phi(ip1,jp1,kp1,CO_ID);
-                reaction = -normal*intercalation_reaction_anode(Ca, 0.0, Ce, 0.0, prob_parm);
+                const amrex::Real Pa = phi(ip1,jp1,kp1,PO_ID);
+                reaction = -normal*intercalation_reaction_anode(Ca, Pa, Ce, Pe, prob_parm);
             }
 
             if(c0 == electrolyte && cp1 == cathode){
                 const amrex::Real Ce = phi(i,j,k,CO_ID);
+                const amrex::Real Pe = phi(i,j,k,PO_ID);
                 const amrex::Real Cc = phi(ip1,jp1,kp1,CO_ID);
-                reaction = normal*intercalation_reaction_cathode(Cc, 0.0, Ce, 0.0, prob_parm);
+                const amrex::Real Pc = phi(ip1,jp1,kp1,PO_ID);
+                reaction = normal*intercalation_reaction_cathode(Cc, Pc, Ce, Pe, prob_parm);
             }
 
             if(c0 == anode && cp1 == electrolyte){
                 const amrex::Real Ca = phi(i,j,k,CO_ID);
+                const amrex::Real Pa = phi(i,j,k,PO_ID);
                 const amrex::Real Ce = phi(ip1,jp1,kp1,CO_ID);
-                reaction = normal*intercalation_reaction_anode(Ca, 0.0, Ce, 0.0, prob_parm);
+                const amrex::Real Pe = phi(ip1,jp1,kp1,PO_ID);
+                reaction = normal*intercalation_reaction_anode(Ca, Pa, Ce, Pe, prob_parm);
             }
 
 
@@ -233,26 +239,34 @@ namespace electrochem
 
             if(cm1 == cathode && c0 == electrolyte){
                 const amrex::Real Cc = phi(im1,jm1,km1,CO_ID);
+                const amrex::Real Pc = phi(im1,jm1,km1,PO_ID);
                 const amrex::Real Ce = phi(i,j,k,CO_ID);
-                reaction = -normal*intercalation_reaction_cathode(Cc, 0.0, Ce, 0.0, prob_parm);
+                const amrex::Real Pe = phi(i,j,k,PO_ID);
+                reaction = -normal*intercalation_reaction_cathode(Cc, Pc, Ce, Pe, prob_parm);
             }
 
             if(cm1 == electrolyte && c0 == anode){
                 const amrex::Real Ce = phi(im1,jm1,km1,CO_ID);
+                const amrex::Real Pe = phi(im1,jm1,km1,PO_ID);
                 const amrex::Real Ca = phi(i,j,k,CO_ID);
-                reaction = -normal*intercalation_reaction_anode(Ca, 0.0, Ce, 0.0, prob_parm);
+                const amrex::Real Pa = phi(i,j,k,PO_ID);
+                reaction = -normal*intercalation_reaction_anode(Ca, Pa, Ce, Pe, prob_parm);
             }
 
             if(cm1 == electrolyte && c0 == cathode){
                 const amrex::Real Ce = phi(im1,jm1,km1,CO_ID);
+                const amrex::Real Pe = phi(im1,jm1,km1,PO_ID);
                 const amrex::Real Cc = phi(i,j,k,CO_ID);
-                reaction = normal*intercalation_reaction_cathode(Cc, 0.0, Ce, 0.0, prob_parm);
+                const amrex::Real Pc = phi(i,j,k,PO_ID);
+                reaction = normal*intercalation_reaction_cathode(Cc, Pc, Ce, Pe, prob_parm);
             }
 
             if(cm1 == anode && c0 == electrolyte){
                 const amrex::Real Ca = phi(im1,jm1,km1,CO_ID);
+                const amrex::Real Pa = phi(im1,jm1,km1,PO_ID);
                 const amrex::Real Ce = phi(i,j,k,CO_ID);
-                reaction = normal*intercalation_reaction_anode(Ca, 0.0, Ce, 0.0, prob_parm);
+                const amrex::Real Pe = phi(i,j,k,PO_ID);
+                reaction = normal*intercalation_reaction_anode(Ca, Pa, Ce, Pe, prob_parm);
             }
         }
 
