@@ -19,7 +19,7 @@ amr.max_grid_size   = 64
 amr.regrid_int      = 100       # how often to regrid
 
 # TIME STEP CONTROL
-echemamr.cfl            = 0.01     # cfl number for hyperbolic system
+echemamr.cfl            = 0.5     # cfl number for hyperbolic system
                              # In this test problem, the velocity is
 			     # time-dependent.  We could use 0.9 in
 			     # the 3D test, but need to use 0.7 in 2D

@@ -28,12 +28,10 @@ namespace electrochem_transport
 
             if(comp == electrochem::cathode){
 
-                dcoeff(i,j,k,PO_ID) = prob_parm.K_c;
                 dcoeff(i,j,k,CO_ID) = prob_parm.D_c;
 
             } else if (comp == electrochem::anode){
 
-                dcoeff(i,j,k,PO_ID) = prob_parm.K_a;
                 dcoeff(i,j,k,CO_ID) = prob_parm.D_a;
 
             } else {
@@ -48,7 +46,6 @@ namespace electrochem_transport
                 const Real KD = electrochem::KD(con, prob_parm);
 
                 dcoeff(i,j,k,CO_ID) = DeC - tplus*KD/prob_parm.Faraday_const;
-                dcoeff(i,j,k,PO_ID) = electrochem::KeC(con);
 
             }
 
@@ -112,8 +109,8 @@ namespace electrochem_transport
             // FIXME: this should be KDstar
             // FIXME: need to account for walls
             potsource(i,j,k) = KD * ( (phi(i-1,j,k,CO_ID) - 2.0*phi(i,j,k,CO_ID) + phi(i+1,j,k,CO_ID))/dx[0]/dx[0]
-                                            +(phi(i,j-1,k,CO_ID) - 2.0*phi(i,j,k,CO_ID) + phi(i,j+1,k,CO_ID))/dx[1]/dx[1]
-                                            +(phi(i,j,k-1,CO_ID) - 2.0*phi(i,j,k,CO_ID) + phi(i,j,k+1,CO_ID))/dx[2]/dx[2]);
+                                     +(phi(i,j-1,k,CO_ID) - 2.0*phi(i,j,k,CO_ID) + phi(i,j+1,k,CO_ID))/dx[1]/dx[1]
+                                     +(phi(i,j,k-1,CO_ID) - 2.0*phi(i,j,k,CO_ID) + phi(i,j,k+1,CO_ID))/dx[2]/dx[2]);
         }
 
         /* add intercalation reaction */

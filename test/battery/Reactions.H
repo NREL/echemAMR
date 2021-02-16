@@ -30,7 +30,6 @@ namespace electrochem_reactions
         // FIXME: add Neummann bc's to potential and concentration source terms
         if(electrochem::is_electrode(i,j,k,phi)){
 
-            reactsource(i,j,k,PO_ID) = 0.0;
             reactsource(i,j,k,CO_ID) = 0.0;
 
         } else {
@@ -49,13 +48,6 @@ namespace electrochem_reactions
                                                        +(phi(i,j-1,k,PO_ID) - 2.0*phi(i,j,k,PO_ID) + phi(i,j+1,k,PO_ID))/dx[1]/dx[1]
                                                        +(phi(i,j,k-1,PO_ID) - 2.0*phi(i,j,k,PO_ID) + phi(i,j,k+1,PO_ID))/dx[2]/dx[2]);
 
-            // FIXME: should probably average KD over faces but for now use use value at center
-            // FIXME: check sign on this
-            // FIXME: this should be KDstar
-            reactsource(i,j,k,PO_ID) = KD * ( (phi(i-1,j,k,CO_ID) - 2.0*phi(i,j,k,CO_ID) + phi(i+1,j,k,CO_ID))/dx[0]/dx[0]
-                                             +(phi(i,j-1,k,CO_ID) - 2.0*phi(i,j,k,CO_ID) + phi(i,j+1,k,CO_ID))/dx[1]/dx[1]
-                                             +(phi(i,j,k-1,CO_ID) - 2.0*phi(i,j,k,CO_ID) + phi(i,j,k+1,CO_ID))/dx[2]/dx[2]);
-
         }
 
 
@@ -63,9 +55,7 @@ namespace electrochem_reactions
         for(int dir = 0; dir < AMREX_SPACEDIM; ++dir){
             amrex::Real normal = 1.0/dx[dir];
             reactsource(i,j,k,CO_ID) += electrochem::ic_reaction(i,j,k,dir,+normal,phi,prob_parm);
-            reactsource(i,j,k,PO_ID) += electrochem::ic_reaction(i,j,k,dir,+normal,phi,prob_parm)/prob_parm.Faraday_const;
             reactsource(i,j,k,CO_ID) += electrochem::ic_reaction(i,j,k,dir,-normal,phi,prob_parm);
-            reactsource(i,j,k,PO_ID) += electrochem::ic_reaction(i,j,k,dir,-normal,phi,prob_parm)/prob_parm.Faraday_const;
         }
 
 
