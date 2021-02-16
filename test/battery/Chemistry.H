@@ -43,15 +43,15 @@ namespace electrochem
         if(phase(i,j,k,S_ID) > 0.0) {comp = separator; ++ncomp;}
 
         // FIXME: need to make sure we only do this for real cells and not ghost cells
-//        if(comp == -1) {
-//            amrex::Print() << i << ' ' << j << ' ' << k << std::endl;
-//            amrex::Abort("error component not found");
-//        }
-//
-//        if(ncomp > 1) {
-//            amrex::Print() << i << ' ' << j << ' ' << k << std::endl;
-//            amrex::Abort("too many components found");
-//        }
+        if(comp == -1) {
+            amrex::Print() << i << ' ' << j << ' ' << k << std::endl;
+            amrex::Abort("error component not found");
+        }
+
+        if(ncomp > 1) {
+            amrex::Print() << i << ' ' << j << ' ' << k << std::endl;
+            amrex::Abort("too many components found");
+        }
 
         return comp;
 
