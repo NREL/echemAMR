@@ -19,7 +19,7 @@
 #define PO_ID 5
 #define NVAR NUM_SPECIES+1
 
-#define myeps 1.0e-12
+#define myeps 1.0e-30
 
 namespace electrochem
 {
@@ -43,15 +43,15 @@ namespace electrochem
         if(phase(i,j,k,S_ID) > 0.0) {comp = separator; ++ncomp;}
 
         // FIXME: need to make sure we only do this for real cells and not ghost cells
-//        if(comp == -1) {
-//            amrex::Print() << i << ' ' << j << ' ' << k << std::endl;
-//            amrex::Abort("error component not found");
-//        }
-//
-//        if(ncomp > 1) {
-//            amrex::Print() << i << ' ' << j << ' ' << k << std::endl;
-//            amrex::Abort("too many components found");
-//        }
+        if(comp == -1) {
+            amrex::Print() << i << ' ' << j << ' ' << k << std::endl;
+            amrex::Abort("error component not found");
+        }
+
+        if(ncomp > 1) {
+            amrex::Print() << i << ' ' << j << ' ' << k << std::endl;
+            amrex::Abort("too many components found");
+        }
 
         return comp;
 
@@ -145,7 +145,7 @@ namespace electrochem
         const amrex::Real ia = intercalation_function(Ca, Ce);
         const amrex::Real eta_alpha = phi_a - phi_e;// FIXME - OCP?
         const amrex::Real FRT = prob_parm.Faraday_const/(prob_parm.R_gas_const * prob_parm.T0);
-        return 2.0 * ia * std::sinh(0.5 * FRT * eta_alpha);
+        return 2.0 * ia * std::sinh(0.5 * FRT * eta_alpha); //FIXME: gpu safe?
     }
 
     AMREX_GPU_DEVICE AMREX_FORCE_INLINE
