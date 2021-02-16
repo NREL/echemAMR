@@ -36,7 +36,7 @@ void echemAMR::Evolve ()
 	int lev = 0;
 	int iteration = 1;
         
-        if(potential_solve==1)
+        if(potential_solve==1 && step % pot_solve_int == 0)
         {
             solve_potential(cur_time);
         }

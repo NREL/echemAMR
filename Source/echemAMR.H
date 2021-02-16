@@ -187,7 +187,9 @@ private:
     int do_reflux = 1;
 
     //poission solve required
-    int potential_solve=0;
+    int potential_solve = 0;
+    // frequency to solve potential equation
+    int pot_solve_int = 1;
 
     // plotfile prefix and frequency
     std::string plot_file {"plt"};
