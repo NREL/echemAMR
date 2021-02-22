@@ -84,6 +84,7 @@ void echemAMR::solve_potential(Real current_time)
 {
     LPInfo info;
 
+    // TODO: add these as inputs
     int agglomeration=1;
     int consolidation=1;
     int max_coarsening_level=30;
@@ -96,7 +97,7 @@ void echemAMR::solve_potential(Real current_time)
     int bottom_verbose = 0;
     Real ascalar=0.0;
     Real bscalar=1.0;
-    const Real tol_rel = 1.e-10;
+    const Real tol_rel = 1.e-6; // FIXME: had to adjust for constant coefficent, this could be due to missing terms in the intercalation reaction or sign mistakes...
     const Real tol_abs = 0.0;
 
 #ifdef AMREX_USE_HYPRE

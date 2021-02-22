@@ -35,11 +35,11 @@ namespace electrochem_reactions
         } else {
 
             // concentration
-            const Real con = phi(i,j,k,CO_ID);
+            const Real Ce = phi(i,j,k,CO_ID);
 
-            const Real KeC = electrochem::KeC(con);
-            const Real tplus = electrochem::t_plus(con);
-            const Real KD = electrochem::KD(con, prob_parm);
+            const Real KeC = electrochem::KeC(Ce, prob_parm);
+            const Real tplus = electrochem::t_plus(Ce, prob_parm);
+            const Real KD = electrochem::KD(Ce, prob_parm);
 
             // FIXME: should probably average KeC and tplus over faces but for now use value at center
             // FIXME: check sign on this

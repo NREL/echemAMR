@@ -72,50 +72,68 @@ namespace electrochem
     // Electrolyte conductivity
     // Ce in mol.m-3
     AMREX_GPU_DEVICE AMREX_FORCE_INLINE
-    amrex::Real KeC(amrex::Real Ce)
+    amrex::Real KeC(amrex::Real Ce, const ProbParm& prob_parm)
     {
-        constexpr amrex::Real a4 = -3.334591539362114e-14;
-        constexpr amrex::Real a3 = 3.867473118129116e-10;
-        constexpr amrex::Real a2 = -1.559193894834466e-06;
-        constexpr amrex::Real a1 = 0.002182354774294;
-        constexpr amrex::Real a0 = 0.0;
-        return amrex::max((((a4 * Ce + a3) * Ce + a2) * Ce + a1) * Ce + a0, myeps);
+
+        if(prob_parm.constant_coeff) {
+            return prob_parm.Kebulk;
+        } else {
+            constexpr amrex::Real a4 = -3.334591539362114e-14;
+            constexpr amrex::Real a3 = 3.867473118129116e-10;
+            constexpr amrex::Real a2 = -1.559193894834466e-06;
+            constexpr amrex::Real a1 = 0.002182354774294;
+            constexpr amrex::Real a0 = 0.0;
+            return amrex::max((((a4 * Ce + a3) * Ce + a2) * Ce + a1) * Ce + a0, myeps);
+        }
     }
 
     // Electrolyte diffusion coefficient
     // Ce in mol.m-3
     AMREX_GPU_DEVICE AMREX_FORCE_INLINE
-    amrex::Real DeC(amrex::Real Ce)
+    amrex::Real DeC(amrex::Real Ce, const ProbParm& prob_parm)
     {
-        constexpr amrex::Real a4 = 7.414554029503555e-25;
-        constexpr amrex::Real a3 = -1.159860784909586e-20;
-        constexpr amrex::Real a2 = 7.492287453960106e-17;
-        constexpr amrex::Real a1 = -2.451314899670142e-13;
-        constexpr amrex::Real a0 = 3.396397365975209e-10;
-        return amrex::max((((a4 * Ce + a3) * Ce + a2) * Ce + a1) * Ce + a0, myeps); // [m2.s-1]
+
+        if(prob_parm.constant_coeff){
+            return prob_parm.Debulk;
+        } else {
+            constexpr amrex::Real a4 = 7.414554029503555e-25;
+            constexpr amrex::Real a3 = -1.159860784909586e-20;
+            constexpr amrex::Real a2 = 7.492287453960106e-17;
+            constexpr amrex::Real a1 = -2.451314899670142e-13;
+            constexpr amrex::Real a0 = 3.396397365975209e-10;
+            return amrex::max((((a4 * Ce + a3) * Ce + a2) * Ce + a1) * Ce + a0, myeps); // [m2.s-1]
+        }
     }
 
     // Transference number
     // Ce in mol.m-3
     AMREX_GPU_DEVICE AMREX_FORCE_INLINE
-    amrex::Real t_plus(amrex::Real Ce)
+    amrex::Real t_plus(amrex::Real Ce, const ProbParm& prob_parm)
     {
-        constexpr amrex::Real a2 = -2.266955710225041e-09;
-        constexpr amrex::Real a1 = 2.125258249150030e-05;
-        constexpr amrex::Real a0 = 0.440686353438825;
-        return amrex::max( (a2 * Ce + a1) * Ce + a0, myeps);
+        if(prob_parm.constant_coeff) {
+            return prob_parm.tplus;
+        } else {
+            constexpr amrex::Real a2 = -2.266955710225041e-09;
+            constexpr amrex::Real a1 = 2.125258249150030e-05;
+            constexpr amrex::Real a0 = 0.440686353438825;
+            return amrex::max( (a2 * Ce + a1) * Ce + a0, myeps);
+        }
     }
 
     // Electrolyte activity
     // Ce in mol.m-3
     AMREX_GPU_DEVICE AMREX_FORCE_INLINE
-    amrex::Real Activity(amrex::Real Ce)
+    amrex::Real Activity(amrex::Real Ce, const ProbParm& prob_parm)
     {
-        // Valid for temperature = 30 + 273.15 K
-        constexpr amrex::Real a2 = 1.598531153290851e-06;
-        constexpr amrex::Real a1 = -1.997682922513610e-04;
-        constexpr amrex::Real a0 = 0.806611708428853;
-        return amrex::max((a2 * Ce + a1) * Ce + a0, myeps);
+        if(prob_parm.constant_coeff) {
+            return prob_parm.Activityel;
+        } else {
+            // Valid for temperature = 30 + 273.15 K
+            constexpr amrex::Real a2 = 1.598531153290851e-06;
+            constexpr amrex::Real a1 = -1.997682922513610e-04;
+            constexpr amrex::Real a0 = 0.806611708428853;
+            return amrex::max((a2 * Ce + a1) * Ce + a0, myeps);
+        }
     }
 
     AMREX_GPU_DEVICE AMREX_FORCE_INLINE
@@ -123,12 +141,13 @@ namespace electrochem
     {
         const amrex::Real RTF = prob_parm.R_gas_const*prob_parm.T0/prob_parm.Faraday_const;
         // FIXME: there is a sign mismatch... double check this tplus-1 vs 1-tplus
-        return amrex::min((1.0 - t_plus(Ce)) * (1.0 + Activity(Ce)) * 2.0 * KeC(Ce) * RTF, -myeps);
+        return amrex::min((1.0 - t_plus(Ce, prob_parm)) * (1.0 + Activity(Ce, prob_parm)) * 2.0 * KeC(Ce, prob_parm) * RTF, -myeps);
     }
 
     AMREX_GPU_DEVICE AMREX_FORCE_INLINE
-    amrex::Real kestar(amrex::Real Ce)
+    amrex::Real kestar(amrex::Real Ce, const ProbParm& prob_parm)
     {
+        // FIXME: does this have a constant coefficient form?
         constexpr amrex::Real a1 = 1.0e-10;
         constexpr amrex::Real a2 = 0.0;
         constexpr amrex::Real a3 = 0.0;
@@ -140,13 +159,14 @@ namespace electrochem
     AMREX_GPU_DEVICE AMREX_FORCE_INLINE
     amrex::Real KDstar(amrex::Real Ce, const ProbParm& prob_parm)
     {
-        return amrex::min(kestar(Ce) * (1.0 - t_plus(Ce)) * (1.0 + Activity(Ce)), -myeps);
+        return amrex::min(kestar(Ce, prob_parm) * (1.0 - t_plus(Ce, prob_parm)) * (1.0 + Activity(Ce, prob_parm)), -myeps);
     }
 
 
     AMREX_GPU_DEVICE AMREX_FORCE_INLINE
     amrex::Real intercalation_function(amrex::Real Ca, amrex::Real Ce)
     {
+        // FIXME: not sure what should be here yet
         return std::sqrt(Ca*Ce);
     }
 
@@ -154,7 +174,7 @@ namespace electrochem
     amrex::Real intercalation_reaction_anode(amrex::Real Ca, amrex::Real phi_a, amrex::Real Ce, amrex::Real phi_e, const ProbParm& prob_parm)
     {
         const amrex::Real ia = intercalation_function(Ca, Ce);
-        const amrex::Real eta_alpha = phi_a - phi_e;// FIXME - OCP?
+        const amrex::Real eta_alpha = phi_a - phi_e;// FIXME: - OCP?
         const amrex::Real FRT = prob_parm.Faraday_const/(prob_parm.R_gas_const * prob_parm.T0);
         return 2.0 * ia * std::sinh(0.5 * FRT * eta_alpha); //FIXME: gpu safe?
     }
