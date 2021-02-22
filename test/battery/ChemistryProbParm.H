@@ -15,6 +15,10 @@ struct ProbParm
     amrex::Real Faraday_const = 96487.0;
     amrex::Real R_gas_const = 8.31446261815324;
     amrex::Real T0 = 300.0_rt; // temperature Kelvin
+
+    // potential boundary conditions
+    amrex::Vector<amrex::Real> pot_bc_lo{0.0, 0.0, 0.0};
+    amrex::Vector<amrex::Real> pot_bc_hi{0.0, 0.0, 0.0};
 };
 
 #endif

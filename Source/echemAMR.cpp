@@ -29,13 +29,7 @@ echemAMR::echemAMR ()
 
     h_prob_parm = new ProbParm{};
     d_prob_parm = (ProbParm*)The_Arena()->alloc(sizeof(ProbParm));
-
-#ifdef AMREX_USE_GPU
-    amrex::Gpu::htod_memcpy(echemAMR::d_prob_parm, echemAMR::h_prob_parm, sizeof(ProbParm));
-#else
-    std::memcpy(echemAMR::d_prob_parm, echemAMR::h_prob_parm, sizeof(ProbParm));
-#endif
-
+    amrex_probinit(*h_prob_parm, *d_prob_parm);
 
     ReadParameters();
 
@@ -76,7 +70,8 @@ echemAMR::echemAMR ()
         // lo-side BCs
         if (bc_lo[idim] == BCType::int_dir  ||  // periodic uses "internal Dirichlet"
             bc_lo[idim] == BCType::foextrap ||  // first-order extrapolation
-            bc_lo[idim] == BCType::ext_dir ) 
+            bc_lo[idim] == BCType::ext_dir  ||
+            bc_lo[idim] == BCType::hoextrapcc)
         {  
             for(int sp=0;sp<NVAR;sp++)
             {
@@ -91,7 +86,8 @@ echemAMR::echemAMR ()
         // hi-side BCSs
         if (bc_hi[idim] == BCType::int_dir  ||  // periodic uses "internal Dirichlet"
             bc_hi[idim] == BCType::foextrap ||  // first-order extrapolation
-            bc_hi[idim] == BCType::ext_dir ) 
+            bc_hi[idim] == BCType::ext_dir  ||
+            bc_hi[idim] == BCType::hoextrapcc ) 
         {  
             for(int sp=0;sp<NVAR;sp++)
             {

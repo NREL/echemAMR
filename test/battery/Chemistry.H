@@ -119,24 +119,35 @@ namespace electrochem
     }
 
     AMREX_GPU_DEVICE AMREX_FORCE_INLINE
-    amrex::Real KD(amrex::Real con, const ProbParm& prob_parm)
+    amrex::Real KD(amrex::Real Ce, const ProbParm& prob_parm)
     {
         const amrex::Real RTF = prob_parm.R_gas_const*prob_parm.T0/prob_parm.Faraday_const;
         // FIXME: there is a sign mismatch... double check this tplus-1 vs 1-tplus
-        return amrex::min((1.0 - t_plus(con)) * (1.0 + Activity(con)) * 2.0 * KeC(con) * RTF, -myeps);
+        return amrex::min((1.0 - t_plus(Ce)) * (1.0 + Activity(Ce)) * 2.0 * KeC(Ce) * RTF, -myeps);
     }
 
     AMREX_GPU_DEVICE AMREX_FORCE_INLINE
-    amrex::Real KDstar(amrex::Real con, const ProbParm& prob_parm)
+    amrex::Real kestar(amrex::Real Ce)
     {
-        return 0.0;
+        constexpr amrex::Real a1 = 1.0e-10;
+        constexpr amrex::Real a2 = 0.0;
+        constexpr amrex::Real a3 = 0.0;
+        constexpr amrex::Real a4 = 0.0;
+
+        return a1 + a2*Ce + a3*Ce*Ce + a4*Ce*Ce;
+    }
+
+    AMREX_GPU_DEVICE AMREX_FORCE_INLINE
+    amrex::Real KDstar(amrex::Real Ce, const ProbParm& prob_parm)
+    {
+        return amrex::min(kestar(Ce) * (1.0 - t_plus(Ce)) * (1.0 + Activity(Ce)), -myeps);
     }
 
 
     AMREX_GPU_DEVICE AMREX_FORCE_INLINE
     amrex::Real intercalation_function(amrex::Real Ca, amrex::Real Ce)
     {
-        return Ca * Ce;
+        return std::sqrt(Ca*Ce);
     }
 
     AMREX_GPU_DEVICE AMREX_FORCE_INLINE

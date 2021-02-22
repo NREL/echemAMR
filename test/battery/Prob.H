@@ -5,8 +5,33 @@
 #include <AMReX_FArrayBox.H>
 #include <AMReX_Geometry.H>
 #include <Chemistry.H>
+#include <ChemistryProbParm.H>
 
 using namespace amrex;
+
+AMREX_GPU_DEVICE
+AMREX_INLINE
+void amrex_probinit (ProbParm & h_prob_parm, ProbParm & d_prob_parm)
+{
+    // read problem specific parmparse parameters here
+    amrex::ParmParse pp("prob");
+    pp.query("anode_conductivity", h_prob_parm.K_a );
+    pp.query("cathode_conductivity", h_prob_parm.K_c );
+    pp.query("anode_diffusivity", h_prob_parm.D_a );
+    pp.query("cathode_diffusivity", h_prob_parm.D_c );
+    pp.query("faraday_constant", h_prob_parm.Faraday_const );
+    pp.query("R_gas_constant", h_prob_parm.R_gas_const );
+    pp.queryarr("pot_bc_lo", h_prob_parm.pot_bc_lo, 0, AMREX_SPACEDIM );
+    pp.queryarr("pot_bc_hi", h_prob_parm.pot_bc_hi, 0, AMREX_SPACEDIM );
+
+#ifdef AMREX_USE_GPU
+    amrex::Gpu::htod_memcpy(d_prob_parm, h_prob_parm, sizeof(ProbParm));
+#else
+    std::memcpy(&d_prob_parm, &h_prob_parm, sizeof(ProbParm));
+#endif
+
+}
+
 
 AMREX_GPU_DEVICE
 AMREX_INLINE
