@@ -97,7 +97,7 @@ void echemAMR::solve_potential(Real current_time)
     int bottom_verbose = 0;
     Real ascalar=0.0;
     Real bscalar=1.0;
-    const Real tol_rel = 1.e-6; // FIXME: had to adjust for constant coefficent, this could be due to missing terms in the intercalation reaction or sign mistakes...
+    const Real tol_rel = 1.e-10; // FIXME: had to adjust for constant coefficent, this could be due to missing terms in the intercalation reaction or sign mistakes...
     const Real tol_abs = 0.0;
 
 #ifdef AMREX_USE_HYPRE
@@ -185,7 +185,8 @@ void echemAMR::solve_potential(Real current_time)
 
         //copy current solution for better guess
         //doesn't seem to work better, dont know why
-        solution[ilev].copy(potential[ilev], 0, 0, 1);
+        // This did cause an issue for a particular loading of g=-.00001 turning it off again
+//        solution[ilev].copy(potential[ilev], 0, 0, 1);
 
         // fill cell centered diffusion coefficients and rhs
         for (MFIter mfi(phi_new[ilev],TilingIfNotGPU()); mfi.isValid(); ++mfi)

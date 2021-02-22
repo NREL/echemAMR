@@ -230,28 +230,29 @@ void echemAMR::ErrorEst (int lev, TagBoxArray& tags, Real time, int ngrow)
 void echemAMR::ReadParameters ()
 {
     {
-	ParmParse pp;  // Traditionally, max_step and stop_time do not have prefix.
-	pp.query("max_step", max_step);
-	pp.query("stop_time", stop_time);
+        ParmParse pp;  // Traditionally, max_step and stop_time do not have prefix.
+        pp.query("max_step", max_step);
+        pp.query("stop_time", stop_time);
     }
 
     {
-	ParmParse pp("amr"); // Traditionally, these have prefix, amr.
+        ParmParse pp("amr"); // Traditionally, these have prefix, amr.
 
-	pp.query("regrid_int", regrid_int);
-	pp.query("plot_file", plot_file);
-	pp.query("plot_int", plot_int);
-	pp.query("chk_file", chk_file);
-	pp.query("chk_int", chk_int);
+        pp.query("regrid_int", regrid_int);
+        pp.query("plot_file", plot_file);
+        pp.query("plot_int", plot_int);
+        pp.query("chk_file", chk_file);
+        pp.query("chk_int", chk_int);
         pp.query("restart",restart_chkfile);
     }
 
     {
-	ParmParse pp("echemamr");
+        ParmParse pp("echemamr");
 	
-	pp.query("cfl", cfl);
+        pp.query("cfl", cfl);
         pp.query("do_reflux", do_reflux);
         pp.query("potential_solve",potential_solve);
+        pp.query("potential_solve_int",pot_solve_int);
     }
 }
 

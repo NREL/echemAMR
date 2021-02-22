@@ -30,6 +30,8 @@ void amrex_probinit (ProbParm & h_prob_parm, ProbParm & d_prob_parm)
     pp.query("faraday_constant", h_prob_parm.Faraday_const );
     pp.query("R_gas_constant", h_prob_parm.R_gas_const );
 
+    pp.query("constant_coefficient", h_prob_parm.constant_coeff);
+    
     pp.queryarr("pot_bc_lo", h_prob_parm.pot_bc_lo, 0, AMREX_SPACEDIM );
     pp.queryarr("pot_bc_hi", h_prob_parm.pot_bc_hi, 0, AMREX_SPACEDIM );
 

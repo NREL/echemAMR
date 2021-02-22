@@ -148,12 +148,12 @@ namespace electrochem
     amrex::Real kestar(amrex::Real Ce, const ProbParm& prob_parm)
     {
         // FIXME: does this have a constant coefficient form?
-        constexpr amrex::Real a1 = 1.0e-10;
+        constexpr amrex::Real a1 = 1.0;
         constexpr amrex::Real a2 = 0.0;
         constexpr amrex::Real a3 = 0.0;
         constexpr amrex::Real a4 = 0.0;
 
-        return a1 + a2*Ce + a3*Ce*Ce + a4*Ce*Ce;
+        return a1 + a2*Ce + a3*Ce*Ce + a4*Ce*Ce*Ce;
     }
 
     AMREX_GPU_DEVICE AMREX_FORCE_INLINE
