@@ -39,11 +39,11 @@ namespace electrochem_transport
                 /* electrolyte or separator */
 
                 // concentration
-                const Real con = phi(i,j,k,CO_ID);
+                const Real Ce = phi(i,j,k,CO_ID);
 
-                const Real DeC = electrochem::DeC(con);
-                const Real tplus = electrochem::t_plus(con);
-                const Real KDstar = electrochem::KDstar(con, prob_parm);
+                const Real DeC = electrochem::DeC(Ce, prob_parm);
+                const Real tplus = electrochem::t_plus(Ce, prob_parm);
+                const Real KDstar = electrochem::KDstar(Ce, prob_parm);
 
                 dcoeff(i,j,k,CO_ID) = DeC - tplus*KDstar/prob_parm.Faraday_const;
 
@@ -75,7 +75,7 @@ namespace electrochem_transport
         } else {
 
             /* electrolyte or separator */
-            dcoeff(i,j,k) = electrochem::KeC(phi(i,j,k,CO_ID));
+            dcoeff(i,j,k) = electrochem::KeC(phi(i,j,k,CO_ID), prob_parm);
 
         }
 

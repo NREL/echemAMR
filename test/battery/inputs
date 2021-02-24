@@ -34,8 +34,8 @@ echemamr.potential_solve = 1
 
 echemamr.lo_bc = 2 2 2
 echemamr.hi_bc = 2 2 2
-prob.pot_bc_lo = 1.0 0.0 0.0
-prob.pot_bc_hi = -1.0 0.0 0.0
+prob.pot_bc_lo = -0.00001 0.0 0.0
+prob.pot_bc_hi = -0.00001 0.0 0.0
 # Tagging
 echemamr.tagged_vars = Concentration Potential
 echemamr.Concentration_refine = 1e20
