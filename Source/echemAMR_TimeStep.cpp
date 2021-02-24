@@ -186,10 +186,12 @@ Real echemAMR::EstTimeStep (int lev, bool local)
     }
 
     Real maxcon = S_new.norm0(0,0,true);
-    std::cout << "max concentration: " << maxcon << std::endl;
+    ParallelDescriptor::ReduceRealMax(maxcon);
+    amrex::Print() << "max concentration: " << maxcon << std::endl;
 //    if(maxcon > 1.0e12) amrex::Abort("con too high");
     Real mincon = S_new.min(0,0,true);
-    std::cout << "min concentration: " << maxcon << std::endl;
+    ParallelDescriptor::ReduceRealMin(mincon);
+    amrex::Print() << "min concentration: " << mincon << std::endl;
 //    if(mincon < 0.0) amrex::Abort("negative concentration");
 
     // Currently, this never happens (function called with local = true).
