@@ -196,9 +196,12 @@ namespace electrochem
         int cm1,cp1;
 
         // shifted indices
-        int ileft, iright;
-        int jleft, jright;
-        int kleft, kright;
+        int ileft=i;
+        int iright=i;
+        int jleft=j;
+        int jright=j;
+        int kleft=k;
+        int kright=k;
 
         switch (dir) {
             case 0:
