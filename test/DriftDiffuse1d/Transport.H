@@ -20,13 +20,29 @@ namespace electrochem_transport
                       const Real time,
                       ProbParm& prob_parm)
     {
+        Real xlen,ylen,zlen,maxlen;
+        int axialdir=0;
+
         const int im1 = (dir == 0) ? i-1 : i;
         const int jm1 = (dir == 1) ? j-1 : j;
         const int km1 = (dir == 2) ? k-1 : k;
+        
+        xlen=prob_hi[0]-prob_lo[0];
+        ylen=prob_hi[1]-prob_lo[1];
+        zlen=prob_hi[2]-prob_lo[2];
 
-        if(sgn == -1) { // lo sides
-            bc(im1,jm1,km1) = (dir==0) ? 1.0 : 0.0;
-        } else { // hi sides
+        maxlen=std::max(xlen,std::max(ylen,zlen));
+
+        if(maxlen==xlen) axialdir=0;
+        if(maxlen==ylen) axialdir=1;
+        if(maxlen==zlen) axialdir=2;
+
+        if(sgn == -1) 
+        { // lo sides
+            bc(im1,jm1,km1) = (dir==axialdir) ? 1.0 : 0.0;
+        } 
+        else 
+        { // hi sides
             bc(i,j,k) = 0.0;
         }
     }
@@ -72,9 +88,8 @@ namespace electrochem_transport
 
             if(dir==0)
             {
-                velx(i,j,k,S1_ID)=
-                    -(phi(i,j,k,POT_ID)
-                     -phi(i-1,j,k,POT_ID))/dx[dir];
+                velx(i,j,k,S1_ID)
+                    =0.5*(phi(i-1,j,k,EFX_ID)+phi(i,j,k,EFX_ID));
             }
         }
     AMREX_GPU_DEVICE AMREX_INLINE
@@ -104,9 +119,8 @@ namespace electrochem_transport
 
             if(dir==1)
             {
-                vely(i,j,k,S1_ID)=
-                -(phi(i,j,k,POT_ID)
-                        -phi(i,j-1,k,POT_ID))/dx[dir];
+                vely(i,j,k,S1_ID)
+                    =0.5*(phi(i,j-1,k,EFY_ID)+phi(i,j,k,EFY_ID));
             }
         }
 
@@ -137,9 +151,8 @@ namespace electrochem_transport
 
             if(dir==2)
             {
-                velz(i,j,k,S1_ID)=
-                -(phi(i,j,k,POT_ID)
-                        -phi(i,j,k-1,POT_ID))/dx[dir];
+                velz(i,j,k,S1_ID)
+                    =0.5*(phi(i,j,k-1,EFZ_ID)+phi(i,j,k,EFZ_ID));
             }
         }
 

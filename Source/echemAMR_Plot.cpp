@@ -48,6 +48,9 @@ Vector<std::string> echemAMR::PlotFileVarNames () const
     {
         allnames[i]=electrochem::specnames[i];
     }
+    allnames[NVAR-4]="Efieldx";
+    allnames[NVAR-3]="Efieldy";
+    allnames[NVAR-2]="Efieldz";
     allnames[NVAR-1]="Potential";
 
     return {allnames};

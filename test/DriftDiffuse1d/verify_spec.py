@@ -48,7 +48,7 @@ fig.colorbar(im, ax=ax[1][1])
 
 dir_char=chr(ord('x')+int(argv[2]))
 fig.suptitle("S1 and S2 solution along "+dir_char+" direction "+argv[3])
-plt.savefig("species_"+dir_char+".png")
+plt.savefig("species_"+dir_char+"_"+argv[3]+".png")
 plt.show()
 #=======================================
 

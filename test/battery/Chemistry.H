@@ -16,8 +16,11 @@
 #define C_ID 2
 #define E_ID 3
 #define S_ID 4
-#define PO_ID 5
-#define NVAR NUM_SPECIES+1
+#define EFX_ID 5
+#define EFY_ID 6
+#define EFZ_ID 7
+#define PO_ID 8
+#define NVAR NUM_SPECIES+4
 
 #define myeps 1.0e-30
 

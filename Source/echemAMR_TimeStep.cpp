@@ -72,7 +72,7 @@ Real echemAMR::EstTimeStep (int lev, bool local)
     MultiFab vel(S_new.boxArray(), S_new.DistributionMap(), S_new.nComp(), 0);
     
     //set sane default values
-    dcoeff.setVal(1.0);
+    dcoeff.setVal(0.5);
     vel.setVal(1.0);
 
     int ncomp=S_new.nComp();
@@ -153,7 +153,7 @@ Real echemAMR::EstTimeStep (int lev, bool local)
     }
 
 
-    Real maxdcoeff=dcoeff.norm0(0,0,true);
+    Real maxdcoeff=1e-50;
     //only loop over species
     for(int comp=0;comp<NUM_SPECIES;comp++)
     {
@@ -168,7 +168,7 @@ Real echemAMR::EstTimeStep (int lev, bool local)
         dt_est = std::min(dt_est, (0.5/AMREX_SPACEDIM)*(dx[i]*dx[i])/maxdcoeff);
     }
     
-    Real maxvel=vel.norm0(0,0,true);
+    Real maxvel=1e-50;
     for(int comp=0;comp<NUM_SPECIES;comp++)
     {
         Real velcomp=vel.norm0(comp,0,true);

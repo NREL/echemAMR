@@ -131,6 +131,10 @@ void initdata(Box const& bx, Array4<Real> const& phi, GeometryData const& geomda
                         phi(i,j,k,CO_ID) = 1200.0;
                     }
                 }
+                phi(i,j,k,EFX_ID) = 0.0;
+                phi(i,j,k,EFY_ID) = 0.0;
+                phi(i,j,k,EFZ_ID) = 0.0;
+                phi(i,j,k,PO_ID)  = 0.0;
 
                 // this has a check in it to make sure we don't have
                 // multiple fields specified in the same cell
@@ -151,6 +155,12 @@ void externalbc(const amrex::Real x[AMREX_SPACEDIM],
         const amrex::Real time,
         amrex::GeometryData const& geomdata)
 {
+    //default to extrapolation
+    for(int c=0;c<NVAR;c++)
+    {
+        s_ext[c]=s_int[c];
+    }
+    
     if(sgn==1) //left lo side
     {
         s_ext[CO_ID]=0.0;

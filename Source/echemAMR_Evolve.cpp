@@ -97,7 +97,10 @@ void echemAMR::solve_potential(Real current_time)
     int bottom_verbose = 0;
     Real ascalar=0.0;
     Real bscalar=1.0;
-    const Real tol_rel = 1.e-10; // FIXME: had to adjust for constant coefficent, this could be due to missing terms in the intercalation reaction or sign mistakes...
+    
+    // FIXME: had to adjust for constant coefficent, 
+    // this could be due to missing terms in the intercalation reaction or sign mistakes...
+    const Real tol_rel = 1.e-10; 
     const Real tol_abs = 0.0;
 
 #ifdef AMREX_USE_HYPRE
@@ -121,7 +124,6 @@ void echemAMR::solve_potential(Real current_time)
         ={LinOpBCType::inhomogNeumann,LinOpBCType::inhomogNeumann,LinOpBCType::inhomogNeumann};
     std::array<LinOpBCType,AMREX_SPACEDIM> bc_potential_hi
         ={LinOpBCType::inhomogNeumann,LinOpBCType::inhomogNeumann,LinOpBCType::inhomogNeumann};
-
 
 
     for(int idim=0;idim<AMREX_SPACEDIM;idim++)
@@ -150,11 +152,13 @@ void echemAMR::solve_potential(Real current_time)
     Vector<MultiFab> potential;
     Vector<MultiFab> acoeff;
     Vector<MultiFab> bcoeff;
+    Vector<Array<MultiFab *,AMREX_SPACEDIM>> gradsoln;
     Vector<MultiFab> solution;
     Vector<MultiFab> rhs;
 
     acoeff.resize(finest_level+1);
     bcoeff.resize(finest_level+1);
+    gradsoln.resize(finest_level+1);
     potential.resize(finest_level+1);
     solution.resize(finest_level+1);
     rhs.resize(finest_level+1);
@@ -178,10 +182,18 @@ void echemAMR::solve_potential(Real current_time)
 
         acoeff[ilev].setVal(0.0);
         mlabec.setACoeffs(ilev, acoeff[ilev]);
-
+        
         bcoeff[ilev].setVal(1.0);
         solution[ilev].setVal(0.0);
         rhs[ilev].setVal(0.0);
+
+        for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
+        {
+            const BoxArray& faceba = amrex::convert(grids[ilev],
+                    IntVect::TheDimensionVector(idim));
+
+            gradsoln[ilev][idim] = new MultiFab(faceba, dmap[ilev], 1, 0);
+        }
 
         //copy current solution for better guess
         //doesn't seem to work better, dont know why
@@ -241,23 +253,30 @@ void echemAMR::solve_potential(Real current_time)
             Array4<Real> bc_arr = potential[ilev].array(mfi);
             Real time = current_time; //for GPU capture
 
-            for(int idim = 0; idim < AMREX_SPACEDIM; ++idim){
-                if (!geom[ilev].isPeriodic(idim)) {
-                    if (bx.smallEnd(idim) == domain.smallEnd(idim)) {
+            for(int idim = 0; idim < AMREX_SPACEDIM; ++idim)
+            {
+                if (!geom[ilev].isPeriodic(idim)) 
+                {
+                    if (bx.smallEnd(idim) == domain.smallEnd(idim)) 
+                    {
+                        amrex::ParallelFor(
+                        amrex::bdryLo(bx, idim),
+                        [=] AMREX_GPU_DEVICE(int i, int j, int k) noexcept 
+                        {
+                            electrochem_transport::potential_bc(i, j, k, idim, -1, phi_arr, 
+                                bc_arr, prob_lo, prob_hi, dx, time, *d_prob_parm);
+                        });
+                    }
+                    if (bx.bigEnd(idim) == domain.bigEnd(idim)) 
+                    {
                           amrex::ParallelFor(
-                              amrex::bdryLo(bx, idim),
-                              [=] AMREX_GPU_DEVICE(int i, int j, int k) noexcept {
-                                electrochem_transport::potential_bc(i, j, k, idim, -1, phi_arr, bc_arr, prob_lo, prob_hi, dx, time, *d_prob_parm);
-                              });
-                      }
-                      if (bx.bigEnd(idim) == domain.bigEnd(idim)) {
-                          amrex::ParallelFor(
-                              amrex::bdryHi(bx, idim),
-                              [=] AMREX_GPU_DEVICE(int i, int j, int k) noexcept {
-                                electrochem_transport::potential_bc(i, j, k, idim, 1, phi_arr, bc_arr, prob_lo, prob_hi, dx, time, *d_prob_parm);
-                              });
-                      }
-
+                          amrex::bdryHi(bx, idim),
+                          [=] AMREX_GPU_DEVICE(int i, int j, int k) noexcept 
+                          {
+                                electrochem_transport::potential_bc(i, j, k, idim, 1, phi_arr, 
+                                        bc_arr, prob_lo, prob_hi, dx, time, *d_prob_parm);
+                          });
+                    }
                 }
             }
         }
@@ -293,6 +312,7 @@ void echemAMR::solve_potential(Real current_time)
 
     mlmg.solve(GetVecOfPtrs(solution), GetVecOfConstPtrs(rhs), tol_rel, tol_abs);
 
+    mlmg.getGradSolution(gradsoln);
     // reset ghost cells using boundary condition values
     // this is commented out since the fillpatch will overwrite this anyways
 //    for(int ilev=0; ilev<=finest_level; ilev++)
@@ -370,6 +390,10 @@ void echemAMR::solve_potential(Real current_time)
     for(int ilev=0; ilev<=finest_level; ilev++)
     {
         phi_new[ilev].copy(solution[ilev], 0, NVAR-1, 1);
+        const Array<const MultiFab *,AMREX_SPACEDIM> 
+        allgrad={gradsoln[ilev][0],gradsoln[ilev][1],gradsoln[ilev][2]};
+        average_face_to_cellcenter(phi_new[ilev],NVAR-4,allgrad);
+        phi_new[ilev].mult(-1.0,NVAR-4,3);
     }
 }
 
