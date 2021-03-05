@@ -90,7 +90,7 @@ namespace electrochem_transport
             GpuArray<Real, AMREX_SPACEDIM> prob_hi,
             GpuArray<Real, AMREX_SPACEDIM> dx,
             const Real time,
-            ProbParm& prob_parm)
+            ProbParm const& prob_parm)
     {
 
         // FIXME: add Neummann bc's to potential and concentration source terms
@@ -132,7 +132,7 @@ namespace electrochem_transport
                       GpuArray<Real, AMREX_SPACEDIM> prob_hi,
                       GpuArray<Real, AMREX_SPACEDIM> dx,
                       const Real time,
-                      ProbParm& prob_parm)
+                      ProbParm const& prob_parm)
     {
 
         const int im1 = (dir == 0) ? i-1 : i;

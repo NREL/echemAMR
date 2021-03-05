@@ -18,7 +18,7 @@ namespace electrochem_transport
                       GpuArray<Real, AMREX_SPACEDIM> prob_hi,
                       GpuArray<Real, AMREX_SPACEDIM> dx,
                       const Real time,
-                      ProbParm& prob_parm)
+                      ProbParm const& prob_parm)
     {
         Real xlen,ylen,zlen,maxlen;
         int axialdir=0;

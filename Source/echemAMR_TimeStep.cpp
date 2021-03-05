@@ -59,6 +59,7 @@ Real echemAMR::EstTimeStep (int lev, bool local)
     auto prob_lo = geom[lev].ProbLoArray();
     auto prob_hi = geom[lev].ProbHiArray();
     const auto dx = geom[lev].CellSizeArray();
+    ProbParm const* localprobparm = d_prob_parm;
     
     const Real cur_time = t_new[lev];
     MultiFab& S_new = phi_new[lev];
@@ -72,7 +73,7 @@ Real echemAMR::EstTimeStep (int lev, bool local)
     MultiFab vel(S_new.boxArray(), S_new.DistributionMap(), S_new.nComp(), 0);
     
     //set sane default values
-    dcoeff.setVal(0.5);
+    dcoeff.setVal(1.0);
     vel.setVal(1.0);
 
     int ncomp=S_new.nComp();
@@ -113,7 +114,7 @@ Real echemAMR::EstTimeStep (int lev, bool local)
             {
                 electrochem_transport::compute_dcoeff(i, j, k, statearray, 
                         dcoeffarray, prob_lo, prob_hi,
-                        dx, cur_time, *d_prob_parm);
+                        dx, cur_time, *localprobparm);
             });
 
             amrex::ParallelFor(bx_x,

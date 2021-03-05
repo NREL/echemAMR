@@ -100,6 +100,8 @@ void echemAMR::solve_potential(Real current_time)
     
     // FIXME: had to adjust for constant coefficent, 
     // this could be due to missing terms in the intercalation reaction or sign mistakes...
+    ProbParm const* localprobparm = d_prob_parm;
+
     const Real tol_rel = 1.e-10; 
     const Real tol_abs = 0.0;
 
@@ -220,13 +222,13 @@ void echemAMR::solve_potential(Real current_time)
             [=] AMREX_GPU_DEVICE (int i, int j, int k)
             {
                 electrochem_transport::compute_potential_dcoeff
-                (i, j, k, phi_arr, bcoeff_arr, prob_lo, prob_hi, dx, time, *d_prob_parm);
+                (i, j, k, phi_arr, bcoeff_arr, prob_lo, prob_hi, dx, time, *localprobparm);
             });
             amrex::ParallelFor(bx,
             [=] AMREX_GPU_DEVICE (int i, int j, int k)
             {
                 electrochem_transport::compute_potential_source
-                (i, j, k, phi_arr, rhs_arr, prob_lo, prob_hi, dx, time, *d_prob_parm);
+                (i, j, k, phi_arr, rhs_arr, prob_lo, prob_hi, dx, time, *localprobparm);
             });
 
         }
@@ -264,7 +266,7 @@ void echemAMR::solve_potential(Real current_time)
                         [=] AMREX_GPU_DEVICE(int i, int j, int k) noexcept 
                         {
                             electrochem_transport::potential_bc(i, j, k, idim, -1, phi_arr, 
-                                bc_arr, prob_lo, prob_hi, dx, time, *d_prob_parm);
+                                bc_arr, prob_lo, prob_hi, dx, time, *localprobparm);
                         });
                     }
                     if (bx.bigEnd(idim) == domain.bigEnd(idim)) 
@@ -274,7 +276,7 @@ void echemAMR::solve_potential(Real current_time)
                           [=] AMREX_GPU_DEVICE(int i, int j, int k) noexcept 
                           {
                                 electrochem_transport::potential_bc(i, j, k, idim, 1, phi_arr, 
-                                        bc_arr, prob_lo, prob_hi, dx, time, *d_prob_parm);
+                                        bc_arr, prob_lo, prob_hi, dx, time, *localprobparm);
                           });
                     }
                 }
@@ -515,6 +517,7 @@ void echemAMR::compute_dsdt (int lev, const int num_grow,
     const auto dx = geom[lev].CellSizeArray();
     auto prob_lo = geom[lev].ProbLoArray();
     auto prob_hi = geom[lev].ProbHiArray();
+    ProbParm const* localprobparm = d_prob_parm;
 
     int ncomp=Sborder.nComp();
 
@@ -599,14 +602,14 @@ void echemAMR::compute_dsdt (int lev, const int num_grow,
             [=] AMREX_GPU_DEVICE (int i, int j, int k)
             {
                 electrochem_transport::compute_dcoeff(i, j, k, sborder_arr, 
-                        dcoeff_arr, prob_lo, prob_hi, dx, time, *d_prob_parm);
+                        dcoeff_arr, prob_lo, prob_hi, dx, time, *localprobparm);
             });
 
             amrex::ParallelFor(bx,
             [=] AMREX_GPU_DEVICE (int i, int j, int k)
             {
                 electrochem_reactions::compute_react_source(i, j, k, sborder_arr, reactsource_arr, 
-                        prob_lo, prob_hi, dx, time, *d_prob_parm);
+                        prob_lo, prob_hi, dx, time, *localprobparm);
             });
 
             amrex::ParallelFor(bx_x,ncomp,

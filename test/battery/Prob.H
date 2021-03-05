@@ -35,7 +35,7 @@ void amrex_probinit (ProbParm & h_prob_parm, ProbParm & d_prob_parm)
     pp.queryarr("pot_bc_hi", h_prob_parm.pot_bc_hi, 0, AMREX_SPACEDIM );
 
 #ifdef AMREX_USE_GPU
-    amrex::Gpu::htod_memcpy(d_prob_parm, h_prob_parm, sizeof(ProbParm));
+    amrex::Gpu::htod_memcpy(&d_prob_parm, &h_prob_parm, sizeof(ProbParm));
 #else
     std::memcpy(&d_prob_parm, &h_prob_parm, sizeof(ProbParm));
 #endif
