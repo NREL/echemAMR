@@ -23,6 +23,7 @@ echemamr.cfl            = 0.8
 
 echemamr.do_reflux = 1
 echemamr.potential_solve = 1
+echemamr.potential_solve_int = 100
 
 #periodic 0
 #extdir 3
