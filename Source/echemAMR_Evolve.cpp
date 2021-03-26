@@ -106,8 +106,8 @@ void echemAMR::solve_potential(Real current_time)
     const Real tol_abs = 0.0;
 
 #ifdef AMREX_USE_HYPRE
-        int hypre_interface_i = 1;  // 1. structed, 2. semi-structed, 3. ij
-        Hypre::Interface hypre_interface = Hypre::Interface::structed;
+    int hypre_interface_i = 1;  // 1. structed, 2. semi-structed, 3. ij
+    Hypre::Interface hypre_interface = Hypre::Interface::structed;
 #endif
 
     info.setAgglomeration(agglomeration);
