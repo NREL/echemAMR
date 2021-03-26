@@ -83,7 +83,7 @@ Real echemAMR::SurfaceIntegral(int comp, int domain1, int domain2)
             Real r = 0.0;
             AMREX_LOOP_3D(bx, i, j, k,
             {
-                r += electrochem_utilities::surface_value(i, j, k, CO_ID, domain1, domain2, fab, dx);
+                r += electrochem_utilities::surface_value(i, j, k, comp, domain1, domain2, fab, dx);
             });
             return r;
         });
