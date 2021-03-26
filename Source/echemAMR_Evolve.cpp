@@ -15,6 +15,7 @@
 #include<Chemistry.H>
 #include<Transport.H>
 #include<Reactions.H>
+#include<PostProcessing.H>
 #include<ChemistryProbParm.H>
 #include <AMReX_MLABecLaplacian.H>
 
@@ -23,6 +24,8 @@ void echemAMR::Evolve ()
 {
     Real cur_time = t_new[0];
     int last_plot_file_step = 0;
+    
+    electrochem_postprocessing::callback(*this);
 
     for (int step = istep[0]; step < max_step && cur_time < stop_time; ++step)
     {
@@ -42,8 +45,13 @@ void echemAMR::Evolve ()
 
 	cur_time += dt[0];
         
+    electrochem_postprocessing::callback(*this);
+
         amrex::Print() << "Coarse STEP " << step+1 << " ends." << " TIME = " << cur_time
                        << " DT = " << dt[0]  << std::endl;
+
+    exit(1);
+
 
 	// sync up time
 	for (lev = 0; lev <= finest_level; ++lev) 

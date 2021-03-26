@@ -77,6 +77,11 @@ public:
     // compute dt from CFL considerations
     Real EstTimeStep (int lev, bool local=false);
 
+    // a wrapper for computing integrals
+    Real VolumeIntegral (int comp, int domain);
+
+    // a wrapper for computing integrals
+    Real SurfaceIntegral (int comp, int domain1, int domain2);
 private:
 
     ////////////////
