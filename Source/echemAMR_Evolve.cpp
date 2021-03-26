@@ -24,7 +24,7 @@ void echemAMR::Evolve ()
 {
     Real cur_time = t_new[0];
     int last_plot_file_step = 0;
-    
+
     electrochem_postprocessing::callback(*this);
 
     for (int step = istep[0]; step < max_step && cur_time < stop_time; ++step)
@@ -50,7 +50,6 @@ void echemAMR::Evolve ()
         amrex::Print() << "Coarse STEP " << step+1 << " ends." << " TIME = " << cur_time
                        << " DT = " << dt[0]  << std::endl;
 
-    exit(1);
 
 
 	// sync up time
