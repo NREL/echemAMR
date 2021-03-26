@@ -21,7 +21,7 @@ int main(int argc, char* argv[])
     const Real strt_total = amrex::second();
 
     electrochem::init();
-
+exit(1);
     {
         // constructor - reads in parameters from inputs file
         //             - sizes multilevel arrays and data structures
