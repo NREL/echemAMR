@@ -83,7 +83,7 @@ public:
     // a wrapper for computing integrals
     Real SurfaceIntegral (int comp, int domain1, int domain2);
 
-    void post_timestep(Real time, int timestep);
+    void postprocess(Real time, int timestep);
 private:
 
     ////////////////

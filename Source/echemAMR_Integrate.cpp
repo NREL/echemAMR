@@ -3,7 +3,7 @@
 
 #include <echemAMR.H>
 #include<Chemistry.H>
-#include<Utilities.H>
+#include<IntegralUtils.H>
 
 //Returns the volume integral of the state variable <comp> on <domain>
 //TODO: incorperate a level mask
@@ -11,7 +11,6 @@ Real echemAMR::VolumeIntegral(int comp, int domain)
 {
     Real int_tmp = 0;
     Real exact_con;
-    bool local = true;
     for (int lev = 0; lev <= finest_level; ++lev)
     {
 
@@ -21,24 +20,23 @@ Real echemAMR::VolumeIntegral(int comp, int domain)
         MultiFab& S_new = phi_new[lev];
        
         //need fillpatched data for velocity calculation 
-        constexpr int num_grow = 2; 
-        MultiFab Sborder(grids[lev], dmap[lev], S_new.nComp(), num_grow);
-        FillPatch(lev, cur_time, Sborder, 0, Sborder.nComp()); 
+        // constexpr int num_grow = 2; 
+        // MultiFab Sborder(grids[lev], dmap[lev], S_new.nComp(), num_grow);
+        // FillPatch(lev, cur_time, Sborder, 0, Sborder.nComp()); 
 
         // need to implement the mask feature from https://github.com/Exawind/amr-wind/blob/main/amr-wind/utilities/sampling/Enstrophy.cpp
 
-        Real nm1 = amrex::ReduceSum(Sborder, lev,
+        Real nm1 = amrex::ReduceSum(S_new, lev,
         [=] AMREX_GPU_HOST_DEVICE (Box const& bx, Array4<Real const> const& fab) -> Real
         {
             Real r = 0.0;
             AMREX_LOOP_3D(bx, i, j, k,
             {
-                r += electrochem_utilities::volume_value(i, j, k, comp, domain, fab, dx);
+                r += electrochem_integral_utils::volume_value(i, j, k, comp, domain, fab, dx);
             });
             return r;
         });
 
-        if (!local)
         ParallelAllReduce::Sum(nm1, ParallelContext::CommunicatorSub());
 
         int_tmp = nm1;
@@ -61,7 +59,6 @@ Real echemAMR::SurfaceIntegral(int comp, int domain1, int domain2)
 {
     Real int_tmp = 0;
     Real exact_con;
-    bool local = true;
     for (int lev = 0; lev <= finest_level; ++lev)
     {
 
@@ -83,12 +80,11 @@ Real echemAMR::SurfaceIntegral(int comp, int domain1, int domain2)
             Real r = 0.0;
             AMREX_LOOP_3D(bx, i, j, k,
             {
-                r += electrochem_utilities::surface_value(i, j, k, comp, domain1, domain2, fab, dx);
+                r += electrochem_integral_utils::surface_value(i, j, k, comp, domain1, domain2, fab, dx);
             });
             return r;
         });
 
-        if (!local)
         ParallelAllReduce::Sum(nm1, ParallelContext::CommunicatorSub());
 
         int_tmp = nm1;

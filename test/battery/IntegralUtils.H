@@ -3,7 +3,7 @@
 #include <AMReX_MultiFabUtil.H>
 
 using namespace amrex;
-namespace electrochem_utilities
+namespace electrochem_integral_utils
 {
 
 //Returns the state value of <comp> if within <domain>

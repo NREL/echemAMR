@@ -25,7 +25,7 @@ void echemAMR::Evolve ()
     Real cur_time = t_new[0];
     int last_plot_file_step = 0;
 
-    post_timestep(cur_time, 0);
+    postprocess(cur_time, 0);
 
     for (int step = istep[0]; step < max_step && cur_time < stop_time; ++step)
     {
@@ -45,7 +45,7 @@ void echemAMR::Evolve ()
 
 	cur_time += dt[0];
         
-    post_timestep(cur_time, step);
+    postprocess(cur_time, step);
 
         amrex::Print() << "Coarse STEP " << step+1 << " ends." << " TIME = " << cur_time
                        << " DT = " << dt[0]  << std::endl;

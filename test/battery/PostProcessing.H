@@ -6,7 +6,7 @@
 
 using namespace amrex;
 
-void echemAMR::post_timestep(Real time, int timestep)
+void echemAMR::postprocess(Real time, int timestep)
 {
 
     amrex::Print() << std::endl;
