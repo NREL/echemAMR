@@ -1,5 +1,5 @@
-#ifndef _UTILITIES_H_
-#define _UTILITIES_H_
+#ifndef _INTEGRALUTILS_H_
+#define _INTEGRALUTILS_H_
 #include <AMReX_MultiFabUtil.H>
 
 using namespace amrex;

@@ -1,9 +1,9 @@
-#ifndef _UTILITIES_H_
-#define _UTILITIES_H_
+#ifndef _INTEGRALUTILS_H_
+#define _INTEGRALUTILS_H_
 #include <AMReX_MultiFabUtil.H>
 
 using namespace amrex;
-namespace electrochem_utilities
+namespace electrochem_integral_utils
 {
 
 //Returns the state value of <comp> if within <domain>
