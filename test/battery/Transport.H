@@ -27,25 +27,27 @@ namespace electrochem_transport
             const int comp = electrochem::level_set_to_component(i,j,k,phi);
 
             if(comp == electrochem::cathode){
-
-                dcoeff(i,j,k,CO_ID) = prob_parm.D_c;
+                const Real Cs = phi(i,j,k,CO_ID); // cathode solid concentration
+                dcoeff(i,j,k,CO_ID) = electrochem::Dc_bulk(Cs, prob_parm); // Cathode diffusion coefficient
 
             } else if (comp == electrochem::anode){
-
-                dcoeff(i,j,k,CO_ID) = prob_parm.D_a;
+                const Real Cs = phi(i,j,k,CO_ID); // anode solid concentration
+                dcoeff(i,j,k,CO_ID) = electrochem::Da_bulk(Cs, prob_parm); // Cathode diffusion coefficient
 
             } else {
 
                 /* electrolyte or separator */
+                const Real Ce = phi(i,j,k,CO_ID); // concentration
 
-                // concentration
-                const Real Ce = phi(i,j,k,CO_ID);
-
-                const Real DeC = electrochem::DeC(Ce, prob_parm);
+                const Real DeC = electrochem::De_C(Ce, prob_parm);
                 const Real tplus = electrochem::t_plus(Ce, prob_parm);
-                const Real KDstar = electrochem::KDstar(Ce, prob_parm);
+                const Real KD = electrochem::K_D(Ce, prob_parm); // KD is either KD or KDstar as a function of prob_parm.use_KDstar
 
-                dcoeff(i,j,k,CO_ID) = DeC - tplus*KDstar/prob_parm.Faraday_const;
+                if(prob_parm.use_KDstar) { 
+                     dcoeff(i,j,k,CO_ID) = DeC - tplus*KD/prob_parm.Faraday_const; // QUESTION: The concentration flux is -dcoeff*grad(Ce) -t/F*conductivity coefficient*grad(phie). In the code, is -t/F*conductivity coefficient*grad(phie) considered ? 
+                } else {
+                     dcoeff(i,j,k,CO_ID) = 1.0; // Use the baseline Dec - t/F*Kd*grad(ln(Ce))
+                }
 
             }
 
@@ -65,17 +67,20 @@ namespace electrochem_transport
         const int comp = electrochem::level_set_to_component(i,j,k,phi);
 
         if(comp == electrochem::cathode){
-
-            dcoeff(i,j,k) = prob_parm.K_c;
+            const Real Cs = phi(i,j,k,CO_ID); // cathode solid concentration
+            dcoeff(i,j,k) = electrochem::Kc_bulk(Cs, prob_parm); // Cathode diffusion coefficient
+            // dcoeff(i,j,k) = prob_parm.K_c; // QUESTION: why dcoeff(i,j,k) and not dcoeff(i,j,k,CO_ID) as done for the diffusion coefficient?
 
         } else if (comp == electrochem::anode){
-
-            dcoeff(i,j,k) = prob_parm.K_a;
+            const Real Cs = phi(i,j,k,CO_ID); // anode solid concentration
+            dcoeff(i,j,k) = electrochem::Ka_bulk(Cs, prob_parm); // Cathode diffusion coefficient
 
         } else {
 
             /* electrolyte or separator */
-            dcoeff(i,j,k) = electrochem::KeC(phi(i,j,k,CO_ID), prob_parm);
+            // QUESTION: this time we use the conductivity coefficient, while the term before the grad(phie) is much more complex
+            const Real Ce = phi(i,j,k,CO_ID); // concentration
+            dcoeff(i,j,k) = electrochem::KeC(phi(i,j,k,CO_ID), prob_parm); // QUESTION: the potential fluix is -dcoeff*grad(phie) + Kdstar*grad(Ce). In the code, is Kdstar*grad(Ce) considered?
 
         }
 
@@ -102,13 +107,13 @@ namespace electrochem_transport
 
             // concentration
             const Real Ce = phi(i,j,k,CO_ID);
-            const Real KDstar = electrochem::KDstar(Ce, prob_parm);
+            const Real KD = electrochem::K_D(Ce, prob_parm); // KD is either KD or KDstar as a function of prob_parm.use_KDstar
 
             // FIXME: should probably average KD over faces but for now use use value at center
             // FIXME: check sign on this
-            // FIXME: this should be KDstar
+            // FIXME: this should be KDstar // Is KDstar or KD depending on prob_parm.use_KDstar
             // FIXME: need to account for walls
-            potsource(i,j,k) = KDstar * ( (phi(i-1,j,k,CO_ID) - 2.0*phi(i,j,k,CO_ID) + phi(i+1,j,k,CO_ID))/dx[0]/dx[0]
+            potsource(i,j,k) = KD * ( (phi(i-1,j,k,CO_ID) - 2.0*phi(i,j,k,CO_ID) + phi(i+1,j,k,CO_ID))/dx[0]/dx[0]
                                          +(phi(i,j-1,k,CO_ID) - 2.0*phi(i,j,k,CO_ID) + phi(i,j+1,k,CO_ID))/dx[1]/dx[1]
                                          +(phi(i,j,k-1,CO_ID) - 2.0*phi(i,j,k,CO_ID) + phi(i,j,k+1,CO_ID))/dx[2]/dx[2]);
         }

@@ -7,6 +7,8 @@
 #include <Chemistry.H>
 #include <ChemistryProbParm.H>
 
+#include<echemAMR.H>
+
 using namespace amrex;
 
 AMREX_INLINE
@@ -15,22 +17,26 @@ void amrex_probinit (ProbParm & h_prob_parm, ProbParm & d_prob_parm)
     // read problem specific parmparse parameters here
     amrex::ParmParse pp("prob");
 
-    pp.query("anode_conductivity", h_prob_parm.K_a );
-    pp.query("cathode_conductivity", h_prob_parm.K_c );
-
-    pp.query("anode_diffusivity", h_prob_parm.D_a );
-    pp.query("cathode_diffusivity", h_prob_parm.D_c );
-
-    pp.query("Electrolyte_diffusivity", h_prob_parm.Debulk);
-    pp.query("Electrolyte_Transference", h_prob_parm.tplus);
-    pp.query("Electrolyte_conductivity", h_prob_parm.Kebulk);
-    pp.query("Electrolyte_activity",h_prob_parm.Activityel);
-    
     pp.query("faraday_constant", h_prob_parm.Faraday_const );
     pp.query("R_gas_constant", h_prob_parm.R_gas_const );
 
-    pp.query("constant_coefficient", h_prob_parm.constant_coeff);
-    
+    pp.query("material_electrolyte", h_prob_parm.mater_electrolyte);
+    pp.query("use_KDstar", h_prob_parm.use_KDstar);
+    pp.query("material_cathode", h_prob_parm.mater_cathode);
+    pp.query("material_anode", h_prob_parm.mater_anode);
+
+    pp.query("lowerscale_vf_pore_anode", h_prob_parm.lowerscale_vf_pore_anode);
+    pp.query("lowerscale_vf_pore_separator", h_prob_parm.lowerscale_vf_pore_separator);
+    pp.query("lowerscale_vf_pore_cathode", h_prob_parm.lowerscale_vf_pore_cathode);
+    pp.query("lowerscale_p_pore_anode", h_prob_parm.lowerscale_p_pore_anode);
+    pp.query("lowerscale_p_pore_separator", h_prob_parm.lowerscale_p_pore_separator);
+    pp.query("lowerscale_p_pore_cathode", h_prob_parm.lowerscale_p_pore_cathode);
+
+    pp.query("ce_atrest", h_prob_parm.ce_atrest);
+    pp.query("soc_anode_t0", h_prob_parm.soc_anode_t0);
+    pp.query("soc_cathode_t0", h_prob_parm.soc_cathode_t0);
+    pp.query("phi_reference", h_prob_parm.phi_reference);
+
     pp.queryarr("pot_bc_lo", h_prob_parm.pot_bc_lo, 0, AMREX_SPACEDIM );
     pp.queryarr("pot_bc_hi", h_prob_parm.pot_bc_hi, 0, AMREX_SPACEDIM );
 
@@ -63,6 +69,34 @@ void initdata(Box const& bx, Array4<Real> const& phi, GeometryData const& geomda
 #ifdef _OPENMP
 #pragma omp parallel for collapse(2) if (GPU::notInLaunchRegion)
 #endif
+
+    // Active material volumes
+    // echemAMR::post_timestep(0, 0);
+
+    // Applied loading values (BC)
+    // g=f(active material volume)
+
+    // Active interface surface
+    // will determine s_anode and s_cathode 
+
+    //Mean Faraday current at the active interfaces
+    // this will determine j_anode=s_anode/g and j_cathode=s_cathode/g used in below functions
+
+    // Initial potential
+    // const amrex::Real phie_to = get_phie_initial_from_anode(amrex::Real j_anode, const ProbParm& prob_parm);
+    // const amrex::Real phi_c_to = get_phic_initial_from_electrolyte(amrex::Real j_cathode, amrex::Real phie_to, const ProbParm& prob_parm);
+    const amrex::Real phie_to = -0.1;
+    const amrex::Real phi_c_to = 4.0;
+
+    //ProbParm h_prob_parm; // Create a new instance of the structure ProbParm
+
+
+    //ProbParm* hh_prob_parm = nullptr;
+    //ProbParm* dd_prob_parm = nullptr;
+    //hh_prob_parm = new ProbParm{};
+    //dd_prob_parm = (ProbParm*)The_Arena()->alloc(sizeof(ProbParm));
+    //amrex_probinit(*hh_prob_parm, *dd_prob_parm);
+
     for (int k = lo.z; k <= hi.z; ++k) 
     {
         const Real z = prob_lo[2] + (0.5+k) * dx[2];
@@ -102,7 +136,11 @@ void initdata(Box const& bx, Array4<Real> const& phi, GeometryData const& geomda
                             Real r = std::sqrt((x-x0)*(x-x0) + (y-y0)*(y-y0) + (z-z0)*(z-z0));
                             if(r < Lx/20.0){
                                 phi(i,j,k,C_ID) = 1.0;
-                                phi(i,j,k,CO_ID) = 10000.0;
+                                const amrex::Real soc_init = echemAMR::h_prob_parm->soc_cathode_t0;
+                                amrex::Print() << "soc init cathode:       " << soc_init << std::endl;
+                                const amrex::Real csmax = electrochem::Cs_max_cathode(*echemAMR::h_prob_parm);
+                                phi(i,j,k,CO_ID) = soc_init * csmax;
+                                phi(i,j,k,PO_ID) = phi_c_to;
                                 comp_found = true;
                             }
                         }
@@ -112,7 +150,11 @@ void initdata(Box const& bx, Array4<Real> const& phi, GeometryData const& geomda
                             Real r = std::sqrt((x-x0)*(x-x0) + (y-y0)*(y-y0) + (z-z0)*(z-z0));
                             if(r < Lx/20.0){
                                 phi(i,j,k,A_ID) = 1.0;
-                                phi(i,j,k,CO_ID) = 1000.0;
+                                const amrex::Real soc_init = echemAMR::h_prob_parm->soc_anode_t0;
+                                amrex::Print() << "soc init anode:       " << soc_init << std::endl;
+                                const amrex::Real csmax = electrochem::Cs_max_anode(*echemAMR::h_prob_parm);
+                                phi(i,j,k,CO_ID) = soc_init * csmax;
+                                phi(i,j,k,PO_ID) = echemAMR::h_prob_parm->phi_reference;
                                 comp_found = true;
                             }
                         }
@@ -123,17 +165,19 @@ void initdata(Box const& bx, Array4<Real> const& phi, GeometryData const& geomda
                     if(x > s_xlo && x < s_xhi) {
                         // separator
                         phi(i,j,k,S_ID) = 1.0;
-                        phi(i,j,k,CO_ID) = 1200.0;
+                        phi(i,j,k,CO_ID) = echemAMR::h_prob_parm->ce_atrest;
+                        phi(i,j,k,PO_ID) = phie_to;
                     } else {
                         // electrolyte
                         phi(i,j,k,E_ID) = 1.0;
-                        phi(i,j,k,CO_ID) = 1200.0;
+                        phi(i,j,k,CO_ID) = echemAMR::h_prob_parm->ce_atrest;
+                        phi(i,j,k,PO_ID) = phie_to;
                     }
                 }
                 phi(i,j,k,EFX_ID) = 0.0;
                 phi(i,j,k,EFY_ID) = 0.0;
                 phi(i,j,k,EFZ_ID) = 0.0;
-                phi(i,j,k,PO_ID)  = 0.0;
+                //phi(i,j,k,PO_ID)  = 0.0;
 
                 // this has a check in it to make sure we don't have
                 // multiple fields specified in the same cell

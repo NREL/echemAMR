@@ -39,7 +39,7 @@ namespace electrochem_reactions
 
             const Real KeC = electrochem::KeC(Ce, prob_parm);
             const Real tplus = electrochem::t_plus(Ce, prob_parm);
-            const Real KD = electrochem::KD(Ce, prob_parm);
+            const Real KD = electrochem::K_D(Ce, prob_parm);
 
             // FIXME: should probably average KeC and tplus over faces but for now use value at center
             // FIXME: check sign on this
