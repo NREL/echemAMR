@@ -115,6 +115,7 @@ void initdata(Box const& bx, Array4<Real> const& phi, GeometryData const& geomda
 
     // Applied current density at the interface active material - current collector
     // These are the two Neumann Boundary conditions value applies at the left and right extremities of the cell
+    // FIX ME: MICHAEL/HARI: could you link g with these two values?
     const amrex::Real Applied_current_density_anode = Applied_current / surface_anodesolid_currentcollector; // [A.m-2]
     const amrex::Real Applied_current_density_cathode = Applied_current / surface_cathodsolid_currentcollector; // [A.m-2]
 
@@ -124,7 +125,6 @@ void initdata(Box const& bx, Array4<Real> const& phi, GeometryData const& geomda
 
     // Initial current density at the interface active material - electrolyte
     // These are the two Neumann Boundary conditions value applied at the active interface.
-    // FIX ME: MICHAEL/HARI: could you link g with these two values?
     // At time=0s, value is uniform along the interface, then it will vary locally while the surface integral ([A]) will be constant and equal to "Applied_current"
     // Any deviation from the equality: Applied_current = integral(current density, ds active material-current collector) = integral(current density, ds active material-electrolyte)
     // will result in an error in mass conservation
