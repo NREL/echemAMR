@@ -25,6 +25,13 @@ void amrex_probinit (ProbParm & h_prob_parm, ProbParm & d_prob_parm)
     pp.query("material_cathode", h_prob_parm.mater_cathode);
     pp.query("material_anode", h_prob_parm.mater_anode);
 
+    pp.query("T0", h_prob_parm.T0);
+    pp.query("Crate", h_prob_parm.Crate);
+    pp.query("cathode_soc_min", h_prob_parm.cathode_soc_min);
+    pp.query("cathode_soc_max", h_prob_parm.cathode_soc_max);
+    pp.query("anode_soc_min", h_prob_parm.anode_soc_min);
+    pp.query("cathode_soc_min", h_prob_parm.anode_soc_max);
+
     pp.query("lowerscale_vf_pore_anode", h_prob_parm.lowerscale_vf_pore_anode);
     pp.query("lowerscale_vf_pore_separator", h_prob_parm.lowerscale_vf_pore_separator);
     pp.query("lowerscale_vf_pore_cathode", h_prob_parm.lowerscale_vf_pore_cathode);
@@ -70,27 +77,104 @@ void initdata(Box const& bx, Array4<Real> const& phi, GeometryData const& geomda
 #pragma omp parallel for collapse(2) if (GPU::notInLaunchRegion)
 #endif
 
-    // Active material volumes
-    // echemAMR::post_timestep(0, 0);
+    // ------------------------
+    // POTENTIAL INITIALIZATION
+    // ------------------------
 
-    // Applied loading values (BC)
-    // g=f(active material volume)
+    // Calculate active material volumes
+    // echemAMR::post_timestep(0, 0); // FIX ME: add volume calculation from Jeff post-processing
+    const amrex::Real volume_anode = 1.171875e-15; // [m3] temporary value
+    const amrex::Real volume_cathode = 1.171875e-15; // [m3] temporary value
 
-    // Active interface surface
-    // will determine s_anode and s_cathode 
+    // Calculate anode and cathode theoritical (use full soc range) and pratical (use a reduced soc range) capacity
+    const amrex::Real Fday = echemAMR::h_prob_parm->Faraday_const; // [C.mol-1]
 
-    //Mean Faraday current at the active interfaces
-    // this will determine j_anode=s_anode/g and j_cathode=s_cathode/g used in below functions
+    const amrex::Real Csmax_anode = electrochem::Cs_max_anode(*echemAMR::h_prob_parm); // [mol.m-3]
+    const amrex::Real SOCrange_anode = echemAMR::h_prob_parm->anode_soc_max - echemAMR::h_prob_parm->anode_soc_min; // []
+    const amrex::Real theoritical_capacity_anode = volume_anode * Csmax_anode * Fday; // [C]
+    const amrex::Real pratical_capacity_anode = theoritical_capacity_anode * SOCrange_anode; // [C]	
 
-    // Initial potential
-    // const amrex::Real phie_to = get_phie_initial_from_anode(amrex::Real j_anode, const ProbParm& prob_parm);
-    // const amrex::Real phi_c_to = get_phic_initial_from_electrolyte(amrex::Real j_cathode, amrex::Real phie_to, const ProbParm& prob_parm);
-    const amrex::Real phie_to = -0.1;
-    const amrex::Real phi_c_to = 4.0;
+    const amrex::Real Csmax_cathode = electrochem::Cs_max_cathode(*echemAMR::h_prob_parm); // [mol.m-3]
+    const amrex::Real SOCrange_cathode = echemAMR::h_prob_parm->cathode_soc_max - echemAMR::h_prob_parm->cathode_soc_min; // []
+    const amrex::Real theoritical_capacity_cathode = volume_cathode * Csmax_cathode * Fday; // [C]
+    const amrex::Real pratical_capacity_cathode = theoritical_capacity_cathode * SOCrange_cathode; // [C]
 
+    // Deduce cell pratical capacity
+    const amrex::Real pratical_capacity_cell = amrex::min(pratical_capacity_anode, pratical_capacity_cathode); // [C]
+    const amrex::Real Cell_NP_ratio = pratical_capacity_anode/pratical_capacity_cathode; // Not required, just FYI. Should be always >1 (if not, you can expect eartly degradation)
+
+    // Applied current
+    const amrex::Real Crate = echemAMR::h_prob_parm->Crate;
+    const amrex::Real time_to_charge = (1/Crate)*3600; // [s] Time to charge or discharge the cell
+    const amrex::Real Current1C = pratical_capacity_cell/3600; // [A=C.s-1] Current for 1C
+    const amrex::Real Applied_current = Current1C * Crate; // [A] (but we need the applied current density in A.m-2)
+
+    // Surface calculations // FIX ME: add surface calculations from Jeff post-processing
+    const amrex::Real surface_anodesolid_currentcollector = 7.8540e-11; // [m2], temporary value pi*((5e-6)^2)
+    const amrex::Real surface_cathodsolid_currentcollector = 7.8540e-11; // [m2], temporary value pi*((5e-6)^2)
+
+    // Applied current density at the interface active material - current collector
+    // These are the two Neumann Boundary conditions value applies at the left and right extremities of the cell
+    const amrex::Real Applied_current_density_anode = Applied_current / surface_anodesolid_currentcollector; // [A.m-2]
+    const amrex::Real Applied_current_density_cathode = Applied_current / surface_cathodsolid_currentcollector; // [A.m-2]
+
+    // Surface calculations // FIX ME: add surface calculations from Jeff post-processing
+    const amrex::Real surface_anodesolid_electrolyte = 3.1416e-10; // 4*pi*((5e-6)^2)
+    const amrex::Real surface_cathodesolid_electrolyte = 3.1416e-10; // 4*pi*((5e-6)^2)
+
+    // Initial current density at the interface active material - electrolyte
+    // These are the two Neumann Boundary conditions value applied at the active interface.
+    // FIX ME: MICHAEL/HARI: could you link g with these two values?
+    // At time=0s, value is uniform along the interface, then it will vary locally while the surface integral ([A]) will be constant and equal to "Applied_current"
+    // Any deviation from the equality: Applied_current = integral(current density, ds active material-current collector) = integral(current density, ds active material-electrolyte)
+    // will result in an error in mass conservation
+    const amrex::Real Activeinterface_current_density_anode = Applied_current / surface_anodesolid_electrolyte; // [A.m-2]
+    const amrex::Real Activeinterface_current_density_cathode = Applied_current / surface_cathodesolid_electrolyte; // [A.m-2]
+
+    // Deduce potential values that verify this condition: Applied_current = integral(current density, ds active material-current collector) = integral(current density, ds active material-electrolyte) 
+    const amrex::Real phie_to = electrochem::get_phie_initial_from_anode(Activeinterface_current_density_anode, echemAMR::h_prob_parm->phi_reference, *echemAMR::h_prob_parm);
+    const amrex::Real phi_c_to = electrochem::get_phic_initial_from_electrolyte(Activeinterface_current_density_cathode, phie_to, *echemAMR::h_prob_parm);
+
+    amrex::Print() << std::endl;
+    amrex::Print() << "CAPACITY" << std::endl;
+    amrex::Print() << "Anode                     " << std::endl;
+    amrex::Print() << "- Active material volume: " << volume_anode << " [m3] " << std::endl;
+    amrex::Print() << "- Theoritical capacity  : " << theoritical_capacity_anode << " [C] " << std::endl;
+    amrex::Print() << "- SOC delta range       : " << SOCrange_anode << std::endl;
+    amrex::Print() << "- Pratical capacity     : " << pratical_capacity_anode << " [C] " << std::endl;
+    amrex::Print() << "Cathode                   " << std::endl;
+    amrex::Print() << "- Active material volume: " << volume_cathode << " [m3] " <<  std::endl;
+    amrex::Print() << "- Theoritical capacity  : " << theoritical_capacity_cathode << " [C] " << std::endl;
+    amrex::Print() << "- SOC delta range       : " << SOCrange_cathode << std::endl;
+    amrex::Print() << "- Pratical capacity     : " << pratical_capacity_cathode << " [C] " << std::endl;
+    amrex::Print() << "Cell                      " << std::endl;
+    amrex::Print() << "- N/P ratio             : " << Cell_NP_ratio << std::endl;
+    amrex::Print() << "- Pratical capacity     : " << pratical_capacity_cell << " [C] " << std::endl;
+    amrex::Print() << std::endl;
+    amrex::Print() << "CURRENT" << std::endl;
+    amrex::Print() << "Cell                     " << std::endl;
+    amrex::Print() << "- C-rate                : " << Crate << std::endl;
+    amrex::Print() << "- Time to (dis)charge      :  " << time_to_charge << " [s] " << std::endl;
+    amrex::Print() << "- Applied current       : " << Applied_current << " [A] " << std::endl;
+    amrex::Print() << "Anode                     " << std::endl;
+    amrex::Print() << "- active material - current collector interface: " << surface_anodesolid_currentcollector << " [m2] " << std::endl;
+    amrex::Print() << "- Applied current density                      : " << Applied_current_density_anode << " [A.m-2] " << std::endl;
+    amrex::Print() << "- active material - electrolyte interface      : " << surface_anodesolid_electrolyte << " [m2] " << std::endl;
+    amrex::Print() << "- Current density at the active interface      : " << Activeinterface_current_density_anode << " [A.m-2] " << std::endl;
+    amrex::Print() << "Cathode                     " << std::endl;
+    amrex::Print() << "- active material - current collector interface: " << surface_cathodsolid_currentcollector << " [m2] " << std::endl;
+    amrex::Print() << "- Applied current density                      : " << Applied_current_density_cathode << " [A.m-2] " << std::endl;
+    amrex::Print() << "- active material - electrolyte interface      : " << surface_cathodesolid_electrolyte << " [m2] " << std::endl;
+    amrex::Print() << "- Current density at the active interface      : " << Activeinterface_current_density_cathode << " [A.m-2] " << std::endl;
+    amrex::Print() << std::endl;
+    amrex::Print() << "POTENTIAL INITALIZATION" << std::endl;
+    amrex::Print() << "- Anode reference potential : " << echemAMR::h_prob_parm->phi_reference << " [V] " << std::endl;
+    amrex::Print() << "- Electrolyte potential     : " << phie_to << " [V] " << std::endl;
+    amrex::Print() << "- Cathode potential         : " << phi_c_to << " [V] " << std::endl;
+
+
+    // TO BE REMOVED
     //ProbParm h_prob_parm; // Create a new instance of the structure ProbParm
-
-
     //ProbParm* hh_prob_parm = nullptr;
     //ProbParm* dd_prob_parm = nullptr;
     //hh_prob_parm = new ProbParm{};
@@ -137,7 +221,6 @@ void initdata(Box const& bx, Array4<Real> const& phi, GeometryData const& geomda
                             if(r < Lx/20.0){
                                 phi(i,j,k,C_ID) = 1.0;
                                 const amrex::Real soc_init = echemAMR::h_prob_parm->soc_cathode_t0;
-                                amrex::Print() << "soc init cathode:       " << soc_init << std::endl;
                                 const amrex::Real csmax = electrochem::Cs_max_cathode(*echemAMR::h_prob_parm);
                                 phi(i,j,k,CO_ID) = soc_init * csmax;
                                 phi(i,j,k,PO_ID) = phi_c_to;
@@ -151,7 +234,6 @@ void initdata(Box const& bx, Array4<Real> const& phi, GeometryData const& geomda
                             if(r < Lx/20.0){
                                 phi(i,j,k,A_ID) = 1.0;
                                 const amrex::Real soc_init = echemAMR::h_prob_parm->soc_anode_t0;
-                                amrex::Print() << "soc init anode:       " << soc_init << std::endl;
                                 const amrex::Real csmax = electrochem::Cs_max_anode(*echemAMR::h_prob_parm);
                                 phi(i,j,k,CO_ID) = soc_init * csmax;
                                 phi(i,j,k,PO_ID) = echemAMR::h_prob_parm->phi_reference;

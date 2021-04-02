@@ -638,14 +638,14 @@ namespace electrochem
     // Consists in solving the set of equation for an equivalent 0D model (i.e., in each domain potential and concentration are uniform)
 
     AMREX_GPU_DEVICE AMREX_FORCE_INLINE
-    amrex::Real get_phie_initial_from_anode(amrex::Real j, const ProbParm& prob_parm)
+    amrex::Real get_phie_initial_from_anode(amrex::Real j, amrex::Real phi_s, const ProbParm& prob_parm)
     {
         const amrex::Real Ca = prob_parm.soc_anode_t0 * Cs_max_anode(prob_parm);
         const amrex::Real io = Io_a(Ca, prob_parm.ce_atrest, prob_parm);
         const amrex::Real ocp = OCP_a(Ca, prob_parm);
         amrex::Real A = asinh(j/(2*io)); // asinh safe?
         amrex::Real eta = A*prob_parm.R_gas_const*prob_parm.T0/(0.5*prob_parm.Faraday_const);
-        return prob_parm.phi_reference-eta-ocp;
+        return phi_s-eta-ocp;
     }
 
     AMREX_GPU_DEVICE AMREX_FORCE_INLINE
