@@ -37,11 +37,16 @@ echemamr.hi_bc = 2 2 2
 prob.pot_bc_lo = -0.00001 0.0 0.0
 prob.pot_bc_hi = -0.00001 0.0 0.0
 # Tagging
-echemamr.tagged_vars = Concentration Potential
+echemamr.tagged_vars = Concentration
 echemamr.Concentration_refine = 1e20
 echemamr.Concentration_refinegrad = 0.0005
 echemamr.Potential_refine = 1e20
 echemamr.Potential_refinegrad = 1e20
+
+# LINEPLOT
+amr.line_plot_int = 5
+amr.line_plot_dir = 0
+amr.line_plot_npoints = 160
 
 # PLOTFILES
 amr.plot_file  = output/plt    # root name of plot file
