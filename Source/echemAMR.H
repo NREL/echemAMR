@@ -198,6 +198,11 @@ private:
     // frequency to solve potential equation
     int pot_solve_int = 1;
 
+    // frequency to output line plots
+    int line_plot_int = -1;
+    int line_plot_dir = 0;
+    int line_plot_npoints = 100;
+
     // plotfile prefix and frequency
     std::string plot_file {"plt"};
     int plot_int = -1;

@@ -3,65 +3,27 @@
 
 #include <echemAMR.H>
 #include <Chemistry.H>
-
+#include <DirectionSelector.H>
 using namespace amrex;
 
-void echemAMR::postprocess(Real time, int timestep)
+template <typename IndexSelector>
+void line_plot(const IndexSelector& idxOp,
+               int num_points,
+               amrex::Real time,
+               int timestep,
+               int finest_level,
+               amrex::Vector<amrex::Geometry> &geom,
+               amrex::Vector<amrex::DistributionMapping>& dmap,
+               amrex::Vector<amrex::BoxArray>& grids,
+               amrex::Vector<amrex::MultiFab>& phi_new)
 {
 
-    amrex::Print() << std::endl;
-
-    Real A_int = VolumeIntegral(-1, A_ID);
-    amrex::Print() << "Anode Volume:       " << A_int << std::endl;
-    Real C_int = VolumeIntegral(-1, C_ID);
-    amrex::Print() << "Cathode Volume:     " << C_int << std::endl;
-    Real E_int = VolumeIntegral(-1, E_ID);
-    amrex::Print() << "Electrolyte Volume: " << E_int << std::endl;
-    Real S_int = VolumeIntegral(-1, S_ID);
-    amrex::Print() << "Separator Volume:   " << S_int << std::endl;
-    Real tot_int = A_int+C_int+E_int+S_int;
-    amrex::Print() << "Total Volume:       " << tot_int << std::endl;
-
-
-
-    amrex::Print() << std::endl;
-
-    Real cA_int = VolumeIntegral(CO_ID, A_ID);
-    amrex::Print() << "Anode Volume:       " << cA_int << " (" << cA_int/A_int << ")" << std::endl;
-    Real cC_int = VolumeIntegral(CO_ID, C_ID);
-    amrex::Print() << "Cathode Volume:     " << cC_int << " (" << cC_int/C_int << ")" << std::endl;
-    Real cE_int = VolumeIntegral(CO_ID, E_ID);
-    amrex::Print() << "Electrolyte Volume: " << cE_int << " (" << cE_int/E_int << ")" << std::endl;
-    Real cS_int = VolumeIntegral(CO_ID, S_ID);
-    amrex::Print() << "Separator Volume:   " << cS_int << " (" << cS_int/S_int << ")" << std::endl;
-    Real ctot_int = cA_int+cC_int+cE_int+cS_int;
-    amrex::Print() << "Total Volume:       " << ctot_int << " (" << ctot_int/tot_int << ")" << std::endl;
-
-
-
-    amrex::Print() << std::endl;
-
-    Real test1 = SurfaceIntegral(-1, A_ID, E_ID);
-    Real test2 = SurfaceIntegral(-1, C_ID, E_ID);
-    amrex::Print() << "Anode-Electrolyte SA:   " << test1 << std::endl;
-    amrex::Print() << "Cathode-Electrolyte SA: " << test2 << std::endl;
-
-
-
-    amrex::Print() << std::endl;
-
-    // FIXME: make these inputs
-    // axis is tricky since there is some logical involved
-    const int axis = 0;
-    // number of points along line, can be any length > 1
-    const int num_points = 161;
-
-
-    // FIXME: need to move everything below to a function
+    const int axis = idxOp.dir;
     const int num_comps = 4;
+
     const bool print_stuff = false;
+
     AMREX_ALWAYS_ASSERT(num_points > 0);
-    AMREX_ALWAYS_ASSERT(axis == 0);
     AMREX_ALWAYS_ASSERT(num_comps < NVAR);
 
     const amrex::Real xlo = geom[0].ProbLo(axis);
@@ -120,10 +82,7 @@ void echemAMR::postprocess(Real time, int timestep)
             auto phi_arr = phi_new[lev].const_array(mfi);
             auto mask_arr = level_mask.const_array(mfi);
 
-            // perpendicular box
-            amrex::IntVect plane_lo = {0, bx.smallEnd(1), bx.smallEnd(2)};
-            amrex::IntVect plane_hi = {0, bx.bigEnd(1), bx.bigEnd(2)};
-            amrex::Box pbx(plane_lo, plane_hi);
+            amrex::Box pbx = PerpendicularBox<IndexSelector>(bx, amrex::IntVect{0, 0, 0});
 
             amrex::ParallelFor(
             amrex::Gpu::KernelInfo().setReduction(true), pbx,
@@ -132,9 +91,7 @@ void echemAMR::postprocess(Real time, int timestep)
                 amrex::Gpu::Handler const& handler) noexcept {
 
                 // parallel box
-                amrex::IntVect line_lo = {bx.smallEnd(0), p_j, p_k};
-                amrex::IntVect line_hi = {bx.bigEnd(0), p_j, p_k};
-                amrex::Box lbx(line_lo, line_hi);
+                amrex::Box lbx = ParallelBox<IndexSelector>(bx, amrex::IntVect{p_i, p_j, p_k});
 
                 for (int k = lbx.smallEnd(2); k <= lbx.bigEnd(2); ++k) {
                     for (int j = lbx.smallEnd(1); j <= lbx.bigEnd(1); ++j) {
@@ -143,10 +100,10 @@ void echemAMR::postprocess(Real time, int timestep)
                             if(mask_arr(i,j,k) == 1) {
 
                                 // cell coordinates
-                                const amrex::Real cell_xlo = xlo + i*geom[lev].CellSizeArray()[axis];
+                                const amrex::Real cell_xlo = xlo + idxOp(i,j,k)*geom[lev].CellSizeArray()[axis];
                                 const amrex::Real cell_xhi = cell_xlo + geom[lev].CellSizeArray()[axis];
-                                const amrex::Real dy = geom[lev].CellSizeArray()[1];
-                                const amrex::Real dz = geom[lev].CellSizeArray()[2];
+                                const amrex::Real dy = geom[lev].CellSizeArray()[idxOp.odir1];
+                                const amrex::Real dz = geom[lev].CellSizeArray()[idxOp.odir2];
 
                                 // line indices
                                 const int line_ind_lo = amrex::min(amrex::max(static_cast<int>((cell_xlo-xlo)/line_dx), 0), num_points-1);
@@ -154,7 +111,7 @@ void echemAMR::postprocess(Real time, int timestep)
 
                                 if(print_stuff)
                                 {
-                                    amrex::Print() << std::endl << "index i: " << i << std::endl;
+                                    amrex::Print() << std::endl << "index i: " << idxOp(i,j,k) << std::endl;
                                     amrex::Print() << "cell_xlo: " << cell_xlo << " cell_xhi: " << cell_xhi << std::endl;
                                     amrex::Print() << "line_ind_lo: " << line_ind_lo << " line_ind_hi: " << line_ind_hi << std::endl;
                                 }
@@ -172,9 +129,9 @@ void echemAMR::postprocess(Real time, int timestep)
 
                                     amrex::Real dx;
 
-                                    if(line_xlo < cell_xlo)
+                                    if(line_xlo <= cell_xlo)
                                         dx = line_xhi - cell_xlo;
-                                    else if(line_xhi > cell_xhi)
+                                    else if(line_xhi >= cell_xhi)
                                         dx = cell_xhi - line_xlo;
                                     else
                                         dx = line_dx;
@@ -186,9 +143,8 @@ void echemAMR::postprocess(Real time, int timestep)
                                         amrex::Print() << "line index: " << ind << std::endl;
                                         amrex::Print() << "line_xlo: " << line_xlo << " line_xhi: " << line_xhi << std::endl;
                                         amrex::Print() << "dx: " << dx << std::endl;
+                                        if(dx < 0.0) amrex::Print() << "negative volume error: " << idxOp(i,j,k) << ' ' << dx << std::endl;
                                     }
-
-                                    if(dx < 0.0) amrex::Print() << "negative volume error: " << i << ' ' << dx << std::endl;
 
                                     for(int n = 0; n < num_comps; ++n) {
 
@@ -201,7 +157,7 @@ void echemAMR::postprocess(Real time, int timestep)
                                         amrex::Gpu::deviceReduceSum(&line_avg[num_comps * ind + n], concen*lvlset*vol, handler);
                                         amrex::Gpu::deviceReduceMax(&line_max[num_comps * ind + n], concen*lvlset, handler);
                                         amrex::Gpu::deviceReduceSum(&line_vol[num_comps * ind + n], vol*lvlset, handler);
-                                        
+
 
                                     } // component loop
                                 } // line loop
@@ -246,10 +202,7 @@ void echemAMR::postprocess(Real time, int timestep)
             auto phi_arr = phi_new[lev].const_array(mfi);
             auto mask_arr = level_mask.const_array(mfi);
 
-            // perpendicular box
-            amrex::IntVect plane_lo = {0, bx.smallEnd(1), bx.smallEnd(2)};
-            amrex::IntVect plane_hi = {0, bx.bigEnd(1), bx.bigEnd(2)};
-            amrex::Box pbx(plane_lo, plane_hi);
+            amrex::Box pbx = PerpendicularBox<IndexSelector>(bx, amrex::IntVect{0, 0, 0});
 
             amrex::ParallelFor(
             amrex::Gpu::KernelInfo().setReduction(true), pbx,
@@ -257,10 +210,7 @@ void echemAMR::postprocess(Real time, int timestep)
                 int p_i, int p_j, int p_k,
                 amrex::Gpu::Handler const& handler) noexcept {
 
-                // parallel box
-                amrex::IntVect line_lo = {bx.smallEnd(0), p_j, p_k};
-                amrex::IntVect line_hi = {bx.bigEnd(0), p_j, p_k};
-                amrex::Box lbx(line_lo, line_hi);
+                amrex::Box lbx = ParallelBox<IndexSelector>(bx, amrex::IntVect{p_i, p_j, p_k});
 
                 for (int k = lbx.smallEnd(2); k <= lbx.bigEnd(2); ++k) {
                     for (int j = lbx.smallEnd(1); j <= lbx.bigEnd(1); ++j) {
@@ -269,10 +219,10 @@ void echemAMR::postprocess(Real time, int timestep)
                             if(mask_arr(i,j,k) == 1) {
 
                                 // cell coordinates
-                                const amrex::Real cell_xlo = xlo + i*geom[lev].CellSizeArray()[axis];
+                                const amrex::Real cell_xlo = xlo + idxOp(i,j,k)*geom[lev].CellSizeArray()[axis];
                                 const amrex::Real cell_xhi = cell_xlo + geom[lev].CellSizeArray()[axis];
-                                const amrex::Real dy = geom[lev].CellSizeArray()[1];
-                                const amrex::Real dz = geom[lev].CellSizeArray()[2];
+                                const amrex::Real dy = geom[lev].CellSizeArray()[idxOp.odir1];
+                                const amrex::Real dz = geom[lev].CellSizeArray()[idxOp.odir2];
 
                                 // line indices
                                 const int line_ind_lo = amrex::min(amrex::max(static_cast<int>((cell_xlo-xlo)/line_dx), 0), num_points-1);
@@ -286,9 +236,9 @@ void echemAMR::postprocess(Real time, int timestep)
 
                                     amrex::Real dx;
 
-                                    if(line_xlo < cell_xlo)
+                                    if(line_xlo <= cell_xlo)
                                         dx = line_xhi - cell_xlo;
-                                    else if(line_xhi > cell_xhi)
+                                    else if(line_xhi >= cell_xhi)
                                         dx = cell_xhi - line_xlo;
                                     else
                                         dx = line_dx;
@@ -320,7 +270,7 @@ void echemAMR::postprocess(Real time, int timestep)
     {
         const int num_files = 4;
 
-        AMREX_ALWAYS_ASSERT(num_files==num_comps);
+        AMREX_ALWAYS_ASSERT(num_files == num_comps);
 
         std::ofstream outfile[num_files];
         std::string filename[num_files];
@@ -355,6 +305,59 @@ void echemAMR::postprocess(Real time, int timestep)
 
     }
 
+}
+
+void echemAMR::postprocess(Real time, int timestep)
+{
+
+    amrex::Print() << std::endl;
+
+    Real A_int = VolumeIntegral(-1, A_ID);
+    amrex::Print() << "Anode Volume:       " << A_int << std::endl;
+    Real C_int = VolumeIntegral(-1, C_ID);
+    amrex::Print() << "Cathode Volume:     " << C_int << std::endl;
+    Real E_int = VolumeIntegral(-1, E_ID);
+    amrex::Print() << "Electrolyte Volume: " << E_int << std::endl;
+    Real S_int = VolumeIntegral(-1, S_ID);
+    amrex::Print() << "Separator Volume:   " << S_int << std::endl;
+    Real tot_int = A_int+C_int+E_int+S_int;
+    amrex::Print() << "Total Volume:       " << tot_int << std::endl;
+
+
+
+    amrex::Print() << std::endl;
+
+    Real cA_int = VolumeIntegral(CO_ID, A_ID);
+    amrex::Print() << "Anode Volume:       " << cA_int << " (" << cA_int/A_int << ")" << std::endl;
+    Real cC_int = VolumeIntegral(CO_ID, C_ID);
+    amrex::Print() << "Cathode Volume:     " << cC_int << " (" << cC_int/C_int << ")" << std::endl;
+    Real cE_int = VolumeIntegral(CO_ID, E_ID);
+    amrex::Print() << "Electrolyte Volume: " << cE_int << " (" << cE_int/E_int << ")" << std::endl;
+    Real cS_int = VolumeIntegral(CO_ID, S_ID);
+    amrex::Print() << "Separator Volume:   " << cS_int << " (" << cS_int/S_int << ")" << std::endl;
+    Real ctot_int = cA_int+cC_int+cE_int+cS_int;
+    amrex::Print() << "Total Volume:       " << ctot_int << " (" << ctot_int/tot_int << ")" << std::endl;
+
+
+
+    amrex::Print() << std::endl;
+
+    Real test1 = SurfaceIntegral(-1, A_ID, E_ID);
+    Real test2 = SurfaceIntegral(-1, C_ID, E_ID);
+    amrex::Print() << "Anode-Electrolyte SA:   " << test1 << std::endl;
+    amrex::Print() << "Cathode-Electrolyte SA: " << test2 << std::endl;
+    amrex::Print() << std::endl;
+
+    if (line_plot_int > 0 && ((timestep+1) % line_plot_int == 0 || timestep == 0))
+    {
+        if(line_plot_dir == 0)
+            line_plot(XDir(), line_plot_npoints, time, timestep, finest_level, geom, dmap, grids, phi_new);
+        else if(line_plot_dir == 1)
+            line_plot(YDir(), line_plot_npoints, time, timestep, finest_level, geom, dmap, grids, phi_new);
+        else
+            line_plot(ZDir(), line_plot_npoints, time, timestep, finest_level, geom, dmap, grids, phi_new);
+
+    }
 
 }
 #endif
