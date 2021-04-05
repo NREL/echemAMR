@@ -200,7 +200,9 @@ private:
 
     // frequency to output line plots
     int line_plot_int = -1;
+    // direction to create line plot
     int line_plot_dir = 0;
+    // number of points along line
     int line_plot_npoints = 100;
 
     // plotfile prefix and frequency
