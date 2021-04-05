@@ -241,6 +241,9 @@ void echemAMR::ReadParameters ()
         pp.query("regrid_int", regrid_int);
         pp.query("plot_file", plot_file);
         pp.query("plot_int", plot_int);
+        pp.query("line_plot_int", line_plot_int);
+        pp.query("line_plot_dir", line_plot_dir);
+        pp.query("line_plot_npoints", line_plot_npoints);
         pp.query("chk_file", chk_file);
         pp.query("chk_int", chk_int);
         pp.query("restart",restart_chkfile);
