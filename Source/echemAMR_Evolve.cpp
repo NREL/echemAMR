@@ -27,6 +27,20 @@ void echemAMR::Evolve ()
 
     postprocess(cur_time, 0);
 
+    // amrex::Print() << "ProbParm Anode Volume:   " << echemAMR::h_prob_parm->anode_volume << std::endl;
+    // amrex::Print() << "ProbParm ELSEP Volume:   " << echemAMR::h_prob_parm->ele_sep_volume << std::endl;
+    // amrex::Print() << "ProbParm Cathode Volume: " << echemAMR::h_prob_parm->cathode_volume << std::endl;
+    // amrex::Print() << "ProbParm Anode SA:       " << echemAMR::h_prob_parm->anode_SA << std::endl;
+    // amrex::Print() << "ProbParm Electrolyte SA: " << echemAMR::h_prob_parm->electrolyte_SA << std::endl;
+    // amrex::Print() << "ProbParm Separator SA:   " << echemAMR::h_prob_parm->sepatator_SA << std::endl;
+    // amrex::Print() << "ProbParm Cathode SA:     " << echemAMR::h_prob_parm->cathode_SA << std::endl;
+    // amrex::Print() << "ProbParm AE SA:          " << echemAMR::h_prob_parm->anode_ele_SA << std::endl;
+    // amrex::Print() << "ProbParm CE SA:          " << echemAMR::h_prob_parm->cathode_ele_SA << std::endl;
+    // amrex::Print() << "ProbParm Anode CC SA:    " << echemAMR::h_prob_parm->anode_cc_SA << std::endl;
+    // amrex::Print() << "ProbParm Cathode CC SA:  " << echemAMR::h_prob_parm->cathode_cc_SA << std::endl;
+    // amrex::Print() << "ProbParm Total SA:       " << echemAMR::h_prob_parm->anode_SA + echemAMR::h_prob_parm->electrolyte_SA + echemAMR::h_prob_parm->sepatator_SA + echemAMR::h_prob_parm->cathode_SA - 2.0*echemAMR::h_prob_parm->anode_ele_SA - 2.0*echemAMR::h_prob_parm->cathode_ele_SA - 10e-6*10e-6*4 << std::endl;
+    // exit(1);
+
     for (int step = istep[0]; step < max_step && cur_time < stop_time; ++step)
     {
         amrex::Print() << "\nCoarse STEP " << step+1 << " starts ..." << std::endl;

@@ -68,7 +68,7 @@ Real echemAMR::SurfaceIntegral(int comp, int domain1, int domain2)
         MultiFab& S_new = phi_new[lev];
        
         //need fillpatched data for velocity calculation 
-        constexpr int num_grow = 2; 
+        constexpr int num_grow = 1; 
         MultiFab Sborder(grids[lev], dmap[lev], S_new.nComp(), num_grow);
         FillPatch(lev, cur_time, Sborder, 0, Sborder.nComp()); 
 
@@ -80,7 +80,7 @@ Real echemAMR::SurfaceIntegral(int comp, int domain1, int domain2)
             Real r = 0.0;
             AMREX_LOOP_3D(bx, i, j, k,
             {
-                r += electrochem_integral_utils::surface_value(i, j, k, comp, domain1, domain2, fab, dx);
+                r += electrochem_integral_utils::surface_value(i, j, k, comp, domain1, domain2, fab, geom[lev]);
             });
             return r;
         });
@@ -99,3 +99,4 @@ Real echemAMR::SurfaceIntegral(int comp, int domain1, int domain2)
     return int_tmp;
 
 }
+

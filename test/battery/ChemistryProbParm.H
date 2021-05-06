@@ -65,6 +65,22 @@ struct ProbParm
     // potential boundary conditions
     amrex::Vector<amrex::Real> pot_bc_lo{0.0, 0.0, 0.0};
     amrex::Vector<amrex::Real> pot_bc_hi{0.0, 0.0, 0.0};
+
+    // Volumes
+    amrex::Real anode_volume = 0.0;
+    amrex::Real ele_sep_volume = 0.0;
+    amrex::Real cathode_volume = 0.0;
+
+    // Surface Areas
+    amrex::Real anode_SA = 0.0;
+    amrex::Real electrolyte_SA = 0.0;
+    amrex::Real sepatator_SA = 0.0;
+    amrex::Real cathode_SA = 0.0;
+    amrex::Real anode_ele_SA = 0.0;
+    amrex::Real cathode_ele_SA = 0.0;
+    amrex::Real anode_cc_SA = 0.0;
+    amrex::Real cathode_cc_SA = 0.0;
+
 };
 
 #endif

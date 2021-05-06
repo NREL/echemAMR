@@ -124,6 +124,25 @@ void echemAMR::InitData ()
         InitFromScratch(time);
         AverageDown();
 
+        // Calculate the initial volumes and append to probparm
+        init_volumes(*h_prob_parm);
+
+        // Initialize the concentration and potential fields
+        for (int lev = 0; lev <= finest_level; ++lev)
+        {
+
+            MultiFab& state = phi_new[lev];
+            for (MFIter mfi(state); mfi.isValid(); ++mfi)
+            {
+                Array4<Real> fab = state[mfi].array();
+                GeometryData geomData = geom[lev].data();
+                const Box& box = mfi.validbox();
+                initproblemdata(box, fab, geomData);
+            }
+        }
+
+        print_init_data();
+
         if (chk_int > 0) 
         {
             WriteCheckpointFile();

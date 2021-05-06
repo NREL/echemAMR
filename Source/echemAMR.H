@@ -84,6 +84,8 @@ public:
     Real SurfaceIntegral (int comp, int domain1, int domain2);
 
     void postprocess(Real time, int timestep);
+
+    void init_volumes(ProbParm & prob_parm);
 private:
 
     ////////////////
