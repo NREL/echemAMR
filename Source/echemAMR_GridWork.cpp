@@ -97,6 +97,9 @@ void echemAMR::MakeNewLevelFromScratch (int lev, Real time, const BoxArray& ba,
     Real cur_time = t_new[lev];
     MultiFab& state = phi_new[lev];
 
+
+
+
     for (MFIter mfi(state); mfi.isValid(); ++mfi)
     {
         Array4<Real> fab = state[mfi].array();
@@ -106,7 +109,7 @@ void echemAMR::MakeNewLevelFromScratch (int lev, Real time, const BoxArray& ba,
         amrex::launch(box,
         [=] AMREX_GPU_DEVICE (Box const& tbx)
         {
-            initdata(tbx, fab, geomData);
+            initdomaindata(tbx, fab, geomData); //init just mesh refinement stuff
         });
     }
 }

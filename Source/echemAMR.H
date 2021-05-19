@@ -83,7 +83,12 @@ public:
     // a wrapper for computing integrals
     Real SurfaceIntegral (int comp, int domain1, int domain2);
 
+    // a wrapper for computing integrals
+    Real CurrentCollectorIntegral (int comp, int domain);
+
     void postprocess(Real time, int timestep);
+
+    void init_volumes(ProbParm & prob_parm);
 private:
 
     ////////////////
