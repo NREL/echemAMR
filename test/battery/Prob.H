@@ -11,6 +11,10 @@
 
 using namespace amrex;
 
+//static initdata
+
+
+
 AMREX_INLINE
 void amrex_probinit (ProbParm & h_prob_parm, ProbParm & d_prob_parm)
 {
@@ -201,9 +205,11 @@ void initproblemdata(Box const& bx, Array4<Real> const& phi, GeometryData const&
     const amrex::Real Applied_current = Current1C * Crate; // [A] (but we need the applied current density in A.m-2)
 
     // Surface calculations // FIX ME: add surface calculations from Jeff post-processing
-    const amrex::Real surface_anodesolid_currentcollector = 7.8540e-11; // [m2], temporary value pi*((5e-6)^2)
-    const amrex::Real surface_cathodsolid_currentcollector = 7.8540e-11; // [m2], temporary value pi*((5e-6)^2)
-
+    const amrex::Real surface_anodesolid_currentcollector = echemAMR::h_prob_parm->anode_cc_SA; // [m2], temporary value pi*((5e-6)^2)
+    const amrex::Real surface_cathodsolid_currentcollector = echemAMR::h_prob_parm->cathode_cc_SA; // [m2], temporary value pi*((5e-6)^2)
+    // const amrex::Real surface_anodesolid_currentcollector = 7.8540e-11; // [m2], temporary value pi*((5e-6)^2)
+    // const amrex::Real surface_cathodsolid_currentcollector = 7.8540e-11; // [m2], temporary value pi*((5e-6)^2)
+    
     // Applied current density at the interface active material - current collector
     // These are the two Neumann Boundary conditions value applies at the left and right extremities of the cell
     // FIX ME: MICHAEL/HARI: could you link g with these two values?
@@ -211,8 +217,10 @@ void initproblemdata(Box const& bx, Array4<Real> const& phi, GeometryData const&
     const amrex::Real Applied_current_density_cathode = Applied_current / surface_cathodsolid_currentcollector; // [A.m-2]
 
     // Surface calculations // FIX ME: add surface calculations from Jeff post-processing
-    const amrex::Real surface_anodesolid_electrolyte = 3.1416e-10; // 4*pi*((5e-6)^2)
-    const amrex::Real surface_cathodesolid_electrolyte = 3.1416e-10; // 4*pi*((5e-6)^2)
+    const amrex::Real surface_anodesolid_electrolyte = echemAMR::h_prob_parm->anode_ele_SA; // 4*pi*((5e-6)^2)
+    const amrex::Real surface_cathodesolid_electrolyte = echemAMR::h_prob_parm->cathode_ele_SA; // 4*pi*((5e-6)^2)
+    // const amrex::Real surface_anodesolid_electrolyte = 3.1416e-10; // 4*pi*((5e-6)^2)
+    // const amrex::Real surface_cathodesolid_electrolyte = 3.1416e-10; // 4*pi*((5e-6)^2)
 
     // Initial current density at the interface active material - electrolyte
     // These are the two Neumann Boundary conditions value applied at the active interface.
@@ -318,7 +326,6 @@ void initproblemdata(Box const& bx, Array4<Real> const& phi, GeometryData const&
 }
 
 
-AMREX_GPU_DEVICE
 AMREX_INLINE
 void print_init_data() //break into multiple steps
 {
@@ -351,8 +358,8 @@ void print_init_data() //break into multiple steps
     const amrex::Real Applied_current = Current1C * Crate; // [A] (but we need the applied current density in A.m-2)
 
     // Surface calculations // FIX ME: add surface calculations from Jeff post-processing
-    const amrex::Real surface_anodesolid_currentcollector = 7.8540e-11; // [m2], temporary value pi*((5e-6)^2)
-    const amrex::Real surface_cathodsolid_currentcollector = 7.8540e-11; // [m2], temporary value pi*((5e-6)^2)
+    const amrex::Real surface_anodesolid_currentcollector = echemAMR::h_prob_parm->anode_cc_SA; // [m2], temporary value pi*((5e-6)^2)
+    const amrex::Real surface_cathodsolid_currentcollector = echemAMR::h_prob_parm->cathode_cc_SA; // [m2], temporary value pi*((5e-6)^2)
 
     // Applied current density at the interface active material - current collector
     // These are the two Neumann Boundary conditions value applies at the left and right extremities of the cell
@@ -361,8 +368,8 @@ void print_init_data() //break into multiple steps
     const amrex::Real Applied_current_density_cathode = Applied_current / surface_cathodsolid_currentcollector; // [A.m-2]
 
     // Surface calculations // FIX ME: add surface calculations from Jeff post-processing
-    const amrex::Real surface_anodesolid_electrolyte = 3.1416e-10; // 4*pi*((5e-6)^2)
-    const amrex::Real surface_cathodesolid_electrolyte = 3.1416e-10; // 4*pi*((5e-6)^2)
+    const amrex::Real surface_anodesolid_electrolyte = echemAMR::h_prob_parm->anode_ele_SA; // 4*pi*((5e-6)^2)
+    const amrex::Real surface_cathodesolid_electrolyte = echemAMR::h_prob_parm->cathode_ele_SA; // 4*pi*((5e-6)^2)
 
     // Initial current density at the interface active material - electrolyte
     // These are the two Neumann Boundary conditions value applied at the active interface.
@@ -396,7 +403,7 @@ void print_init_data() //break into multiple steps
     amrex::Print() << "CURRENT" << std::endl;
     amrex::Print() << "Cell                     " << std::endl;
     amrex::Print() << "- C-rate                : " << Crate << std::endl;
-    amrex::Print() << "- Time to (dis)charge      :  " << time_to_charge << " [s] " << std::endl;
+    amrex::Print() << "- Time to (dis)charge   : " << time_to_charge << " [s] " << std::endl;
     amrex::Print() << "- Applied current       : " << Applied_current << " [A] " << std::endl;
     amrex::Print() << "Anode                     " << std::endl;
     amrex::Print() << "- active material - current collector interface: " << surface_anodesolid_currentcollector << " [m2] " << std::endl;

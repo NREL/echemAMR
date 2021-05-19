@@ -27,6 +27,7 @@ void echemAMR::Evolve ()
 
     postprocess(cur_time, 0);
 
+    // feel free to delete this commented chunk
     // amrex::Print() << "ProbParm Anode Volume:   " << echemAMR::h_prob_parm->anode_volume << std::endl;
     // amrex::Print() << "ProbParm ELSEP Volume:   " << echemAMR::h_prob_parm->ele_sep_volume << std::endl;
     // amrex::Print() << "ProbParm Cathode Volume: " << echemAMR::h_prob_parm->cathode_volume << std::endl;
