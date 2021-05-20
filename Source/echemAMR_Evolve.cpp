@@ -124,8 +124,8 @@ void echemAMR::solve_potential(Real current_time)
     // this could be due to missing terms in the intercalation reaction or sign mistakes...
     ProbParm const* localprobparm = d_prob_parm;
 
-    const Real tol_rel = 1.0e-6; 
-    const Real tol_abs = 1.0e-14;
+    const Real tol_rel = 1.0e-6;
+    const Real tol_abs = 1.0e-13;
 
 #ifdef AMREX_USE_HYPRE
         int hypre_interface_i = 1;  // 1. structed, 2. semi-structed, 3. ij
