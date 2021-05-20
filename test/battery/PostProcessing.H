@@ -283,7 +283,7 @@ void line_plot(const IndexSelector& idxOp,
         for(int f=0; f < num_files; ++f){
             if(timestep == 0){
                 outfile[f].open(filename[f].c_str(), std::ios_base::out);
-                outfile[f] << "Time step    Time[s]    Position[m]    Min    Mean    Max    Std" << std::endl;
+                outfile[f] << "Time_step    Time[s]    Position[m]    Min    Mean    Max    Std" << std::endl;
             } else {
                 outfile[f].open(filename[f].c_str(), std::ios_base::out | std::ios_base::app);
             }
