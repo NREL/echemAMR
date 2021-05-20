@@ -27,6 +27,8 @@ echemamr.cfl            = 0.5     # cfl number for hyperbolic system
 
 echemamr.do_reflux = 1
 echemamr.potential_solve = 1
+echemamr.potential_initial_guess = 1
+echemamr.potential_solve_int = 1
 
 #periodic 0
 #extdir 3

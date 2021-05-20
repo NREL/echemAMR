@@ -129,11 +129,13 @@ namespace electrochem_transport
             velx(i,j,k,n) = 0.0;
         }
 
-        if(!electrochem::is_electrode(i,j,k,phi)){
-            const Real Ce = phi(i,j,k,CO_ID);
-            const Real tplus = electrochem::t_plus(Ce, prob_parm);
-            velx(i,j,k,CO_ID) = tplus/prob_parm.Faraday_const * phi(i,j,k,EFX_ID);
-        }
+        // FIXME: this is not in the correct form would need to be grad(Ce*tplus/F*EFX)
+        // also grad(j_e) = 0 anyways...
+//        if(!electrochem::is_electrode(i,j,k,phi)){
+//            const Real Ce = phi(i,j,k,CO_ID);
+//            const Real tplus = electrochem::t_plus(Ce, prob_parm);
+//            velx(i,j,k,CO_ID) = tplus/prob_parm.Faraday_const * phi(i,j,k,EFX_ID);
+//        }
 
     }
 
@@ -151,11 +153,11 @@ namespace electrochem_transport
             vely(i,j,k,n) = 0.0;
         }
 
-        if(!electrochem::is_electrode(i,j,k,phi)){
-            const Real Ce = phi(i,j,k,CO_ID);
-            const Real tplus = electrochem::t_plus(Ce, prob_parm);
-            vely(i,j,k,CO_ID) = tplus/prob_parm.Faraday_const * phi(i,j,k,EFY_ID);
-        }
+//        if(!electrochem::is_electrode(i,j,k,phi)){
+//            const Real Ce = phi(i,j,k,CO_ID);
+//            const Real tplus = electrochem::t_plus(Ce, prob_parm);
+//            vely(i,j,k,CO_ID) = tplus/prob_parm.Faraday_const * phi(i,j,k,EFY_ID);
+//        }
     }
 
     AMREX_GPU_DEVICE AMREX_INLINE
@@ -172,11 +174,11 @@ namespace electrochem_transport
             velz(i,j,k,n) = 0.0;
         }
 
-        if(!electrochem::is_electrode(i,j,k,phi)){
-            const Real Ce = phi(i,j,k,CO_ID);
-            const Real tplus = electrochem::t_plus(Ce, prob_parm);
-            velz(i,j,k,CO_ID) = tplus/prob_parm.Faraday_const * phi(i,j,k,EFZ_ID);
-        }
+//        if(!electrochem::is_electrode(i,j,k,phi)){
+//            const Real Ce = phi(i,j,k,CO_ID);
+//            const Real tplus = electrochem::t_plus(Ce, prob_parm);
+//            velz(i,j,k,CO_ID) = tplus/prob_parm.Faraday_const * phi(i,j,k,EFZ_ID);
+//        }
     }
 
 }

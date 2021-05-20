@@ -749,9 +749,9 @@ namespace electrochem
 
         // FIXME: added min and max to prevent nans... not sure if we need this
         if(reaction > 0.0)
-            return amrex::min(reaction,0.01*std::abs(normal));
+            return amrex::min(reaction,0.1*std::abs(normal));
         else
-            return amrex::max(reaction,-0.01*std::abs(normal));
+            return amrex::max(reaction,-0.1*std::abs(normal));
 
 //        return reaction;
 

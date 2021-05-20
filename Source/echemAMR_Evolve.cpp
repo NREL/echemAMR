@@ -220,9 +220,10 @@ void echemAMR::solve_potential(Real current_time)
         }
 
         //copy current solution for better guess
-        //doesn't seem to work better, dont know why
-        // This did cause an issue for a particular loading of g=-.00001 turning it off again
-        solution[ilev].copy(potential[ilev], 0, 0, 1);
+        if(pot_initial_guess)
+        {
+            solution[ilev].copy(potential[ilev], 0, 0, 1);
+        }
 
         // fill cell centered diffusion coefficients and rhs
         for (MFIter mfi(phi_new[ilev],TilingIfNotGPU()); mfi.isValid(); ++mfi)

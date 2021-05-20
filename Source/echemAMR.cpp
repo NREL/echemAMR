@@ -275,6 +275,8 @@ void echemAMR::ReadParameters ()
         pp.query("do_reflux", do_reflux);
         pp.query("potential_solve",potential_solve);
         pp.query("potential_solve_int",pot_solve_int);
+        pp.query("potential_initial_guess",pot_initial_guess);
+        
     }
 }
 
