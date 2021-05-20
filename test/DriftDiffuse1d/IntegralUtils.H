@@ -110,7 +110,7 @@ namespace electrochem_integral_utils
         }
 }
 
-void echemAMR::init_volumes(ProbParm & prob_parm)
+void echemAMR::init_volumes()
 {
 
 }

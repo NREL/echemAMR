@@ -88,7 +88,7 @@ public:
 
     void postprocess(Real time, int timestep);
 
-    void init_volumes(ProbParm & prob_parm);
+    void init_volumes();
 private:
 
     ////////////////
@@ -202,6 +202,8 @@ private:
     int potential_solve = 0;
     // frequency to solve potential equation
     int pot_solve_int = 1;
+    // use old solution as initial guess for potential
+    int pot_initial_guess = 0;
 
     // frequency to output line plots
     int line_plot_int = -1;

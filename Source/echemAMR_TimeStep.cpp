@@ -121,21 +121,21 @@ Real echemAMR::EstTimeStep (int lev, bool local)
                   [=] AMREX_GPU_DEVICE (int i, int j, int k)
             {
                 electrochem_transport::compute_velx(i, j, k, statearray,
-                        velxarray,prob_lo, prob_hi, dx, cur_time);
+                        velxarray,prob_lo, prob_hi, dx, cur_time, *localprobparm);
             });
             
             amrex::ParallelFor(bx_y,
                   [=] AMREX_GPU_DEVICE (int i, int j, int k)
             {
                 electrochem_transport::compute_vely(i, j, k, statearray,
-                        velyarray,prob_lo, prob_hi, dx, cur_time);
+                        velyarray,prob_lo, prob_hi, dx, cur_time, *localprobparm);
             });
 
             amrex::ParallelFor(bx_z,
                   [=] AMREX_GPU_DEVICE (int i, int j, int k)
             {
                 electrochem_transport::compute_velz(i, j, k, statearray,
-                        velzarray,prob_lo, prob_hi, dx, cur_time);
+                        velzarray,prob_lo, prob_hi, dx, cur_time, *localprobparm);
             });
 
             amrex::ParallelFor(bx,

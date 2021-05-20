@@ -724,25 +724,19 @@ namespace electrochem
             const amrex::Real Ce = phi(iright,jright,kright,CO_ID);
             const amrex::Real Pe = phi(iright,jright,kright,PO_ID);
             reaction = -normal*intercalation_reaction_cathode(Cc, Pc, Ce, Pe, prob_parm);
-        }
-
-        if(cl == electrolyte && cr == cathode){
+        } else if(cl == electrolyte && cr == cathode){
             const amrex::Real Ce = phi(ileft,jleft,kleft,CO_ID);
             const amrex::Real Pe = phi(ileft,jleft,kleft,PO_ID);
             const amrex::Real Cc = phi(iright,jright,kright,CO_ID);
             const amrex::Real Pc = phi(iright,jright,kright,PO_ID);
             reaction = normal*intercalation_reaction_cathode(Cc, Pc, Ce, Pe, prob_parm);
-        }
-
-        if(cl == electrolyte && cr == anode){
+        } else if(cl == electrolyte && cr == anode){
             const amrex::Real Ce = phi(ileft,jleft,kleft,CO_ID);
             const amrex::Real Pe = phi(ileft,jleft,kleft,PO_ID);
             const amrex::Real Ca = phi(iright,jright,kright,CO_ID);
             const amrex::Real Pa = phi(iright,jright,kright,PO_ID);
             reaction = -normal*intercalation_reaction_anode(Ca, Pa, Ce, Pe, prob_parm);
-        }
-
-        if(cl == anode && cr == electrolyte){
+        } else if(cl == anode && cr == electrolyte){
             const amrex::Real Ca = phi(ileft,jleft,kleft,CO_ID);
             const amrex::Real Pa = phi(ileft,jleft,kleft,PO_ID);
             const amrex::Real Ce = phi(iright,jright,kright,CO_ID);
@@ -750,8 +744,16 @@ namespace electrochem
             reaction = normal*intercalation_reaction_anode(Ca, Pa, Ce, Pe, prob_parm);
         }
 
+        if(isnan(reaction)) amrex::Abort("NaN in ic reaction");
+        if(isinf(reaction)) amrex::Abort("Infinity in ic reaction");
 
-        return reaction;
+        // FIXME: added min and max to prevent nans... not sure if we need this
+        if(reaction > 0.0)
+            return amrex::min(reaction,0.1*std::abs(normal));
+        else
+            return amrex::max(reaction,-0.1*std::abs(normal));
+
+//        return reaction;
 
     }
 

@@ -43,7 +43,8 @@ namespace electrochem_transport
                 GpuArray<Real, AMREX_SPACEDIM> prob_lo,
                 GpuArray<Real, AMREX_SPACEDIM> prob_hi,
                 GpuArray<Real, AMREX_SPACEDIM> dx,
-                const Real time)
+                const Real time,
+                ProbParm const& prob_parm)
         {
             velx(i,j,k,S1_ID)=0.0;
             velx(i,j,k,S2_ID)=0.0;
@@ -55,7 +56,8 @@ namespace electrochem_transport
                 GpuArray<Real, AMREX_SPACEDIM> prob_lo,
                 GpuArray<Real, AMREX_SPACEDIM> prob_hi,
                 GpuArray<Real, AMREX_SPACEDIM> dx,
-                const Real time)
+                const Real time,
+                ProbParm const& prob_parm)
         {
             vely(i,j,k,S1_ID)=0.0;
             vely(i,j,k,S2_ID)=0.0;
@@ -68,7 +70,8 @@ namespace electrochem_transport
                 GpuArray<Real, AMREX_SPACEDIM> prob_lo,
                 GpuArray<Real, AMREX_SPACEDIM> prob_hi,
                 GpuArray<Real, AMREX_SPACEDIM> dx,
-                const Real time)
+                const Real time,
+                ProbParm const& prob_parm)
         {
             velz(i,j,k,S1_ID)=0.0;
             velz(i,j,k,S2_ID)=0.0;
@@ -87,17 +90,6 @@ namespace electrochem_transport
         {
             dcoeff(i,j,k)=1.0;
         }
-    AMREX_GPU_DEVICE AMREX_INLINE
-        void compute_potential_source(int i, int j, int k,
-                Array4<Real> const& phi,
-                Array4<Real> const& source,
-                GpuArray<Real, AMREX_SPACEDIM> prob_lo,
-                GpuArray<Real, AMREX_SPACEDIM> prob_hi,
-                GpuArray<Real, AMREX_SPACEDIM> dx,
-                const Real time,
-                ProbParm const& prob_parm)
-        {
-            source(i,j,k)=0.0;
-        }
+
 }
 #endif
