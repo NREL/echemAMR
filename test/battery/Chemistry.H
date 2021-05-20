@@ -611,9 +611,7 @@ namespace electrochem
             return 2.0 * ioa * std::sinh(0.5 * FRT * eta); //FIXME: gpu safe?
         } else {
             amrex::Real A = 0.5 * FRT * eta;
-            amrex::Real poop = ioa * ( exp(A) - exp(-A) ); // equivalent expression
-//            amrex::Print() <<  FRT << ' ' << eta << ' ' << ' ' << A << ' ' << ioa << ' ' << poop << std::endl;
-            return poop;
+            return ioa * ( exp(A) - exp(-A) ); // equivalent expression
         }
     }
 
