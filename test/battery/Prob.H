@@ -178,19 +178,19 @@ void initproblemdata(Box const& bx, Array4<Real> const& phi, GeometryData const&
     // ------------------------
 
     // Calculate active material volumes
-    const amrex::Real volume_anode = echemAMR::h_prob_parm->anode_volume; // [m3]
-    const amrex::Real volume_cathode = echemAMR::h_prob_parm->cathode_volume; // [m3]
+    const amrex::Real volume_anode = echemAMR::d_prob_parm->anode_volume; // [m3]
+    const amrex::Real volume_cathode = echemAMR::d_prob_parm->cathode_volume; // [m3]
 
     // Calculate anode and cathode theoritical (use full soc range) and pratical (use a reduced soc range) capacity
-    const amrex::Real Fday = echemAMR::h_prob_parm->Faraday_const; // [C.mol-1]
+    const amrex::Real Fday = echemAMR::d_prob_parm->Faraday_const; // [C.mol-1]
 
-    const amrex::Real Csmax_anode = electrochem::Cs_max_anode(*echemAMR::h_prob_parm); // [mol.m-3]
-    const amrex::Real SOCrange_anode = echemAMR::h_prob_parm->anode_soc_max - echemAMR::h_prob_parm->anode_soc_min; // []
+    const amrex::Real Csmax_anode = electrochem::Cs_max_anode(*echemAMR::d_prob_parm); // [mol.m-3]
+    const amrex::Real SOCrange_anode = echemAMR::d_prob_parm->anode_soc_max - echemAMR::d_prob_parm->anode_soc_min; // []
     const amrex::Real theoritical_capacity_anode = volume_anode * Csmax_anode * Fday; // [C]
     const amrex::Real pratical_capacity_anode = theoritical_capacity_anode * SOCrange_anode; // [C] 
 
-    const amrex::Real Csmax_cathode = electrochem::Cs_max_cathode(*echemAMR::h_prob_parm); // [mol.m-3]
-    const amrex::Real SOCrange_cathode = echemAMR::h_prob_parm->cathode_soc_max - echemAMR::h_prob_parm->cathode_soc_min; // []
+    const amrex::Real Csmax_cathode = electrochem::Cs_max_cathode(*echemAMR::d_prob_parm); // [mol.m-3]
+    const amrex::Real SOCrange_cathode = echemAMR::d_prob_parm->cathode_soc_max - echemAMR::d_prob_parm->cathode_soc_min; // []
     const amrex::Real theoritical_capacity_cathode = volume_cathode * Csmax_cathode * Fday; // [C]
     const amrex::Real pratical_capacity_cathode = theoritical_capacity_cathode * SOCrange_cathode; // [C]
 
@@ -199,14 +199,14 @@ void initproblemdata(Box const& bx, Array4<Real> const& phi, GeometryData const&
     const amrex::Real Cell_NP_ratio = pratical_capacity_anode/pratical_capacity_cathode; // Not required, just FYI. Should be always >1 (if not, you can expect eartly degradation)
 
     // Applied current
-    const amrex::Real Crate = echemAMR::h_prob_parm->Crate;
+    const amrex::Real Crate = echemAMR::d_prob_parm->Crate;
     const amrex::Real time_to_charge = (1/Crate)*3600; // [s] Time to charge or discharge the cell
     const amrex::Real Current1C = pratical_capacity_cell/3600; // [A=C.s-1] Current for 1C
     const amrex::Real Applied_current = Current1C * Crate; // [A] (but we need the applied current density in A.m-2)
 
     // Surface calculations // FIX ME: add surface calculations from Jeff post-processing
-    const amrex::Real surface_anodesolid_currentcollector = echemAMR::h_prob_parm->anode_cc_SA; // [m2], temporary value pi*((5e-6)^2)
-    const amrex::Real surface_cathodsolid_currentcollector = echemAMR::h_prob_parm->cathode_cc_SA; // [m2], temporary value pi*((5e-6)^2)
+    const amrex::Real surface_anodesolid_currentcollector = echemAMR::d_prob_parm->anode_cc_SA; // [m2], temporary value pi*((5e-6)^2)
+    const amrex::Real surface_cathodsolid_currentcollector = echemAMR::d_prob_parm->cathode_cc_SA; // [m2], temporary value pi*((5e-6)^2)
     // const amrex::Real surface_anodesolid_currentcollector = 7.8540e-11; // [m2], temporary value pi*((5e-6)^2)
     // const amrex::Real surface_cathodsolid_currentcollector = 7.8540e-11; // [m2], temporary value pi*((5e-6)^2)
     
@@ -216,9 +216,12 @@ void initproblemdata(Box const& bx, Array4<Real> const& phi, GeometryData const&
     const amrex::Real Applied_current_density_anode = Applied_current / surface_anodesolid_currentcollector; // [A.m-2]
     const amrex::Real Applied_current_density_cathode = Applied_current / surface_cathodsolid_currentcollector; // [A.m-2]
 
+    echemAMR::d_prob_parm->pot_bc_lo[0] = -Applied_current_density_cathode;
+    echemAMR::d_prob_parm->pot_bc_hi[0] = -Applied_current_density_anode;
+
     // Surface calculations // FIX ME: add surface calculations from Jeff post-processing
-    const amrex::Real surface_anodesolid_electrolyte = echemAMR::h_prob_parm->anode_ele_SA; // 4*pi*((5e-6)^2)
-    const amrex::Real surface_cathodesolid_electrolyte = echemAMR::h_prob_parm->cathode_ele_SA; // 4*pi*((5e-6)^2)
+    const amrex::Real surface_anodesolid_electrolyte = echemAMR::d_prob_parm->anode_ele_SA; // 4*pi*((5e-6)^2)
+    const amrex::Real surface_cathodesolid_electrolyte = echemAMR::d_prob_parm->cathode_ele_SA; // 4*pi*((5e-6)^2)
     // const amrex::Real surface_anodesolid_electrolyte = 3.1416e-10; // 4*pi*((5e-6)^2)
     // const amrex::Real surface_cathodesolid_electrolyte = 3.1416e-10; // 4*pi*((5e-6)^2)
 
@@ -231,8 +234,8 @@ void initproblemdata(Box const& bx, Array4<Real> const& phi, GeometryData const&
     const amrex::Real Activeinterface_current_density_cathode = Applied_current / surface_cathodesolid_electrolyte; // [A.m-2]
 
     // Deduce potential values that verify this condition: Applied_current = integral(current density, ds active material-current collector) = integral(current density, ds active material-electrolyte) 
-    const amrex::Real phie_to = electrochem::get_phie_initial_from_anode(Activeinterface_current_density_anode, echemAMR::h_prob_parm->phi_reference, *echemAMR::h_prob_parm);
-    const amrex::Real phi_c_to = electrochem::get_phic_initial_from_electrolyte(Activeinterface_current_density_cathode, phie_to, *echemAMR::h_prob_parm);
+    const amrex::Real phie_to = electrochem::get_phie_initial_from_anode(Activeinterface_current_density_anode, echemAMR::d_prob_parm->phi_reference, *echemAMR::d_prob_parm);
+    const amrex::Real phi_c_to = electrochem::get_phic_initial_from_electrolyte(Activeinterface_current_density_cathode, phie_to, *echemAMR::d_prob_parm);
 
     // TO BE REMOVED
     //ProbParm h_prob_parm; // Create a new instance of the structure ProbParm
@@ -276,8 +279,8 @@ void initproblemdata(Box const& bx, Array4<Real> const& phi, GeometryData const&
                             Real x0 = ii*.35*Lx/4.0;
                             Real r = std::sqrt((x-x0)*(x-x0) + (y-y0)*(y-y0) + (z-z0)*(z-z0));
                             if(r < Lx/20.0){
-                                const amrex::Real soc_init = echemAMR::h_prob_parm->soc_cathode_t0;
-                                const amrex::Real csmax = electrochem::Cs_max_cathode(*echemAMR::h_prob_parm);
+                                const amrex::Real soc_init = echemAMR::d_prob_parm->soc_cathode_t0;
+                                const amrex::Real csmax = electrochem::Cs_max_cathode(*echemAMR::d_prob_parm);
                                 phi(i,j,k,CO_ID) = soc_init * csmax;
                                 phi(i,j,k,PO_ID) = phi_c_to;
                                 comp_found = true;
@@ -288,10 +291,10 @@ void initproblemdata(Box const& bx, Array4<Real> const& phi, GeometryData const&
                             Real x0 = 0.65*Lx + ii*.35*Lx/4.0;
                             Real r = std::sqrt((x-x0)*(x-x0) + (y-y0)*(y-y0) + (z-z0)*(z-z0));
                             if(r < Lx/20.0){
-                                const amrex::Real soc_init = echemAMR::h_prob_parm->soc_anode_t0;
-                                const amrex::Real csmax = electrochem::Cs_max_anode(*echemAMR::h_prob_parm);
+                                const amrex::Real soc_init = echemAMR::d_prob_parm->soc_anode_t0;
+                                const amrex::Real csmax = electrochem::Cs_max_anode(*echemAMR::d_prob_parm);
                                 phi(i,j,k,CO_ID) = soc_init * csmax;
-                                phi(i,j,k,PO_ID) = echemAMR::h_prob_parm->phi_reference;
+                                phi(i,j,k,PO_ID) = echemAMR::d_prob_parm->phi_reference;
                                 comp_found = true;
                             }
                         }
@@ -301,11 +304,11 @@ void initproblemdata(Box const& bx, Array4<Real> const& phi, GeometryData const&
                 if(!comp_found){
                     if(x > s_xlo && x < s_xhi) {
                         // separator
-                        phi(i,j,k,CO_ID) = echemAMR::h_prob_parm->ce_atrest;
+                        phi(i,j,k,CO_ID) = echemAMR::d_prob_parm->ce_atrest;
                         phi(i,j,k,PO_ID) = phie_to;
                     } else {
                         // electrolyte
-                        phi(i,j,k,CO_ID) = echemAMR::h_prob_parm->ce_atrest;
+                        phi(i,j,k,CO_ID) = echemAMR::d_prob_parm->ce_atrest;
                         phi(i,j,k,PO_ID) = phie_to;
                     }
                 }
@@ -331,19 +334,19 @@ void print_init_data() //break into multiple steps
 {
     // Calculate active material volumes
     // echemAMR::post_timestep(0, 0); // FIX ME: add volume calculation from Jeff post-processing
-    const amrex::Real volume_anode = echemAMR::h_prob_parm->anode_volume; // [m3] 
-    const amrex::Real volume_cathode = echemAMR::h_prob_parm->cathode_volume; // [m3] 
+    const amrex::Real volume_anode = echemAMR::d_prob_parm->anode_volume; // [m3]
+    const amrex::Real volume_cathode = echemAMR::d_prob_parm->cathode_volume; // [m3]
 
     // Calculate anode and cathode theoritical (use full soc range) and pratical (use a reduced soc range) capacity
-    const amrex::Real Fday = echemAMR::h_prob_parm->Faraday_const; // [C.mol-1]
+    const amrex::Real Fday = echemAMR::d_prob_parm->Faraday_const; // [C.mol-1]
 
-    const amrex::Real Csmax_anode = electrochem::Cs_max_anode(*echemAMR::h_prob_parm); // [mol.m-3]
-    const amrex::Real SOCrange_anode = echemAMR::h_prob_parm->anode_soc_max - echemAMR::h_prob_parm->anode_soc_min; // []
+    const amrex::Real Csmax_anode = electrochem::Cs_max_anode(*echemAMR::d_prob_parm); // [mol.m-3]
+    const amrex::Real SOCrange_anode = echemAMR::d_prob_parm->anode_soc_max - echemAMR::d_prob_parm->anode_soc_min; // []
     const amrex::Real theoritical_capacity_anode = volume_anode * Csmax_anode * Fday; // [C]
     const amrex::Real pratical_capacity_anode = theoritical_capacity_anode * SOCrange_anode; // [C] 
 
-    const amrex::Real Csmax_cathode = electrochem::Cs_max_cathode(*echemAMR::h_prob_parm); // [mol.m-3]
-    const amrex::Real SOCrange_cathode = echemAMR::h_prob_parm->cathode_soc_max - echemAMR::h_prob_parm->cathode_soc_min; // []
+    const amrex::Real Csmax_cathode = electrochem::Cs_max_cathode(*echemAMR::d_prob_parm); // [mol.m-3]
+    const amrex::Real SOCrange_cathode = echemAMR::d_prob_parm->cathode_soc_max - echemAMR::d_prob_parm->cathode_soc_min; // []
     const amrex::Real theoritical_capacity_cathode = volume_cathode * Csmax_cathode * Fday; // [C]
     const amrex::Real pratical_capacity_cathode = theoritical_capacity_cathode * SOCrange_cathode; // [C]
 
@@ -352,14 +355,14 @@ void print_init_data() //break into multiple steps
     const amrex::Real Cell_NP_ratio = pratical_capacity_anode/pratical_capacity_cathode; // Not required, just FYI. Should be always >1 (if not, you can expect eartly degradation)
 
     // Applied current
-    const amrex::Real Crate = echemAMR::h_prob_parm->Crate;
+    const amrex::Real Crate = echemAMR::d_prob_parm->Crate;
     const amrex::Real time_to_charge = (1/Crate)*3600; // [s] Time to charge or discharge the cell
     const amrex::Real Current1C = pratical_capacity_cell/3600; // [A=C.s-1] Current for 1C
     const amrex::Real Applied_current = Current1C * Crate; // [A] (but we need the applied current density in A.m-2)
 
     // Surface calculations // FIX ME: add surface calculations from Jeff post-processing
-    const amrex::Real surface_anodesolid_currentcollector = echemAMR::h_prob_parm->anode_cc_SA; // [m2], temporary value pi*((5e-6)^2)
-    const amrex::Real surface_cathodsolid_currentcollector = echemAMR::h_prob_parm->cathode_cc_SA; // [m2], temporary value pi*((5e-6)^2)
+    const amrex::Real surface_anodesolid_currentcollector = echemAMR::d_prob_parm->anode_cc_SA; // [m2], temporary value pi*((5e-6)^2)
+    const amrex::Real surface_cathodsolid_currentcollector = echemAMR::d_prob_parm->cathode_cc_SA; // [m2], temporary value pi*((5e-6)^2)
 
     // Applied current density at the interface active material - current collector
     // These are the two Neumann Boundary conditions value applies at the left and right extremities of the cell
@@ -368,8 +371,8 @@ void print_init_data() //break into multiple steps
     const amrex::Real Applied_current_density_cathode = Applied_current / surface_cathodsolid_currentcollector; // [A.m-2]
 
     // Surface calculations // FIX ME: add surface calculations from Jeff post-processing
-    const amrex::Real surface_anodesolid_electrolyte = echemAMR::h_prob_parm->anode_ele_SA; // 4*pi*((5e-6)^2)
-    const amrex::Real surface_cathodesolid_electrolyte = echemAMR::h_prob_parm->cathode_ele_SA; // 4*pi*((5e-6)^2)
+    const amrex::Real surface_anodesolid_electrolyte = echemAMR::d_prob_parm->anode_ele_SA; // 4*pi*((5e-6)^2)
+    const amrex::Real surface_cathodesolid_electrolyte = echemAMR::d_prob_parm->cathode_ele_SA; // 4*pi*((5e-6)^2)
 
     // Initial current density at the interface active material - electrolyte
     // These are the two Neumann Boundary conditions value applied at the active interface.
@@ -380,8 +383,8 @@ void print_init_data() //break into multiple steps
     const amrex::Real Activeinterface_current_density_cathode = Applied_current / surface_cathodesolid_electrolyte; // [A.m-2]
 
     // Deduce potential values that verify this condition: Applied_current = integral(current density, ds active material-current collector) = integral(current density, ds active material-electrolyte) 
-    const amrex::Real phie_to = electrochem::get_phie_initial_from_anode(Activeinterface_current_density_anode, echemAMR::h_prob_parm->phi_reference, *echemAMR::h_prob_parm);
-    const amrex::Real phi_c_to = electrochem::get_phic_initial_from_electrolyte(Activeinterface_current_density_cathode, phie_to, *echemAMR::h_prob_parm);
+    const amrex::Real phie_to = electrochem::get_phie_initial_from_anode(Activeinterface_current_density_anode, echemAMR::d_prob_parm->phi_reference, *echemAMR::d_prob_parm);
+    const amrex::Real phi_c_to = electrochem::get_phic_initial_from_electrolyte(Activeinterface_current_density_cathode, phie_to, *echemAMR::d_prob_parm);
 
 
     amrex::Print() << std::endl;
@@ -417,7 +420,7 @@ void print_init_data() //break into multiple steps
     amrex::Print() << "- Current density at the active interface      : " << Activeinterface_current_density_cathode << " [A.m-2] " << std::endl;
     amrex::Print() << std::endl;
     amrex::Print() << "POTENTIAL INITALIZATION" << std::endl;
-    amrex::Print() << "- Anode reference potential : " << echemAMR::h_prob_parm->phi_reference << " [V] " << std::endl;
+    amrex::Print() << "- Anode reference potential : " << echemAMR::d_prob_parm->phi_reference << " [V] " << std::endl;
     amrex::Print() << "- Electrolyte potential     : " << phie_to << " [V] " << std::endl;
     amrex::Print() << "- Cathode potential         : " << phi_c_to << " [V] " << std::endl;
 }

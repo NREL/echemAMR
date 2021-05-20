@@ -125,7 +125,7 @@ void echemAMR::InitData ()
         AverageDown();
 
         // Calculate the initial volumes and append to probparm
-        init_volumes(*h_prob_parm);
+        init_volumes();
 
         // Initialize the concentration and potential fields
         for (int lev = 0; lev <= finest_level; ++lev)

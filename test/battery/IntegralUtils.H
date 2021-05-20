@@ -123,22 +123,30 @@ Real current_collector_value(int i, int j, int k, int comp, int domain,
 }
 }
 
-void echemAMR::init_volumes(ProbParm & prob_parm)
+void echemAMR::init_volumes()
 {
+
     // Volumes
-    prob_parm.anode_volume =   VolumeIntegral(-1, A_ID);
-    prob_parm.ele_sep_volume = VolumeIntegral(-1, E_ID) + VolumeIntegral(-1, S_ID);
-    prob_parm.cathode_volume = VolumeIntegral(-1, C_ID);
+    h_prob_parm->anode_volume =   VolumeIntegral(-1, A_ID);
+    h_prob_parm->ele_sep_volume = VolumeIntegral(-1, E_ID) + VolumeIntegral(-1, S_ID);
+    h_prob_parm->cathode_volume = VolumeIntegral(-1, C_ID);
 
     // Surface Areas
-    prob_parm.anode_SA =       SurfaceIntegral(-1, A_ID, A_ID);
-    prob_parm.electrolyte_SA = SurfaceIntegral(-1, E_ID, E_ID);
-    prob_parm.sepatator_SA =   SurfaceIntegral(-1, S_ID, S_ID);
-    prob_parm.cathode_SA =     SurfaceIntegral(-1, C_ID, C_ID);
-    prob_parm.anode_ele_SA =   SurfaceIntegral(-1, A_ID, E_ID);
-    prob_parm.cathode_ele_SA = SurfaceIntegral(-1, C_ID, E_ID);
-    prob_parm.anode_cc_SA =    CurrentCollectorIntegral(-1, A_ID);
-    prob_parm.cathode_cc_SA =  CurrentCollectorIntegral(-1, C_ID);
+    h_prob_parm->anode_SA =       SurfaceIntegral(-1, A_ID, A_ID);
+    h_prob_parm->electrolyte_SA = SurfaceIntegral(-1, E_ID, E_ID);
+    h_prob_parm->sepatator_SA =   SurfaceIntegral(-1, S_ID, S_ID);
+    h_prob_parm->cathode_SA =     SurfaceIntegral(-1, C_ID, C_ID);
+    h_prob_parm->anode_ele_SA =   SurfaceIntegral(-1, A_ID, E_ID);
+    h_prob_parm->cathode_ele_SA = SurfaceIntegral(-1, C_ID, E_ID);
+    h_prob_parm->anode_cc_SA =    CurrentCollectorIntegral(-1, A_ID);
+    h_prob_parm->cathode_cc_SA =  CurrentCollectorIntegral(-1, C_ID);
+
+#ifdef AMREX_USE_GPU
+    amrex::Gpu::htod_memcpy(d_prob_parm, h_prob_parm, sizeof(ProbParm));
+#else
+    std::memcpy(d_prob_parm, h_prob_parm, sizeof(ProbParm));
+#endif
+
 }
 
 #endif
