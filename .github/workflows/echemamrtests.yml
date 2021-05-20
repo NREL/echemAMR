@@ -47,6 +47,8 @@ jobs:
     - name: Build
       working-directory: ./test/DriftDiffuse1d
       run: |
+        export PATH=/usr/local/nvidia/bin:/usr/local/cuda-11.1/bin:${PATH}
+        export LD_LIBRARY_PATH=/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda-11.1/lib:${LD_LIBRARY_PATH}
         make -j 2 COMP=gnu USE_CUDA=TRUE
     - name: Run
       working-directory: ./test/DriftDiffuse1d
