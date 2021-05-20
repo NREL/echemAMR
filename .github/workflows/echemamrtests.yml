@@ -25,3 +25,5 @@ jobs:
       working-directory: ./test/DriftDiffuse1d
       run: |
           mpirun -n 2 ./echemAMR3d.gnu.MPI.ex inputs_x
+          mpirun -n 2 ./echemAMR3d.gnu.MPI.ex inputs_y
+          mpirun -n 2 ./echemAMR3d.gnu.MPI.ex inputs_z
