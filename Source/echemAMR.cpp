@@ -137,7 +137,12 @@ void echemAMR::InitData ()
                 Array4<Real> fab = state[mfi].array();
                 GeometryData geomData = geom[lev].data();
                 const Box& box = mfi.validbox();
-                initproblemdata(box, fab, geomData);
+
+                amrex::launch(box,
+                [=] AMREX_GPU_DEVICE (Box const& tbx)
+                {
+                    initproblemdata(box, fab, geomData);
+                });
             }
         }
 
