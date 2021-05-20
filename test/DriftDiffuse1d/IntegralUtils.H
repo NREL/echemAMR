@@ -123,7 +123,7 @@ Real current_collector_value(int i, int j, int k, int comp, int domain,
 }
 }
 
-void echemAMR::init_volumes(ProbParm & prob_parm)
+void echemAMR::init_volumes()
 {
 
 }

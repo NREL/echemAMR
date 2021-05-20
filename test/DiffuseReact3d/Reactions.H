@@ -22,5 +22,18 @@ namespace electrochem_reactions
             reactsource(i,j,k,S1_ID) = 1.0;
             reactsource(i,j,k,S2_ID) = 0.0;
         }
+
+    AMREX_GPU_DEVICE AMREX_INLINE
+    void compute_potential_source(int i, int j, int k,
+            Array4<Real> const& phi,
+            Array4<Real> const& source,
+            GpuArray<Real, AMREX_SPACEDIM> prob_lo,
+            GpuArray<Real, AMREX_SPACEDIM> prob_hi,
+            GpuArray<Real, AMREX_SPACEDIM> dx,
+            const Real time,
+            ProbParm const& prob_parm)
+    {
+        source(i,j,k)=0.0;
+    }
 }
 #endif

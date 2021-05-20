@@ -125,7 +125,7 @@ void echemAMR::InitData ()
         AverageDown();
 
         // Calculate the initial volumes and append to probparm
-        init_volumes(*h_prob_parm);
+        init_volumes();
 
         // Initialize the concentration and potential fields
         for (int lev = 0; lev <= finest_level; ++lev)
@@ -275,6 +275,8 @@ void echemAMR::ReadParameters ()
         pp.query("do_reflux", do_reflux);
         pp.query("potential_solve",potential_solve);
         pp.query("potential_solve_int",pot_solve_int);
+        pp.query("potential_initial_guess",pot_initial_guess);
+        
     }
 }
 
