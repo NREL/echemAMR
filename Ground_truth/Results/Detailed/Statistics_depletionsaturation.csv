@@ -1,0 +1,2211 @@
+Time step	Time[s]	Domain	Location	Type	Threshold 1	[%]	Threshold 2	[%]
+1	1.1099271887764162	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+1	1.1099271887764162	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+1	1.1099271887764162	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+1	1.1099271887764162	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+1	1.1099271887764162	Right active material	Active interface	Depletion	0.05	99.33982184898414	0.01	0.0
+1	1.1099271887764162	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+1	1.1099271887764162	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+1	1.1099271887764162	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+1	1.1099271887764162	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+1	1.1099271887764162	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+1	1.1099271887764162	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+1	1.1099271887764162	Right active material	Volume	Depletion	0.05	99.97528081718707	0.01	0.0
+1	1.1099271887764162	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+2	2.4973361747469363	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+2	2.4973361747469363	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+2	2.4973361747469363	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+2	2.4973361747469363	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+2	2.4973361747469363	Right active material	Active interface	Depletion	0.05	49.20835254807546	0.01	0.0
+2	2.4973361747469363	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+2	2.4973361747469363	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+2	2.4973361747469363	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+2	2.4973361747469363	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+2	2.4973361747469363	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+2	2.4973361747469363	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+2	2.4973361747469363	Right active material	Volume	Depletion	0.05	96.013244150397	0.01	0.0
+2	2.4973361747469363	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+3	4.231597407210087	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+3	4.231597407210087	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+3	4.231597407210087	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+3	4.231597407210087	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+3	4.231597407210087	Right active material	Active interface	Depletion	0.05	7.753857107027969	0.01	0.0
+3	4.231597407210087	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+3	4.231597407210087	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+3	4.231597407210087	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+3	4.231597407210087	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+3	4.231597407210087	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+3	4.231597407210087	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+3	4.231597407210087	Right active material	Volume	Depletion	0.05	88.12085741635444	0.01	0.0
+3	4.231597407210087	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+4	6.399423947789025	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+4	6.399423947789025	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+4	6.399423947789025	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+4	6.399423947789025	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+4	6.399423947789025	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+4	6.399423947789025	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+4	6.399423947789025	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+4	6.399423947789025	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+4	6.399423947789025	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+4	6.399423947789025	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+4	6.399423947789025	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+4	6.399423947789025	Right active material	Volume	Depletion	0.05	85.25900614343594	0.01	0.0
+4	6.399423947789025	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+5	9.109207123512697	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+5	9.109207123512697	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+5	9.109207123512697	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+5	9.109207123512697	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+5	9.109207123512697	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+5	9.109207123512697	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+5	9.109207123512697	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+5	9.109207123512697	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+5	9.109207123512697	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+5	9.109207123512697	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+5	9.109207123512697	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+5	9.109207123512697	Right active material	Volume	Depletion	0.05	78.96288487402896	0.01	0.0
+5	9.109207123512697	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+6	12.496436093167286	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+6	12.496436093167286	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+6	12.496436093167286	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+6	12.496436093167286	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+6	12.496436093167286	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+6	12.496436093167286	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+6	12.496436093167286	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+6	12.496436093167286	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+6	12.496436093167286	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+6	12.496436093167286	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+6	12.496436093167286	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+6	12.496436093167286	Right active material	Volume	Depletion	0.05	71.66563670069905	0.01	0.0
+6	12.496436093167286	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+7	16.730472305235523	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+7	16.730472305235523	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+7	16.730472305235523	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+7	16.730472305235523	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+7	16.730472305235523	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+7	16.730472305235523	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+7	16.730472305235523	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+7	16.730472305235523	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+7	16.730472305235523	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+7	16.730472305235523	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+7	16.730472305235523	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+7	16.730472305235523	Right active material	Volume	Depletion	0.05	64.14518884726418	0.01	0.0
+7	16.730472305235523	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+8	22.02301757032082	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+8	22.02301757032082	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+8	22.02301757032082	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+8	22.02301757032082	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+8	22.02301757032082	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+8	22.02301757032082	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+8	22.02301757032082	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+8	22.02301757032082	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+8	22.02301757032082	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+8	22.02301757032082	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+8	22.02301757032082	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+8	22.02301757032082	Right active material	Volume	Depletion	0.05	54.93147697114567	0.01	0.0
+8	22.02301757032082	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+9	28.638699151677443	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+9	28.638699151677443	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+9	28.638699151677443	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+9	28.638699151677443	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+9	28.638699151677443	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+9	28.638699151677443	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+9	28.638699151677443	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+9	28.638699151677443	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+9	28.638699151677443	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+9	28.638699151677443	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+9	28.638699151677443	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+9	28.638699151677443	Right active material	Volume	Depletion	0.05	45.75266276488744	0.01	0.0
+9	28.638699151677443	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+10	36.908301128373225	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+10	36.908301128373225	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+10	36.908301128373225	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+10	36.908301128373225	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+10	36.908301128373225	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+10	36.908301128373225	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+10	36.908301128373225	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+10	36.908301128373225	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+10	36.908301128373225	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+10	36.908301128373225	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+10	36.908301128373225	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+10	36.908301128373225	Right active material	Volume	Depletion	0.05	34.17317968662887	0.01	0.0
+10	36.908301128373225	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+11	47.245303599242945	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+11	47.245303599242945	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+11	47.245303599242945	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+11	47.245303599242945	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+11	47.245303599242945	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+11	47.245303599242945	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+11	47.245303599242945	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+11	47.245303599242945	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+11	47.245303599242945	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+11	47.245303599242945	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+11	47.245303599242945	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+11	47.245303599242945	Right active material	Volume	Depletion	0.05	23.380348249650602	0.01	0.0
+11	47.245303599242945	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+12	58.344575487007106	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+12	58.344575487007106	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+12	58.344575487007106	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+12	58.344575487007106	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+12	58.344575487007106	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+12	58.344575487007106	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+12	58.344575487007106	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+12	58.344575487007106	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+12	58.344575487007106	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+12	58.344575487007106	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+12	58.344575487007106	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+12	58.344575487007106	Right active material	Volume	Depletion	0.05	14.825814581885927	0.01	0.0
+12	58.344575487007106	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+13	69.44384737477127	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+13	69.44384737477127	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+13	69.44384737477127	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+13	69.44384737477127	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+13	69.44384737477127	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+13	69.44384737477127	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+13	69.44384737477127	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+13	69.44384737477127	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+13	69.44384737477127	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+13	69.44384737477127	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+13	69.44384737477127	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+13	69.44384737477127	Right active material	Volume	Depletion	0.05	8.291468246751027	0.01	0.0
+13	69.44384737477127	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+14	80.54311926253543	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+14	80.54311926253543	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+14	80.54311926253543	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+14	80.54311926253543	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+14	80.54311926253543	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+14	80.54311926253543	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+14	80.54311926253543	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+14	80.54311926253543	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+14	80.54311926253543	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+14	80.54311926253543	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+14	80.54311926253543	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+14	80.54311926253543	Right active material	Volume	Depletion	0.05	3.7954851139606873	0.01	0.0
+14	80.54311926253543	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+15	91.64239115029959	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+15	91.64239115029959	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+15	91.64239115029959	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+15	91.64239115029959	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+15	91.64239115029959	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+15	91.64239115029959	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+15	91.64239115029959	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+15	91.64239115029959	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+15	91.64239115029959	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+15	91.64239115029959	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+15	91.64239115029959	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+15	91.64239115029959	Right active material	Volume	Depletion	0.05	0.9307257018910048	0.01	0.0
+15	91.64239115029959	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+16	102.74166303806375	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+16	102.74166303806375	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+16	102.74166303806375	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+16	102.74166303806375	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+16	102.74166303806375	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+16	102.74166303806375	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+16	102.74166303806375	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+16	102.74166303806375	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+16	102.74166303806375	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+16	102.74166303806375	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+16	102.74166303806375	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+16	102.74166303806375	Right active material	Volume	Depletion	0.05	0.02265925091181052	0.01	0.0
+16	102.74166303806375	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+17	113.84093492582791	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+17	113.84093492582791	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+17	113.84093492582791	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+17	113.84093492582791	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+17	113.84093492582791	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+17	113.84093492582791	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+17	113.84093492582791	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+17	113.84093492582791	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+17	113.84093492582791	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+17	113.84093492582791	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+17	113.84093492582791	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+17	113.84093492582791	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+17	113.84093492582791	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+18	124.94020681359207	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+18	124.94020681359207	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+18	124.94020681359207	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+18	124.94020681359207	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+18	124.94020681359207	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+18	124.94020681359207	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+18	124.94020681359207	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+18	124.94020681359207	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+18	124.94020681359207	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+18	124.94020681359207	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+18	124.94020681359207	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+18	124.94020681359207	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+18	124.94020681359207	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+19	136.03947870135624	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+19	136.03947870135624	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+19	136.03947870135624	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+19	136.03947870135624	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+19	136.03947870135624	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+19	136.03947870135624	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+19	136.03947870135624	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+19	136.03947870135624	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+19	136.03947870135624	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+19	136.03947870135624	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+19	136.03947870135624	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+19	136.03947870135624	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+19	136.03947870135624	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+20	147.1387505891204	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+20	147.1387505891204	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+20	147.1387505891204	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+20	147.1387505891204	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+20	147.1387505891204	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+20	147.1387505891204	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+20	147.1387505891204	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+20	147.1387505891204	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+20	147.1387505891204	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+20	147.1387505891204	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+20	147.1387505891204	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+20	147.1387505891204	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+20	147.1387505891204	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+21	158.23802247688457	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+21	158.23802247688457	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+21	158.23802247688457	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+21	158.23802247688457	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+21	158.23802247688457	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+21	158.23802247688457	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+21	158.23802247688457	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+21	158.23802247688457	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+21	158.23802247688457	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+21	158.23802247688457	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+21	158.23802247688457	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+21	158.23802247688457	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+21	158.23802247688457	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+22	169.33729436464873	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+22	169.33729436464873	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+22	169.33729436464873	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+22	169.33729436464873	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+22	169.33729436464873	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+22	169.33729436464873	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+22	169.33729436464873	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+22	169.33729436464873	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+22	169.33729436464873	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+22	169.33729436464873	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+22	169.33729436464873	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+22	169.33729436464873	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+22	169.33729436464873	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+23	180.4365662524129	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+23	180.4365662524129	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+23	180.4365662524129	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+23	180.4365662524129	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+23	180.4365662524129	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+23	180.4365662524129	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+23	180.4365662524129	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+23	180.4365662524129	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+23	180.4365662524129	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+23	180.4365662524129	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+23	180.4365662524129	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+23	180.4365662524129	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+23	180.4365662524129	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+24	191.53583814017705	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+24	191.53583814017705	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+24	191.53583814017705	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+24	191.53583814017705	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+24	191.53583814017705	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+24	191.53583814017705	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+24	191.53583814017705	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+24	191.53583814017705	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+24	191.53583814017705	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+24	191.53583814017705	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+24	191.53583814017705	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+24	191.53583814017705	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+24	191.53583814017705	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+25	202.6351100279412	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+25	202.6351100279412	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+25	202.6351100279412	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+25	202.6351100279412	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+25	202.6351100279412	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+25	202.6351100279412	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+25	202.6351100279412	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+25	202.6351100279412	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+25	202.6351100279412	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+25	202.6351100279412	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+25	202.6351100279412	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+25	202.6351100279412	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+25	202.6351100279412	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+26	213.73438191570537	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+26	213.73438191570537	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+26	213.73438191570537	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+26	213.73438191570537	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+26	213.73438191570537	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+26	213.73438191570537	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+26	213.73438191570537	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+26	213.73438191570537	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+26	213.73438191570537	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+26	213.73438191570537	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+26	213.73438191570537	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+26	213.73438191570537	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+26	213.73438191570537	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+27	224.83365380346953	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+27	224.83365380346953	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+27	224.83365380346953	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+27	224.83365380346953	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+27	224.83365380346953	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+27	224.83365380346953	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+27	224.83365380346953	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+27	224.83365380346953	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+27	224.83365380346953	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+27	224.83365380346953	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+27	224.83365380346953	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+27	224.83365380346953	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+27	224.83365380346953	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+28	235.9329256912337	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+28	235.9329256912337	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+28	235.9329256912337	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+28	235.9329256912337	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+28	235.9329256912337	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+28	235.9329256912337	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+28	235.9329256912337	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+28	235.9329256912337	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+28	235.9329256912337	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+28	235.9329256912337	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+28	235.9329256912337	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+28	235.9329256912337	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+28	235.9329256912337	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+29	247.03219757899785	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+29	247.03219757899785	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+29	247.03219757899785	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+29	247.03219757899785	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+29	247.03219757899785	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+29	247.03219757899785	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+29	247.03219757899785	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+29	247.03219757899785	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+29	247.03219757899785	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+29	247.03219757899785	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+29	247.03219757899785	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+29	247.03219757899785	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+29	247.03219757899785	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+30	258.13146946676204	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+30	258.13146946676204	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+30	258.13146946676204	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+30	258.13146946676204	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+30	258.13146946676204	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+30	258.13146946676204	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+30	258.13146946676204	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+30	258.13146946676204	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+30	258.13146946676204	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+30	258.13146946676204	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+30	258.13146946676204	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+30	258.13146946676204	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+30	258.13146946676204	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+31	269.23074135452623	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+31	269.23074135452623	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+31	269.23074135452623	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+31	269.23074135452623	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+31	269.23074135452623	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+31	269.23074135452623	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+31	269.23074135452623	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+31	269.23074135452623	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+31	269.23074135452623	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+31	269.23074135452623	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+31	269.23074135452623	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+31	269.23074135452623	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+31	269.23074135452623	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+32	280.3300132422904	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+32	280.3300132422904	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+32	280.3300132422904	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+32	280.3300132422904	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+32	280.3300132422904	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+32	280.3300132422904	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+32	280.3300132422904	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+32	280.3300132422904	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+32	280.3300132422904	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+32	280.3300132422904	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+32	280.3300132422904	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+32	280.3300132422904	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+32	280.3300132422904	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+33	291.4292851300546	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+33	291.4292851300546	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+33	291.4292851300546	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+33	291.4292851300546	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+33	291.4292851300546	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+33	291.4292851300546	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+33	291.4292851300546	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+33	291.4292851300546	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+33	291.4292851300546	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+33	291.4292851300546	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+33	291.4292851300546	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+33	291.4292851300546	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+33	291.4292851300546	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+34	302.5285570178188	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+34	302.5285570178188	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+34	302.5285570178188	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+34	302.5285570178188	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+34	302.5285570178188	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+34	302.5285570178188	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+34	302.5285570178188	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+34	302.5285570178188	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+34	302.5285570178188	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+34	302.5285570178188	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+34	302.5285570178188	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+34	302.5285570178188	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+34	302.5285570178188	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+35	313.627828905583	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+35	313.627828905583	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+35	313.627828905583	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+35	313.627828905583	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+35	313.627828905583	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+35	313.627828905583	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+35	313.627828905583	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+35	313.627828905583	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+35	313.627828905583	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+35	313.627828905583	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+35	313.627828905583	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+35	313.627828905583	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+35	313.627828905583	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+36	324.7271007933472	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+36	324.7271007933472	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+36	324.7271007933472	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+36	324.7271007933472	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+36	324.7271007933472	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+36	324.7271007933472	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+36	324.7271007933472	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+36	324.7271007933472	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+36	324.7271007933472	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+36	324.7271007933472	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+36	324.7271007933472	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+36	324.7271007933472	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+36	324.7271007933472	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+37	335.82637268111137	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+37	335.82637268111137	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+37	335.82637268111137	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+37	335.82637268111137	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+37	335.82637268111137	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+37	335.82637268111137	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+37	335.82637268111137	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+37	335.82637268111137	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+37	335.82637268111137	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+37	335.82637268111137	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+37	335.82637268111137	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+37	335.82637268111137	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+37	335.82637268111137	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+38	346.92564456887555	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+38	346.92564456887555	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+38	346.92564456887555	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+38	346.92564456887555	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+38	346.92564456887555	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+38	346.92564456887555	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+38	346.92564456887555	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+38	346.92564456887555	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+38	346.92564456887555	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+38	346.92564456887555	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+38	346.92564456887555	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+38	346.92564456887555	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+38	346.92564456887555	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+39	358.02491645663974	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+39	358.02491645663974	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+39	358.02491645663974	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+39	358.02491645663974	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+39	358.02491645663974	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+39	358.02491645663974	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+39	358.02491645663974	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+39	358.02491645663974	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+39	358.02491645663974	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+39	358.02491645663974	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+39	358.02491645663974	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+39	358.02491645663974	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+39	358.02491645663974	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+40	369.12418834440393	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+40	369.12418834440393	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+40	369.12418834440393	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+40	369.12418834440393	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+40	369.12418834440393	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+40	369.12418834440393	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+40	369.12418834440393	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+40	369.12418834440393	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+40	369.12418834440393	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+40	369.12418834440393	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+40	369.12418834440393	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+40	369.12418834440393	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+40	369.12418834440393	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+41	380.2234602321681	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+41	380.2234602321681	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+41	380.2234602321681	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+41	380.2234602321681	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+41	380.2234602321681	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+41	380.2234602321681	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+41	380.2234602321681	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+41	380.2234602321681	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+41	380.2234602321681	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+41	380.2234602321681	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+41	380.2234602321681	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+41	380.2234602321681	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+41	380.2234602321681	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+42	391.3227321199323	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+42	391.3227321199323	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+42	391.3227321199323	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+42	391.3227321199323	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+42	391.3227321199323	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+42	391.3227321199323	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+42	391.3227321199323	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+42	391.3227321199323	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+42	391.3227321199323	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+42	391.3227321199323	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+42	391.3227321199323	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+42	391.3227321199323	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+42	391.3227321199323	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+43	402.4220040076965	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+43	402.4220040076965	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+43	402.4220040076965	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+43	402.4220040076965	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+43	402.4220040076965	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+43	402.4220040076965	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+43	402.4220040076965	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+43	402.4220040076965	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+43	402.4220040076965	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+43	402.4220040076965	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+43	402.4220040076965	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+43	402.4220040076965	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+43	402.4220040076965	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+44	413.5212758954607	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+44	413.5212758954607	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+44	413.5212758954607	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+44	413.5212758954607	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+44	413.5212758954607	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+44	413.5212758954607	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+44	413.5212758954607	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+44	413.5212758954607	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+44	413.5212758954607	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+44	413.5212758954607	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+44	413.5212758954607	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+44	413.5212758954607	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+44	413.5212758954607	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+45	424.6205477832249	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+45	424.6205477832249	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+45	424.6205477832249	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+45	424.6205477832249	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+45	424.6205477832249	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+45	424.6205477832249	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+45	424.6205477832249	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+45	424.6205477832249	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+45	424.6205477832249	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+45	424.6205477832249	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+45	424.6205477832249	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+45	424.6205477832249	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+45	424.6205477832249	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+46	435.71981967098907	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+46	435.71981967098907	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+46	435.71981967098907	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+46	435.71981967098907	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+46	435.71981967098907	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+46	435.71981967098907	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+46	435.71981967098907	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+46	435.71981967098907	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+46	435.71981967098907	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+46	435.71981967098907	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+46	435.71981967098907	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+46	435.71981967098907	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+46	435.71981967098907	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+47	446.81909155875326	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+47	446.81909155875326	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+47	446.81909155875326	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+47	446.81909155875326	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+47	446.81909155875326	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+47	446.81909155875326	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+47	446.81909155875326	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+47	446.81909155875326	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+47	446.81909155875326	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+47	446.81909155875326	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+47	446.81909155875326	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+47	446.81909155875326	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+47	446.81909155875326	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+48	457.91836344651745	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+48	457.91836344651745	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+48	457.91836344651745	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+48	457.91836344651745	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+48	457.91836344651745	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+48	457.91836344651745	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+48	457.91836344651745	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+48	457.91836344651745	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+48	457.91836344651745	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+48	457.91836344651745	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+48	457.91836344651745	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+48	457.91836344651745	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+48	457.91836344651745	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+49	469.01763533428164	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+49	469.01763533428164	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+49	469.01763533428164	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+49	469.01763533428164	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+49	469.01763533428164	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+49	469.01763533428164	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+49	469.01763533428164	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+49	469.01763533428164	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+49	469.01763533428164	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+49	469.01763533428164	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+49	469.01763533428164	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+49	469.01763533428164	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+49	469.01763533428164	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+50	480.1169072220458	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+50	480.1169072220458	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+50	480.1169072220458	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+50	480.1169072220458	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+50	480.1169072220458	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+50	480.1169072220458	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+50	480.1169072220458	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+50	480.1169072220458	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+50	480.1169072220458	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+50	480.1169072220458	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+50	480.1169072220458	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+50	480.1169072220458	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+50	480.1169072220458	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+51	491.21617910981	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+51	491.21617910981	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+51	491.21617910981	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+51	491.21617910981	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+51	491.21617910981	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+51	491.21617910981	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+51	491.21617910981	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+51	491.21617910981	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+51	491.21617910981	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+51	491.21617910981	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+51	491.21617910981	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+51	491.21617910981	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+51	491.21617910981	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+52	502.3154509975742	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+52	502.3154509975742	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+52	502.3154509975742	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+52	502.3154509975742	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+52	502.3154509975742	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+52	502.3154509975742	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+52	502.3154509975742	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+52	502.3154509975742	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+52	502.3154509975742	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+52	502.3154509975742	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+52	502.3154509975742	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+52	502.3154509975742	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+52	502.3154509975742	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+53	513.4147228853384	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+53	513.4147228853384	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+53	513.4147228853384	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+53	513.4147228853384	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+53	513.4147228853384	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+53	513.4147228853384	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+53	513.4147228853384	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+53	513.4147228853384	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+53	513.4147228853384	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+53	513.4147228853384	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+53	513.4147228853384	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+53	513.4147228853384	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+53	513.4147228853384	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+54	524.5139947731026	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+54	524.5139947731026	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+54	524.5139947731026	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+54	524.5139947731026	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+54	524.5139947731026	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+54	524.5139947731026	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+54	524.5139947731026	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+54	524.5139947731026	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+54	524.5139947731026	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+54	524.5139947731026	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+54	524.5139947731026	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+54	524.5139947731026	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+54	524.5139947731026	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+55	535.6132666608668	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+55	535.6132666608668	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+55	535.6132666608668	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+55	535.6132666608668	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+55	535.6132666608668	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+55	535.6132666608668	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+55	535.6132666608668	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+55	535.6132666608668	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+55	535.6132666608668	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+55	535.6132666608668	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+55	535.6132666608668	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+55	535.6132666608668	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+55	535.6132666608668	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+56	546.712538548631	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+56	546.712538548631	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+56	546.712538548631	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+56	546.712538548631	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+56	546.712538548631	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+56	546.712538548631	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+56	546.712538548631	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+56	546.712538548631	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+56	546.712538548631	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+56	546.712538548631	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+56	546.712538548631	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+56	546.712538548631	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+56	546.712538548631	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+57	557.8118104363951	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+57	557.8118104363951	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+57	557.8118104363951	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+57	557.8118104363951	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+57	557.8118104363951	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+57	557.8118104363951	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+57	557.8118104363951	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+57	557.8118104363951	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+57	557.8118104363951	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+57	557.8118104363951	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+57	557.8118104363951	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+57	557.8118104363951	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+57	557.8118104363951	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+58	568.9110823241593	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+58	568.9110823241593	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+58	568.9110823241593	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+58	568.9110823241593	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+58	568.9110823241593	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+58	568.9110823241593	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+58	568.9110823241593	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+58	568.9110823241593	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+58	568.9110823241593	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+58	568.9110823241593	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+58	568.9110823241593	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+58	568.9110823241593	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+58	568.9110823241593	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+59	580.0103542119235	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+59	580.0103542119235	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+59	580.0103542119235	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+59	580.0103542119235	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+59	580.0103542119235	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+59	580.0103542119235	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+59	580.0103542119235	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+59	580.0103542119235	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+59	580.0103542119235	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+59	580.0103542119235	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+59	580.0103542119235	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+59	580.0103542119235	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+59	580.0103542119235	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+60	591.1096260996877	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+60	591.1096260996877	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+60	591.1096260996877	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+60	591.1096260996877	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+60	591.1096260996877	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+60	591.1096260996877	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+60	591.1096260996877	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+60	591.1096260996877	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+60	591.1096260996877	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+60	591.1096260996877	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+60	591.1096260996877	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+60	591.1096260996877	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+60	591.1096260996877	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+61	602.2088979874519	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+61	602.2088979874519	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+61	602.2088979874519	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+61	602.2088979874519	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+61	602.2088979874519	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+61	602.2088979874519	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+61	602.2088979874519	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+61	602.2088979874519	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+61	602.2088979874519	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+61	602.2088979874519	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+61	602.2088979874519	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+61	602.2088979874519	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+61	602.2088979874519	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+62	613.3081698752161	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+62	613.3081698752161	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+62	613.3081698752161	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+62	613.3081698752161	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+62	613.3081698752161	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+62	613.3081698752161	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+62	613.3081698752161	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+62	613.3081698752161	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+62	613.3081698752161	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+62	613.3081698752161	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+62	613.3081698752161	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+62	613.3081698752161	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+62	613.3081698752161	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+63	624.4074417629803	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+63	624.4074417629803	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+63	624.4074417629803	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+63	624.4074417629803	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+63	624.4074417629803	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+63	624.4074417629803	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+63	624.4074417629803	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+63	624.4074417629803	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+63	624.4074417629803	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+63	624.4074417629803	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+63	624.4074417629803	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+63	624.4074417629803	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+63	624.4074417629803	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+64	635.5067136507445	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+64	635.5067136507445	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+64	635.5067136507445	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+64	635.5067136507445	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+64	635.5067136507445	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+64	635.5067136507445	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+64	635.5067136507445	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+64	635.5067136507445	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+64	635.5067136507445	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+64	635.5067136507445	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+64	635.5067136507445	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+64	635.5067136507445	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+64	635.5067136507445	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+65	646.6059855385087	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+65	646.6059855385087	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+65	646.6059855385087	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+65	646.6059855385087	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+65	646.6059855385087	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+65	646.6059855385087	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+65	646.6059855385087	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+65	646.6059855385087	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+65	646.6059855385087	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+65	646.6059855385087	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+65	646.6059855385087	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+65	646.6059855385087	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+65	646.6059855385087	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+66	657.7052574262729	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+66	657.7052574262729	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+66	657.7052574262729	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+66	657.7052574262729	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+66	657.7052574262729	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+66	657.7052574262729	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+66	657.7052574262729	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+66	657.7052574262729	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+66	657.7052574262729	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+66	657.7052574262729	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+66	657.7052574262729	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+66	657.7052574262729	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+66	657.7052574262729	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+67	668.804529314037	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+67	668.804529314037	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+67	668.804529314037	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+67	668.804529314037	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+67	668.804529314037	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+67	668.804529314037	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+67	668.804529314037	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+67	668.804529314037	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+67	668.804529314037	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+67	668.804529314037	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+67	668.804529314037	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+67	668.804529314037	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+67	668.804529314037	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+68	679.9038012018012	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+68	679.9038012018012	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+68	679.9038012018012	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+68	679.9038012018012	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+68	679.9038012018012	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+68	679.9038012018012	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+68	679.9038012018012	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+68	679.9038012018012	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+68	679.9038012018012	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+68	679.9038012018012	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+68	679.9038012018012	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+68	679.9038012018012	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+68	679.9038012018012	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+69	691.0030730895654	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+69	691.0030730895654	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+69	691.0030730895654	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+69	691.0030730895654	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+69	691.0030730895654	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+69	691.0030730895654	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+69	691.0030730895654	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+69	691.0030730895654	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+69	691.0030730895654	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+69	691.0030730895654	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+69	691.0030730895654	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+69	691.0030730895654	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+69	691.0030730895654	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+70	702.1023449773296	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+70	702.1023449773296	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+70	702.1023449773296	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+70	702.1023449773296	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+70	702.1023449773296	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+70	702.1023449773296	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+70	702.1023449773296	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+70	702.1023449773296	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+70	702.1023449773296	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+70	702.1023449773296	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+70	702.1023449773296	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+70	702.1023449773296	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+70	702.1023449773296	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+71	713.2016168650938	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+71	713.2016168650938	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+71	713.2016168650938	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+71	713.2016168650938	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+71	713.2016168650938	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+71	713.2016168650938	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+71	713.2016168650938	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+71	713.2016168650938	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+71	713.2016168650938	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+71	713.2016168650938	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+71	713.2016168650938	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+71	713.2016168650938	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+71	713.2016168650938	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+72	724.300888752858	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+72	724.300888752858	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+72	724.300888752858	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+72	724.300888752858	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+72	724.300888752858	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+72	724.300888752858	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+72	724.300888752858	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+72	724.300888752858	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+72	724.300888752858	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+72	724.300888752858	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+72	724.300888752858	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+72	724.300888752858	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+72	724.300888752858	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+73	735.4001606406222	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+73	735.4001606406222	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+73	735.4001606406222	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+73	735.4001606406222	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+73	735.4001606406222	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+73	735.4001606406222	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+73	735.4001606406222	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+73	735.4001606406222	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+73	735.4001606406222	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+73	735.4001606406222	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+73	735.4001606406222	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+73	735.4001606406222	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+73	735.4001606406222	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+74	746.4994325283864	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+74	746.4994325283864	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+74	746.4994325283864	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+74	746.4994325283864	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+74	746.4994325283864	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+74	746.4994325283864	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+74	746.4994325283864	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+74	746.4994325283864	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+74	746.4994325283864	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+74	746.4994325283864	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+74	746.4994325283864	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+74	746.4994325283864	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+74	746.4994325283864	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+75	757.5987044161506	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+75	757.5987044161506	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+75	757.5987044161506	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+75	757.5987044161506	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+75	757.5987044161506	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+75	757.5987044161506	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+75	757.5987044161506	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+75	757.5987044161506	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+75	757.5987044161506	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+75	757.5987044161506	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+75	757.5987044161506	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+75	757.5987044161506	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+75	757.5987044161506	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+76	768.6979763039147	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+76	768.6979763039147	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+76	768.6979763039147	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+76	768.6979763039147	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+76	768.6979763039147	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+76	768.6979763039147	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+76	768.6979763039147	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+76	768.6979763039147	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+76	768.6979763039147	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+76	768.6979763039147	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+76	768.6979763039147	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+76	768.6979763039147	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+76	768.6979763039147	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+77	779.7972481916789	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+77	779.7972481916789	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+77	779.7972481916789	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+77	779.7972481916789	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+77	779.7972481916789	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+77	779.7972481916789	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+77	779.7972481916789	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+77	779.7972481916789	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+77	779.7972481916789	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+77	779.7972481916789	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+77	779.7972481916789	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+77	779.7972481916789	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+77	779.7972481916789	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+78	790.8965200794431	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+78	790.8965200794431	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+78	790.8965200794431	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+78	790.8965200794431	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+78	790.8965200794431	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+78	790.8965200794431	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+78	790.8965200794431	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+78	790.8965200794431	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+78	790.8965200794431	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+78	790.8965200794431	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+78	790.8965200794431	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+78	790.8965200794431	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+78	790.8965200794431	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+79	801.9957919672073	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+79	801.9957919672073	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+79	801.9957919672073	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+79	801.9957919672073	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+79	801.9957919672073	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+79	801.9957919672073	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+79	801.9957919672073	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+79	801.9957919672073	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+79	801.9957919672073	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+79	801.9957919672073	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+79	801.9957919672073	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+79	801.9957919672073	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+79	801.9957919672073	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+80	813.0950638549715	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+80	813.0950638549715	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+80	813.0950638549715	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+80	813.0950638549715	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+80	813.0950638549715	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+80	813.0950638549715	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+80	813.0950638549715	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+80	813.0950638549715	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+80	813.0950638549715	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+80	813.0950638549715	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+80	813.0950638549715	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+80	813.0950638549715	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+80	813.0950638549715	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+81	824.1943357427357	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+81	824.1943357427357	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+81	824.1943357427357	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+81	824.1943357427357	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+81	824.1943357427357	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+81	824.1943357427357	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+81	824.1943357427357	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+81	824.1943357427357	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+81	824.1943357427357	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+81	824.1943357427357	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+81	824.1943357427357	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+81	824.1943357427357	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+81	824.1943357427357	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+82	835.2936076304999	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+82	835.2936076304999	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+82	835.2936076304999	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+82	835.2936076304999	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+82	835.2936076304999	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+82	835.2936076304999	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+82	835.2936076304999	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+82	835.2936076304999	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+82	835.2936076304999	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+82	835.2936076304999	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+82	835.2936076304999	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+82	835.2936076304999	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+82	835.2936076304999	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+83	846.3928795182641	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+83	846.3928795182641	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+83	846.3928795182641	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+83	846.3928795182641	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+83	846.3928795182641	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+83	846.3928795182641	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+83	846.3928795182641	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+83	846.3928795182641	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+83	846.3928795182641	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+83	846.3928795182641	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+83	846.3928795182641	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+83	846.3928795182641	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+83	846.3928795182641	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+84	857.4921514060283	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+84	857.4921514060283	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+84	857.4921514060283	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+84	857.4921514060283	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+84	857.4921514060283	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+84	857.4921514060283	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+84	857.4921514060283	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+84	857.4921514060283	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+84	857.4921514060283	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+84	857.4921514060283	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+84	857.4921514060283	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+84	857.4921514060283	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+84	857.4921514060283	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+85	868.5914232937924	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+85	868.5914232937924	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+85	868.5914232937924	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+85	868.5914232937924	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+85	868.5914232937924	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+85	868.5914232937924	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+85	868.5914232937924	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+85	868.5914232937924	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+85	868.5914232937924	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+85	868.5914232937924	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+85	868.5914232937924	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+85	868.5914232937924	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+85	868.5914232937924	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+86	879.6906951815566	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+86	879.6906951815566	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+86	879.6906951815566	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+86	879.6906951815566	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+86	879.6906951815566	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+86	879.6906951815566	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+86	879.6906951815566	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+86	879.6906951815566	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+86	879.6906951815566	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+86	879.6906951815566	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+86	879.6906951815566	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+86	879.6906951815566	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+86	879.6906951815566	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+87	890.7899670693208	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+87	890.7899670693208	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+87	890.7899670693208	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+87	890.7899670693208	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+87	890.7899670693208	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+87	890.7899670693208	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+87	890.7899670693208	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+87	890.7899670693208	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+87	890.7899670693208	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+87	890.7899670693208	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+87	890.7899670693208	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+87	890.7899670693208	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+87	890.7899670693208	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+88	901.889238957085	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+88	901.889238957085	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+88	901.889238957085	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+88	901.889238957085	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+88	901.889238957085	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+88	901.889238957085	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+88	901.889238957085	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+88	901.889238957085	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+88	901.889238957085	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+88	901.889238957085	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+88	901.889238957085	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+88	901.889238957085	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+88	901.889238957085	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+89	912.9885108448492	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+89	912.9885108448492	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+89	912.9885108448492	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+89	912.9885108448492	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+89	912.9885108448492	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+89	912.9885108448492	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+89	912.9885108448492	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+89	912.9885108448492	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+89	912.9885108448492	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+89	912.9885108448492	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+89	912.9885108448492	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+89	912.9885108448492	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+89	912.9885108448492	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+90	924.0877827326134	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+90	924.0877827326134	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+90	924.0877827326134	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+90	924.0877827326134	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+90	924.0877827326134	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+90	924.0877827326134	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+90	924.0877827326134	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+90	924.0877827326134	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+90	924.0877827326134	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+90	924.0877827326134	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+90	924.0877827326134	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+90	924.0877827326134	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+90	924.0877827326134	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+91	935.1870546203776	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+91	935.1870546203776	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+91	935.1870546203776	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+91	935.1870546203776	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+91	935.1870546203776	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+91	935.1870546203776	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+91	935.1870546203776	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+91	935.1870546203776	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+91	935.1870546203776	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+91	935.1870546203776	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+91	935.1870546203776	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+91	935.1870546203776	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+91	935.1870546203776	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+92	946.2863265081418	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+92	946.2863265081418	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+92	946.2863265081418	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+92	946.2863265081418	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+92	946.2863265081418	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+92	946.2863265081418	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+92	946.2863265081418	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+92	946.2863265081418	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+92	946.2863265081418	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+92	946.2863265081418	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+92	946.2863265081418	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+92	946.2863265081418	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+92	946.2863265081418	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+93	957.385598395906	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+93	957.385598395906	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+93	957.385598395906	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+93	957.385598395906	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+93	957.385598395906	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+93	957.385598395906	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+93	957.385598395906	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+93	957.385598395906	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+93	957.385598395906	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+93	957.385598395906	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+93	957.385598395906	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+93	957.385598395906	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+93	957.385598395906	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+94	968.4848702836701	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+94	968.4848702836701	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+94	968.4848702836701	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+94	968.4848702836701	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+94	968.4848702836701	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+94	968.4848702836701	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+94	968.4848702836701	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+94	968.4848702836701	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+94	968.4848702836701	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+94	968.4848702836701	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+94	968.4848702836701	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+94	968.4848702836701	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+94	968.4848702836701	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+95	979.5841421714343	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+95	979.5841421714343	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+95	979.5841421714343	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+95	979.5841421714343	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+95	979.5841421714343	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+95	979.5841421714343	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+95	979.5841421714343	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+95	979.5841421714343	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+95	979.5841421714343	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+95	979.5841421714343	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+95	979.5841421714343	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+95	979.5841421714343	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+95	979.5841421714343	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+96	990.6834140591985	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+96	990.6834140591985	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+96	990.6834140591985	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+96	990.6834140591985	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+96	990.6834140591985	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+96	990.6834140591985	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+96	990.6834140591985	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+96	990.6834140591985	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+96	990.6834140591985	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+96	990.6834140591985	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+96	990.6834140591985	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+96	990.6834140591985	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+96	990.6834140591985	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+97	1001.7826859469627	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+97	1001.7826859469627	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+97	1001.7826859469627	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+97	1001.7826859469627	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+97	1001.7826859469627	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+97	1001.7826859469627	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+97	1001.7826859469627	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+97	1001.7826859469627	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+97	1001.7826859469627	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+97	1001.7826859469627	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+97	1001.7826859469627	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+97	1001.7826859469627	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+97	1001.7826859469627	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+98	1012.8819578347269	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+98	1012.8819578347269	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+98	1012.8819578347269	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+98	1012.8819578347269	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+98	1012.8819578347269	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+98	1012.8819578347269	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+98	1012.8819578347269	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+98	1012.8819578347269	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+98	1012.8819578347269	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+98	1012.8819578347269	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+98	1012.8819578347269	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+98	1012.8819578347269	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+98	1012.8819578347269	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+99	1023.9812297224911	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+99	1023.9812297224911	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+99	1023.9812297224911	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+99	1023.9812297224911	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+99	1023.9812297224911	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+99	1023.9812297224911	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+99	1023.9812297224911	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+99	1023.9812297224911	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+99	1023.9812297224911	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+99	1023.9812297224911	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+99	1023.9812297224911	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+99	1023.9812297224911	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+99	1023.9812297224911	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+100	1035.0805016102552	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+100	1035.0805016102552	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+100	1035.0805016102552	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+100	1035.0805016102552	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+100	1035.0805016102552	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+100	1035.0805016102552	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+100	1035.0805016102552	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+100	1035.0805016102552	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+100	1035.0805016102552	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+100	1035.0805016102552	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+100	1035.0805016102552	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+100	1035.0805016102552	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+100	1035.0805016102552	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+101	1046.1797734980194	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+101	1046.1797734980194	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+101	1046.1797734980194	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+101	1046.1797734980194	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+101	1046.1797734980194	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+101	1046.1797734980194	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+101	1046.1797734980194	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+101	1046.1797734980194	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+101	1046.1797734980194	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+101	1046.1797734980194	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+101	1046.1797734980194	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+101	1046.1797734980194	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+101	1046.1797734980194	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+102	1057.2790453857835	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+102	1057.2790453857835	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+102	1057.2790453857835	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+102	1057.2790453857835	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+102	1057.2790453857835	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+102	1057.2790453857835	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+102	1057.2790453857835	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+102	1057.2790453857835	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+102	1057.2790453857835	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+102	1057.2790453857835	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+102	1057.2790453857835	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+102	1057.2790453857835	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+102	1057.2790453857835	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+103	1068.3783172735477	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+103	1068.3783172735477	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+103	1068.3783172735477	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+103	1068.3783172735477	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+103	1068.3783172735477	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+103	1068.3783172735477	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+103	1068.3783172735477	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+103	1068.3783172735477	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+103	1068.3783172735477	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+103	1068.3783172735477	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+103	1068.3783172735477	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+103	1068.3783172735477	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+103	1068.3783172735477	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+104	1079.477589161312	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+104	1079.477589161312	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+104	1079.477589161312	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+104	1079.477589161312	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+104	1079.477589161312	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+104	1079.477589161312	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+104	1079.477589161312	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+104	1079.477589161312	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+104	1079.477589161312	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+104	1079.477589161312	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+104	1079.477589161312	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+104	1079.477589161312	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+104	1079.477589161312	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+105	1090.5768610490761	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+105	1090.5768610490761	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+105	1090.5768610490761	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+105	1090.5768610490761	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+105	1090.5768610490761	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+105	1090.5768610490761	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+105	1090.5768610490761	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+105	1090.5768610490761	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+105	1090.5768610490761	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+105	1090.5768610490761	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+105	1090.5768610490761	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+105	1090.5768610490761	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+105	1090.5768610490761	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+106	1101.6761329368403	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+106	1101.6761329368403	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+106	1101.6761329368403	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+106	1101.6761329368403	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+106	1101.6761329368403	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+106	1101.6761329368403	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+106	1101.6761329368403	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+106	1101.6761329368403	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+106	1101.6761329368403	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+106	1101.6761329368403	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+106	1101.6761329368403	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+106	1101.6761329368403	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+106	1101.6761329368403	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+107	1112.7754048246045	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+107	1112.7754048246045	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+107	1112.7754048246045	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+107	1112.7754048246045	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+107	1112.7754048246045	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+107	1112.7754048246045	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+107	1112.7754048246045	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+107	1112.7754048246045	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+107	1112.7754048246045	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+107	1112.7754048246045	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+107	1112.7754048246045	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+107	1112.7754048246045	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+107	1112.7754048246045	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+108	1123.8746767123687	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+108	1123.8746767123687	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+108	1123.8746767123687	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+108	1123.8746767123687	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+108	1123.8746767123687	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+108	1123.8746767123687	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+108	1123.8746767123687	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+108	1123.8746767123687	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+108	1123.8746767123687	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+108	1123.8746767123687	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+108	1123.8746767123687	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+108	1123.8746767123687	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+108	1123.8746767123687	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+109	1134.9739486001329	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+109	1134.9739486001329	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+109	1134.9739486001329	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+109	1134.9739486001329	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+109	1134.9739486001329	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+109	1134.9739486001329	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+109	1134.9739486001329	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+109	1134.9739486001329	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+109	1134.9739486001329	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+109	1134.9739486001329	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+109	1134.9739486001329	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+109	1134.9739486001329	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+109	1134.9739486001329	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+110	1146.073220487897	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+110	1146.073220487897	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+110	1146.073220487897	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+110	1146.073220487897	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+110	1146.073220487897	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+110	1146.073220487897	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+110	1146.073220487897	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+110	1146.073220487897	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+110	1146.073220487897	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+110	1146.073220487897	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+110	1146.073220487897	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+110	1146.073220487897	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+110	1146.073220487897	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+111	1157.1724923756612	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+111	1157.1724923756612	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+111	1157.1724923756612	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+111	1157.1724923756612	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+111	1157.1724923756612	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+111	1157.1724923756612	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+111	1157.1724923756612	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+111	1157.1724923756612	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+111	1157.1724923756612	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+111	1157.1724923756612	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+111	1157.1724923756612	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+111	1157.1724923756612	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+111	1157.1724923756612	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+112	1168.2717642634254	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+112	1168.2717642634254	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+112	1168.2717642634254	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+112	1168.2717642634254	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+112	1168.2717642634254	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+112	1168.2717642634254	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+112	1168.2717642634254	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+112	1168.2717642634254	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+112	1168.2717642634254	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+112	1168.2717642634254	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+112	1168.2717642634254	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+112	1168.2717642634254	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+112	1168.2717642634254	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+113	1179.3710361511896	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+113	1179.3710361511896	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+113	1179.3710361511896	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+113	1179.3710361511896	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+113	1179.3710361511896	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+113	1179.3710361511896	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+113	1179.3710361511896	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+113	1179.3710361511896	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+113	1179.3710361511896	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+113	1179.3710361511896	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+113	1179.3710361511896	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+113	1179.3710361511896	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+113	1179.3710361511896	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+114	1190.4703080389538	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+114	1190.4703080389538	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+114	1190.4703080389538	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+114	1190.4703080389538	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+114	1190.4703080389538	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+114	1190.4703080389538	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+114	1190.4703080389538	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+114	1190.4703080389538	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+114	1190.4703080389538	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+114	1190.4703080389538	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+114	1190.4703080389538	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+114	1190.4703080389538	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+114	1190.4703080389538	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+115	1201.569579926718	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+115	1201.569579926718	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+115	1201.569579926718	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+115	1201.569579926718	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+115	1201.569579926718	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+115	1201.569579926718	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+115	1201.569579926718	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+115	1201.569579926718	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+115	1201.569579926718	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+115	1201.569579926718	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+115	1201.569579926718	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+115	1201.569579926718	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+115	1201.569579926718	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+116	1212.6688518144822	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+116	1212.6688518144822	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+116	1212.6688518144822	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+116	1212.6688518144822	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+116	1212.6688518144822	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+116	1212.6688518144822	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+116	1212.6688518144822	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+116	1212.6688518144822	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+116	1212.6688518144822	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+116	1212.6688518144822	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+116	1212.6688518144822	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+116	1212.6688518144822	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+116	1212.6688518144822	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+117	1223.7681237022464	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+117	1223.7681237022464	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+117	1223.7681237022464	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+117	1223.7681237022464	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+117	1223.7681237022464	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+117	1223.7681237022464	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+117	1223.7681237022464	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+117	1223.7681237022464	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+117	1223.7681237022464	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+117	1223.7681237022464	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+117	1223.7681237022464	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+117	1223.7681237022464	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+117	1223.7681237022464	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+118	1234.8673955900106	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+118	1234.8673955900106	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+118	1234.8673955900106	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+118	1234.8673955900106	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+118	1234.8673955900106	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+118	1234.8673955900106	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+118	1234.8673955900106	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+118	1234.8673955900106	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+118	1234.8673955900106	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+118	1234.8673955900106	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+118	1234.8673955900106	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+118	1234.8673955900106	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+118	1234.8673955900106	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+119	1245.9666674777748	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+119	1245.9666674777748	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+119	1245.9666674777748	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+119	1245.9666674777748	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+119	1245.9666674777748	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+119	1245.9666674777748	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+119	1245.9666674777748	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+119	1245.9666674777748	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+119	1245.9666674777748	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+119	1245.9666674777748	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+119	1245.9666674777748	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+119	1245.9666674777748	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+119	1245.9666674777748	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+120	1257.065939365539	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+120	1257.065939365539	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+120	1257.065939365539	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+120	1257.065939365539	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+120	1257.065939365539	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+120	1257.065939365539	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+120	1257.065939365539	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+120	1257.065939365539	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+120	1257.065939365539	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+120	1257.065939365539	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+120	1257.065939365539	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+120	1257.065939365539	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+120	1257.065939365539	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+121	1268.1652112533031	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+121	1268.1652112533031	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+121	1268.1652112533031	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+121	1268.1652112533031	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+121	1268.1652112533031	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+121	1268.1652112533031	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+121	1268.1652112533031	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+121	1268.1652112533031	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+121	1268.1652112533031	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+121	1268.1652112533031	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+121	1268.1652112533031	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+121	1268.1652112533031	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+121	1268.1652112533031	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+122	1279.2644831410673	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+122	1279.2644831410673	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+122	1279.2644831410673	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+122	1279.2644831410673	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+122	1279.2644831410673	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+122	1279.2644831410673	Right active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+122	1279.2644831410673	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+122	1279.2644831410673	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+122	1279.2644831410673	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+122	1279.2644831410673	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+122	1279.2644831410673	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+122	1279.2644831410673	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+122	1279.2644831410673	Right active material	Volume	Saturation	0.95	0.0	0.99	0.0
+123	1290.3637550288315	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+123	1290.3637550288315	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+123	1290.3637550288315	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+123	1290.3637550288315	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+123	1290.3637550288315	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+123	1290.3637550288315	Right active material	Active interface	Saturation	0.95	0.0056632929621447765	0.99	0.0
+123	1290.3637550288315	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+123	1290.3637550288315	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+123	1290.3637550288315	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+123	1290.3637550288315	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+123	1290.3637550288315	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+123	1290.3637550288315	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+123	1290.3637550288315	Right active material	Volume	Saturation	0.95	0.0003029311619226016	0.99	0.0
+124	1299.243172539043	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+124	1299.243172539043	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+124	1299.243172539043	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+124	1299.243172539043	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+124	1299.243172539043	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+124	1299.243172539043	Right active material	Active interface	Saturation	0.95	0.008899460369084638	0.99	0.0
+124	1299.243172539043	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+124	1299.243172539043	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+124	1299.243172539043	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+124	1299.243172539043	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+124	1299.243172539043	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+124	1299.243172539043	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+124	1299.243172539043	Right active material	Volume	Saturation	0.95	0.00042410362669164227	0.99	0.0
+125	1306.346706547212	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+125	1306.346706547212	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+125	1306.346706547212	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+125	1306.346706547212	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+125	1306.346706547212	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+125	1306.346706547212	Right active material	Active interface	Saturation	0.95	0.05420580406624286	0.99	0.0
+125	1306.346706547212	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+125	1306.346706547212	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+125	1306.346706547212	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+125	1306.346706547212	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+125	1306.346706547212	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+125	1306.346706547212	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+125	1306.346706547212	Right active material	Volume	Saturation	0.95	0.0026657942249188947	0.99	0.0
+126	1312.0295337537473	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+126	1312.0295337537473	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+126	1312.0295337537473	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+126	1312.0295337537473	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+126	1312.0295337537473	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+126	1312.0295337537473	Right active material	Active interface	Saturation	0.95	0.18284345849210298	0.99	0.0
+126	1312.0295337537473	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+126	1312.0295337537473	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+126	1312.0295337537473	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+126	1312.0295337537473	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+126	1312.0295337537473	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+126	1312.0295337537473	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+126	1312.0295337537473	Right active material	Volume	Saturation	0.95	0.008966762392909035	0.99	0.0
+127	1316.5757955189754	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+127	1316.5757955189754	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+127	1316.5757955189754	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+127	1316.5757955189754	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+127	1316.5757955189754	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+127	1316.5757955189754	Right active material	Active interface	Saturation	0.95	0.32523482439745716	0.99	0.0
+127	1316.5757955189754	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+127	1316.5757955189754	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+127	1316.5757955189754	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+127	1316.5757955189754	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+127	1316.5757955189754	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+127	1316.5757955189754	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+127	1316.5757955189754	Right active material	Volume	Saturation	0.95	0.01605535158189793	0.99	0.0
+128	1320.212804931158	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+128	1320.212804931158	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+128	1320.212804931158	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+128	1320.212804931158	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+128	1320.212804931158	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+128	1320.212804931158	Right active material	Active interface	Saturation	0.95	0.4910884040031255	0.99	0.0
+128	1320.212804931158	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+128	1320.212804931158	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+128	1320.212804931158	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+128	1320.212804931158	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+128	1320.212804931158	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+128	1320.212804931158	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+128	1320.212804931158	Right active material	Volume	Saturation	0.95	0.024719182812884356	0.99	0.0
+129	1323.1224124609041	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+129	1323.1224124609041	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+129	1323.1224124609041	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+129	1323.1224124609041	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+129	1323.1224124609041	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+129	1323.1224124609041	Right active material	Active interface	Saturation	0.95	0.6350978536119496	0.99	0.0
+129	1323.1224124609041	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+129	1323.1224124609041	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+129	1323.1224124609041	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+129	1323.1224124609041	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+129	1323.1224124609041	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+129	1323.1224124609041	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+129	1323.1224124609041	Right active material	Volume	Saturation	0.95	0.03156542707233516	0.99	0.0
+130	1325.8972304328452	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+130	1325.8972304328452	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+130	1325.8972304328452	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+130	1325.8972304328452	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+130	1325.8972304328452	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+130	1325.8972304328452	Right active material	Active interface	Saturation	0.95	0.7621174243343395	0.99	0.0
+130	1325.8972304328452	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+130	1325.8972304328452	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+130	1325.8972304328452	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+130	1325.8972304328452	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+130	1325.8972304328452	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+130	1325.8972304328452	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+130	1325.8972304328452	Right active material	Volume	Saturation	0.95	0.03822991263463238	0.99	0.0
+131	1328.6720484047862	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+131	1328.6720484047862	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+131	1328.6720484047862	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+131	1328.6720484047862	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+131	1328.6720484047862	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+131	1328.6720484047862	Right active material	Active interface	Saturation	0.95	0.9619507617128787	0.99	0.0
+131	1328.6720484047862	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+131	1328.6720484047862	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+131	1328.6720484047862	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+131	1328.6720484047862	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+131	1328.6720484047862	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+131	1328.6720484047862	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+131	1328.6720484047862	Right active material	Volume	Saturation	0.95	0.050650090273459104	0.99	0.0
+132	1331.4468663767273	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+132	1331.4468663767273	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+132	1331.4468663767273	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+132	1331.4468663767273	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+132	1331.4468663767273	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+132	1331.4468663767273	Right active material	Active interface	Saturation	0.95	1.0695533279936298	0.99	0.0
+132	1331.4468663767273	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+132	1331.4468663767273	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+132	1331.4468663767273	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+132	1331.4468663767273	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+132	1331.4468663767273	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+132	1331.4468663767273	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+132	1331.4468663767273	Right active material	Volume	Saturation	0.95	0.05670871351191113	0.99	0.0
+133	1334.2216843486683	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+133	1334.2216843486683	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+133	1334.2216843486683	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+133	1334.2216843486683	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+133	1334.2216843486683	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+133	1334.2216843486683	Right active material	Active interface	Saturation	0.95	1.2807132512964599	0.99	0.0
+133	1334.2216843486683	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+133	1334.2216843486683	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+133	1334.2216843486683	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+133	1334.2216843486683	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+133	1334.2216843486683	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+133	1334.2216843486683	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+133	1334.2216843486683	Right active material	Volume	Saturation	0.95	0.07137058174896509	0.99	0.0
+134	1336.9965023206094	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+134	1336.9965023206094	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+134	1336.9965023206094	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+134	1336.9965023206094	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+134	1336.9965023206094	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+134	1336.9965023206094	Right active material	Active interface	Saturation	0.95	1.4344312031261057	0.99	0.0
+134	1336.9965023206094	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+134	1336.9965023206094	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+134	1336.9965023206094	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+134	1336.9965023206094	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+134	1336.9965023206094	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+134	1336.9965023206094	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+134	1336.9965023206094	Right active material	Volume	Saturation	0.95	0.08191258618387158	0.99	0.0
+135	1339.7713202925504	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+135	1339.7713202925504	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+135	1339.7713202925504	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+135	1339.7713202925504	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+135	1339.7713202925504	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+135	1339.7713202925504	Right active material	Active interface	Saturation	0.95	1.6722895075361897	0.99	0.0
+135	1339.7713202925504	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+135	1339.7713202925504	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+135	1339.7713202925504	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+135	1339.7713202925504	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+135	1339.7713202925504	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+135	1339.7713202925504	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+135	1339.7713202925504	Right active material	Volume	Saturation	0.95	0.09905848994869076	0.99	0.0
+136	1342.5461382644914	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+136	1342.5461382644914	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+136	1342.5461382644914	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+136	1342.5461382644914	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+136	1342.5461382644914	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+136	1342.5461382644914	Right active material	Active interface	Saturation	0.95	1.922283439722298	0.99	0.0
+136	1342.5461382644914	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+136	1342.5461382644914	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+136	1342.5461382644914	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+136	1342.5461382644914	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+136	1342.5461382644914	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+136	1342.5461382644914	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+136	1342.5461382644914	Right active material	Volume	Saturation	0.95	0.11784022198789207	0.99	0.0
+137	1345.3209562364325	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+137	1345.3209562364325	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+137	1345.3209562364325	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+137	1345.3209562364325	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+137	1345.3209562364325	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+137	1345.3209562364325	Right active material	Active interface	Saturation	0.95	2.2758347289304823	0.99	0.0
+137	1345.3209562364325	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+137	1345.3209562364325	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+137	1345.3209562364325	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+137	1345.3209562364325	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+137	1345.3209562364325	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+137	1345.3209562364325	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+137	1345.3209562364325	Right active material	Volume	Saturation	0.95	0.14498285409615722	0.99	0.0
+138	1348.0957742083735	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+138	1348.0957742083735	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+138	1348.0957742083735	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+138	1348.0957742083735	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+138	1348.0957742083735	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+138	1348.0957742083735	Right active material	Active interface	Saturation	0.95	2.5549541677790506	0.99	0.0
+138	1348.0957742083735	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+138	1348.0957742083735	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+138	1348.0957742083735	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+138	1348.0957742083735	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+138	1348.0957742083735	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+138	1348.0957742083735	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+138	1348.0957742083735	Right active material	Volume	Saturation	0.95	0.165158069480203	0.99	0.0
+139	1350.8705921803146	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+139	1350.8705921803146	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+139	1350.8705921803146	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+139	1350.8705921803146	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+139	1350.8705921803146	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+139	1350.8705921803146	Right active material	Active interface	Saturation	0.95	2.9521937169809243	0.99	0.0
+139	1350.8705921803146	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+139	1350.8705921803146	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+139	1350.8705921803146	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+139	1350.8705921803146	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+139	1350.8705921803146	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+139	1350.8705921803146	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+139	1350.8705921803146	Right active material	Volume	Saturation	0.95	0.19726877264399936	0.99	0.0
+140	1353.6454101522556	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+140	1353.6454101522556	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+140	1353.6454101522556	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+140	1353.6454101522556	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+140	1353.6454101522556	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+140	1353.6454101522556	Right active material	Active interface	Saturation	0.95	3.3486242243310578	0.99	0.0
+140	1353.6454101522556	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+140	1353.6454101522556	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+140	1353.6454101522556	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+140	1353.6454101522556	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+140	1353.6454101522556	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+140	1353.6454101522556	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+140	1353.6454101522556	Right active material	Volume	Saturation	0.95	0.22719837144195287	0.99	0.0
+141	1356.4202281241967	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+141	1356.4202281241967	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+141	1356.4202281241967	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+141	1356.4202281241967	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+141	1356.4202281241967	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+141	1356.4202281241967	Right active material	Active interface	Saturation	0.95	3.9303253157284974	0.99	0.0
+141	1356.4202281241967	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+141	1356.4202281241967	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+141	1356.4202281241967	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+141	1356.4202281241967	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+141	1356.4202281241967	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+141	1356.4202281241967	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+141	1356.4202281241967	Right active material	Volume	Saturation	0.95	0.27597028851149275	0.99	0.0
+142	1359.1950460961377	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+142	1359.1950460961377	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+142	1359.1950460961377	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+142	1359.1950460961377	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+142	1359.1950460961377	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+142	1359.1950460961377	Right active material	Active interface	Saturation	0.95	4.4295041382489595	0.99	0.0
+142	1359.1950460961377	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+142	1359.1950460961377	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+142	1359.1950460961377	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+142	1359.1950460961377	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+142	1359.1950460961377	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+142	1359.1950460961377	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+142	1359.1950460961377	Right active material	Volume	Saturation	0.95	0.317956547553965	0.99	0.0
+143	1361.9698640680788	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+143	1361.9698640680788	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+143	1361.9698640680788	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+143	1361.9698640680788	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+143	1361.9698640680788	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+143	1361.9698640680788	Right active material	Active interface	Saturation	0.95	5.012823313349857	0.99	0.0
+143	1361.9698640680788	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+143	1361.9698640680788	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+143	1361.9698640680788	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+143	1361.9698640680788	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+143	1361.9698640680788	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+143	1361.9698640680788	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+143	1361.9698640680788	Right active material	Volume	Saturation	0.95	0.36800077550357885	0.99	0.0
+144	1364.7446820400198	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+144	1364.7446820400198	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+144	1364.7446820400198	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+144	1364.7446820400198	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+144	1364.7446820400198	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+144	1364.7446820400198	Right active material	Active interface	Saturation	0.95	5.59209727919208	0.99	0.0
+144	1364.7446820400198	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+144	1364.7446820400198	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+144	1364.7446820400198	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+144	1364.7446820400198	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+144	1364.7446820400198	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+144	1364.7446820400198	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+144	1364.7446820400198	Right active material	Volume	Saturation	0.95	0.42555769626887135	0.99	0.0
+145	1367.5195000119609	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+145	1367.5195000119609	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+145	1367.5195000119609	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+145	1367.5195000119609	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+145	1367.5195000119609	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+145	1367.5195000119609	Right active material	Active interface	Saturation	0.95	6.071050055419172	0.99	0.0
+145	1367.5195000119609	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+145	1367.5195000119609	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+145	1367.5195000119609	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+145	1367.5195000119609	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+145	1367.5195000119609	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+145	1367.5195000119609	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+145	1367.5195000119609	Right active material	Volume	Saturation	0.95	0.46821040386757257	0.99	0.0
+146	1370.294317983902	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+146	1370.294317983902	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+146	1370.294317983902	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+146	1370.294317983902	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+146	1370.294317983902	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+146	1370.294317983902	Right active material	Active interface	Saturation	0.95	6.661650607185693	0.99	0.0
+146	1370.294317983902	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+146	1370.294317983902	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+146	1370.294317983902	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+146	1370.294317983902	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+146	1370.294317983902	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+146	1370.294317983902	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+146	1370.294317983902	Right active material	Volume	Saturation	0.95	0.5254038072385591	0.99	0.0
+147	1373.069135955843	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+147	1373.069135955843	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+147	1373.069135955843	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+147	1373.069135955843	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+147	1373.069135955843	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+147	1373.069135955843	Right active material	Active interface	Saturation	0.95	7.207753857106794	0.99	0.0
+147	1373.069135955843	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+147	1373.069135955843	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+147	1373.069135955843	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+147	1373.069135955843	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+147	1373.069135955843	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+147	1373.069135955843	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+147	1373.069135955843	Right active material	Volume	Saturation	0.95	0.5839301077220044	0.99	0.0
+148	1375.843953927784	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+148	1375.843953927784	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+148	1375.843953927784	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+148	1375.843953927784	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+148	1375.843953927784	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+148	1375.843953927784	Right active material	Active interface	Saturation	0.95	7.866313924419053	0.99	0.0
+148	1375.843953927784	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+148	1375.843953927784	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+148	1375.843953927784	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+148	1375.843953927784	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+148	1375.843953927784	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+148	1375.843953927784	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+148	1375.843953927784	Right active material	Volume	Saturation	0.95	0.650211445950667	0.99	0.0
+149	1378.618771899725	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+149	1378.618771899725	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+149	1378.618771899725	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+149	1378.618771899725	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+149	1378.618771899725	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+149	1378.618771899725	Right active material	Active interface	Saturation	0.95	8.582315963204493	0.99	0.0
+149	1378.618771899725	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+149	1378.618771899725	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+149	1378.618771899725	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+149	1378.618771899725	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+149	1378.618771899725	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+149	1378.618771899725	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+149	1378.618771899725	Right active material	Volume	Saturation	0.95	0.7287312031210035	0.99	0.0
+150	1381.393589871666	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+150	1381.393589871666	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+150	1381.393589871666	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+150	1381.393589871666	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+150	1381.393589871666	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+150	1381.393589871666	Right active material	Active interface	Saturation	0.95	9.58876402676278	0.99	0.0
+150	1381.393589871666	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+150	1381.393589871666	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+150	1381.393589871666	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+150	1381.393589871666	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+150	1381.393589871666	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+150	1381.393589871666	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+150	1381.393589871666	Right active material	Volume	Saturation	0.95	0.8383922837369817	0.99	0.0
+151	1384.1684078436072	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+151	1384.1684078436072	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+151	1384.1684078436072	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+151	1384.1684078436072	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+151	1384.1684078436072	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+151	1384.1684078436072	Right active material	Active interface	Saturation	0.95	10.37596174850088	0.99	0.0
+151	1384.1684078436072	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+151	1384.1684078436072	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+151	1384.1684078436072	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+151	1384.1684078436072	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+151	1384.1684078436072	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+151	1384.1684078436072	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+151	1384.1684078436072	Right active material	Volume	Saturation	0.95	0.927454045342222	0.99	0.0
+152	1386.9432258155482	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+152	1386.9432258155482	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+152	1386.9432258155482	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+152	1386.9432258155482	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+152	1386.9432258155482	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+152	1386.9432258155482	Right active material	Active interface	Saturation	0.95	11.435806574273657	0.99	0.0
+152	1386.9432258155482	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+152	1386.9432258155482	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+152	1386.9432258155482	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+152	1386.9432258155482	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+152	1386.9432258155482	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+152	1386.9432258155482	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+152	1386.9432258155482	Right active material	Volume	Saturation	0.95	1.0483235789493346	0.99	0.0
+153	1389.7180437874893	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+153	1389.7180437874893	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+153	1389.7180437874893	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+153	1389.7180437874893	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+153	1389.7180437874893	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+153	1389.7180437874893	Right active material	Active interface	Saturation	0.95	12.374295122286187	0.99	0.0
+153	1389.7180437874893	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+153	1389.7180437874893	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+153	1389.7180437874893	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+153	1389.7180437874893	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+153	1389.7180437874893	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+153	1389.7180437874893	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+153	1389.7180437874893	Right active material	Volume	Saturation	0.95	1.1776751850902798	0.99	0.0
+154	1392.4928617594303	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+154	1392.4928617594303	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+154	1392.4928617594303	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+154	1392.4928617594303	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+154	1392.4928617594303	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+154	1392.4928617594303	Right active material	Active interface	Saturation	0.95	13.409059650655182	0.99	0.0
+154	1392.4928617594303	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+154	1392.4928617594303	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+154	1392.4928617594303	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+154	1392.4928617594303	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+154	1392.4928617594303	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+154	1392.4928617594303	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+154	1392.4928617594303	Right active material	Volume	Saturation	0.95	1.3067844463016858	0.99	0.0
+155	1395.2676797313713	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+155	1395.2676797313713	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+155	1395.2676797313713	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+155	1395.2676797313713	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+155	1395.2676797313713	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+155	1395.2676797313713	Right active material	Active interface	Saturation	0.95	14.392854542364892	0.99	0.0
+155	1395.2676797313713	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+155	1395.2676797313713	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+155	1395.2676797313713	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+155	1395.2676797313713	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+155	1395.2676797313713	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+155	1395.2676797313713	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+155	1395.2676797313713	Right active material	Volume	Saturation	0.95	1.443769917723082	0.99	0.0
+156	1398.0424977033124	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+156	1398.0424977033124	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+156	1398.0424977033124	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+156	1398.0424977033124	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+156	1398.0424977033124	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+156	1398.0424977033124	Right active material	Active interface	Saturation	0.95	15.430855238140861	0.99	0.0
+156	1398.0424977033124	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+156	1398.0424977033124	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+156	1398.0424977033124	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+156	1398.0424977033124	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+156	1398.0424977033124	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+156	1398.0424977033124	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+156	1398.0424977033124	Right active material	Volume	Saturation	0.95	1.578634871011019	0.99	0.0
+157	1400.8173156752534	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+157	1400.8173156752534	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+157	1400.8173156752534	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+157	1400.8173156752534	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+157	1400.8173156752534	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+157	1400.8173156752534	Right active material	Active interface	Saturation	0.95	16.46804689206507	0.99	0.0
+157	1400.8173156752534	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+157	1400.8173156752534	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+157	1400.8173156752534	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+157	1400.8173156752534	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+157	1400.8173156752534	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+157	1400.8173156752534	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+157	1400.8173156752534	Right active material	Volume	Saturation	0.95	1.7304033831342365	0.99	0.0
+158	1403.5921336471945	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+158	1403.5921336471945	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+158	1403.5921336471945	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+158	1403.5921336471945	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+158	1403.5921336471945	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+158	1403.5921336471945	Right active material	Active interface	Saturation	0.95	17.637112367822105	0.99	0.0
+158	1403.5921336471945	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+158	1403.5921336471945	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+158	1403.5921336471945	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+158	1403.5921336471945	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+158	1403.5921336471945	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+158	1403.5921336471945	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+158	1403.5921336471945	Right active material	Volume	Saturation	0.95	1.8801725495887645	0.99	0.0
+159	1406.3669516191355	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+159	1406.3669516191355	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+159	1406.3669516191355	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+159	1406.3669516191355	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+159	1406.3669516191355	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+159	1406.3669516191355	Right active material	Active interface	Saturation	0.95	18.777861378768414	0.99	0.0
+159	1406.3669516191355	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+159	1406.3669516191355	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+159	1406.3669516191355	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+159	1406.3669516191355	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+159	1406.3669516191355	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+159	1406.3669516191355	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+159	1406.3669516191355	Right active material	Volume	Saturation	0.95	2.0433918596326532	0.99	0.0
+160	1409.1417695910766	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+160	1409.1417695910766	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+160	1409.1417695910766	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+160	1409.1417695910766	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+160	1409.1417695910766	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+160	1409.1417695910766	Right active material	Active interface	Saturation	0.95	20.214719707449788	0.99	0.0
+160	1409.1417695910766	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+160	1409.1417695910766	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+160	1409.1417695910766	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+160	1409.1417695910766	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+160	1409.1417695910766	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+160	1409.1417695910766	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+160	1409.1417695910766	Right active material	Volume	Saturation	0.95	2.26144170998453	0.99	0.0
+161	1411.9165875630176	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+161	1411.9165875630176	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+161	1411.9165875630176	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+161	1411.9165875630176	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+161	1411.9165875630176	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+161	1411.9165875630176	Right active material	Active interface	Saturation	0.95	21.727627970194263	0.99	0.0
+161	1411.9165875630176	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+161	1411.9165875630176	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+161	1411.9165875630176	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+161	1411.9165875630176	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+161	1411.9165875630176	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+161	1411.9165875630176	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+161	1411.9165875630176	Right active material	Volume	Saturation	0.95	2.4644055884726623	0.99	0.0
+162	1414.6914055349587	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+162	1414.6914055349587	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+162	1414.6914055349587	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+162	1414.6914055349587	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+162	1414.6914055349587	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+162	1414.6914055349587	Right active material	Active interface	Saturation	0.95	23.25752611182514	0.99	0.0
+162	1414.6914055349587	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+162	1414.6914055349587	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+162	1414.6914055349587	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+162	1414.6914055349587	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+162	1414.6914055349587	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+162	1414.6914055349587	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+162	1414.6914055349587	Right active material	Volume	Saturation	0.95	2.7011765846313565	0.99	0.0
+163	1417.4662235068997	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+163	1417.4662235068997	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+163	1417.4662235068997	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+163	1417.4662235068997	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+163	1417.4662235068997	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+163	1417.4662235068997	Right active material	Active interface	Saturation	0.95	24.89664490344026	0.99	0.0
+163	1417.4662235068997	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+163	1417.4662235068997	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+163	1417.4662235068997	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+163	1417.4662235068997	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+163	1417.4662235068997	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+163	1417.4662235068997	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+163	1417.4662235068997	Right active material	Volume	Saturation	0.95	2.985083669585214	0.99	0.0
+164	1420.2410414788408	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+164	1420.2410414788408	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+164	1420.2410414788408	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+164	1420.2410414788408	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+164	1420.2410414788408	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+164	1420.2410414788408	Right active material	Active interface	Saturation	0.95	26.66035614022253	0.99	0.0
+164	1420.2410414788408	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+164	1420.2410414788408	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+164	1420.2410414788408	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+164	1420.2410414788408	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+164	1420.2410414788408	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+164	1420.2410414788408	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+164	1420.2410414788408	Right active material	Volume	Saturation	0.95	3.2423328122898782	0.99	0.0
+165	1423.0158594507818	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+165	1423.0158594507818	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+165	1423.0158594507818	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+165	1423.0158594507818	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+165	1423.0158594507818	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+165	1423.0158594507818	Right active material	Active interface	Saturation	0.95	28.53086090143382	0.99	0.0
+165	1423.0158594507818	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+165	1423.0158594507818	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+165	1423.0158594507818	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+165	1423.0158594507818	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+165	1423.0158594507818	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+165	1423.0158594507818	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+165	1423.0158594507818	Right active material	Volume	Saturation	0.95	3.5463545263953953	0.99	0.0
+166	1425.7906774227229	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+166	1425.7906774227229	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+166	1425.7906774227229	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+166	1425.7906774227229	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+166	1425.7906774227229	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+166	1425.7906774227229	Right active material	Active interface	Saturation	0.95	30.507350145222414	0.99	0.0
+166	1425.7906774227229	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+166	1425.7906774227229	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+166	1425.7906774227229	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+166	1425.7906774227229	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+166	1425.7906774227229	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+166	1425.7906774227229	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+166	1425.7906774227229	Right active material	Volume	Saturation	0.95	3.8853344965868106	0.99	0.0
+167	1428.565495394664	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+167	1428.565495394664	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+167	1428.565495394664	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+167	1428.565495394664	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+167	1428.565495394664	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+167	1428.565495394664	Right active material	Active interface	Saturation	0.95	32.589823871588244	0.99	0.0
+167	1428.565495394664	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+167	1428.565495394664	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+167	1428.565495394664	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+167	1428.565495394664	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+167	1428.565495394664	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+167	1428.565495394664	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+167	1428.565495394664	Right active material	Volume	Saturation	0.95	4.1946272129098015	0.99	0.0
+168	1431.340313366605	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+168	1431.340313366605	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+168	1431.340313366605	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+168	1431.340313366605	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+168	1431.340313366605	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+168	1431.340313366605	Right active material	Active interface	Saturation	0.95	34.56631311537679	0.99	0.0
+168	1431.340313366605	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+168	1431.340313366605	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+168	1431.340313366605	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+168	1431.340313366605	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+168	1431.340313366605	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+168	1431.340313366605	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+168	1431.340313366605	Right active material	Volume	Saturation	0.95	4.573594096475004	0.99	0.0
+169	1434.115131338546	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+169	1434.115131338546	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+169	1434.115131338546	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+169	1434.115131338546	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+169	1434.115131338546	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+169	1434.115131338546	Right active material	Active interface	Saturation	0.95	37.083242316124284	0.99	0.0
+169	1434.115131338546	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+169	1434.115131338546	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+169	1434.115131338546	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+169	1434.115131338546	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+169	1434.115131338546	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+169	1434.115131338546	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+169	1434.115131338546	Right active material	Volume	Saturation	0.95	4.961285397503558	0.99	0.0
+170	1436.889949310487	Electrolyte	Left activeinterface	Depletion	0.05	0.0	0.01	0.0
+170	1436.889949310487	Electrolyte	Right active interface	Depletion	0.05	0.0	0.01	0.0
+170	1436.889949310487	Left active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+170	1436.889949310487	Left active material	Active interface	Saturation	0.95	0.0	0.99	0.0
+170	1436.889949310487	Right active material	Active interface	Depletion	0.05	0.0	0.01	0.0
+170	1436.889949310487	Right active material	Active interface	Saturation	0.95	39.859064909426955	0.99	0.0
+170	1436.889949310487	Electrolyte	Left electrode	Depletion	0.05	0.0	0.01	0.0
+170	1436.889949310487	Electrolyte	Separator	Depletion	0.05	0.0	0.01	0.0
+170	1436.889949310487	Electrolyte	Right electrode	Depletion	0.05	0.0	0.01	0.0
+170	1436.889949310487	Left active material	Volume	Depletion	0.05	0.0	0.01	0.0
+170	1436.889949310487	Left active material	Volume	Saturation	0.95	0.0	0.99	0.0
+170	1436.889949310487	Right active material	Volume	Depletion	0.05	0.0	0.01	0.0
+170	1436.889949310487	Right active material	Volume	Saturation	0.95	5.420165521583924	0.99	0.0

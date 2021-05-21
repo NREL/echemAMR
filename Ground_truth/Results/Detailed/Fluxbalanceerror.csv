@@ -1,0 +1,4 @@
+Time step	Time[s]	Flux_unbalance	Target[A]	Reach (=error)[A]	Rel. error[%]
+0	0	Left interface (diff. between solid-electrolyte side)	0	1.1249656330721176e-22	8.010972639035601e-13
+0	0	Right interface (diff. between solid-electrolyte side)	0	-2.150669592637872e-23	1.5315094751097575e-13
+0	0	FLux unbalance (diff. between the two interfaces)	0	9.429858983104515e-23	6.715080006250453e-13
