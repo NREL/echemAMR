@@ -117,6 +117,8 @@ echemAMR::~echemAMR ()
 // initializes multilevel data
 void echemAMR::InitData ()
 {
+    ProbParm* localprobparm = d_prob_parm;
+
     if (restart_chkfile == "") 
     {
         // start simulation from the beginning
@@ -141,12 +143,12 @@ void echemAMR::InitData ()
                 amrex::launch(box,
                 [=] AMREX_GPU_DEVICE (Box const& tbx)
                 {
-                    initproblemdata(box, fab, geomData);
+                    initproblemdata(box, fab, geomData,localprobparm);
                 });
             }
         }
 
-        print_init_data();
+        print_init_data(echemAMR::h_prob_parm);
 
         if (chk_int > 0) 
         {

@@ -9,7 +9,7 @@ namespace electrochem_integral_utils
 
     //Returns the state value of <comp> if within <domain>
     //TODO: incorporate a level mask
-    AMREX_GPU_DEVICE
+    AMREX_GPU_HOST_DEVICE
         AMREX_FORCE_INLINE
         Real volume_value(int i, int j, int k, int comp, int domain,
                 Array4<Real const> const& phi,

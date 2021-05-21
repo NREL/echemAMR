@@ -63,8 +63,8 @@ struct ProbParm
     amrex::Real lowerscale_p_pore_cathode = 3.0; // In the cathode, each mesh cell has a Bruggeman coefficient of
 
     // potential boundary conditions
-    amrex::Vector<amrex::Real> pot_bc_lo{0.0, 0.0, 0.0};
-    amrex::Vector<amrex::Real> pot_bc_hi{0.0, 0.0, 0.0};
+    amrex::GpuArray<amrex::Real,AMREX_SPACEDIM> pot_bc_lo;
+    amrex::GpuArray<amrex::Real,AMREX_SPACEDIM> pot_bc_hi;
 
     // Volumes
     amrex::Real anode_volume = 0.0;

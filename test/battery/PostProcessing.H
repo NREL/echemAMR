@@ -26,6 +26,7 @@ void line_plot(const IndexSelector& idxOp,
     AMREX_ALWAYS_ASSERT(num_points > 0);
     AMREX_ALWAYS_ASSERT(num_comps < NVAR);
 
+
     const amrex::Real xlo = geom[0].ProbLo(axis);
     const amrex::Real xhi = geom[0].ProbHi(axis);
     const amrex::Real line_dx = (xhi-xlo)/static_cast<amrex::Real>(num_points);
@@ -62,6 +63,7 @@ void line_plot(const IndexSelector& idxOp,
 
     for (int lev = 0; lev <= finest_level; ++lev)
     {
+        GeometryData geomData = geom[lev].data();
 
         // mask covered cells
         amrex::iMultiFab level_mask;
@@ -100,21 +102,22 @@ void line_plot(const IndexSelector& idxOp,
                             if(mask_arr(i,j,k) == 1) {
 
                                 // cell coordinates
-                                const amrex::Real cell_xlo = xlo + idxOp(i,j,k)*geom[lev].CellSizeArray()[axis];
-                                const amrex::Real cell_xhi = cell_xlo + geom[lev].CellSizeArray()[axis];
-                                const amrex::Real dy = geom[lev].CellSizeArray()[idxOp.odir1];
-                                const amrex::Real dz = geom[lev].CellSizeArray()[idxOp.odir2];
+                                const amrex::Real cell_xlo = xlo + idxOp(i,j,k)*geomData.CellSize()[axis];
+                                const amrex::Real cell_xhi = cell_xlo + geomData.CellSize()[axis];
+                                const amrex::Real dy = geomData.CellSize()[idxOp.odir1];
+                                const amrex::Real dz = geomData.CellSize()[idxOp.odir2];
 
                                 // line indices
                                 const int line_ind_lo = amrex::min(amrex::max(static_cast<int>((cell_xlo-xlo)/line_dx), 0), num_points-1);
                                 const int line_ind_hi = amrex::min(amrex::max(static_cast<int>((cell_xhi-xlo)/line_dx), 0), num_points-1);
-
+#ifndef AMREX_USE_GPU
                                 if(print_stuff)
                                 {
                                     amrex::Print() << std::endl << "index i: " << idxOp(i,j,k) << std::endl;
                                     amrex::Print() << "cell_xlo: " << cell_xlo << " cell_xhi: " << cell_xhi << std::endl;
                                     amrex::Print() << "line_ind_lo: " << line_ind_lo << " line_ind_hi: " << line_ind_hi << std::endl;
                                 }
+#endif
 
                                 AMREX_ALWAYS_ASSERT(line_ind_lo >= 0);
                                 AMREX_ALWAYS_ASSERT(line_ind_hi >= 0);
@@ -136,8 +139,9 @@ void line_plot(const IndexSelector& idxOp,
                                     else
                                         dx = line_dx;
 
-                                    dx = amrex::min(dx, geom[lev].CellSizeArray()[axis]);
+                                    dx = amrex::min(dx, geomData.CellSize()[axis]);
 
+#ifndef AMREX_USE_GPU
                                     if(print_stuff)
                                     {
                                         amrex::Print() << "line index: " << ind << std::endl;
@@ -145,6 +149,7 @@ void line_plot(const IndexSelector& idxOp,
                                         amrex::Print() << "dx: " << dx << std::endl;
                                         if(dx < 0.0) amrex::Print() << "negative volume error: " << idxOp(i,j,k) << ' ' << dx << std::endl;
                                     }
+#endif
 
                                     for(int n = 0; n < num_comps; ++n) {
 
@@ -182,6 +187,7 @@ void line_plot(const IndexSelector& idxOp,
     // FIXME: lots of code duplication here...
     for (int lev = 0; lev <= finest_level; ++lev)
     {
+        GeometryData geomData = geom[lev].data();
 
         // mask covered cells
         amrex::iMultiFab level_mask;
@@ -219,10 +225,10 @@ void line_plot(const IndexSelector& idxOp,
                             if(mask_arr(i,j,k) == 1) {
 
                                 // cell coordinates
-                                const amrex::Real cell_xlo = xlo + idxOp(i,j,k)*geom[lev].CellSizeArray()[axis];
-                                const amrex::Real cell_xhi = cell_xlo + geom[lev].CellSizeArray()[axis];
-                                const amrex::Real dy = geom[lev].CellSizeArray()[idxOp.odir1];
-                                const amrex::Real dz = geom[lev].CellSizeArray()[idxOp.odir2];
+                                const amrex::Real cell_xlo = xlo + idxOp(i,j,k)*geomData.CellSize()[axis];
+                                const amrex::Real cell_xhi = cell_xlo + geomData.CellSize()[axis];
+                                const amrex::Real dy = geomData.CellSize()[idxOp.odir1];
+                                const amrex::Real dz = geomData.CellSize()[idxOp.odir2];
 
                                 // line indices
                                 const int line_ind_lo = amrex::min(amrex::max(static_cast<int>((cell_xlo-xlo)/line_dx), 0), num_points-1);
@@ -243,13 +249,13 @@ void line_plot(const IndexSelector& idxOp,
                                     else
                                         dx = line_dx;
 
-                                    dx = amrex::min(dx, geom[lev].CellSizeArray()[axis]);
+                                    dx = amrex::min(dx, geomData.CellSize()[axis]);
 
                                     for(int n = 0; n < num_comps; ++n) {
                                         const amrex::Real concen = phi_arr(i,j,k,0);
                                         const amrex::Real lvlset = amrex::max(phi_arr(i,j,k,n+1), 0.0);
                                         const amrex::Real vol = dx*dy*dz;
-                                        const amrex::Real mean = line_avg[num_comps * ind + n]/line_volume[num_comps * ind + n];
+                                        const amrex::Real mean = line_avg[num_comps * ind + n]/line_vol[num_comps * ind + n];
                                         const amrex::Real stddev = std::pow(concen - mean, 2.0)*lvlset*vol;
                                         amrex::Gpu::deviceReduceSum(&line_std[num_comps * ind + n], stddev, handler);
                                     } // component loop
@@ -257,7 +263,7 @@ void line_plot(const IndexSelector& idxOp,
                             } // mask if statement
                         } // i loop
                     } // j loop
-                } // k loop
+                } // k loop*/
             }); // parallel for
         } // mfiter loop
     } // level loop
@@ -322,7 +328,6 @@ void echemAMR::postprocess(Real time, int timestep)
     // amrex::Print() << "Separator Volume:   " << S_int << std::endl;
     Real tot_int = A_int+C_int+E_int+S_int;
     // amrex::Print() << "Total Volume:       " << tot_int << std::endl;
-
 
 
     amrex::Print() << std::endl;

@@ -242,7 +242,7 @@ namespace electrochem
     // ANODE MATERIAL COEFFICIENTS
 
     // Anode maximum concentration [mol.m-3]
-    AMREX_GPU_DEVICE AMREX_FORCE_INLINE
+    AMREX_GPU_HOST_DEVICE AMREX_FORCE_INLINE
     amrex::Real Cs_max_anode(const ProbParm& prob_parm)
     {
         if(prob_parm.mater_anode==0) {
@@ -293,7 +293,7 @@ namespace electrochem
 
     // Anode exchange current density [A.m-2]
     // Cs in mol.m-3
-    AMREX_GPU_DEVICE AMREX_FORCE_INLINE
+    AMREX_GPU_HOST_DEVICE AMREX_FORCE_INLINE
     amrex::Real Io_a(amrex::Real Cs, amrex::Real Ce, const ProbParm& prob_parm)
     {
         amrex::Real x = Cs/Cs_max_anode(prob_parm);
@@ -311,7 +311,7 @@ namespace electrochem
 
     // Anode Open circuit voltage [V]
     // Cs in mol.m-3
-    AMREX_GPU_DEVICE AMREX_FORCE_INLINE
+    AMREX_GPU_HOST_DEVICE AMREX_FORCE_INLINE
     amrex::Real OCP_a(amrex::Real Cs, const ProbParm& prob_parm)
     {
         amrex::Real x = Cs/Cs_max_anode(prob_parm);
@@ -390,7 +390,7 @@ namespace electrochem
     // CATHODE MATERIAL COEFFICIENTS
 
     // Cathode maximum concentration [mol.m-3]
-    AMREX_GPU_DEVICE AMREX_FORCE_INLINE
+    AMREX_GPU_HOST_DEVICE AMREX_FORCE_INLINE
     amrex::Real Cs_max_cathode(const ProbParm& prob_parm)
     {
 
@@ -518,7 +518,7 @@ namespace electrochem
 
     // Cathode exchange current density [A.m-2]
     // Cs in mol.m-3
-    AMREX_GPU_DEVICE AMREX_FORCE_INLINE
+    AMREX_GPU_HOST_DEVICE AMREX_FORCE_INLINE
     amrex::Real Io_c(amrex::Real Cs, amrex::Real Ce, const ProbParm& prob_parm)
     {
         amrex::Real x = Cs/Cs_max_cathode(prob_parm);
@@ -548,7 +548,7 @@ namespace electrochem
 
     // Cathode Open circuit voltage [V]
     // Cs in mol.m-3
-    AMREX_GPU_DEVICE AMREX_FORCE_INLINE
+    AMREX_GPU_HOST_DEVICE AMREX_FORCE_INLINE
     amrex::Real OCP_c(amrex::Real Cs, const ProbParm& prob_parm)
     {
         amrex::Real x = Cs/Cs_max_cathode(prob_parm);
@@ -637,7 +637,7 @@ namespace electrochem
     // ------------------
     // Consists in solving the set of equation for an equivalent 0D model (i.e., in each domain potential and concentration are uniform)
 
-    AMREX_GPU_DEVICE AMREX_FORCE_INLINE
+    AMREX_GPU_HOST_DEVICE AMREX_FORCE_INLINE
     amrex::Real get_phie_initial_from_anode(amrex::Real j, amrex::Real phi_s, const ProbParm& prob_parm)
     {
         const amrex::Real Ca = prob_parm.soc_anode_t0 * Cs_max_anode(prob_parm);
@@ -648,7 +648,7 @@ namespace electrochem
         return phi_s-eta-ocp;
     }
 
-    AMREX_GPU_DEVICE AMREX_FORCE_INLINE
+    AMREX_GPU_HOST_DEVICE AMREX_FORCE_INLINE
     amrex::Real get_phic_initial_from_electrolyte(amrex::Real j, amrex::Real phi_e, const ProbParm& prob_parm)
     {
         const amrex::Real Cc = prob_parm.soc_cathode_t0 * Cs_max_cathode(prob_parm);
