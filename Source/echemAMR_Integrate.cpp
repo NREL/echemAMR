@@ -63,6 +63,10 @@ Real echemAMR::SurfaceIntegral(int comp, int domain1, int domain2)
     {
 
         const auto dx = geom[lev].CellSizeArray();
+
+        // Get the boundary ids
+        const int* domlo = geom[lev].Domain().loVect();
+        const int* domhi = geom[lev].Domain().hiVect();
         
         const Real cur_time = t_new[lev];
         MultiFab& S_new = phi_new[lev];
@@ -80,7 +84,7 @@ Real echemAMR::SurfaceIntegral(int comp, int domain1, int domain2)
             Real r = 0.0;
             AMREX_LOOP_3D(bx, i, j, k,
             {
-                r += electrochem_integral_utils::surface_value(i, j, k, comp, domain1, domain2, fab, geom[lev]);
+                r += electrochem_integral_utils::surface_value(i, j, k, comp, domain1, domain2, fab, domlo, domhi,dx);
             });
             return r;
         });
@@ -112,6 +116,10 @@ Real echemAMR::CurrentCollectorIntegral(int comp, int domain)
 
         const auto dx = geom[lev].CellSizeArray();
         
+        // Get the boundary ids
+        const int* domlo = geom[lev].Domain().loVect();
+        const int* domhi = geom[lev].Domain().hiVect();
+        
         const Real cur_time = t_new[lev];
         MultiFab& S_new = phi_new[lev];
        
@@ -128,7 +136,7 @@ Real echemAMR::CurrentCollectorIntegral(int comp, int domain)
             Real r = 0.0;
             AMREX_LOOP_3D(bx, i, j, k,
             {
-                r += electrochem_integral_utils::current_collector_value(i, j, k, comp, domain, fab, geom[lev]);
+                r += electrochem_integral_utils::current_collector_value(i, j, k, comp, domain, fab, domlo, domhi, dx);
             });
             return r;
         });

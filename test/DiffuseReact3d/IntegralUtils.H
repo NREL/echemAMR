@@ -9,7 +9,7 @@ namespace electrochem_integral_utils
 
 //Returns the state value of <comp> if within <domain>
 //TODO: incorporate a level mask
-AMREX_GPU_DEVICE
+AMREX_GPU_HOST_DEVICE
 AMREX_FORCE_INLINE
 Real volume_value(int i, int j, int k, int comp, int domain,
                     Array4<Real const> const& phi,
@@ -31,20 +31,13 @@ Real volume_value(int i, int j, int k, int comp, int domain,
 
 //Returns the state value of <comp> if on the interface of <domain1> and <domain1>
 //TODO: incorporate a level mask
-AMREX_GPU_DEVICE
+AMREX_GPU_HOST_DEVICE
 AMREX_FORCE_INLINE
 Real surface_value(int i, int j, int k, int comp, int domain1, int domain2,
                     Array4<Real const> const& phi,
-                    amrex::Geometry geom
-                    )
+                const int* domlo,const int *domhi,
+                const GpuArray<Real, AMREX_SPACEDIM>& dx)
 {
-    // Get the mesh size
-    const auto dx = geom.CellSizeArray();
-
-    // Get the boundary ids
-    const int* domlo = geom.Domain().loVect();
-    const int* domhi = geom.Domain().hiVect();
-
     // Init some values
     Real val = 1.0;
     Real out = 0.0;
@@ -90,20 +83,13 @@ Real surface_value(int i, int j, int k, int comp, int domain1, int domain2,
 
 //Returns the state value of <comp> if on the current collectors located at +/- x
 //TODO: incorporate a level mask
-AMREX_GPU_DEVICE
+AMREX_GPU_HOST_DEVICE
 AMREX_FORCE_INLINE
 Real current_collector_value(int i, int j, int k, int comp, int domain,
                              Array4<Real const> const& phi,
-                             amrex::Geometry geom
-                             )
+                const int* domlo,const int *domhi,
+                const GpuArray<Real, AMREX_SPACEDIM>& dx)
 {
-    // Get the mesh size
-    const auto dx = geom.CellSizeArray();
-
-    // Get the boundary ids
-    const int* domlo = geom.Domain().loVect();
-    const int* domhi = geom.Domain().hiVect();
-
     // Init some values
     Real val = 1.0;
     Real out = 0.0;
