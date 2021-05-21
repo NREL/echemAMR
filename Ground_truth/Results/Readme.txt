@@ -1,4 +1,4 @@
-Detailed folder: for interactive visualization of resutls: install F2S B2M post-processing app in MATLAB
+Detailed folder: for interactive visualization of results: install F2S B2M post-processing app in MATLAB and load this folder.
 Otherwise, csv and figures of Main_ones is enough.
 Look at the diary file for checking intial values ("FIELDS INITIALIZATION") and dimensions.
 
