@@ -15,16 +15,17 @@ void line_plot(const IndexSelector& idxOp,
                amrex::Vector<amrex::Geometry> &geom,
                amrex::Vector<amrex::DistributionMapping>& dmap,
                amrex::Vector<amrex::BoxArray>& grids,
-               amrex::Vector<amrex::MultiFab>& phi_new)
+               amrex::Vector<amrex::MultiFab>& phi_new,
+               int index,
+               std::string& filename_type)
 {
 
     const int axis = idxOp.dir;
+    const int index_in = index;
+    // this is hard coded for the 4 level sets
     const int num_comps = 4;
 
-    const bool print_stuff = false;
-
     AMREX_ALWAYS_ASSERT(num_points > 0);
-    AMREX_ALWAYS_ASSERT(num_comps < NVAR);
 
 
     const amrex::Real xlo = geom[0].ProbLo(axis);
@@ -110,16 +111,8 @@ void line_plot(const IndexSelector& idxOp,
                                 // line indices
                                 const int line_ind_lo = amrex::min(amrex::max(static_cast<int>((cell_xlo-xlo)/line_dx), 0), num_points-1);
                                 const int line_ind_hi = amrex::min(amrex::max(static_cast<int>((cell_xhi-xlo)/line_dx), 0), num_points-1);
-#ifndef AMREX_USE_GPU
-                                if(print_stuff)
-                                {
-                                    amrex::Print() << std::endl << "index i: " << idxOp(i,j,k) << std::endl;
-                                    amrex::Print() << "cell_xlo: " << cell_xlo << " cell_xhi: " << cell_xhi << std::endl;
-                                    amrex::Print() << "line_ind_lo: " << line_ind_lo << " line_ind_hi: " << line_ind_hi << std::endl;
-                                }
-#endif
 
-                                AMREX_ALWAYS_ASSERT(line_ind_lo >= 0);
+                              AMREX_ALWAYS_ASSERT(line_ind_lo >= 0);
                                 AMREX_ALWAYS_ASSERT(line_ind_hi >= 0);
                                 AMREX_ALWAYS_ASSERT(line_ind_lo < num_points);
                                 AMREX_ALWAYS_ASSERT(line_ind_hi < num_points);
@@ -141,26 +134,16 @@ void line_plot(const IndexSelector& idxOp,
 
                                     dx = amrex::min(dx, geomData.CellSize()[axis]);
 
-#ifndef AMREX_USE_GPU
-                                    if(print_stuff)
-                                    {
-                                        amrex::Print() << "line index: " << ind << std::endl;
-                                        amrex::Print() << "line_xlo: " << line_xlo << " line_xhi: " << line_xhi << std::endl;
-                                        amrex::Print() << "dx: " << dx << std::endl;
-                                        if(dx < 0.0) amrex::Print() << "negative volume error: " << idxOp(i,j,k) << ' ' << dx << std::endl;
-                                    }
-#endif
-
                                     for(int n = 0; n < num_comps; ++n) {
 
-                                        const amrex::Real concen = phi_arr(i,j,k,0);
+                                        const amrex::Real field = phi_arr(i,j,k,index_in);
                                         const amrex::Real lvlset = amrex::max(phi_arr(i,j,k,n+1), 0.0);
                                         const amrex::Real vol = dx*dy*dz;
 
                                         // min is annoying can't use level set here
-                                        if(lvlset > 0.0) amrex::Gpu::deviceReduceMin(&line_min[num_comps * ind + n], concen, handler);
-                                        amrex::Gpu::deviceReduceSum(&line_avg[num_comps * ind + n], concen*lvlset*vol, handler);
-                                        amrex::Gpu::deviceReduceMax(&line_max[num_comps * ind + n], concen*lvlset, handler);
+                                        if(lvlset > 0.0) amrex::Gpu::deviceReduceMin(&line_min[num_comps * ind + n], field, handler);
+                                        amrex::Gpu::deviceReduceSum(&line_avg[num_comps * ind + n], field*lvlset*vol, handler);
+                                        amrex::Gpu::deviceReduceMax(&line_max[num_comps * ind + n], field*lvlset, handler);
                                         amrex::Gpu::deviceReduceSum(&line_vol[num_comps * ind + n], vol*lvlset, handler);
 
 
@@ -179,10 +162,16 @@ void line_plot(const IndexSelector& idxOp,
     lmax.copyToHost(line_maximum.data(), line_maximum.size());
     lvol.copyToHost(line_volume.data(), line_volume.size());
 
-    amrex::ParallelDescriptor::ReduceRealMin(line_minimum.data(), line_minimum.size());
+    amrex::ParallelDescriptor::ReduceRealMin(line_minimum.data(), line_minimum.size(), ParallelDescriptor::IOProcessorNumber());
     amrex::ParallelDescriptor::ReduceRealSum(line_average.data(), line_average.size());
-    amrex::ParallelDescriptor::ReduceRealMax(line_maximum.data(), line_maximum.size());
+    amrex::ParallelDescriptor::ReduceRealMax(line_maximum.data(), line_maximum.size(), ParallelDescriptor::IOProcessorNumber());
     amrex::ParallelDescriptor::ReduceRealSum(line_volume.data(), line_volume.size());
+
+    // just make new ones until we figure out how to copytodevice...
+    amrex::AsyncArray<amrex::Real> lavg2(line_average.data(), line_average.size());
+    amrex::AsyncArray<amrex::Real> lvol2(line_volume.data(), line_volume.size());
+    line_avg = lavg2.data();
+    line_vol = lvol2.data();
 
     // FIXME: lots of code duplication here...
     for (int lev = 0; lev <= finest_level; ++lev)
@@ -252,11 +241,12 @@ void line_plot(const IndexSelector& idxOp,
                                     dx = amrex::min(dx, geomData.CellSize()[axis]);
 
                                     for(int n = 0; n < num_comps; ++n) {
-                                        const amrex::Real concen = phi_arr(i,j,k,0);
+                                        const amrex::Real field = phi_arr(i,j,k,index_in);
+                                        // this assumes level sets are stacked after concentration
                                         const amrex::Real lvlset = amrex::max(phi_arr(i,j,k,n+1), 0.0);
                                         const amrex::Real vol = dx*dy*dz;
                                         const amrex::Real mean = line_avg[num_comps * ind + n]/line_vol[num_comps * ind + n];
-                                        const amrex::Real stddev = std::pow(concen - mean, 2.0)*lvlset*vol;
+                                        const amrex::Real stddev = std::pow(field - mean, 2.0)*lvlset*vol;
                                         amrex::Gpu::deviceReduceSum(&line_std[num_comps * ind + n], stddev, handler);
                                     } // component loop
                                 } // line loop
@@ -269,7 +259,7 @@ void line_plot(const IndexSelector& idxOp,
     } // level loop
 
     lstd.copyToHost(line_stddev.data(), line_stddev.size());
-    amrex::ParallelDescriptor::ReduceRealSum(line_stddev.data(), line_stddev.size());
+    amrex::ParallelDescriptor::ReduceRealSum(line_stddev.data(), line_stddev.size(),ParallelDescriptor::IOProcessorNumber());
 
     // only IO Processor outputs file
     if(amrex::ParallelDescriptor::IOProcessor())
@@ -281,10 +271,10 @@ void line_plot(const IndexSelector& idxOp,
         std::ofstream outfile[num_files];
         std::string filename[num_files];
 
-        filename[0] = "anode.csv";
-        filename[1] = "cathode.csv";
-        filename[2] = "electrolyte.csv";
-        filename[3] = "separator.csv";
+        filename[0] = "anode_"+filename_type+".csv";
+        filename[1] = "cathode_"+filename_type+".csv";
+        filename[2] = "electrolyte_"+filename_type+".csv";
+        filename[3] = "separator_"+filename_type+".csv";
 
         for(int f=0; f < num_files; ++f){
             if(timestep == 0){
@@ -300,9 +290,9 @@ void line_plot(const IndexSelector& idxOp,
                 outfile[f] << timestep << ' ' << std::scientific
                            << time << ' '
                            << line_location[i] << ' '
-                           << line_min[num_comps*i + f] << ' '
+                           << line_minimum[num_comps*i + f] << ' '
                            << line_average[num_comps*i + f]/line_volume[num_comps*i + f] << ' '
-                           << line_max[num_comps*i + f] << ' '
+                           << line_maximum[num_comps*i + f] << ' '
                            << std::sqrt(line_stddev[num_comps*i + f]/line_volume[num_comps*i + f]) << std::endl;
             }
 
@@ -354,12 +344,20 @@ void echemAMR::postprocess(Real time, int timestep)
 
     if (line_plot_int > 0 && ((timestep+1) % line_plot_int == 0 || timestep == 0))
     {
-        if(line_plot_dir == 0)
-            line_plot(XDir(), line_plot_npoints, time, timestep, finest_level, geom, dmap, grids, phi_new);
-        else if(line_plot_dir == 1)
-            line_plot(YDir(), line_plot_npoints, time, timestep, finest_level, geom, dmap, grids, phi_new);
-        else
-            line_plot(ZDir(), line_plot_npoints, time, timestep, finest_level, geom, dmap, grids, phi_new);
+        std::string co = "concentration";
+        std::string po = "potential";
+        
+        if(line_plot_dir == 0){
+            line_plot(XDir(), line_plot_npoints, time, timestep, finest_level, geom, dmap, grids, phi_new, CO_ID, co);
+            line_plot(XDir(), line_plot_npoints, time, timestep, finest_level, geom, dmap, grids, phi_new, PO_ID, po);
+        }
+        else if(line_plot_dir == 1){
+            line_plot(YDir(), line_plot_npoints, time, timestep, finest_level, geom, dmap, grids, phi_new, CO_ID, co);
+            line_plot(YDir(), line_plot_npoints, time, timestep, finest_level, geom, dmap, grids, phi_new, PO_ID, po);
+        } else {
+            line_plot(ZDir(), line_plot_npoints, time, timestep, finest_level, geom, dmap, grids, phi_new, CO_ID, co);
+            line_plot(ZDir(), line_plot_npoints, time, timestep, finest_level, geom, dmap, grids, phi_new, PO_ID, po);
+        }
 
     }
 
