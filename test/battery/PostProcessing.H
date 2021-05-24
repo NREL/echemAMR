@@ -174,10 +174,16 @@ void line_plot(const IndexSelector& idxOp,
     lmax.copyToHost(line_maximum.data(), line_maximum.size());
     lvol.copyToHost(line_volume.data(), line_volume.size());
 
-    amrex::ParallelDescriptor::ReduceRealMin(line_minimum.data(), line_minimum.size());
+    amrex::ParallelDescriptor::ReduceRealMin(line_minimum.data(), line_minimum.size(), ParallelDescriptor::IOProcessorNumber());
     amrex::ParallelDescriptor::ReduceRealSum(line_average.data(), line_average.size());
-    amrex::ParallelDescriptor::ReduceRealMax(line_maximum.data(), line_maximum.size());
+    amrex::ParallelDescriptor::ReduceRealMax(line_maximum.data(), line_maximum.size(), ParallelDescriptor::IOProcessorNumber());
     amrex::ParallelDescriptor::ReduceRealSum(line_volume.data(), line_volume.size());
+
+    // just make new ones until we figure out how to copytodevice...
+    amrex::AsyncArray<amrex::Real> lavg2(line_average.data(), line_average.size());
+    amrex::AsyncArray<amrex::Real> lvol2(line_volume.data(), line_volume.size());
+    line_avg = lavg2.data();
+    line_vol = lvol2.data();
 
     // FIXME: lots of code duplication here...
     for (int lev = 0; lev <= finest_level; ++lev)
@@ -249,7 +255,7 @@ void line_plot(const IndexSelector& idxOp,
                                         const amrex::Real concen = phi_arr(i,j,k,0);
                                         const amrex::Real lvlset = amrex::max(phi_arr(i,j,k,n+1), 0.0);
                                         const amrex::Real vol = dx*dy*dz;
-                                        const amrex::Real mean = line_avg[num_comps * ind + n]/line_volume[num_comps * ind + n];
+                                        const amrex::Real mean = line_avg[num_comps * ind + n]/line_vol[num_comps * ind + n];
                                         const amrex::Real stddev = std::pow(concen - mean, 2.0)*lvlset*vol;
                                         amrex::Gpu::deviceReduceSum(&line_std[num_comps * ind + n], stddev, handler);
                                     } // component loop
@@ -263,7 +269,7 @@ void line_plot(const IndexSelector& idxOp,
     } // level loop
 
     lstd.copyToHost(line_stddev.data(), line_stddev.size());
-    amrex::ParallelDescriptor::ReduceRealSum(line_stddev.data(), line_stddev.size());
+    amrex::ParallelDescriptor::ReduceRealSum(line_stddev.data(), line_stddev.size(),ParallelDescriptor::IOProcessorNumber());
 
     // only IO Processor outputs file
     if(amrex::ParallelDescriptor::IOProcessor())
@@ -294,9 +300,9 @@ void line_plot(const IndexSelector& idxOp,
                 outfile[f] << timestep << ' ' << std::scientific
                            << time << ' '
                            << line_location[i] << ' '
-                           << line_min[num_comps*i + f] << ' '
+                           << line_minimum[num_comps*i + f] << ' '
                            << line_average[num_comps*i + f]/line_volume[num_comps*i + f] << ' '
-                           << line_max[num_comps*i + f] << ' '
+                           << line_maximum[num_comps*i + f] << ' '
                            << std::sqrt(line_stddev[num_comps*i + f]/line_volume[num_comps*i + f]) << std::endl;
             }
 
