@@ -280,6 +280,9 @@ void echemAMR::solve_potential(Real current_time)
 
             for(int idim = 0; idim < AMREX_SPACEDIM; ++idim)
             {
+                const amrex::Real bclo = host_global_storage->pot_bc_lo[idim];
+                const amrex::Real bchi = host_global_storage->pot_bc_hi[idim];
+
                 if (!geom[ilev].isPeriodic(idim)) 
                 {
                     if (bx.smallEnd(idim) == domain.smallEnd(idim)) 
@@ -289,7 +292,7 @@ void echemAMR::solve_potential(Real current_time)
                         [=] AMREX_GPU_DEVICE(int i, int j, int k) noexcept 
                         {
                             electrochem_transport::potential_bc(i, j, k, idim, -1, phi_arr, 
-                                bc_arr, prob_lo, prob_hi, dx, time, *localprobparm);
+                                bc_arr, prob_lo, prob_hi, dx, time, bclo, bchi);
                         });
                     }
                     if (bx.bigEnd(idim) == domain.bigEnd(idim)) 
@@ -299,7 +302,7 @@ void echemAMR::solve_potential(Real current_time)
                           [=] AMREX_GPU_DEVICE(int i, int j, int k) noexcept 
                           {
                                 electrochem_transport::potential_bc(i, j, k, idim, 1, phi_arr, 
-                                        bc_arr, prob_lo, prob_hi, dx, time, *localprobparm);
+                                        bc_arr, prob_lo, prob_hi, dx, time, bclo, bchi);
                           });
                     }
                 }

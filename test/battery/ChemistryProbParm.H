@@ -27,7 +27,7 @@ struct ProbParm
 
     // APPLIED LOADING
     amrex::Real T0 = 300.0_rt; // temperature Kelvin
-    amrex::Real Crate = 1; // [] Typically ranges from 1/20 to 6 (6 and above are considered fast-charge)
+    amrex::Real Crate = 1.0; // [] Typically ranges from 1/20 to 6 (6 and above are considered fast-charge)
     // Pratical state of charge range is more a material property (should be in Chemistry.H).
     // Although as it informs the initial state of charge and that I prefer not to hard-code an equality (to let the user free to initialize not the typical value) the values are there.
     amrex::Real cathode_soc_min = 0.567; // [] All the theoritical state of charge range is typically not used
@@ -61,6 +61,11 @@ struct ProbParm
     amrex::Real lowerscale_p_pore_anode = 3.0; // In the anode, each mesh cell has a Bruggeman coefficient of
     amrex::Real lowerscale_p_pore_separator = 2.4; // In the separator, each mesh cell has a Bruggeman coefficient of
     amrex::Real lowerscale_p_pore_cathode = 3.0; // In the cathode, each mesh cell has a Bruggeman coefficient of
+
+};
+
+struct GlobalStorage
+{
 
     // potential boundary conditions
     amrex::Vector<amrex::Real> pot_bc_lo{0.0, 0.0, 0.0};

@@ -231,12 +231,15 @@ namespace electrochem
     AMREX_GPU_DEVICE AMREX_FORCE_INLINE
     amrex::Real K_D(amrex::Real Ce, const ProbParm& prob_parm)
     {
-        const amrex::Real RTF = prob_parm.R_gas_const*prob_parm.T0/prob_parm.Faraday_const;
-        if(prob_parm.use_KDstar)  { 
-            return amrex::min((1.0 - t_plus(Ce, prob_parm)) * (1.0 + Activity_el(Ce, prob_parm)) * 2.0 * KeC_star(Ce, prob_parm) * RTF, -myeps);
-        } else {
-            return amrex::min((1.0 - t_plus(Ce, prob_parm)) * (1.0 + Activity_el(Ce, prob_parm)) * 2.0 * KeC(Ce, prob_parm) * RTF, -myeps);
-        }
+        // FIXME: hard coding this for now
+        return -0.1;
+
+//        const amrex::Real RTF = prob_parm.R_gas_const*prob_parm.T0/prob_parm.Faraday_const;
+//        if(prob_parm.use_KDstar)  { 
+//            return amrex::min(-(1.0 - t_plus(Ce, prob_parm)) * (1.0 + Activity_el(Ce, prob_parm)) * 2.0 * KeC_star(Ce, prob_parm) * RTF, -myeps);
+//        } else {
+//            return amrex::min(-(1.0 - t_plus(Ce, prob_parm)) * (1.0 + Activity_el(Ce, prob_parm)) * 2.0 * KeC(Ce, prob_parm) * RTF, -myeps);
+//        }
     }
 
     // ANODE MATERIAL COEFFICIENTS

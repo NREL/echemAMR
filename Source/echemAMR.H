@@ -227,6 +227,7 @@ private:
 public:
     static ProbParm* h_prob_parm;
     static ProbParm* d_prob_parm;
+    static GlobalStorage* host_global_storage;
 };
 
 #endif

@@ -20,6 +20,7 @@ using namespace amrex;
 
 ProbParm* echemAMR::h_prob_parm = nullptr;
 ProbParm* echemAMR::d_prob_parm = nullptr;
+GlobalStorage* echemAMR::host_global_storage = nullptr;
 
 // constructor - reads in parameters from inputs file
 //             - sizes multilevel arrays and data structures
@@ -29,6 +30,7 @@ echemAMR::echemAMR ()
 
     h_prob_parm = new ProbParm{};
     d_prob_parm = (ProbParm*)The_Arena()->alloc(sizeof(ProbParm));
+    host_global_storage = new GlobalStorage{};
     amrex_probinit(*h_prob_parm, *d_prob_parm);
 
     ReadParameters();
@@ -112,6 +114,7 @@ echemAMR::echemAMR ()
 echemAMR::~echemAMR ()
 {
     delete h_prob_parm;
+    delete host_global_storage;
     The_Arena()->free(d_prob_parm);
 }
 // initializes multilevel data
