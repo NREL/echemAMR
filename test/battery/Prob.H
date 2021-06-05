@@ -48,9 +48,6 @@ void amrex_probinit (ProbParm & h_prob_parm, ProbParm & d_prob_parm)
     pp.query("soc_cathode_t0", h_prob_parm.soc_cathode_t0);
     pp.query("phi_reference", h_prob_parm.phi_reference);
 
-    pp.queryarr("pot_bc_lo", h_prob_parm.pot_bc_lo, 0, AMREX_SPACEDIM );
-    pp.queryarr("pot_bc_hi", h_prob_parm.pot_bc_hi, 0, AMREX_SPACEDIM );
-
 #ifdef AMREX_USE_GPU
     amrex::Gpu::htod_memcpy(&d_prob_parm, &h_prob_parm, sizeof(ProbParm));
 #else
@@ -178,8 +175,8 @@ void initproblemdata(Box const& bx, Array4<Real> const& phi, GeometryData const&
     // ------------------------
 
     // Calculate active material volumes
-    const amrex::Real volume_anode = echemAMR::d_prob_parm->anode_volume; // [m3]
-    const amrex::Real volume_cathode = echemAMR::d_prob_parm->cathode_volume; // [m3]
+    const amrex::Real volume_anode = echemAMR::host_global_storage->anode_volume; // [m3]
+    const amrex::Real volume_cathode = echemAMR::host_global_storage->cathode_volume; // [m3]
 
     // Calculate anode and cathode theoritical (use full soc range) and pratical (use a reduced soc range) capacity
     const amrex::Real Fday = echemAMR::d_prob_parm->Faraday_const; // [C.mol-1]
@@ -205,8 +202,8 @@ void initproblemdata(Box const& bx, Array4<Real> const& phi, GeometryData const&
     const amrex::Real Applied_current = Current1C * Crate; // [A] (but we need the applied current density in A.m-2)
 
     // Surface calculations // FIX ME: add surface calculations from Jeff post-processing
-    const amrex::Real surface_anodesolid_currentcollector = echemAMR::d_prob_parm->anode_cc_SA; // [m2], temporary value pi*((5e-6)^2)
-    const amrex::Real surface_cathodsolid_currentcollector = echemAMR::d_prob_parm->cathode_cc_SA; // [m2], temporary value pi*((5e-6)^2)
+    const amrex::Real surface_anodesolid_currentcollector = echemAMR::host_global_storage->anode_cc_SA; // [m2], temporary value pi*((5e-6)^2)
+    const amrex::Real surface_cathodsolid_currentcollector = echemAMR::host_global_storage->cathode_cc_SA; // [m2], temporary value pi*((5e-6)^2)
     // const amrex::Real surface_anodesolid_currentcollector = 7.8540e-11; // [m2], temporary value pi*((5e-6)^2)
     // const amrex::Real surface_cathodsolid_currentcollector = 7.8540e-11; // [m2], temporary value pi*((5e-6)^2)
     
@@ -216,12 +213,12 @@ void initproblemdata(Box const& bx, Array4<Real> const& phi, GeometryData const&
     const amrex::Real Applied_current_density_anode = Applied_current / surface_anodesolid_currentcollector; // [A.m-2]
     const amrex::Real Applied_current_density_cathode = Applied_current / surface_cathodsolid_currentcollector; // [A.m-2]
 
-    echemAMR::d_prob_parm->pot_bc_lo[0] = -Applied_current_density_cathode;
-    echemAMR::d_prob_parm->pot_bc_hi[0] = -Applied_current_density_anode;
+    echemAMR::host_global_storage->pot_bc_lo[0] = -Applied_current_density_cathode;
+    echemAMR::host_global_storage->pot_bc_hi[0] = -Applied_current_density_anode;
 
     // Surface calculations // FIX ME: add surface calculations from Jeff post-processing
-    const amrex::Real surface_anodesolid_electrolyte = echemAMR::d_prob_parm->anode_ele_SA; // 4*pi*((5e-6)^2)
-    const amrex::Real surface_cathodesolid_electrolyte = echemAMR::d_prob_parm->cathode_ele_SA; // 4*pi*((5e-6)^2)
+    const amrex::Real surface_anodesolid_electrolyte = echemAMR::host_global_storage->anode_ele_SA; // 4*pi*((5e-6)^2)
+    const amrex::Real surface_cathodesolid_electrolyte = echemAMR::host_global_storage->cathode_ele_SA; // 4*pi*((5e-6)^2)
     // const amrex::Real surface_anodesolid_electrolyte = 3.1416e-10; // 4*pi*((5e-6)^2)
     // const amrex::Real surface_cathodesolid_electrolyte = 3.1416e-10; // 4*pi*((5e-6)^2)
 
@@ -334,8 +331,8 @@ void print_init_data() //break into multiple steps
 {
     // Calculate active material volumes
     // echemAMR::post_timestep(0, 0); // FIX ME: add volume calculation from Jeff post-processing
-    const amrex::Real volume_anode = echemAMR::d_prob_parm->anode_volume; // [m3]
-    const amrex::Real volume_cathode = echemAMR::d_prob_parm->cathode_volume; // [m3]
+    const amrex::Real volume_anode = echemAMR::host_global_storage->anode_volume; // [m3]
+    const amrex::Real volume_cathode = echemAMR::host_global_storage->cathode_volume; // [m3]
 
     // Calculate anode and cathode theoritical (use full soc range) and pratical (use a reduced soc range) capacity
     const amrex::Real Fday = echemAMR::d_prob_parm->Faraday_const; // [C.mol-1]
@@ -361,8 +358,8 @@ void print_init_data() //break into multiple steps
     const amrex::Real Applied_current = Current1C * Crate; // [A] (but we need the applied current density in A.m-2)
 
     // Surface calculations // FIX ME: add surface calculations from Jeff post-processing
-    const amrex::Real surface_anodesolid_currentcollector = echemAMR::d_prob_parm->anode_cc_SA; // [m2], temporary value pi*((5e-6)^2)
-    const amrex::Real surface_cathodsolid_currentcollector = echemAMR::d_prob_parm->cathode_cc_SA; // [m2], temporary value pi*((5e-6)^2)
+    const amrex::Real surface_anodesolid_currentcollector = echemAMR::host_global_storage->anode_cc_SA; // [m2], temporary value pi*((5e-6)^2)
+    const amrex::Real surface_cathodsolid_currentcollector = echemAMR::host_global_storage->cathode_cc_SA; // [m2], temporary value pi*((5e-6)^2)
 
     // Applied current density at the interface active material - current collector
     // These are the two Neumann Boundary conditions value applies at the left and right extremities of the cell
@@ -371,8 +368,8 @@ void print_init_data() //break into multiple steps
     const amrex::Real Applied_current_density_cathode = Applied_current / surface_cathodsolid_currentcollector; // [A.m-2]
 
     // Surface calculations // FIX ME: add surface calculations from Jeff post-processing
-    const amrex::Real surface_anodesolid_electrolyte = echemAMR::d_prob_parm->anode_ele_SA; // 4*pi*((5e-6)^2)
-    const amrex::Real surface_cathodesolid_electrolyte = echemAMR::d_prob_parm->cathode_ele_SA; // 4*pi*((5e-6)^2)
+    const amrex::Real surface_anodesolid_electrolyte = echemAMR::host_global_storage->anode_ele_SA; // 4*pi*((5e-6)^2)
+    const amrex::Real surface_cathodesolid_electrolyte = echemAMR::host_global_storage->cathode_ele_SA; // 4*pi*((5e-6)^2)
 
     // Initial current density at the interface active material - electrolyte
     // These are the two Neumann Boundary conditions value applied at the active interface.

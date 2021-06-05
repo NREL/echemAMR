@@ -18,7 +18,8 @@ namespace electrochem_transport
                       GpuArray<Real, AMREX_SPACEDIM> prob_hi,
                       GpuArray<Real, AMREX_SPACEDIM> dx,
                       const Real time,
-                      ProbParm const& prob_parm)
+                      const Real bclo,
+                      const Real bchi)
     {
         //This function is never called in this case
     }

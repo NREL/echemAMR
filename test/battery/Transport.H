@@ -96,7 +96,8 @@ namespace electrochem_transport
                       GpuArray<Real, AMREX_SPACEDIM> prob_hi,
                       GpuArray<Real, AMREX_SPACEDIM> dx,
                       const Real time,
-                      ProbParm const& prob_parm)
+                      const Real bclo,
+                      const Real bchi)
     {
 
         const int im1 = (dir == 0) ? i-1 : i;
@@ -106,10 +107,10 @@ namespace electrochem_transport
         bool electrode = false;
         if(sgn == -1) { // lo sides
             electrode  = electrochem::is_electrode(i,j,k,phi);
-            bc(im1,jm1,km1) = (electrode) ? prob_parm.pot_bc_lo[dir] : 0.0;
+            bc(im1,jm1,km1) = (electrode) ? bclo : 0.0;
         } else { // hi sides
             electrode = electrochem::is_electrode(im1,jm1,km1,phi);
-            bc(i,j,k) = (electrode) ? prob_parm.pot_bc_hi[dir] : 0.0;
+            bc(i,j,k) = (electrode) ? bchi : 0.0;
         }
 
     }

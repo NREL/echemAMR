@@ -7,6 +7,8 @@
 
 using namespace amrex;
 
+#define heps 1.0e-30
+
 AMREX_GPU_DEVICE
 AMREX_FORCE_INLINE
 void compute_flux_x(int i, int j, int k,int n,
@@ -17,7 +19,10 @@ void compute_flux_x(int i, int j, int k,int n,
                     const GpuArray<Real, AMREX_SPACEDIM>& dx)
 {
 
-    fx(i,j,k,n) = -0.5 * (dcoeff(i,j,k,n)+dcoeff(i-1,j,k,n)) * (phi(i,j,k,n) - phi(i-1,j,k,n))/dx[0];
+    const amrex::Real d1 = dcoeff(i,j,k,n);
+    const amrex::Real d2 = dcoeff(i-1,j,k,n);
+    fx(i,j,k,n) = -2.0 * d1 * d2 / (d1 + d2 + heps) * (phi(i,j,k,n) - phi(i-1,j,k,n))/dx[0];
+//    fx(i,j,k,n) = -0.5 * (dcoeff(i,j,k,n)+dcoeff(i-1,j,k,n)) * (phi(i,j,k,n) - phi(i-1,j,k,n))/dx[0];
     
     //find face vel
     Real smallval  = 1e-10;
@@ -55,8 +60,11 @@ void compute_flux_y(int i, int j, int k,int n,
                     const GpuArray<Real, AMREX_SPACEDIM>& dx)
 {
 
-    fy(i,j,k,n) = -0.5 * (dcoeff(i,j,k,n)+dcoeff(i,j-1,k,n)) * (phi(i,j,k,n) - phi(i,j-1,k,n))/dx[1];
-    
+    const amrex::Real d1 = dcoeff(i,j,k,n);
+    const amrex::Real d2 = dcoeff(i,j-1,k,n);
+    fy(i,j,k,n) = -2.0 * d1 * d2 / (d1 + d2 + heps) * (phi(i,j,k,n) - phi(i,j-1,k,n))/dx[1];
+//    fy(i,j,k,n) = -0.5 * (dcoeff(i,j,k,n)+dcoeff(i,j-1,k,n)) * (phi(i,j,k,n) - phi(i,j-1,k,n))/dx[1];
+
     //find face vel
     Real smallval=1e-10;
     Real dtr=phi(i,j,k,n) - phi(i,j-1,k,n);
@@ -93,8 +101,11 @@ void compute_flux_z(int i, int j, int k,int n,
                     const GpuArray<Real, AMREX_SPACEDIM>& dx)
 {
 
-    fz(i,j,k,n) = -0.5 * (dcoeff(i,j,k,n)+dcoeff(i,j,k-1,n)) * (phi(i,j,k,n) - phi(i,j,k-1,n))/dx[2];
-    
+    const amrex::Real d1 = dcoeff(i,j,k,n);
+    const amrex::Real d2 = dcoeff(i,j,k-1,n);
+    fz(i,j,k,n) = -2.0 * d1 * d2 / (d1 + d2 + heps) * (phi(i,j,k,n) - phi(i,j,k-1,n))/dx[2];
+//    fz(i,j,k,n) = -0.5 * (dcoeff(i,j,k,n)+dcoeff(i,j,k-1,n)) * (phi(i,j,k,n) - phi(i,j,k-1,n))/dx[2];
+
     //find face vel
     Real smallval=1e-10;
 
