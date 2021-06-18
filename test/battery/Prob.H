@@ -201,6 +201,9 @@ void initproblemdata(Box const& bx, Array4<Real> const& phi, GeometryData const&
     const amrex::Real Current1C = pratical_capacity_cell/3600; // [A=C.s-1] Current for 1C
     const amrex::Real Applied_current = Current1C * Crate; // [A] (but we need the applied current density in A.m-2)
 
+    // Copy current in echemAMR as it is needed for post-processing
+    echemAMR::host_global_storage->Applied_current = Applied_current;
+
     // Surface calculations // FIX ME: add surface calculations from Jeff post-processing
     const amrex::Real surface_anodesolid_currentcollector = echemAMR::host_global_storage->anode_cc_SA; // [m2], temporary value pi*((5e-6)^2)
     const amrex::Real surface_cathodsolid_currentcollector = echemAMR::host_global_storage->cathode_cc_SA; // [m2], temporary value pi*((5e-6)^2)
@@ -356,6 +359,9 @@ void print_init_data() //break into multiple steps
     const amrex::Real time_to_charge = (1/Crate)*3600; // [s] Time to charge or discharge the cell
     const amrex::Real Current1C = pratical_capacity_cell/3600; // [A=C.s-1] Current for 1C
     const amrex::Real Applied_current = Current1C * Crate; // [A] (but we need the applied current density in A.m-2)
+
+    // Copy current in echemAMR as it is needed for post-processing
+    echemAMR::host_global_storage->Applied_current = Applied_current;
 
     // Surface calculations // FIX ME: add surface calculations from Jeff post-processing
     const amrex::Real surface_anodesolid_currentcollector = echemAMR::host_global_storage->anode_cc_SA; // [m2], temporary value pi*((5e-6)^2)
