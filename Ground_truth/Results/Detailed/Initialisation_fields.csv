@@ -1,0 +1,4 @@
+Domain	Potential [V]	Concentration [mol.m-3]	Normalized concentration []	Temperature [K]	Faraday current j at the active interface [A.m-2]	Effective j [A.m-2]
+L_material	5.0	45632.0	0.92	303.15	-2.1302288746529694	2.1302288746529694
+Electrolyte_w_sep	1.3198427733734954	1200.0	1.0	303.15	0.0	0.0
+R_material	1.6533523962928318	1120.0	0.04	303.15	-2.1302288746529894	-2.1302288746529894

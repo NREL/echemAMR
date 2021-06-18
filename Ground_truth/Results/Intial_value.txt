@@ -1,0 +1,32 @@
+---------------------
+FIELDS INITIALIZATION
+---------------------
+ 
+                   Potential [V]  Concentration [mol.m-3]  Normalized concentration []  Temperature [K]  Faraday current j at the active interface [A.m-2]  Effective j [A.m-2]
+Domain                                                                                                                                                                         
+R_material  (ANODE)     1.653352                   1120.0                         0.04           303.15                                          -2.130229            -2.130229
+L_material  (CATHODE)   5.000000                  45632.0                         0.92           303.15                                          -2.130229             2.130229
+Electrolyte_w_sep       1.319843                   1200.0                         1.00           303.15                                           0.000000             0.000000
+ 
+                                            Subdomain  Lithium amount [mol]
+Domain                                                                     
+Whole cell                        Electrolyte + Solid          4.266062e-10
+Whole cell                                Electrolyte          1.505392e-11
+Right electrode                           Electrolyte          6.922692e-12
+Separator                                 Electrolyte          2.641511e-12
+Left electrode + right electrode                Solid          4.115522e-10
+Left electrode                                  Solid          4.016930e-10
+Right electrode                                 Solid          9.859226e-12
+ 
+                                        Name     Value     Unit
+Interface                                                      
+Right interface         Open circuit voltage  0.356341      [V]
+Right interface                Overpotential -0.022832      [V]
+Right interface  Exchange current density io  2.361288  [A.m-2]
+Right interface     Potential jump phis-phie  0.333510      [V]
+Right interface              Faraday current -2.130229  [A.m-2]
+Left interface          Open circuit voltage  3.652172      [V]
+Left interface                 Overpotential  0.027985      [V]
+Left interface   Exchange current density io  1.896379  [A.m-2]
+Left interface      Potential jump phis-phie  3.680157      [V]
+Left interface               Faraday current  2.130229  [A.m-2]
