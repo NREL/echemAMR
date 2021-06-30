@@ -86,6 +86,14 @@ struct GlobalStorage
     amrex::Real anode_cc_SA = 0.0;
     amrex::Real cathode_cc_SA = 0.0;
 
+    // Applied current
+    amrex::Real Applied_current = 0.0; // [A] Initialization
+    amrex::Real charging = 1; // 1 Charging, -1 Discharging
+    amrex::Real Faraday_const = 96487.0; // [C.mol-1]
+    amrex::Vector<amrex::Real> Mass_error {0,0,0,0,0,0,0}; // time [s] / anode current [mol] / electrolyte current [mol] / cathode current [mol] / anode target [mol] / electrolyte target [mol] / cathode target [mol]
+
+
+
 };
 
 #endif

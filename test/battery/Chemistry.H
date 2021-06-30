@@ -738,13 +738,13 @@ namespace electrochem
             const amrex::Real Pe = phi(ileft,jleft,kleft,PO_ID);
             const amrex::Real Ca = phi(iright,jright,kright,CO_ID);
             const amrex::Real Pa = phi(iright,jright,kright,PO_ID);
-            reaction = -normal*intercalation_reaction_anode(Ca, Pa, Ce, Pe, prob_parm);
+            reaction = normal*intercalation_reaction_anode(Ca, Pa, Ce, Pe, prob_parm);
         } else if(cl == anode && cr == electrolyte){
             const amrex::Real Ca = phi(ileft,jleft,kleft,CO_ID);
             const amrex::Real Pa = phi(ileft,jleft,kleft,PO_ID);
             const amrex::Real Ce = phi(iright,jright,kright,CO_ID);
             const amrex::Real Pe = phi(iright,jright,kright,PO_ID);
-            reaction = normal*intercalation_reaction_anode(Ca, Pa, Ce, Pe, prob_parm);
+            reaction = -normal*intercalation_reaction_anode(Ca, Pa, Ce, Pe, prob_parm);
         }
 
         if(isnan(reaction)) amrex::Abort("NaN in ic reaction");
