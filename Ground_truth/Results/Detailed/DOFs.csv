@@ -1,5 +1,0 @@
-Domain	Vertices	Potential DOFs	Concentration DOFs	Temperature DOFs	Total DOFs
-Left active material	176598.0	168168	168168	0	336336
-Electrolyte + separator	370617.0	345000	345000	0	690000
-Right active material	177270.0	168168	168168	0	336336
-Whole domain	724485.0	681336	681336	0	1362672
