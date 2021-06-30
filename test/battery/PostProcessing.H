@@ -300,7 +300,8 @@ void line_plot(const IndexSelector& idxOp,
 
 }
 
-void echemAMR::postprocess(Real time, int timestep, Real dt, Real Applied_current, Real Fday, Real charging, Vector<amrex::Real> Mass_error)
+void echemAMR::postprocess(Real time, int timestep, Real dt, GlobalStorage *globalstorage)
+//void echemAMR::postprocess(Real time, int timestep, Real dt, Real Applied_current, Real Fday, Real charging, Vector<amrex::Real> Mass_error)
 {
 
     // Calculate domain volume
@@ -318,8 +319,8 @@ void echemAMR::postprocess(Real time, int timestep, Real dt, Real Applied_curren
     Real total_current_mol = anode_current_mol+cathode_current_mol+electrolyte_current_mol+separator_current_mol;
 
     // Expected mol per domain (target value)
-    Real anode_target_dmol = charging*Applied_current*dt/Fday; // [mol]
-    Real cathode_target_dmol = charging*Applied_current*dt/Fday; // [mol]
+    Real anode_target_dmol = globalstorage->charging*globalstorage->Applied_current*dt/globalstorage->Faraday_const; // [mol]
+    Real cathode_target_dmol = globalstorage->charging*globalstorage->Applied_current*dt/globalstorage->Faraday_const; // [mol]
     Real electrolyte_target_dmol = 0; // [mol]
     // Real anode_target_dSOC = dt/3600 * Crate; // [] Alternative method, FYI
     //Real anode_target_dC = anode_target_dSOC * Csmax; // [mol.m-3]
@@ -335,16 +336,15 @@ void echemAMR::postprocess(Real time, int timestep, Real dt, Real Applied_curren
         cathode_target_mol = cathode_current_mol; // [mol]
 
     } else {
-        anode_target_mol = Mass_error[4] + anode_target_dmol; // [mol] Theortical value
-        electrolyte_target_mol = Mass_error[5] + electrolyte_target_dmol; // [mol] Theortical value
-        cathode_target_mol = Mass_error[6] + cathode_target_dmol; // [mol] Theortical value
+        anode_target_mol = globalstorage->Mass_error[4] + anode_target_dmol; // [mol] Theortical value
+        electrolyte_target_mol = globalstorage->Mass_error[5] + electrolyte_target_dmol; // [mol] Theortical value
+        cathode_target_mol = globalstorage->Mass_error[6] + cathode_target_dmol; // [mol] Theortical value
     }
 
     // Overwritte
-    Mass_error[0]=time;
-    Mass_error[1]=anode_current_mol; Mass_error[2]=electrolyte_current_mol; Mass_error[3]=cathode_current_mol; 
-    Mass_error[4]=anode_target_mol; Mass_error[5]=electrolyte_target_mol; Mass_error[6]=cathode_target_mol; 
-    echemAMR::host_global_storage->Mass_error = Mass_error;
+    globalstorage->Mass_error[0]=time;
+    globalstorage->Mass_error[1]=anode_current_mol; globalstorage->Mass_error[2]=electrolyte_current_mol; globalstorage->Mass_error[3]=cathode_current_mol; 
+    globalstorage->Mass_error[4]=anode_target_mol; globalstorage->Mass_error[5]=electrolyte_target_mol; globalstorage->Mass_error[6]=cathode_target_mol; 
 
 
     // PRINT STATMENT
@@ -367,7 +367,7 @@ void echemAMR::postprocess(Real time, int timestep, Real dt, Real Applied_curren
     amrex::Print() << std::endl;
 
     amrex::Print() << "APPLIED LOADING:" << std::endl;
-    amrex::Print() << "    Applied_current " << Applied_current << " A" << " for duration " << dt << " s" << std::endl;
+    amrex::Print() << "    Applied_current " << globalstorage->Applied_current << " A" << " for duration " << dt << " s" << std::endl;
     amrex::Print() << std::endl;
 
     amrex::Print() << "MOL AND CONCENTRATIONS:       " << std::endl;

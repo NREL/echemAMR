@@ -25,7 +25,7 @@ void echemAMR::Evolve ()
     Real cur_time = t_new[0];
     int last_plot_file_step = 0;
 
-    postprocess(cur_time, 0, 0, echemAMR::host_global_storage->Applied_current, echemAMR::host_global_storage->Faraday_const, echemAMR::host_global_storage->charging, echemAMR::host_global_storage->Mass_error);
+    postprocess(cur_time, 0, 0.0, echemAMR::host_global_storage);
 
     // feel free to delete this commented chunk
     // amrex::Print() << "ProbParm Anode Volume:   " << echemAMR::h_prob_parm->anode_volume << std::endl;
@@ -60,7 +60,7 @@ void echemAMR::Evolve ()
 
 	cur_time += dt[0];
         
-    postprocess(cur_time, step, dt[0], echemAMR::host_global_storage->Applied_current, echemAMR::host_global_storage->Faraday_const, echemAMR::host_global_storage->charging, echemAMR::host_global_storage->Mass_error);
+        postprocess(cur_time, step, dt[0], echemAMR::host_global_storage);
 
         amrex::Print() << "Coarse STEP " << step+1 << " ends." << " TIME = " << cur_time
                        << " DT = " << dt[0]  << std::endl;

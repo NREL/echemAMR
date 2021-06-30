@@ -86,7 +86,7 @@ public:
     // a wrapper for computing integrals
     Real CurrentCollectorIntegral (int comp, int domain);
 
-    void postprocess(Real time, int timestep, Real dt, Real Applied_current, Real Faraday_const, Real charging, Vector<amrex::Real> Mass_error);
+    void postprocess(Real time, int timestep, Real dt, GlobalStorage *globalstorage);
 
     void init_volumes();
 private:

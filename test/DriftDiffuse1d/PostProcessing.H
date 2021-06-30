@@ -6,7 +6,7 @@
 
 using namespace amrex;
 
-void echemAMR::postprocess(Real time, int timestep)
+void echemAMR::postprocess(Real time, int timestep, Real dt, GlobalStorage *globalstorage)
 {
 
 
