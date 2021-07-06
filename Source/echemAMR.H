@@ -88,7 +88,7 @@ public:
 
     void postprocess(Real time, int timestep);
 
-    void init_volumes();
+    void init_volumes(ProbParm & h_prob_parm, ProbParm & d_prob_parm);
 private:
 
     ////////////////
