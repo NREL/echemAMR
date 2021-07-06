@@ -9,7 +9,7 @@ namespace electrochem_integral_utils
 
     //Returns the state value of <comp> if within <domain>
     //TODO: incorporate a level mask
-    AMREX_GPU_DEVICE
+    AMREX_GPU_HOST_DEVICE
         AMREX_FORCE_INLINE
         Real volume_value(int i, int j, int k, int comp, int domain,
                 Array4<Real const> const& phi,
@@ -70,12 +70,13 @@ namespace electrochem_integral_utils
             // Check if we are in domain1 and the adjacent cell is domain2 or boundary
             if( (phi(i,j,k,domain1) > 0) )
             {
-                if ( same_domain*x_prev > 0) out += val*dx[1]*dx[2];
-                if ( same_domain*x_next > 0) out += val*dx[1]*dx[2];
+                //if ( same_domain*x_prev > 0) out += val*dx[1]*dx[2];
+                if ( same_domain*x_prev > 0) out += val;
+                /*if ( same_domain*x_next > 0) out += val*dx[1]*dx[2];
                 if ( same_domain*y_prev > 0) out += val*dx[0]*dx[2];
                 if ( same_domain*y_next > 0) out += val*dx[0]*dx[2];
                 if ( same_domain*z_prev > 0) out += val*dx[0]*dx[1];
-                if ( same_domain*z_next > 0) out += val*dx[0]*dx[1];
+                if ( same_domain*z_next > 0) out += val*dx[0]*dx[1];*/
             }
 
             return out;
@@ -109,8 +110,13 @@ namespace electrochem_integral_utils
         }
 }
 
-void echemAMR::init_volumes()
+void echemAMR::init_volumes(ProbParm& h_prob_parm, ProbParm& d_prob_parm)
 {
+#ifdef AMREX_USE_GPU
+    amrex::Gpu::dtoh_memcpy(&h_prob_parm, &d_prob_parm, sizeof(ProbParm));
+#else
+    std::memcpy(&h_prob_parm, &d_prob_parm, sizeof(ProbParm));
+#endif
 
     // Volumes
     host_global_storage->anode_volume =   VolumeIntegral(-1, A_ID);
@@ -126,7 +132,6 @@ void echemAMR::init_volumes()
     host_global_storage->cathode_ele_SA = SurfaceIntegral(-1, C_ID, E_ID);
     host_global_storage->anode_cc_SA =    CurrentCollectorIntegral(-1, A_ID);
     host_global_storage->cathode_cc_SA =  CurrentCollectorIntegral(-1, C_ID);
-
 }
 
 #endif

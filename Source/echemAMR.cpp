@@ -120,6 +120,8 @@ echemAMR::~echemAMR ()
 // initializes multilevel data
 void echemAMR::InitData ()
 {
+    ProbParm* localprobparm = d_prob_parm;
+
     if (restart_chkfile == "") 
     {
         // start simulation from the beginning
@@ -128,7 +130,7 @@ void echemAMR::InitData ()
         AverageDown();
 
         // Calculate the initial volumes and append to probparm
-        init_volumes();
+        init_volumes(*h_prob_parm, *d_prob_parm);
 
         // Initialize the concentration and potential fields
         for (int lev = 0; lev <= finest_level; ++lev)
@@ -144,12 +146,12 @@ void echemAMR::InitData ()
                 amrex::launch(box,
                 [=] AMREX_GPU_DEVICE (Box const& tbx)
                 {
-                    initproblemdata(box, fab, geomData);
+                    initproblemdata(box, fab, geomData,localprobparm);
                 });
             }
         }
 
-        print_init_data();
+        //print_init_data(echemAMR::h_prob_parm);
 
         if (chk_int > 0) 
         {
