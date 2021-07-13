@@ -6,7 +6,8 @@ import matplotlib.pyplot as plt
 import numpy as np
     
 
-axialdir = int(argv[2])
+#axialdir = int(argv[2])
+axialdir=0
 clength   = 1.0
 cwidth    = 0.125
 cdepth    = 0.125
@@ -38,9 +39,9 @@ ax.plot(x,exactsoln,'r-',label="Exact solution")
 ax.plot(x,fld_pot,'k-',label="echemAMR",markersize=2)
 ax.legend(loc="best")
 
-dir_char=chr(ord('x')+int(argv[2]))
-fig.suptitle("potential solution along "+dir_char+" direction "+argv[3])
-plt.savefig("pot_"+dir_char+"_"+argv[3]+".png")
+dir_char=chr(ord('x')+int(axialdir))
+fig.suptitle("potential solution along "+dir_char+" direction ")
+plt.savefig("pot_"+dir_char+".png")
 plt.show()
 #=======================================
 
