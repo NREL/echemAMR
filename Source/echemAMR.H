@@ -88,7 +88,7 @@ public:
 
     void postprocess(Real time, int timestep, Real dt, GlobalStorage *globalstorage);
 
-    void init_volumes(ProbParm & h_prob_parm, ProbParm & d_prob_parm);
+    void init_volumes();
 private:
 
     ////////////////
@@ -191,6 +191,9 @@ private:
     // advective cfl number - dt = cfl*dx/umax
     amrex::Real cfl = 0.7;
 
+    amrex::Real dtmin=1e-20;
+    amrex::Real dtmax=1e10;
+
     // how often each level regrids the higher levels of refinement
     // (after a level advances that many time steps)
     int regrid_int = 2;
@@ -204,6 +207,11 @@ private:
     int pot_solve_int = 1;
     // use old solution as initial guess for potential
     int pot_initial_guess = 0;
+
+    //apply Buttler-Vohlmer conditions
+    int buttler_vohlmer_flux=0;
+    //level-set id for buttler-vohlmer
+    int bv_levset_id=0;
 
     // frequency to output line plots
     int line_plot_int = -1;
