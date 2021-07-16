@@ -236,9 +236,9 @@ namespace electrochem
 
        const amrex::Real RTF = prob_parm.R_gas_const*prob_parm.T0/prob_parm.Faraday_const;
        if(prob_parm.use_KDstar)  { 
-           return amrex::min((1.0 - t_plus(Ce, prob_parm)) * (1.0 + Activity_el(Ce, prob_parm)) * 2.0 * KeC_star(Ce, prob_parm) * RTF, myeps);
+           return amrex::max((1.0 - t_plus(Ce, prob_parm)) * (1.0 + Activity_el(Ce, prob_parm)) * 2.0 * KeC_star(Ce, prob_parm) * RTF, myeps);
        } else {
-           return amrex::min((1.0 - t_plus(Ce, prob_parm)) * (1.0 + Activity_el(Ce, prob_parm)) * 2.0 * KeC(Ce, prob_parm) * RTF, myeps);
+           return amrex::max((1.0 - t_plus(Ce, prob_parm)) * (1.0 + Activity_el(Ce, prob_parm)) * 2.0 * KeC(Ce, prob_parm) * RTF, myeps);
        }
     }
 
