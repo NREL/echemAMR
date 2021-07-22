@@ -1,0 +1,19 @@
+amrex.fpe_trap_invalid=1
+
+n_cell = 64 4 4
+max_grid_size = 32
+prob_lo=0.0 0.0 0.0
+prob_hi=1.0 1.0 1.0
+electrode_dcoeff=3.0
+electrolyte_dcoeff=1.0
+
+is_periodic=0 0 0
+lo_bc=1 2 2 
+hi_bc=1 2 2 
+
+interface_location1=0.25
+interface_location2=0.75
+leftdircval=0.0
+rightdircval=0.0
+transport_dir=0
+maxnonliniter=20
