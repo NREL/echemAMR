@@ -12,7 +12,7 @@ using namespace amrex;
 
 int main(int argc, char* argv[])
 {
-    amrex::Initialize(argc,argv);
+    amrex::Initialize(argc, argv);
 
     // timer for profiling
     BL_PROFILE_VAR("main()", pmain);
@@ -26,21 +26,22 @@ int main(int argc, char* argv[])
         // constructor - reads in parameters from inputs file
         //             - sizes multilevel arrays and data structures
         echemAMR echem_obj;
-	
+
         // initialize AMR data
-	echem_obj.InitData();
+        echem_obj.InitData();
 
         // advance solution to final time
-	echem_obj.Evolve();
-	
+        echem_obj.Evolve();
+
         // wallclock time
-	Real end_total = amrex::second() - strt_total;
-	
+        Real end_total = amrex::second() - strt_total;
+
         // print wallclock time
-	ParallelDescriptor::ReduceRealMax(end_total ,ParallelDescriptor::IOProcessorNumber());
-	if (echem_obj.Verbose()) {
+        ParallelDescriptor::ReduceRealMax(
+            end_total, ParallelDescriptor::IOProcessorNumber());
+        if (echem_obj.Verbose()) {
             amrex::Print() << "\nTotal Time: " << end_total << '\n';
-	}
+        }
     }
 
     // destroy timer for profiling
