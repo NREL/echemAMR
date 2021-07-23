@@ -12,37 +12,34 @@
 #endif
 
 #include <echemAMR.H>
-#include<Chemistry.H>
+#include <Chemistry.H>
 
-// Make a new level using provided BoxArray and DistributionMapping and 
+// Make a new level using provided BoxArray and DistributionMapping and
 // fill with interpolated coarse level data.
 // overrides the pure virtual function in AmrCore
-void echemAMR::MakeNewLevelFromCoarse (int lev, Real time, const BoxArray& ba,
-				    const DistributionMapping& dm)
+void echemAMR::MakeNewLevelFromCoarse(int lev, Real time, const BoxArray& ba, const DistributionMapping& dm)
 {
-    const int ncomp = phi_new[lev-1].nComp();
-    const int nghost = phi_new[lev-1].nGrow();
-    
+    const int ncomp = phi_new[lev - 1].nComp();
+    const int nghost = phi_new[lev - 1].nGrow();
+
     phi_new[lev].define(ba, dm, ncomp, nghost);
     phi_old[lev].define(ba, dm, ncomp, nghost);
 
     t_new[lev] = time;
     t_old[lev] = time - 1.e200;
 
-    if (lev > 0 && do_reflux) 
+    if (lev > 0 && do_reflux)
     {
-	flux_reg[lev].reset(new 
-                FluxRegister(ba, dm, refRatio(lev-1), lev, ncomp));
+        flux_reg[lev].reset(new FluxRegister(ba, dm, refRatio(lev - 1), lev, ncomp));
     }
 
     FillCoarsePatch(lev, time, phi_new[lev], 0, ncomp);
 }
 
-// Remake an existing level using provided BoxArray and DistributionMapping and 
+// Remake an existing level using provided BoxArray and DistributionMapping and
 // fill with existing fine and coarse data.
 // overrides the pure virtual function in AmrCore
-void echemAMR::RemakeLevel (int lev, Real time, const BoxArray& ba,
-			 const DistributionMapping& dm)
+void echemAMR::RemakeLevel(int lev, Real time, const BoxArray& ba, const DistributionMapping& dm)
 {
     const int ncomp = phi_new[lev].nComp();
     const int nghost = phi_new[lev].nGrow();
@@ -58,26 +55,25 @@ void echemAMR::RemakeLevel (int lev, Real time, const BoxArray& ba,
     t_new[lev] = time;
     t_old[lev] = time - 1.e200;
 
-    if (lev > 0 && do_reflux) 
+    if (lev > 0 && do_reflux)
     {
-	flux_reg[lev].reset(new FluxRegister(ba, dm, refRatio(lev-1), lev, ncomp));
-    }    
+        flux_reg[lev].reset(new FluxRegister(ba, dm, refRatio(lev - 1), lev, ncomp));
+    }
 }
 
 // Delete level data
 // overrides the pure virtual function in AmrCore
-void echemAMR::ClearLevel (int lev)
+void echemAMR::ClearLevel(int lev)
 {
     phi_new[lev].clear();
     phi_old[lev].clear();
     flux_reg[lev].reset(nullptr);
 }
 
-// Make a new level from scratch using provided BoxArray and DistributionMapping.
-// Only used during initialization.
-// overrides the pure virtual function in AmrCore
-void echemAMR::MakeNewLevelFromScratch (int lev, Real time, const BoxArray& ba,
-					  const DistributionMapping& dm)
+// Make a new level from scratch using provided BoxArray and
+// DistributionMapping. Only used during initialization. overrides the pure
+// virtual function in AmrCore
+void echemAMR::MakeNewLevelFromScratch(int lev, Real time, const BoxArray& ba, const DistributionMapping& dm)
 {
     const int nghost = 0;
     int ncomp = NVAR;
@@ -88,17 +84,13 @@ void echemAMR::MakeNewLevelFromScratch (int lev, Real time, const BoxArray& ba,
     t_new[lev] = time;
     t_old[lev] = time - 1.e200;
 
-    if (lev > 0 && do_reflux) 
+    if (lev > 0 && do_reflux)
     {
-	flux_reg[lev].reset(new FluxRegister(ba, dm, 
-                    refRatio(lev-1), lev, ncomp));
+        flux_reg[lev].reset(new FluxRegister(ba, dm, refRatio(lev - 1), lev, ncomp));
     }
 
     Real cur_time = t_new[lev];
     MultiFab& state = phi_new[lev];
-
-
-
 
     for (MFIter mfi(state); mfi.isValid(); ++mfi)
     {
@@ -106,36 +98,32 @@ void echemAMR::MakeNewLevelFromScratch (int lev, Real time, const BoxArray& ba,
         GeometryData geomData = geom[lev].data();
         const Box& box = mfi.validbox();
 
-        amrex::launch(box,
-        [=] AMREX_GPU_DEVICE (Box const& tbx)
-        {
-            initdomaindata(tbx, fab, geomData); //init just mesh refinement stuff
+        amrex::launch(box, [=] AMREX_GPU_DEVICE(Box const& tbx) {
+            initdomaindata(tbx, fab, geomData); // init just mesh refinement stuff
         });
     }
 }
 
 // set covered coarse cells to be the average of overlying fine cells
-void echemAMR::AverageDown ()
+void echemAMR::AverageDown()
 {
-    for (int lev = finest_level-1; lev >= 0; --lev)
+    for (int lev = finest_level - 1; lev >= 0; --lev)
     {
-	amrex::average_down(phi_new[lev+1], phi_new[lev],
-                            geom[lev+1], geom[lev],
-                            0, phi_new[lev].nComp(), refRatio(lev));
+        amrex::average_down(phi_new[lev + 1], phi_new[lev], geom[lev + 1], geom[lev], 0, phi_new[lev].nComp(), refRatio(lev));
     }
 }
 
-// more flexible version of AverageDown() that lets you average down across multiple levels
-void echemAMR::AverageDownTo (int crse_lev)
+// more flexible version of AverageDown() that lets you average down across
+// multiple levels
+void echemAMR::AverageDownTo(int crse_lev)
 {
-    amrex::average_down(phi_new[crse_lev+1], phi_new[crse_lev],
-                        geom[crse_lev+1], geom[crse_lev],
-                        0, phi_new[crse_lev].nComp(), refRatio(crse_lev));
+    amrex::average_down(phi_new[crse_lev + 1], phi_new[crse_lev], geom[crse_lev + 1], geom[crse_lev], 0, phi_new[crse_lev].nComp(), refRatio(crse_lev));
 }
 
-// compute a new multifab by coping in phi from valid region and filling ghost cells
-// works for single level and 2-level cases (fill fine grid ghost by interpolating from coarse)
-void echemAMR::FillPatch (int lev, Real time, MultiFab& mf, int icomp, int ncomp)
+// compute a new multifab by coping in phi from valid region and filling ghost
+// cells works for single level and 2-level cases (fill fine grid ghost by
+// interpolating from coarse)
+void echemAMR::FillPatch(int lev, Real time, MultiFab& mf, int icomp, int ncomp)
 {
     if (lev == 0)
     {
@@ -144,50 +132,45 @@ void echemAMR::FillPatch (int lev, Real time, MultiFab& mf, int icomp, int ncomp
         GetData(0, time, smf, stime);
 
         GpuBndryFuncFab<AmrCoreFill> gpu_bndry_func(amrcore_fill_func);
-        PhysBCFunct<GpuBndryFuncFab<AmrCoreFill> > physbc(geom[lev],bcs,gpu_bndry_func);
-        amrex::FillPatchSingleLevel(mf, time, smf, stime, 0, icomp, ncomp, 
-                geom[lev], physbc, 0);
-    }
-    else
+        PhysBCFunct<GpuBndryFuncFab<AmrCoreFill>> physbc(geom[lev], bcs, gpu_bndry_func);
+        amrex::FillPatchSingleLevel(mf, time, smf, stime, 0, icomp, ncomp, geom[lev], physbc, 0);
+    } else
     {
         Vector<MultiFab*> cmf, fmf;
         Vector<Real> ctime, ftime;
-        GetData(lev-1, time, cmf, ctime);
-        GetData(lev  , time, fmf, ftime);
+        GetData(lev - 1, time, cmf, ctime);
+        GetData(lev, time, fmf, ftime);
 
         Interpolater* mapper = &cell_cons_interp;
 
         GpuBndryFuncFab<AmrCoreFill> gpu_bndry_func(amrcore_fill_func);
-        PhysBCFunct<GpuBndryFuncFab<AmrCoreFill> > cphysbc(geom[lev-1],bcs,gpu_bndry_func);
-        PhysBCFunct<GpuBndryFuncFab<AmrCoreFill> > fphysbc(geom[lev],bcs,gpu_bndry_func);
+        PhysBCFunct<GpuBndryFuncFab<AmrCoreFill>> cphysbc(geom[lev - 1], bcs, gpu_bndry_func);
+        PhysBCFunct<GpuBndryFuncFab<AmrCoreFill>> fphysbc(geom[lev], bcs, gpu_bndry_func);
 
-        amrex::FillPatchTwoLevels(mf, time, cmf, ctime, fmf, ftime,
-                0, icomp, ncomp, geom[lev-1], geom[lev],
-                cphysbc, 0, fphysbc, 0, refRatio(lev-1),
-                mapper, bcs, 0);
+        amrex::FillPatchTwoLevels(
+            mf, time, cmf, ctime, fmf, ftime, 0, icomp, ncomp, geom[lev - 1], geom[lev], cphysbc, 0, fphysbc, 0, refRatio(lev - 1), mapper, bcs, 0);
     }
 }
 
 // fill an entire multifab by interpolating from the coarser level
 // this comes into play when a new level of refinement appears
-void echemAMR::FillCoarsePatch (int lev, Real time, MultiFab& mf, int icomp, int ncomp)
+void echemAMR::FillCoarsePatch(int lev, Real time, MultiFab& mf, int icomp, int ncomp)
 {
     BL_ASSERT(lev > 0);
 
     Vector<MultiFab*> cmf;
     Vector<Real> ctime;
-    GetData(lev-1, time, cmf, ctime);
+    GetData(lev - 1, time, cmf, ctime);
     Interpolater* mapper = &cell_cons_interp;
 
-    if (cmf.size() != 1) {
+    if (cmf.size() != 1)
+    {
         amrex::Abort("FillCoarsePatch: how did this happen?");
     }
 
     GpuBndryFuncFab<AmrCoreFill> gpu_bndry_func(amrcore_fill_func);
-    PhysBCFunct<GpuBndryFuncFab<AmrCoreFill> > cphysbc(geom[lev-1],bcs,gpu_bndry_func);
-    PhysBCFunct<GpuBndryFuncFab<AmrCoreFill> > fphysbc(geom[lev],bcs,gpu_bndry_func);
+    PhysBCFunct<GpuBndryFuncFab<AmrCoreFill>> cphysbc(geom[lev - 1], bcs, gpu_bndry_func);
+    PhysBCFunct<GpuBndryFuncFab<AmrCoreFill>> fphysbc(geom[lev], bcs, gpu_bndry_func);
 
-    amrex::InterpFromCoarseLevel(mf, time, *cmf[0], 0, icomp, ncomp, geom[lev-1], geom[lev],
-            cphysbc, 0, fphysbc, 0, refRatio(lev-1),
-            mapper, bcs, 0);
+    amrex::InterpFromCoarseLevel(mf, time, *cmf[0], 0, icomp, ncomp, geom[lev - 1], geom[lev], cphysbc, 0, fphysbc, 0, refRatio(lev - 1), mapper, bcs, 0);
 }
