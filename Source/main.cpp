@@ -37,9 +37,9 @@ int main(int argc, char* argv[])
         Real end_total = amrex::second() - strt_total;
 
         // print wallclock time
-        ParallelDescriptor::ReduceRealMax(
-            end_total, ParallelDescriptor::IOProcessorNumber());
-        if (echem_obj.Verbose()) {
+        ParallelDescriptor::ReduceRealMax(end_total, ParallelDescriptor::IOProcessorNumber());
+        if (echem_obj.Verbose())
+        {
             amrex::Print() << "\nTotal Time: " << end_total << '\n';
         }
     }

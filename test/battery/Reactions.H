@@ -24,19 +24,17 @@ AMREX_GPU_DEVICE AMREX_INLINE void compute_react_source(
     ProbParm const& prob_parm)
 {
 
-    for (int n = 0; n < reactsource.nComp(); ++n) {
+    for (int n = 0; n < reactsource.nComp(); ++n)
+    {
         reactsource(i, j, k, n) = 0.0;
     }
 
     /* add intercalation reaction */
-    for (int dir = 0; dir < AMREX_SPACEDIM; ++dir) {
+    for (int dir = 0; dir < AMREX_SPACEDIM; ++dir)
+    {
         amrex::Real normal = 1.0 / dx[dir];
-        reactsource(i, j, k, CO_ID) +=
-            electrochem::ic_reaction(i, j, k, dir, +normal, phi, prob_parm) /
-            prob_parm.Faraday_const;
-        reactsource(i, j, k, CO_ID) +=
-            electrochem::ic_reaction(i, j, k, dir, -normal, phi, prob_parm) /
-            prob_parm.Faraday_const;
+        reactsource(i, j, k, CO_ID) += electrochem::ic_reaction(i, j, k, dir, +normal, phi, prob_parm) / prob_parm.Faraday_const;
+        reactsource(i, j, k, CO_ID) += electrochem::ic_reaction(i, j, k, dir, -normal, phi, prob_parm) / prob_parm.Faraday_const;
     }
 }
 
@@ -54,17 +52,18 @@ AMREX_GPU_DEVICE AMREX_INLINE void compute_potential_source(
 {
 
     // FIXME: add Neummann bc's to potential and concentration source terms
-    if (electrochem::is_electrode(i, j, k, phi)) {
+    if (electrochem::is_electrode(i, j, k, phi))
+    {
 
         potsource(i, j, k) = 0.0;
 
-    } else {
+    } else
+    {
 
         // concentration
         const Real Ce = phi(i, j, k, CO_ID);
-        const Real KD =
-            electrochem::K_D(Ce, prob_parm); // KD is either KD or KDstar as a
-                                             // function of prob_parm.use_KDstar
+        const Real KD = electrochem::K_D(Ce, prob_parm); // KD is either KD or KDstar as a
+                                                         // function of prob_parm.use_KDstar
 
         // FIXME: should probably average KD over faces but for now use use
         // value at center
@@ -72,25 +71,17 @@ AMREX_GPU_DEVICE AMREX_INLINE void compute_potential_source(
         // FIXME: this should be KDstar // Is KDstar or KD depending on
         // prob_parm.use_KDstar
         // FIXME: need to account for walls
-        potsource(i, j, k) =
-            KD * ((phi(i - 1, j, k, CO_ID) - 2.0 * phi(i, j, k, CO_ID) +
-                   phi(i + 1, j, k, CO_ID)) /
-                      dx[0] / dx[0] +
-                  (phi(i, j - 1, k, CO_ID) - 2.0 * phi(i, j, k, CO_ID) +
-                   phi(i, j + 1, k, CO_ID)) /
-                      dx[1] / dx[1] +
-                  (phi(i, j, k - 1, CO_ID) - 2.0 * phi(i, j, k, CO_ID) +
-                   phi(i, j, k + 1, CO_ID)) /
-                      dx[2] / dx[2]);
+        potsource(i, j, k) = KD * ((phi(i - 1, j, k, CO_ID) - 2.0 * phi(i, j, k, CO_ID) + phi(i + 1, j, k, CO_ID)) / dx[0] / dx[0] +
+                                   (phi(i, j - 1, k, CO_ID) - 2.0 * phi(i, j, k, CO_ID) + phi(i, j + 1, k, CO_ID)) / dx[1] / dx[1] +
+                                   (phi(i, j, k - 1, CO_ID) - 2.0 * phi(i, j, k, CO_ID) + phi(i, j, k + 1, CO_ID)) / dx[2] / dx[2]);
     }
 
     /* add intercalation reaction */
-    for (int dir = 0; dir < AMREX_SPACEDIM; ++dir) {
+    for (int dir = 0; dir < AMREX_SPACEDIM; ++dir)
+    {
         amrex::Real normal = 1.0 / dx[dir];
-        potsource(i, j, k) +=
-            electrochem::ic_reaction(i, j, k, dir, +normal, phi, prob_parm);
-        potsource(i, j, k) +=
-            electrochem::ic_reaction(i, j, k, dir, -normal, phi, prob_parm);
+        potsource(i, j, k) += electrochem::ic_reaction(i, j, k, dir, +normal, phi, prob_parm);
+        potsource(i, j, k) += electrochem::ic_reaction(i, j, k, dir, -normal, phi, prob_parm);
     }
 }
 

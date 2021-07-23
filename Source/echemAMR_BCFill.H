@@ -28,10 +28,8 @@ struct AmrCoreFill
         const amrex::Real* prob_lo = geom.ProbLo();
         const amrex::Real* prob_hi = geom.ProbHi();
         const amrex::Real* dx = geom.CellSize();
-        const amrex::Real x[AMREX_SPACEDIM] = {AMREX_D_DECL(
-            prob_lo[0] + (iv[0] + 0.5) * dx[0],
-            prob_lo[1] + (iv[1] + 0.5) * dx[1],
-            prob_lo[2] + (iv[2] + 0.5) * dx[2])};
+        const amrex::Real x[AMREX_SPACEDIM] = {
+            AMREX_D_DECL(prob_lo[0] + (iv[0] + 0.5) * dx[0], prob_lo[1] + (iv[1] + 0.5) * dx[1], prob_lo[2] + (iv[2] + 0.5) * dx[2])};
 
         const int* bc = bcr->data();
 
@@ -40,68 +38,80 @@ struct AmrCoreFill
 
         // xlo and xhi
         int idir = 0;
-        if ((bc[idir] == amrex::BCType::ext_dir) and (iv[idir] < domlo[idir])) {
+        if ((bc[idir] == amrex::BCType::ext_dir) and (iv[idir] < domlo[idir]))
+        {
             amrex::IntVect loc(AMREX_D_DECL(domlo[idir], iv[1], iv[2]));
-            for (int n = 0; n < NVAR; n++) {
+            for (int n = 0; n < NVAR; n++)
+            {
                 s_int[n] = data(loc, n);
             }
             externalbc(x, s_int, s_ext, idir, +1, time, geom);
-            for (int n = 0; n < NVAR; n++) {
+            for (int n = 0; n < NVAR; n++)
+            {
                 data(iv, n) = s_ext[n];
             }
-        } else if (
-            (bc[idir + AMREX_SPACEDIM] == amrex::BCType::ext_dir) and
-            (iv[idir] > domhi[idir])) {
+        } else if ((bc[idir + AMREX_SPACEDIM] == amrex::BCType::ext_dir) and (iv[idir] > domhi[idir]))
+        {
             amrex::IntVect loc(AMREX_D_DECL(domhi[idir], iv[1], iv[2]));
-            for (int n = 0; n < NVAR; n++) {
+            for (int n = 0; n < NVAR; n++)
+            {
                 s_int[n] = data(loc, n);
             }
             externalbc(x, s_int, s_ext, idir, -1, time, geom);
-            for (int n = 0; n < NVAR; n++) {
+            for (int n = 0; n < NVAR; n++)
+            {
                 data(iv, n) = s_ext[n];
             }
         }
         // ylo and yhi
         idir = 1;
-        if ((bc[idir] == amrex::BCType::ext_dir) and (iv[idir] < domlo[idir])) {
+        if ((bc[idir] == amrex::BCType::ext_dir) and (iv[idir] < domlo[idir]))
+        {
             amrex::IntVect loc(AMREX_D_DECL(iv[0], domlo[idir], iv[2]));
-            for (int n = 0; n < NVAR; n++) {
+            for (int n = 0; n < NVAR; n++)
+            {
                 s_int[n] = data(loc, n);
             }
             externalbc(x, s_int, s_ext, idir, +1, time, geom);
-            for (int n = 0; n < NVAR; n++) {
+            for (int n = 0; n < NVAR; n++)
+            {
                 data(iv, n) = s_ext[n];
             }
-        } else if (
-            (bc[idir + AMREX_SPACEDIM] == amrex::BCType::ext_dir) and
-            (iv[idir] > domhi[idir])) {
+        } else if ((bc[idir + AMREX_SPACEDIM] == amrex::BCType::ext_dir) and (iv[idir] > domhi[idir]))
+        {
             amrex::IntVect loc(AMREX_D_DECL(iv[0], domhi[idir], iv[2]));
-            for (int n = 0; n < NVAR; n++) {
+            for (int n = 0; n < NVAR; n++)
+            {
                 s_int[n] = data(loc, n);
             }
             externalbc(x, s_int, s_ext, idir, -1, time, geom);
-            for (int n = 0; n < NVAR; n++) {
+            for (int n = 0; n < NVAR; n++)
+            {
                 data(iv, n) = s_ext[n];
             }
         }
         // zlo and zhi
         idir = 2;
-        if ((bc[idir] == amrex::BCType::ext_dir) and (iv[idir] < domlo[idir])) {
-            for (int n = 0; n < NVAR; n++) {
+        if ((bc[idir] == amrex::BCType::ext_dir) and (iv[idir] < domlo[idir]))
+        {
+            for (int n = 0; n < NVAR; n++)
+            {
                 s_int[n] = data(iv[0], iv[1], domlo[idir], n);
             }
             externalbc(x, s_int, s_ext, idir, +1, time, geom);
-            for (int n = 0; n < NVAR; n++) {
+            for (int n = 0; n < NVAR; n++)
+            {
                 data(iv, n) = s_ext[n];
             }
-        } else if (
-            (bc[idir + AMREX_SPACEDIM] == amrex::BCType::ext_dir) and
-            (iv[idir] > domhi[idir])) {
-            for (int n = 0; n < NVAR; n++) {
+        } else if ((bc[idir + AMREX_SPACEDIM] == amrex::BCType::ext_dir) and (iv[idir] > domhi[idir]))
+        {
+            for (int n = 0; n < NVAR; n++)
+            {
                 s_int[n] = data(iv[0], iv[1], domhi[idir], n);
             }
             externalbc(x, s_int, s_ext, idir, -1, time, geom);
-            for (int n = 0; n < NVAR; n++) {
+            for (int n = 0; n < NVAR; n++)
+            {
                 data(iv, n) = s_ext[n];
             }
         }

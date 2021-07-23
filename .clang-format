@@ -26,7 +26,7 @@ BinPackParameters: false
 BraceWrapping:   
   AfterCaseLabel:  false
   AfterClass:      true
-  AfterControlStatement: false
+  AfterControlStatement: true
   AfterEnum:       false
   AfterFunction:   true
   AfterNamespace:  false
@@ -47,7 +47,7 @@ BreakBeforeTernaryOperators: true
 BreakConstructorInitializers: BeforeComma
 BreakAfterJavaFieldAnnotations: false
 BreakStringLiterals: true
-ColumnLimit:     80
+ColumnLimit:     160
 CommentPragmas:  '^ IWYU pragma:'
 CompactNamespaces: false
 ConstructorInitializerAllOnOneLineOrOnePerLine: true

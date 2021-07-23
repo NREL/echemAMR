@@ -43,7 +43,8 @@ echemAMR::echemAMR()
 
     istep.resize(nlevs_max, 0);
     nsubsteps.resize(nlevs_max, 1);
-    for (int lev = 1; lev <= max_level; ++lev) {
+    for (int lev = 1; lev <= max_level; ++lev)
+    {
         nsubsteps[lev] = MaxRefRatio(lev - 1);
     }
 
@@ -64,30 +65,33 @@ echemAMR::echemAMR()
         int bc_hi[] = {FOEXTRAP, FOEXTRAP, FOEXTRAP};
     */
     bcs.resize(NVAR);
-    for (int idim = 0; idim < AMREX_SPACEDIM; ++idim) {
+    for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
+    {
         // lo-side BCs
-        if (bc_lo[idim] ==
-                BCType::int_dir || // periodic uses "internal Dirichlet"
+        if (bc_lo[idim] == BCType::int_dir ||  // periodic uses "internal Dirichlet"
             bc_lo[idim] == BCType::foextrap || // first-order extrapolation
-            bc_lo[idim] == BCType::ext_dir ||
-            bc_lo[idim] == BCType::hoextrapcc) {
-            for (int sp = 0; sp < NVAR; sp++) {
+            bc_lo[idim] == BCType::ext_dir || bc_lo[idim] == BCType::hoextrapcc)
+        {
+            for (int sp = 0; sp < NVAR; sp++)
+            {
                 bcs[sp].setLo(idim, bc_lo[idim]);
             }
-        } else {
+        } else
+        {
             amrex::Abort("Invalid bc_lo");
         }
 
         // hi-side BCSs
-        if (bc_hi[idim] ==
-                BCType::int_dir || // periodic uses "internal Dirichlet"
+        if (bc_hi[idim] == BCType::int_dir ||  // periodic uses "internal Dirichlet"
             bc_hi[idim] == BCType::foextrap || // first-order extrapolation
-            bc_hi[idim] == BCType::ext_dir ||
-            bc_hi[idim] == BCType::hoextrapcc) {
-            for (int sp = 0; sp < NVAR; sp++) {
+            bc_hi[idim] == BCType::ext_dir || bc_hi[idim] == BCType::hoextrapcc)
+        {
+            for (int sp = 0; sp < NVAR; sp++)
+            {
                 bcs[sp].setHi(idim, bc_hi[idim]);
             }
-        } else {
+        } else
+        {
             amrex::Abort("Invalid bc_hi");
         }
     }
@@ -109,7 +113,8 @@ echemAMR::~echemAMR()
 // initializes multilevel data
 void echemAMR::InitData()
 {
-    if (restart_chkfile == "") {
+    if (restart_chkfile == "")
+    {
         // start simulation from the beginning
         const Real time = 0.0;
         InitFromScratch(time);
@@ -119,32 +124,35 @@ void echemAMR::InitData()
         init_volumes();
 
         // Initialize the concentration and potential fields
-        for (int lev = 0; lev <= finest_level; ++lev) {
+        for (int lev = 0; lev <= finest_level; ++lev)
+        {
 
             MultiFab& state = phi_new[lev];
-            for (MFIter mfi(state); mfi.isValid(); ++mfi) {
+            for (MFIter mfi(state); mfi.isValid(); ++mfi)
+            {
                 Array4<Real> fab = state[mfi].array();
                 GeometryData geomData = geom[lev].data();
                 const Box& box = mfi.validbox();
 
-                amrex::launch(box, [=] AMREX_GPU_DEVICE(Box const& tbx) {
-                    initproblemdata(box, fab, geomData);
-                });
+                amrex::launch(box, [=] AMREX_GPU_DEVICE(Box const& tbx) { initproblemdata(box, fab, geomData); });
             }
         }
 
         print_init_data();
 
-        if (chk_int > 0) {
+        if (chk_int > 0)
+        {
             WriteCheckpointFile();
         }
 
-    } else {
+    } else
+    {
         // restart from a checkpoint
         ReadCheckpointFile();
     }
 
-    if (plot_int > 0) {
+    if (plot_int > 0)
+    {
         WritePlotFile();
     }
 }
@@ -156,7 +164,8 @@ void echemAMR::ErrorEst(int lev, TagBoxArray& tags, Real time, int ngrow)
     static bool first = true;
 
     // only do this during the first call to ErrorEst
-    if (first) {
+    if (first)
+    {
         first = false;
         // read in an array of "phierr", which is the tagging threshold
         // in this example, we tag values of "phi" which are greater than phierr
@@ -164,20 +173,22 @@ void echemAMR::ErrorEst(int lev, TagBoxArray& tags, Real time, int ngrow)
         // in subroutine state_error, you could use more elaborate tagging, such
         // as more advanced logical expressions, or gradients, etc.
         ParmParse pp("echemamr");
-        if (pp.contains("tagged_vars")) {
+        if (pp.contains("tagged_vars"))
+        {
             int nvars = pp.countval("tagged_vars");
             refine_phi.resize(nvars);
             refine_phigrad.resize(nvars);
             refine_phi_comps.resize(nvars);
             std::string varname;
-            for (int i = 0; i < nvars; i++) {
+            for (int i = 0; i < nvars; i++)
+            {
                 pp.get("tagged_vars", varname, i);
                 pp.get((varname + "_refine").c_str(), refine_phi[i]);
                 pp.get((varname + "_refinegrad").c_str(), refine_phigrad[i]);
                 int varname_id = electrochem::find_id(varname);
-                if (varname_id == -1) {
-                    Print() << "Variable name:" << varname
-                            << " not found for tagging\n";
+                if (varname_id == -1)
+                {
+                    Print() << "Variable name:" << varname << " not found for tagging\n";
                     amrex::Abort("Invalid tagging variable");
                 }
                 refine_phi_comps[i] = varname_id;
@@ -199,7 +210,8 @@ void echemAMR::ErrorEst(int lev, TagBoxArray& tags, Real time, int ngrow)
 #endif
     {
 
-        for (MFIter mfi(Sborder, TilingIfNotGPU()); mfi.isValid(); ++mfi) {
+        for (MFIter mfi(Sborder, TilingIfNotGPU()); mfi.isValid(); ++mfi)
+        {
             const Box& bx = mfi.tilebox();
             const auto statefab = Sborder.array(mfi);
             const auto tagfab = tags.array(mfi);
@@ -209,19 +221,13 @@ void echemAMR::ErrorEst(int lev, TagBoxArray& tags, Real time, int ngrow)
             int* refine_phi_comps_dat = refine_phi_comps.data();
             int ntagged_comps = refine_phi_comps.size();
 
-            amrex::ParallelFor(
-                bx, [=] AMREX_GPU_DEVICE(int i, int j, int k) noexcept {
-                    state_based_refinement(
-                        i, j, k, tagfab, statefab, refine_phi_dat,
-                        refine_phi_comps_dat, ntagged_comps, tagval);
-                });
+            amrex::ParallelFor(bx, [=] AMREX_GPU_DEVICE(int i, int j, int k) noexcept {
+                state_based_refinement(i, j, k, tagfab, statefab, refine_phi_dat, refine_phi_comps_dat, ntagged_comps, tagval);
+            });
 
-            amrex::ParallelFor(
-                bx, [=] AMREX_GPU_DEVICE(int i, int j, int k) noexcept {
-                    stategrad_based_refinement(
-                        i, j, k, tagfab, statefab, refine_phigrad_dat,
-                        refine_phi_comps_dat, ntagged_comps, tagval);
-                });
+            amrex::ParallelFor(bx, [=] AMREX_GPU_DEVICE(int i, int j, int k) noexcept {
+                stategrad_based_refinement(i, j, k, tagfab, statefab, refine_phigrad_dat, refine_phi_comps_dat, ntagged_comps, tagval);
+            });
         }
     }
 }
@@ -230,8 +236,7 @@ void echemAMR::ErrorEst(int lev, TagBoxArray& tags, Real time, int ngrow)
 void echemAMR::ReadParameters()
 {
     {
-        ParmParse
-            pp; // Traditionally, max_step and stop_time do not have prefix.
+        ParmParse pp; // Traditionally, max_step and stop_time do not have prefix.
         pp.query("max_step", max_step);
         pp.query("stop_time", stop_time);
     }
@@ -262,21 +267,23 @@ void echemAMR::ReadParameters()
 }
 
 // utility to copy in data from phi_old and/or phi_new into another multifab
-void echemAMR::GetData(
-    int lev, Real time, Vector<MultiFab*>& data, Vector<Real>& datatime)
+void echemAMR::GetData(int lev, Real time, Vector<MultiFab*>& data, Vector<Real>& datatime)
 {
     data.clear();
     datatime.clear();
 
     const Real teps = (t_new[lev] - t_old[lev]) * 1.e-3;
 
-    if (time > t_new[lev] - teps && time < t_new[lev] + teps) {
+    if (time > t_new[lev] - teps && time < t_new[lev] + teps)
+    {
         data.push_back(&phi_new[lev]);
         datatime.push_back(t_new[lev]);
-    } else if (time > t_old[lev] - teps && time < t_old[lev] + teps) {
+    } else if (time > t_old[lev] - teps && time < t_old[lev] + teps)
+    {
         data.push_back(&phi_old[lev]);
         datatime.push_back(t_old[lev]);
-    } else {
+    } else
+    {
         data.push_back(&phi_old[lev]);
         data.push_back(&phi_new[lev]);
         datatime.push_back(t_old[lev]);

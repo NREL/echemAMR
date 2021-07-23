@@ -17,9 +17,11 @@ void state_based_refinement(
     char tagval)
 {
 
-    for (int c = 0; c < ntagvars; c++) {
+    for (int c = 0; c < ntagvars; c++)
+    {
         int comp = refine_phi_comps[c];
-        if (std::abs(state(i, j, k, comp)) > refine_phi[c]) {
+        if (std::abs(state(i, j, k, comp)) > refine_phi[c])
+        {
             tag(i, j, k) = tagval;
         }
     }
@@ -39,28 +41,24 @@ void stategrad_based_refinement(
     char tagval)
 {
 
-    for (int c = 0; c < ntagvars; c++) {
+    for (int c = 0; c < ntagvars; c++)
+    {
         int comp = refine_phi_comps[c];
 
-        amrex::Real gradxplus =
-            std::abs(state(i + 1, j, k, comp) - state(i, j, k, comp));
-        amrex::Real gradxminus =
-            std::abs(state(i, j, k, comp) - state(i - 1, j, k, comp));
+        amrex::Real gradxplus = std::abs(state(i + 1, j, k, comp) - state(i, j, k, comp));
+        amrex::Real gradxminus = std::abs(state(i, j, k, comp) - state(i - 1, j, k, comp));
         amrex::Real gradx = amrex::max(gradxplus, gradxminus);
 
-        amrex::Real gradyplus =
-            std::abs(state(i, j + 1, k, comp) - state(i, j, k, comp));
-        amrex::Real gradyminus =
-            std::abs(state(i, j, k, comp) - state(i, j - 1, k, comp));
+        amrex::Real gradyplus = std::abs(state(i, j + 1, k, comp) - state(i, j, k, comp));
+        amrex::Real gradyminus = std::abs(state(i, j, k, comp) - state(i, j - 1, k, comp));
         amrex::Real grady = amrex::max(gradyplus, gradyminus);
 
-        amrex::Real gradzplus =
-            std::abs(state(i, j, k + 1, comp) - state(i, j, k, comp));
-        amrex::Real gradzminus =
-            std::abs(state(i, j, k, comp) - state(i, j, k - 1, comp));
+        amrex::Real gradzplus = std::abs(state(i, j, k + 1, comp) - state(i, j, k, comp));
+        amrex::Real gradzminus = std::abs(state(i, j, k, comp) - state(i, j, k - 1, comp));
         amrex::Real gradz = amrex::max(gradzplus, gradzminus);
 
-        if (amrex::max(gradx, grady, gradz) > refine_phigrad[c]) {
+        if (amrex::max(gradx, grady, gradz) > refine_phigrad[c])
+        {
             tag(i, j, k) = tagval;
         }
     }

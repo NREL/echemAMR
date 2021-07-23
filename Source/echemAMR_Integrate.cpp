@@ -11,7 +11,8 @@ Real echemAMR::VolumeIntegral(int comp, int domain)
 {
     Real int_tmp = 0;
     Real exact_con;
-    for (int lev = 0; lev <= finest_level; ++lev) {
+    for (int lev = 0; lev <= finest_level; ++lev)
+    {
 
         const auto dx = geom[lev].CellSizeArray();
 
@@ -26,17 +27,11 @@ Real echemAMR::VolumeIntegral(int comp, int domain)
         // need to implement the mask feature from
         // https://github.com/Exawind/amr-wind/blob/main/amr-wind/utilities/sampling/Enstrophy.cpp
 
-        Real nm1 = amrex::ReduceSum(
-            S_new, lev,
-            [=] AMREX_GPU_HOST_DEVICE(
-                Box const& bx, Array4<Real const> const& fab) -> Real {
-                Real r = 0.0;
-                AMREX_LOOP_3D(bx, i, j, k, {
-                    r += electrochem_integral_utils::volume_value(
-                        i, j, k, comp, domain, fab, dx);
-                });
-                return r;
-            });
+        Real nm1 = amrex::ReduceSum(S_new, lev, [=] AMREX_GPU_HOST_DEVICE(Box const& bx, Array4<Real const> const& fab) -> Real {
+            Real r = 0.0;
+            AMREX_LOOP_3D(bx, i, j, k, { r += electrochem_integral_utils::volume_value(i, j, k, comp, domain, fab, dx); });
+            return r;
+        });
 
         ParallelAllReduce::Sum(nm1, ParallelContext::CommunicatorSub());
 
@@ -59,7 +54,8 @@ Real echemAMR::SurfaceIntegral(int comp, int domain1, int domain2)
 {
     Real int_tmp = 0;
     Real exact_con;
-    for (int lev = 0; lev <= finest_level; ++lev) {
+    for (int lev = 0; lev <= finest_level; ++lev)
+    {
 
         const auto dx = geom[lev].CellSizeArray();
 
@@ -78,17 +74,11 @@ Real echemAMR::SurfaceIntegral(int comp, int domain1, int domain2)
         // need to implement the mask feature from
         // https://github.com/Exawind/amr-wind/blob/main/amr-wind/utilities/sampling/Enstrophy.cpp
 
-        Real nm1 = amrex::ReduceSum(
-            Sborder, lev,
-            [=] AMREX_GPU_HOST_DEVICE(
-                Box const& bx, Array4<Real const> const& fab) -> Real {
-                Real r = 0.0;
-                AMREX_LOOP_3D(bx, i, j, k, {
-                    r += electrochem_integral_utils::surface_value(
-                        i, j, k, comp, domain1, domain2, fab, domlo, domhi, dx);
-                });
-                return r;
-            });
+        Real nm1 = amrex::ReduceSum(Sborder, lev, [=] AMREX_GPU_HOST_DEVICE(Box const& bx, Array4<Real const> const& fab) -> Real {
+            Real r = 0.0;
+            AMREX_LOOP_3D(bx, i, j, k, { r += electrochem_integral_utils::surface_value(i, j, k, comp, domain1, domain2, fab, domlo, domhi, dx); });
+            return r;
+        });
 
         ParallelAllReduce::Sum(nm1, ParallelContext::CommunicatorSub());
 
@@ -111,7 +101,8 @@ Real echemAMR::CurrentCollectorIntegral(int comp, int domain)
 {
     Real int_tmp = 0;
     Real exact_con;
-    for (int lev = 0; lev <= finest_level; ++lev) {
+    for (int lev = 0; lev <= finest_level; ++lev)
+    {
 
         const auto dx = geom[lev].CellSizeArray();
 
@@ -130,17 +121,11 @@ Real echemAMR::CurrentCollectorIntegral(int comp, int domain)
         // need to implement the mask feature from
         // https://github.com/Exawind/amr-wind/blob/main/amr-wind/utilities/sampling/Enstrophy.cpp
 
-        Real nm1 = amrex::ReduceSum(
-            Sborder, lev,
-            [=] AMREX_GPU_HOST_DEVICE(
-                Box const& bx, Array4<Real const> const& fab) -> Real {
-                Real r = 0.0;
-                AMREX_LOOP_3D(bx, i, j, k, {
-                    r += electrochem_integral_utils::current_collector_value(
-                        i, j, k, comp, domain, fab, domlo, domhi, dx);
-                });
-                return r;
-            });
+        Real nm1 = amrex::ReduceSum(Sborder, lev, [=] AMREX_GPU_HOST_DEVICE(Box const& bx, Array4<Real const> const& fab) -> Real {
+            Real r = 0.0;
+            AMREX_LOOP_3D(bx, i, j, k, { r += electrochem_integral_utils::current_collector_value(i, j, k, comp, domain, fab, domlo, domhi, dx); });
+            return r;
+        });
 
         ParallelAllReduce::Sum(nm1, ParallelContext::CommunicatorSub());
 

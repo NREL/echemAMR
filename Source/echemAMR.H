@@ -42,20 +42,12 @@ public:
     // Make a new level using provided BoxArray and DistributionMapping and
     // fill with interpolated coarse level data.
     // overrides the pure virtual function in AmrCore
-    virtual void MakeNewLevelFromCoarse(
-        int lev,
-        amrex::Real time,
-        const amrex::BoxArray& ba,
-        const amrex::DistributionMapping& dm) override;
+    virtual void MakeNewLevelFromCoarse(int lev, amrex::Real time, const amrex::BoxArray& ba, const amrex::DistributionMapping& dm) override;
 
     // Remake an existing level using provided BoxArray and DistributionMapping
     // and fill with existing fine and coarse data. overrides the pure virtual
     // function in AmrCore
-    virtual void RemakeLevel(
-        int lev,
-        amrex::Real time,
-        const amrex::BoxArray& ba,
-        const amrex::DistributionMapping& dm) override;
+    virtual void RemakeLevel(int lev, amrex::Real time, const amrex::BoxArray& ba, const amrex::DistributionMapping& dm) override;
 
     // Delete level data
     // overrides the pure virtual function in AmrCore
@@ -64,33 +56,15 @@ public:
     // Make a new level from scratch using provided BoxArray and
     // DistributionMapping. Only used during initialization. overrides the pure
     // virtual function in AmrCore
-    virtual void MakeNewLevelFromScratch(
-        int lev,
-        amrex::Real time,
-        const amrex::BoxArray& ba,
-        const amrex::DistributionMapping& dm) override;
+    virtual void MakeNewLevelFromScratch(int lev, amrex::Real time, const amrex::BoxArray& ba, const amrex::DistributionMapping& dm) override;
 
     // tag all cells for refinement
     // overrides the pure virtual function in AmrCore
-    virtual void
-    ErrorEst(int lev, amrex::TagBoxArray& tags, amrex::Real time, int ngrow)
-        override;
+    virtual void ErrorEst(int lev, amrex::TagBoxArray& tags, amrex::Real time, int ngrow) override;
 
     // advance a single level for a single time step, updates flux registers
-    void Advance(
-        int lev,
-        amrex::Real time,
-        amrex::Real dt_lev,
-        int iteration,
-        int ncycle);
-    void compute_dsdt(
-        int lev,
-        const int num_grow,
-        MultiFab& Sborder,
-        MultiFab& dsdt,
-        Real time,
-        Real dt,
-        bool reflux_this_stage);
+    void Advance(int lev, amrex::Real time, amrex::Real dt_lev, int iteration, int ncycle);
+    void compute_dsdt(int lev, const int num_grow, MultiFab& Sborder, MultiFab& dsdt, Real time, Real dt, bool reflux_this_stage);
 
     void solve_potential(Real current_time);
 
@@ -106,8 +80,7 @@ public:
     // a wrapper for computing integrals
     Real CurrentCollectorIntegral(int comp, int domain);
 
-    void
-    postprocess(Real time, int timestep, Real dt, GlobalStorage* globalstorage);
+    void postprocess(Real time, int timestep, Real dt, GlobalStorage* globalstorage);
 
     void init_volumes();
 
@@ -128,20 +101,14 @@ private:
     // compute a new multifab by coping in phi from valid region and filling
     // ghost cells works for single level and 2-level cases (fill fine grid
     // ghost by interpolating from coarse)
-    void FillPatch(
-        int lev, amrex::Real time, amrex::MultiFab& mf, int icomp, int ncomp);
+    void FillPatch(int lev, amrex::Real time, amrex::MultiFab& mf, int icomp, int ncomp);
 
     // fill an entire multifab by interpolating from the coarser level
     // this comes into play when a new level of refinement appears
-    void FillCoarsePatch(
-        int lev, amrex::Real time, amrex::MultiFab& mf, int icomp, int ncomp);
+    void FillCoarsePatch(int lev, amrex::Real time, amrex::MultiFab& mf, int icomp, int ncomp);
 
     // utility to copy in data from phi_old and/or phi_new into another multifab
-    void GetData(
-        int lev,
-        amrex::Real time,
-        amrex::Vector<amrex::MultiFab*>& data,
-        amrex::Vector<amrex::Real>& datatime);
+    void GetData(int lev, amrex::Real time, amrex::Vector<amrex::MultiFab*>& data, amrex::Vector<amrex::Real>& datatime);
 
     // advance a level by dt
     // includes a recursive call for finer levels
@@ -212,10 +179,8 @@ private:
     // if >= 0 we restart from a checkpoint
     std::string restart_chkfile = "";
 
-    amrex::Vector<int> bc_lo{BCType::foextrap, BCType::foextrap,
-                             BCType::foextrap};
-    amrex::Vector<int> bc_hi{BCType::foextrap, BCType::foextrap,
-                             BCType::foextrap};
+    amrex::Vector<int> bc_lo{BCType::foextrap, BCType::foextrap, BCType::foextrap};
+    amrex::Vector<int> bc_hi{BCType::foextrap, BCType::foextrap, BCType::foextrap};
 
     // advective cfl number - dt = cfl*dx/umax
     amrex::Real cfl = 0.7;

@@ -10,14 +10,7 @@ namespace electrochem_integral_utils {
 // TODO: incorporate a level mask
 AMREX_GPU_DEVICE
 AMREX_FORCE_INLINE
-Real volume_value(
-    int i,
-    int j,
-    int k,
-    int comp,
-    int domain,
-    Array4<Real const> const& phi,
-    GpuArray<Real, AMREX_SPACEDIM> dx)
+Real volume_value(int i, int j, int k, int comp, int domain, Array4<Real const> const& phi, GpuArray<Real, AMREX_SPACEDIM> dx)
 {
 
     Real val = 1.0;
@@ -77,7 +70,8 @@ Real surface_value(
     if (k + 1 > domhi[2]) z_next = -1;
 
     // Check if we are in domain1 and the adjacent cell is domain2 or boundary
-    if ((phi(i, j, k, domain1) > 0)) {
+    if ((phi(i, j, k, domain1) > 0))
+    {
         if (same_domain * x_prev > 0) out += val * dx[1] * dx[2];
         if (same_domain * x_next > 0) out += val * dx[1] * dx[2];
         if (same_domain * y_prev > 0) out += val * dx[0] * dx[2];
@@ -95,15 +89,7 @@ Real surface_value(
 AMREX_GPU_HOST_DEVICE
 AMREX_FORCE_INLINE
 Real current_collector_value(
-    int i,
-    int j,
-    int k,
-    int comp,
-    int domain,
-    Array4<Real const> const& phi,
-    const int* domlo,
-    const int* domhi,
-    const GpuArray<Real, AMREX_SPACEDIM>& dx)
+    int i, int j, int k, int comp, int domain, Array4<Real const> const& phi, const int* domlo, const int* domhi, const GpuArray<Real, AMREX_SPACEDIM>& dx)
 {
     // Init some values
     Real val = 1.0;
@@ -113,7 +99,8 @@ Real current_collector_value(
     if (comp > -1) val = phi(i, j, k, comp);
 
     // Check if we are in the right domain and at one of the x extremes
-    if ((phi(i, j, k, domain) > 0)) {
+    if ((phi(i, j, k, domain) > 0))
+    {
         if (i - 1 < domlo[0]) out += val * dx[1] * dx[2];
         if (i + 1 > domhi[0]) out += val * dx[1] * dx[2];
     }
@@ -127,8 +114,7 @@ void echemAMR::init_volumes()
 
     // Volumes
     host_global_storage->anode_volume = VolumeIntegral(-1, A_ID);
-    host_global_storage->ele_sep_volume =
-        VolumeIntegral(-1, E_ID) + VolumeIntegral(-1, S_ID);
+    host_global_storage->ele_sep_volume = VolumeIntegral(-1, E_ID) + VolumeIntegral(-1, S_ID);
     host_global_storage->cathode_volume = VolumeIntegral(-1, C_ID);
 
     // Surface Areas

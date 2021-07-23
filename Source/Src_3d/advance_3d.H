@@ -9,18 +9,18 @@ using namespace amrex;
 
 AMREX_GPU_DEVICE
 AMREX_FORCE_INLINE
-void update_residual(int i, int j, int k, int n, 
-                     Array4<Real> const& dsdt,
-                     Array4<Real> const &source,
-                     AMREX_D_DECL(Array4<Real> const& flxx,
-                                  Array4<Real> const& flxy,
-                                  Array4<Real> const& flxz),
-                     const GpuArray<Real, AMREX_SPACEDIM>& dx)
+void update_residual(
+    int i,
+    int j,
+    int k,
+    int n,
+    Array4<Real> const& dsdt,
+    Array4<Real> const& source,
+    AMREX_D_DECL(Array4<Real> const& flxx, Array4<Real> const& flxy, Array4<Real> const& flxz),
+    const GpuArray<Real, AMREX_SPACEDIM>& dx)
 {
-    //remember, we are solve dudt + del.F = 0
-    dsdt(i,j,k,n) =   (flxx(i,j,k,n) - flxx(i+1,j,k,n)) / dx[0] 
-                  +   (flxy(i,j,k,n) - flxy(i,j+1,k,n)) / dx[1] 
-                  +   (flxz(i,j,k,n) - flxz(i,j,k+1,n)) / dx[2]
-                  +   source(i,j,k,n);
+    // remember, we are solve dudt + del.F = 0
+    dsdt(i, j, k, n) = (flxx(i, j, k, n) - flxx(i + 1, j, k, n)) / dx[0] + (flxy(i, j, k, n) - flxy(i, j + 1, k, n)) / dx[1] +
+                       (flxz(i, j, k, n) - flxz(i, j, k + 1, n)) / dx[2] + source(i, j, k, n);
 }
 #endif

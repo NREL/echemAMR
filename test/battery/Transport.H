@@ -21,46 +21,44 @@ AMREX_GPU_DEVICE AMREX_INLINE void compute_dcoeff(
     ProbParm const& prob_parm)
 {
 
-    for (int n = 0; n < phi.nComp(); ++n) {
+    for (int n = 0; n < phi.nComp(); ++n)
+    {
         dcoeff(i, j, k, n) = 0.0;
     }
 
     const int comp = electrochem::level_set_to_component(i, j, k, phi);
 
-    if (comp == electrochem::cathode) {
-        const Real Cs = phi(i, j, k, CO_ID); // cathode solid concentration
-        dcoeff(i, j, k, CO_ID) = electrochem::Dc_bulk(
-            Cs, prob_parm); // Cathode diffusion coefficient
+    if (comp == electrochem::cathode)
+    {
+        const Real Cs = phi(i, j, k, CO_ID);                          // cathode solid concentration
+        dcoeff(i, j, k, CO_ID) = electrochem::Dc_bulk(Cs, prob_parm); // Cathode diffusion coefficient
 
-    } else if (comp == electrochem::anode) {
-        const Real Cs = phi(i, j, k, CO_ID); // anode solid concentration
-        dcoeff(i, j, k, CO_ID) = electrochem::Da_bulk(
-            Cs, prob_parm); // Cathode diffusion coefficient
+    } else if (comp == electrochem::anode)
+    {
+        const Real Cs = phi(i, j, k, CO_ID);                          // anode solid concentration
+        dcoeff(i, j, k, CO_ID) = electrochem::Da_bulk(Cs, prob_parm); // Cathode diffusion coefficient
 
-    } else {
+    } else
+    {
 
         /* electrolyte or separator */
         const Real Ce = phi(i, j, k, CO_ID); // concentration
 
         const Real DeC = electrochem::De_C(Ce, prob_parm);
         const Real tplus = electrochem::t_plus(Ce, prob_parm);
-        const Real KD =
-            electrochem::K_D(Ce, prob_parm); // KD is either KD or KDstar as a
-                                             // function of prob_parm.use_KDstar
+        const Real KD = electrochem::K_D(Ce, prob_parm); // KD is either KD or KDstar as a
+                                                         // function of prob_parm.use_KDstar
 
-        if (prob_parm.use_KDstar) {
-            dcoeff(i, j, k, CO_ID) =
-                DeC -
-                tplus * KD /
-                    prob_parm
-                        .Faraday_const; // QUESTION: The concentration flux is
-                                        // -dcoeff*grad(Ce) -t/F*conductivity
-                                        // coefficient*grad(phie). In the code,
-                                        // is -t/F*conductivity
-                                        // coefficient*grad(phie) considered ?
-        } else {
-            dcoeff(i, j, k, CO_ID) =
-                1.0; // Use the baseline Dec - t/F*Kd*grad(ln(Ce))
+        if (prob_parm.use_KDstar)
+        {
+            dcoeff(i, j, k, CO_ID) = DeC - tplus * KD / prob_parm.Faraday_const; // QUESTION: The concentration flux is
+                                                                                 // -dcoeff*grad(Ce) -t/F*conductivity
+                                                                                 // coefficient*grad(phie). In the code,
+                                                                                 // is -t/F*conductivity
+                                                                                 // coefficient*grad(phie) considered ?
+        } else
+        {
+            dcoeff(i, j, k, CO_ID) = 1.0; // Use the baseline Dec - t/F*Kd*grad(ln(Ce))
         }
     }
 }
@@ -80,19 +78,20 @@ AMREX_GPU_DEVICE AMREX_INLINE void compute_potential_dcoeff(
 
     const int comp = electrochem::level_set_to_component(i, j, k, phi);
 
-    if (comp == electrochem::cathode) {
-        const Real Cs = phi(i, j, k, CO_ID); // cathode solid concentration
-        dcoeff(i, j, k) = electrochem::Kc_bulk(
-            Cs, prob_parm); // Cathode diffusion coefficient
+    if (comp == electrochem::cathode)
+    {
+        const Real Cs = phi(i, j, k, CO_ID);                   // cathode solid concentration
+        dcoeff(i, j, k) = electrochem::Kc_bulk(Cs, prob_parm); // Cathode diffusion coefficient
         // dcoeff(i,j,k) = prob_parm.K_c; // QUESTION: why dcoeff(i,j,k) and not
         // dcoeff(i,j,k,CO_ID) as done for the diffusion coefficient?
 
-    } else if (comp == electrochem::anode) {
-        const Real Cs = phi(i, j, k, CO_ID); // anode solid concentration
-        dcoeff(i, j, k) = electrochem::Ka_bulk(
-            Cs, prob_parm); // Cathode diffusion coefficient
+    } else if (comp == electrochem::anode)
+    {
+        const Real Cs = phi(i, j, k, CO_ID);                   // anode solid concentration
+        dcoeff(i, j, k) = electrochem::Ka_bulk(Cs, prob_parm); // Cathode diffusion coefficient
 
-    } else {
+    } else
+    {
 
         /* electrolyte or separator */
         // QUESTION: this time we use the conductivity coefficient, while the
@@ -127,10 +126,12 @@ AMREX_GPU_DEVICE AMREX_INLINE void potential_bc(
     const int km1 = (dir == 2) ? k - 1 : k;
 
     bool electrode = false;
-    if (sgn == -1) { // lo sides
+    if (sgn == -1)
+    { // lo sides
         electrode = electrochem::is_electrode(i, j, k, phi);
         bc(im1, jm1, km1) = (electrode) ? bclo : 0.0;
-    } else { // hi sides
+    } else
+    { // hi sides
         electrode = electrochem::is_electrode(im1, jm1, km1, phi);
         bc(i, j, k) = (electrode) ? bchi : 0.0;
     }
@@ -148,7 +149,8 @@ AMREX_GPU_DEVICE AMREX_INLINE void compute_velx(
     const Real time,
     ProbParm const& prob_parm)
 {
-    for (int n = 0; n < phi.nComp(); ++n) {
+    for (int n = 0; n < phi.nComp(); ++n)
+    {
         velx(i, j, k, n) = 0.0;
     }
 
@@ -174,7 +176,8 @@ AMREX_GPU_DEVICE AMREX_INLINE void compute_vely(
     const Real time,
     ProbParm const& prob_parm)
 {
-    for (int n = 0; n < phi.nComp(); ++n) {
+    for (int n = 0; n < phi.nComp(); ++n)
+    {
         vely(i, j, k, n) = 0.0;
     }
 
@@ -198,7 +201,8 @@ AMREX_GPU_DEVICE AMREX_INLINE void compute_velz(
     const Real time,
     ProbParm const& prob_parm)
 {
-    for (int n = 0; n < phi.nComp(); ++n) {
+    for (int n = 0; n < phi.nComp(); ++n)
+    {
         velz(i, j, k, n) = 0.0;
     }
 

@@ -22,16 +22,14 @@ void echemAMR::GotoNextLine(std::istream& is)
 }
 
 // get plotfile name
-std::string echemAMR::PlotFileName(int lev) const
-{
-    return amrex::Concatenate(plot_file, lev, 5);
-}
+std::string echemAMR::PlotFileName(int lev) const { return amrex::Concatenate(plot_file, lev, 5); }
 
 // put together an array of multifabs for writing
 Vector<const MultiFab*> echemAMR::PlotFileMF() const
 {
     Vector<const MultiFab*> r;
-    for (int i = 0; i <= finest_level; ++i) {
+    for (int i = 0; i <= finest_level; ++i)
+    {
         r.push_back(&phi_new[i]);
     }
     return r;
@@ -44,7 +42,8 @@ Vector<std::string> echemAMR::PlotFileVarNames() const
 
     allnames.resize(NVAR);
 
-    for (int i = 0; i < NUM_SPECIES; i++) {
+    for (int i = 0; i < NUM_SPECIES; i++)
+    {
         allnames[i] = electrochem::specnames[i];
     }
     allnames[NVAR - 4] = "Efieldx";
@@ -64,9 +63,7 @@ void echemAMR::WritePlotFile() const
 
     amrex::Print() << "Writing plotfile " << plotfilename << "\n";
 
-    amrex::WriteMultiLevelPlotfile(
-        plotfilename, finest_level + 1, mf, varnames, Geom(), t_new[0], istep,
-        refRatio());
+    amrex::WriteMultiLevelPlotfile(plotfilename, finest_level + 1, mf, varnames, Geom(), t_new[0], istep, refRatio());
 }
 
 void echemAMR::WriteCheckpointFile() const
@@ -98,16 +95,16 @@ void echemAMR::WriteCheckpointFile() const
     amrex::PreBuildDirectorHierarchy(checkpointname, "Level_", nlevels, true);
 
     // write Header file
-    if (ParallelDescriptor::IOProcessor()) {
+    if (ParallelDescriptor::IOProcessor())
+    {
 
         std::string HeaderFileName(checkpointname + "/Header");
         VisMF::IO_Buffer io_buffer(VisMF::IO_Buffer_Size);
         std::ofstream HeaderFile;
         HeaderFile.rdbuf()->pubsetbuf(io_buffer.dataPtr(), io_buffer.size());
-        HeaderFile.open(
-            HeaderFileName.c_str(),
-            std::ofstream::out | std::ofstream::trunc | std::ofstream::binary);
-        if (!HeaderFile.good()) {
+        HeaderFile.open(HeaderFileName.c_str(), std::ofstream::out | std::ofstream::trunc | std::ofstream::binary);
+        if (!HeaderFile.good())
+        {
             amrex::FileOpenFailed(HeaderFileName);
         }
 
@@ -120,35 +117,38 @@ void echemAMR::WriteCheckpointFile() const
         HeaderFile << finest_level << "\n";
 
         // write out array of istep
-        for (int i = 0; i < istep.size(); ++i) {
+        for (int i = 0; i < istep.size(); ++i)
+        {
             HeaderFile << istep[i] << " ";
         }
         HeaderFile << "\n";
 
         // write out array of dt
-        for (int i = 0; i < dt.size(); ++i) {
+        for (int i = 0; i < dt.size(); ++i)
+        {
             HeaderFile << dt[i] << " ";
         }
         HeaderFile << "\n";
 
         // write out array of t_new
-        for (int i = 0; i < t_new.size(); ++i) {
+        for (int i = 0; i < t_new.size(); ++i)
+        {
             HeaderFile << t_new[i] << " ";
         }
         HeaderFile << "\n";
 
         // write the BoxArray at each level
-        for (int lev = 0; lev <= finest_level; ++lev) {
+        for (int lev = 0; lev <= finest_level; ++lev)
+        {
             boxArray(lev).writeOn(HeaderFile);
             HeaderFile << '\n';
         }
     }
 
     // write the MultiFab data to, e.g., chk00010/Level_0/
-    for (int lev = 0; lev <= finest_level; ++lev) {
-        VisMF::Write(
-            phi_new[lev], amrex::MultiFabFileFullPrefix(
-                              lev, checkpointname, "Level_", "phi"));
+    for (int lev = 0; lev <= finest_level; ++lev)
+    {
+        VisMF::Write(phi_new[lev], amrex::MultiFabFileFullPrefix(lev, checkpointname, "Level_", "phi"));
     }
 }
 
@@ -181,7 +181,8 @@ void echemAMR::ReadCheckpointFile()
     {
         std::istringstream lis(line);
         int i = 0;
-        while (lis >> word) {
+        while (lis >> word)
+        {
             istep[i++] = std::stoi(word);
         }
     }
@@ -191,7 +192,8 @@ void echemAMR::ReadCheckpointFile()
     {
         std::istringstream lis(line);
         int i = 0;
-        while (lis >> word) {
+        while (lis >> word)
+        {
             dt[i++] = std::stod(word);
         }
     }
@@ -201,12 +203,14 @@ void echemAMR::ReadCheckpointFile()
     {
         std::istringstream lis(line);
         int i = 0;
-        while (lis >> word) {
+        while (lis >> word)
+        {
             t_new[i++] = std::stod(word);
         }
     }
 
-    for (int lev = 0; lev <= finest_level; ++lev) {
+    for (int lev = 0; lev <= finest_level; ++lev)
+    {
 
         // read in level 'lev' BoxArray from Header
         BoxArray ba;
@@ -226,16 +230,15 @@ void echemAMR::ReadCheckpointFile()
         int nghost = 0;
         phi_old[lev].define(grids[lev], dmap[lev], ncomp, nghost);
         phi_new[lev].define(grids[lev], dmap[lev], ncomp, nghost);
-        if (lev > 0 && do_reflux) {
-            flux_reg[lev].reset(new FluxRegister(
-                grids[lev], dmap[lev], refRatio(lev - 1), lev, ncomp));
+        if (lev > 0 && do_reflux)
+        {
+            flux_reg[lev].reset(new FluxRegister(grids[lev], dmap[lev], refRatio(lev - 1), lev, ncomp));
         }
     }
 
     // read in the MultiFab data
-    for (int lev = 0; lev <= finest_level; ++lev) {
-        VisMF::Read(
-            phi_new[lev], amrex::MultiFabFileFullPrefix(
-                              lev, restart_chkfile, "Level_", "phi"));
+    for (int lev = 0; lev <= finest_level; ++lev)
+    {
+        VisMF::Read(phi_new[lev], amrex::MultiFabFileFullPrefix(lev, restart_chkfile, "Level_", "phi"));
     }
 }
