@@ -64,7 +64,7 @@ int main (int argc, char* argv[])
         dmap.define(grids); // create a processor distribution mapping given the BoxARray
 
         int required_coarsening_level = 0; // typically the same as the max AMR level index
-        int max_coarsening_level = 0;    // typically a huge number so MG coarsens as much as possible
+        int max_coarsening_level = 100;    // typically a huge number so MG coarsens as much as possible
 
         MultiFab phi(grids, dmap, 1, 1);
         MultiFab soln(grids, dmap, 1, 0);

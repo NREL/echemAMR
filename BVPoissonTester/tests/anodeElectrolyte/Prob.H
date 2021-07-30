@@ -12,10 +12,10 @@ AMREX_GPU_DEVICE AMREX_INLINE Real bvcurrent(Real phi_jump)
     Real jbv;
 
     //sinh definition
-    //jbv=-j0*sinh((phi_jump+ocp)/phi0);
+    jbv=-j0*sinh((phi_jump+ocp)/phi0);
 
     //linear case
-    jbv=-(j0/phi0)*(phi_jump+ocp);
+    //jbv=-(j0/phi0)*(phi_jump+ocp);
     return(jbv);
 }
 
@@ -27,10 +27,10 @@ AMREX_GPU_DEVICE AMREX_INLINE Real bvcurrent_der(Real phi_jump)
     Real jbvder;
 
     //sinh definition
-    //jbvder=-j0*cosh((phi_jump+ocp)/phi0)*(1.0/phi0);
+    jbvder=-j0*cosh((phi_jump+ocp)/phi0)*(1.0/phi0);
 
     //linear case
-    jbvder=-(j0/phi0);
+    //jbvder=-(j0/phi0);
     return(jbvder);
 }
 

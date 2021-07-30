@@ -8,6 +8,11 @@ electrode_dcoeff=3.0
 electrolyte_dcoeff=1.0
 
 is_periodic=0 0 0
+
+#0 periodic
+#1 dirichlet
+#2 homogenous neumann
+#3 inhomogenous neumann
 lo_bc=1 2 2 
 hi_bc=1 2 2 
 

@@ -2,6 +2,7 @@ Array<MultiFab,AMREX_SPACEDIM> bv_explicit_terms;
 for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
 {
     bv_explicit_terms[idim].define(amrex::convert(grids,IntVect::TheDimensionVector(idim)), dmap, 1, 0);
+    bv_explicit_terms[idim].setVal(0.0);
 }
 
 for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
@@ -41,7 +42,9 @@ for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
 
                 left[idim]              -= 1;
                 top_left[idim]          -= 1;
+                bottom_left[idim]       -= 1;
                 front_left[idim]        -= 1;
+                back_left[idim]         -= 1;
 
                 top_left[trans1dir]     += 1;
                 top_right[trans1dir]    += 1;
