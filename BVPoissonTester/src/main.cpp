@@ -1,3 +1,4 @@
+
 #include <AMReX.H>
 #include <AMReX_ParmParse.H>
 #include <AMReX_MLABecLaplacian.H>
@@ -83,14 +84,31 @@ int main (int argc, char* argv[])
         initlevset(levset,geom);
 
         LPInfo info;
+
+#ifdef AMREX_USE_HYPRE
+        int use_hypre=0;
+        if(use_hypre)
+           info.setMaxCoarseningLevel(max_coarsening_level);
+#endif
         MLABecLaplacian mlabec({geom}, {grids}, {dmap}, info);
         MLMG mlmg(mlabec);
 
+#ifdef AMREX_USE_HYPRE
+        if(use_hypre){
+          mlmg.setBottomSolver(MLMG::BottomSolver::hypre);
+          Hypre::Interface hypre_interface = Hypre::Interface::ij;
+          amrex::Print() << "using hypre" << std::endl;
+                 mlmg.setHypreOptionsNamespace("hypre");
+           mlmg.setHypreInterface(hypre_interface);
+        }
+#endif
+
         // relative and absolute tolerances for linear solve
         const Real tol_rel = 1.e-10;
-        const Real tol_abs = 0.0;
+        const Real tol_abs = 1.0e-12;
         int verbose = 1;
         mlmg.setVerbose(verbose);
+    mlmg.setBottomVerbose(verbose);
 
         // define array of LinOpBCType for domain boundary conditions
         std::array<LinOpBCType,AMREX_SPACEDIM> mlmg_bc_lo;
@@ -158,9 +176,15 @@ int main (int argc, char* argv[])
             bcoef[idim].define(amrex::convert(grids,IntVect::TheDimensionVector(idim)), dmap, 1, 0);
         }
 
-
         for(int iter=0;iter<maxnonliniter;iter++)
         {
+
+            // store plotfile variables; q and phi
+            MultiFab plotfile_mf(grids, dmap, 2, 0);
+            MultiFab::Copy(plotfile_mf, levset,0,0,1,0);
+            MultiFab::Copy(plotfile_mf, phi,0,1,1,0);
+
+            WriteSingleLevelPlotfile("plt"+std::to_string(iter), plotfile_mf, {"levset","potential"}, geom, 0.0, 0);
 
             rhs.setVal(0.0);
             phi.FillBoundary(geom.periodicity());
@@ -168,33 +192,33 @@ int main (int argc, char* argv[])
 
             for(int idim=0;idim<AMREX_SPACEDIM;idim++)
             {
-            for (MFIter mfi(phi); mfi.isValid(); ++mfi)
-            {
-                const auto dx = geom.CellSizeArray();
-                const Box& bx = mfi.tilebox();
-                Box fbx = convert(bx,IntVect::TheDimensionVector(idim));
+                for (MFIter mfi(phi); mfi.isValid(); ++mfi)
+                {
+                    const auto dx = geom.CellSizeArray();
+                    const Box& bx = mfi.tilebox();
+                    Box fbx = convert(bx,IntVect::TheDimensionVector(idim));
 
-                Array4<Real> bcoef_arr = bcoef[idim].array(mfi);
-                Array4<Real> ls_arr = levset.array(mfi);
+                    Array4<Real> bcoef_arr = bcoef[idim].array(mfi);
+                    Array4<Real> ls_arr = levset.array(mfi);
 
-                amrex::ParallelFor(fbx,
-                        [=] AMREX_GPU_DEVICE (int i, int j, int k)
-                        {
-                        Real eps=1e-10;
-                        IntVect left(i,j,k);
-                        IntVect right(i,j,k);
+                    amrex::ParallelFor(fbx,
+                            [=] AMREX_GPU_DEVICE (int i, int j, int k)
+                            {
+                            Real eps=1e-10;
+                            IntVect left(i,j,k);
+                            IntVect right(i,j,k);
 
-                        left[idim] -= 1;
+                            left[idim] -= 1;
 
-                        Real ls_left  = ls_arr(left);
-                        Real ls_right = ls_arr(right);
+                            Real ls_left  = ls_arr(left);
+                            Real ls_right = ls_arr(right);
 
-                        Real d_right = ls_right*electrolyte_dcoeff + (1.0-ls_right)*electrode_dcoeff;
-                        Real d_left  = ls_left*electrolyte_dcoeff + (1.0-ls_left)*electrode_dcoeff;
+                            Real d_right = ls_right*electrolyte_dcoeff + (1.0-ls_right)*electrode_dcoeff;
+                            Real d_left  = ls_left*electrolyte_dcoeff + (1.0-ls_left)*electrode_dcoeff;
 
-                        bcoef_arr(i,j,k)= 2.0*d_right*d_left/(d_right+d_left+eps);
-                        });
-            }
+                            bcoef_arr(i,j,k)= 2.0*d_right*d_left/(d_right+d_left+eps);
+                            });
+                }
             }
 
             #include "bvflux.H"
@@ -206,6 +230,8 @@ int main (int argc, char* argv[])
             Real errnorm=err.norm2();
             amrex::Print()<<"errnorm:"<<errnorm<<"\n";
             amrex::MultiFab::Copy(phi,soln, 0, 0, 1 ,0);
+            setbcs(phi,geom,bc_lo,bc_hi);
+            phi.FillBoundary(geom.periodicity());
 
             if(errnorm < 1e-8)
             {

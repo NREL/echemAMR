@@ -1,11 +1,13 @@
 USE_EB = TRUE
-DEBUG = FALSE
+DEBUG = TRUE
 USE_MPI  = TRUE
 USE_OMP  = FALSE
 
-USE_HYPRE = FALSE
+USE_HYPRE = TRUE
+BL_NO_FORT=TRUE
+HYPRE_DIR=/Users/mbrazell/Codes/hypre/src/hypre/
 
-COMP = gnu
+COMP = clang
 
 DIM = 3
 

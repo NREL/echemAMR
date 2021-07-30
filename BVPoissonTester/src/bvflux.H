@@ -2,6 +2,7 @@ Array<MultiFab,AMREX_SPACEDIM> bv_explicit_terms;
 for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
 {
     bv_explicit_terms[idim].define(amrex::convert(grids,IntVect::TheDimensionVector(idim)), dmap, 1, 0);
+    bv_explicit_terms[idim].setVal(0.0);
 }
 
 for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
@@ -18,7 +19,7 @@ for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
         Array4<Real> dcoeff_arr    = bcoef[idim].array(mfi);
         Array4<Real> ls_arr        = levset.array(mfi);
         Array4<Real> explterms_arr = bv_explicit_terms[idim].array(mfi);
-
+        amrex::Print() << "fbox: " << fbox << std::endl;
         amrex::ParallelFor(fbox,
         [=] AMREX_GPU_DEVICE (int i, int j, int k)
         {
@@ -38,10 +39,12 @@ for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
                 int normaldir=idim;
                 int trans1dir=(idim+1)%AMREX_SPACEDIM;
                 int trans2dir=(idim+2)%AMREX_SPACEDIM;
-
+                
                 left[idim]              -= 1;
                 top_left[idim]          -= 1;
                 front_left[idim]        -= 1;
+                bottom_left[idim]       -= 1;
+                back_left[idim]         -= 1;
 
                 top_left[trans1dir]     += 1;
                 top_right[trans1dir]    += 1;
@@ -52,7 +55,7 @@ for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
                 front_right[trans2dir]  += 1;
                 back_left[trans2dir]    -= 1;
                 back_right[trans2dir]   -= 1;
-
+            
                 //levelset color
                 Real c_left  = ls_arr(left);
                 Real c_right = ls_arr(right);
@@ -62,7 +65,7 @@ for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
 
                 Real c_frnt = 0.5*(ls_arr(front_left)  + ls_arr(front_right));
                 Real c_back = 0.5*(ls_arr(back_left)   +  ls_arr(back_right));
-
+ 
                 //phi
                 Real pot_left  = phi_arr(left);
                 Real pot_right = phi_arr(right);
@@ -82,8 +85,7 @@ for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
                 Real dphidn  = (pot_right-pot_left)/dx[normaldir];
                 Real dphidt1 = (pot_top-pot_bot)/(2.0*dx[trans1dir]);
                 Real dphidt2 = (pot_frnt-pot_back)/(2.0*dx[trans2dir]);
-
-                Real gradc_tolfac=1e-4;
+                Real gradc_tolfac=min_dx;
                 Real gradc_max=1.0/min_dx; //maximum gradient possible on the current grid
                 Real gradc_cutoff=gradc_tolfac*gradc_max;
 
@@ -94,9 +96,23 @@ for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
 
                 //FIXME: pass ion concentration also
                 //FIXME: ideally it should be the ion concentration at the closest electrode cell
+
                 Real j_bv = bvcurrent(phi_jump);
+
                 Real jdash_bv = bvcurrent_der(phi_jump);
 
+                if(fabs(j_bv) > 1.0e6)
+                {
+                    amrex::Print() << "jdashbv: " << jdash_bv << std::endl;
+                    amrex::Print() << "jbv: " << j_bv << std::endl;
+                    amrex::Print() << "left: " << left << " right: " << right << std::endl;
+                    amrex::Print() << "pot left: " << pot_left << " pot right: " << pot_right << " dx: " << dx[normaldir] << std::endl;
+                    amrex::Print() << "levset left: " << c_left << " levset right: " << c_right << std::endl;
+
+                    amrex::Print() << "phi jump: " << phi_jump << " mod_grad c: " << mod_gradc << " gradc cutoff: " << gradc_cutoff << std::endl;
+                    amrex::Print() << i << ' ' << j << ' ' << k << " normal dir: " << normaldir << " dpot: " << dphidn << ' ' << dphidt1 << ' ' << dphidt2 << " dlevelset: "  << dcdn << ' ' << dcdt1 << ' ' << dcdt2 << std::endl;
+                    exit(1);
+                }
                 Real activ_func = bv_activation_function(0.5*(c_right+c_left),
                         mod_gradc, gradc_cutoff);
 

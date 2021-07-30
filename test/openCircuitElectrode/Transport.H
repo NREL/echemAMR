@@ -38,13 +38,16 @@ namespace electrochem_transport
         if(maxlen==ylen) axialdir=1;
         if(maxlen==zlen) axialdir=2;
 
-        if(sgn == -1) 
+        if(sgn == -1)
         { // lo sides
             bc(im1,jm1,km1) = (dir==0) ? bclo : 0.0;
-        } 
+            if(dir==0) amrex::Print() << "lo i: " << im1 << " j: " << jm1 << " k: " << km1 << " bc: " << bc(im1,jm1,km1) << std::endl;
+        }
         else 
         { // hi sides
           bc(i,j,k) = (dir==0) ? bchi : 0.0;
+          if(dir==0) amrex::Print() << "hi i: " << i << " j: " << j << " k: " << k << " bc: " << bc(i,j,k) << std::endl;
+
         }
     }
 

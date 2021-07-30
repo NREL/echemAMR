@@ -113,7 +113,7 @@ void echemAMR::solve_potential(Real current_time)
     bool semicoarsening = false;
     int max_semicoarsening_level=0;
     int linop_maxorder=2;
-    int max_iter=100;
+    int max_iter=1000;
     int max_fmg_iter=0;
     int verbose = 2;
     int bottom_verbose = 0;
@@ -137,7 +137,7 @@ void echemAMR::solve_potential(Real current_time)
     // this could be due to missing terms in the intercalation reaction or sign mistakes...
     ProbParm const* localprobparm = d_prob_parm;
 
-    const Real tol_rel = 1.0e-6;
+    const Real tol_rel = 1.0e-3;
     const Real tol_abs = 1.0e-13;
 
 #ifdef AMREX_USE_HYPRE
@@ -190,7 +190,7 @@ void echemAMR::solve_potential(Real current_time)
             bc_potential_hi[idim]=LinOpBCType::Dirichlet;
         }
     }
-
+    amrex::Print() << bc_potential_lo << bc_potential_hi << std::endl;
     mlabec.setDomainBC(bc_potential_lo,bc_potential_hi);
 
     Vector<MultiFab> potential;
@@ -442,10 +442,13 @@ void echemAMR::solve_potential(Real current_time)
 
             Array4<Real> phi_arr = Sborder.array(mfi);
             Array4<Real> bc_arr = potential[ilev].array(mfi);
+            Array4<Real> dcoeff_cell = bcoeff[ilev].array(mfi);
+
             Real time = current_time; //for GPU capture
 
             for(int idim = 0; idim < AMREX_SPACEDIM; ++idim)
             {
+                Array4<Real> dcoeff_face = face_bcoeff[idim].array(mfi);
                 const amrex::Real bclo = host_global_storage->pot_bc_lo[idim];
                 const amrex::Real bchi = host_global_storage->pot_bc_hi[idim];
 
@@ -455,10 +458,12 @@ void echemAMR::solve_potential(Real current_time)
                     {
                         amrex::ParallelFor(
                                 amrex::bdryLo(bx, idim),
-                                [=] AMREX_GPU_DEVICE(int i, int j, int k) noexcept 
+                                [=] AMREX_GPU_DEVICE(int i, int j, int k) noexcept
                                 {
                                 electrochem_transport::potential_bc(i, j, k, idim, -1, phi_arr, 
                                         bc_arr, prob_lo, prob_hi, dx, time, bclo, bchi);
+                            if(idim==0)dcoeff_face(i,j,k) = dcoeff_cell(i,j,k);
+
                                 });
                     }
                     if (bx.bigEnd(idim) == domain.bigEnd(idim)) 
@@ -469,6 +474,8 @@ void echemAMR::solve_potential(Real current_time)
                                 {
                                 electrochem_transport::potential_bc(i, j, k, idim, 1, phi_arr, 
                                         bc_arr, prob_lo, prob_hi, dx, time, bclo, bchi);
+                            if(idim==0)dcoeff_face(i,j,k) = dcoeff_cell(i-1,j,k);
+
                                 });
                     }
                 }
@@ -586,10 +593,10 @@ void echemAMR::solve_potential(Real current_time)
     {
         amrex::MultiFab::Copy(phi_new[ilev], solution[ilev], 0, NVAR-1, 1, 0);
         //phi_new[ilev].copy(solution[ilev], 0, NVAR-1, 1);
-        const Array<const MultiFab *,AMREX_SPACEDIM> 
-        allgrad={gradsoln[ilev][0],gradsoln[ilev][1],gradsoln[ilev][2]};
-        average_face_to_cellcenter(phi_new[ilev], NVAR-4, allgrad);
-        phi_new[ilev].mult(-1.0, NVAR-4, 3);
+//        const Array<const MultiFab *,AMREX_SPACEDIM>
+//        allgrad={gradsoln[ilev][0],gradsoln[ilev][1],gradsoln[ilev][2]};
+//        average_face_to_cellcenter(phi_new[ilev], NVAR-4, allgrad);
+//        phi_new[ilev].mult(-1.0, NVAR-4, 3);
     }
 }
 

@@ -5,11 +5,12 @@ PROFILE    = FALSE
 
 DEBUG      = TRUE
 DEBUG      = FALSE
+BL_NO_FORT = TRUE
 
 #DIM        = 2
 DIM       = 3
 
-COMP	   = gnu
+COMP	   = clang 
 
 USE_MPI    = TRUE
 USE_OMP    = FALSE 
