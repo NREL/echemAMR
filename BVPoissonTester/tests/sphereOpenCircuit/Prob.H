@@ -38,25 +38,21 @@ AMREX_GPU_DEVICE AMREX_INLINE Real bv_activation_function(Real c, Real gradc, Re
 {
     Real f;
     Real maxval=0.25;
-    Real tol=1e-2;
+    Real tol=1e-1;
 
     //f=(gradc > gradc_cutoff)?1.0:0.0;
-    f=(c*(1-c) > tol*maxval)?1.0:0.0;
+    f=(c*(1.0-c) > tol*maxval)?1.0:0.0;
     return(f);
 }
 
 void initlevset(MultiFab &levset,Geometry geom)
 {
-        Real int1_loc=0.25;
-        Real int2_loc=0.75;
+        Real sphere_rad=0.3;
         Real sharpness_factor=100.0;
-        int transport_dir=0;
 
         ParmParse pp;
-        pp.query("interface_location1",int1_loc);
-        pp.query("interface_location2",int2_loc);
+        pp.query("sphere_rad",sphere_rad);
         pp.query("sharpness",sharpness_factor);
-        pp.query("transport_dir",transport_dir);
 
         for (MFIter mfi(levset); mfi.isValid(); ++mfi)
         {
@@ -71,13 +67,22 @@ void initlevset(MultiFab &levset,Geometry geom)
             amrex::ParallelFor(gbx,
                     [=] AMREX_GPU_DEVICE (int i, int j, int k)
                     {
-                    Real x[AMREX_SPACEDIM];
+                    Real x[AMREX_SPACEDIM],dist;
                     x[0] = prblo[0] + (i+0.5)*dx[0];    
                     x[1] = prblo[1] + (j+0.5)*dx[1];    
                     x[2] = prblo[2] + (k+0.5)*dx[2];
 
-                    ls_arr(i,j,k) = 0.5*(1.0 - tanh(sharpness_factor*(x[transport_dir]-int1_loc)))
-                    +0.5*(1.0 + tanh(sharpness_factor*(x[transport_dir]-int2_loc))); 
+                    Real center[AMREX_SPACEDIM];
+                    center[0]=0.5*(prblo[0]+prbhi[0]);
+                    center[1]=0.5*(prblo[1]+prbhi[1]);
+                    center[2]=0.5*(prblo[2]+prbhi[2]);
+
+                    dist=sqrt( (x[0]-center[0])*(x[0]-center[0]) +
+                               (x[1]-center[1])*(x[1]-center[1]) +
+                               (x[2]-center[2])*(x[2]-center[2]) );
+
+                    ls_arr(i,j,k) = 0.5*(1.0 + tanh(sharpness_factor*(dist-sphere_rad)));
+
                     });
 
         }
@@ -90,9 +95,6 @@ void setbc(MultiFab &phi_bc,MultiFab &phi, Geometry geom,
     Real rightdircval;
 
     ParmParse pp;
-    pp.query("leftdircval",leftdircval);
-    pp.query("rightdircval",rightdircval);
-
     amrex::MultiFab::Copy(phi_bc,phi,0,0,1,0);
 
     const int* domloarr = geom.Domain().loVect();
@@ -122,7 +124,7 @@ void setbc(MultiFab &phi_bc,MultiFab &phi, Geometry geom,
                 gcellid[XDIR] -=1;
                 if(bc_lo[XDIR]==DIRICHLET_ID)
                 {
-                    phibc_arr(gcellid) = leftdircval;
+                    phibc_arr(gcellid) = 0.0;
                 }
             }
             if(cellid[XDIR]==domhi[XDIR])
@@ -130,7 +132,7 @@ void setbc(MultiFab &phi_bc,MultiFab &phi, Geometry geom,
                 gcellid[XDIR] += 1;
                 if(bc_hi[XDIR]==DIRICHLET_ID)
                 {
-                    phibc_arr(gcellid) = rightdircval;
+                    phibc_arr(gcellid) = 0.0;
                 }
             }
 
@@ -139,7 +141,7 @@ void setbc(MultiFab &phi_bc,MultiFab &phi, Geometry geom,
                 gcellid[YDIR] -=1;
                 if(bc_lo[YDIR]==DIRICHLET_ID)
                 {
-                    phibc_arr(gcellid) = leftdircval;
+                    phibc_arr(gcellid) = 0.0;
                 }
             }
             if(cellid[YDIR]==domhi[YDIR])
@@ -147,7 +149,7 @@ void setbc(MultiFab &phi_bc,MultiFab &phi, Geometry geom,
                 gcellid[YDIR] += 1;
                 if(bc_hi[YDIR]==DIRICHLET_ID)
                 {
-                    phibc_arr(gcellid) = rightdircval;
+                    phibc_arr(gcellid) = 0.0;
                 }
             }
             
@@ -156,7 +158,7 @@ void setbc(MultiFab &phi_bc,MultiFab &phi, Geometry geom,
                 gcellid[ZDIR] -=1;
                 if(bc_lo[ZDIR]==DIRICHLET_ID)
                 {
-                    phibc_arr(gcellid) = leftdircval;
+                    phibc_arr(gcellid) = 0.0;
                 }
             }
             if(cellid[ZDIR]==domhi[ZDIR])
@@ -164,7 +166,7 @@ void setbc(MultiFab &phi_bc,MultiFab &phi, Geometry geom,
                 gcellid[ZDIR] += 1;
                 if(bc_hi[ZDIR]==DIRICHLET_ID)
                 {
-                    phibc_arr(gcellid) = rightdircval;
+                    phibc_arr(gcellid) = 0.0;
                 }
             }
         });

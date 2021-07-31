@@ -7,7 +7,7 @@ using namespace amrex;
 AMREX_GPU_DEVICE AMREX_INLINE Real bvcurrent(Real phi_jump)
 {
     Real ocp=0.2;
-    Real j0=1.0;
+    Real j0=3.0;
     Real phi0=1.0;
     Real jbv;
 
@@ -22,7 +22,7 @@ AMREX_GPU_DEVICE AMREX_INLINE Real bvcurrent(Real phi_jump)
 AMREX_GPU_DEVICE AMREX_INLINE Real bvcurrent_der(Real phi_jump)
 {
     Real ocp=0.2;
-    Real j0=1.0;
+    Real j0=3.0;
     Real phi0=1.0;
     Real jbvder;
 
@@ -37,8 +37,11 @@ AMREX_GPU_DEVICE AMREX_INLINE Real bvcurrent_der(Real phi_jump)
 AMREX_GPU_DEVICE AMREX_INLINE Real bv_activation_function(Real c, Real gradc, Real gradc_cutoff)
 {
     Real f;
+    Real maxval=0.25;
+    Real tol=1e-1;
 
-    f=(gradc > gradc_cutoff)?1.0:0.0;
+    //f=(gradc > gradc_cutoff)?1.0:0.0;
+    f=(c*(1.0-c) > tol*maxval)?1.0:0.0;
     return(f);
 }
 
@@ -79,12 +82,13 @@ void initlevset(MultiFab &levset,Geometry geom)
 void setbc(MultiFab &phi_bc,MultiFab &phi, Geometry geom,
         amrex::Vector<int> bc_lo,amrex::Vector<int> bc_hi)
 {
-    Real leftdircval;
+    Real current_input;
     Real rightdircval;
+    Real dcoeffleft;
 
     ParmParse pp;
-    pp.query("leftdircval",leftdircval);
-    pp.query("rightdircval",rightdircval);
+    pp.query("current_input",current_input);
+    pp.query("electrode_dcoeff",dcoeffleft);
 
     amrex::MultiFab::Copy(phi_bc,phi,0,0,1,0);
 
@@ -113,18 +117,13 @@ void setbc(MultiFab &phi_bc,MultiFab &phi, Geometry geom,
             if(cellid[XDIR]==domlo[XDIR])
             {
                 gcellid[XDIR] -=1;
-                if(bc_lo[XDIR]==DIRICHLET_ID)
-                {
-                    phibc_arr(gcellid) = leftdircval;
-                }
+                //inhom neumann
+                phibc_arr(gcellid) = -current_input/dcoeffleft;
             }
             if(cellid[XDIR]==domhi[XDIR])
             {
                 gcellid[XDIR] += 1;
-                if(bc_hi[XDIR]==DIRICHLET_ID)
-                {
-                    phibc_arr(gcellid) = rightdircval;
-                }
+                phibc_arr(gcellid) = 0.0; //dirichlet
             }
 
             if(cellid[YDIR]==domlo[YDIR])
@@ -132,7 +131,7 @@ void setbc(MultiFab &phi_bc,MultiFab &phi, Geometry geom,
                 gcellid[YDIR] -=1;
                 if(bc_lo[YDIR]==DIRICHLET_ID)
                 {
-                    phibc_arr(gcellid) = leftdircval;
+                    phibc_arr(gcellid) = 0.0;
                 }
             }
             if(cellid[YDIR]==domhi[YDIR])
@@ -140,7 +139,7 @@ void setbc(MultiFab &phi_bc,MultiFab &phi, Geometry geom,
                 gcellid[YDIR] += 1;
                 if(bc_hi[YDIR]==DIRICHLET_ID)
                 {
-                    phibc_arr(gcellid) = rightdircval;
+                    phibc_arr(gcellid) = 0.0;
                 }
             }
 
@@ -149,7 +148,7 @@ void setbc(MultiFab &phi_bc,MultiFab &phi, Geometry geom,
                 gcellid[ZDIR] -=1;
                 if(bc_lo[ZDIR]==DIRICHLET_ID)
                 {
-                    phibc_arr(gcellid) = leftdircval;
+                    phibc_arr(gcellid) = 0.0;
                 }
             }
             if(cellid[ZDIR]==domhi[ZDIR])
@@ -157,7 +156,7 @@ void setbc(MultiFab &phi_bc,MultiFab &phi, Geometry geom,
                 gcellid[ZDIR] += 1;
                 if(bc_hi[ZDIR]==DIRICHLET_ID)
                 {
-                    phibc_arr(gcellid) = rightdircval;
+                    phibc_arr(gcellid) = 0.0;
                 }
             }
         });

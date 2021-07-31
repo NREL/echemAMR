@@ -25,6 +25,7 @@ int main (int argc, char* argv[])
         Real leftdircval=1.0;
         Real rightdircval=0.0;
         int maxnonliniter=10;
+        int max_coarsening_level = 0;    // typically a huge number so MG coarsens as much as possible
     
         Vector<int> is_periodic(AMREX_SPACEDIM,0);
         amrex::Vector<int> bc_lo{0,0,0};
@@ -41,6 +42,7 @@ int main (int argc, char* argv[])
         pp.query("electrode_dcoeff",electrode_dcoeff);
         pp.query("electrolyte_dcoeff",electrolyte_dcoeff);
         pp.query("maxnonliniter",maxnonliniter);
+        pp.query("max_coarsening_level",max_coarsening_level);
     
         pp.queryarr("lo_bc", bc_lo, 0, AMREX_SPACEDIM);
         pp.queryarr("hi_bc", bc_hi, 0, AMREX_SPACEDIM);
@@ -64,7 +66,6 @@ int main (int argc, char* argv[])
         dmap.define(grids); // create a processor distribution mapping given the BoxARray
 
         int required_coarsening_level = 0; // typically the same as the max AMR level index
-        int max_coarsening_level = 100;    // typically a huge number so MG coarsens as much as possible
 
         MultiFab phi(grids, dmap, 1, 1);
         MultiFab soln(grids, dmap, 1, 0);
@@ -83,12 +84,13 @@ int main (int argc, char* argv[])
         initlevset(levset,geom);
 
         LPInfo info;
+        info.setMaxCoarseningLevel(max_coarsening_level);
         MLABecLaplacian mlabec({geom}, {grids}, {dmap}, info);
         MLMG mlmg(mlabec);
 
         // relative and absolute tolerances for linear solve
         const Real tol_rel = 1.e-10;
-        const Real tol_abs = 0.0;
+        const Real tol_abs = 1e-10;
         int verbose = 1;
         mlmg.setVerbose(verbose);
 
