@@ -25,7 +25,10 @@ int main (int argc, char* argv[])
         Real leftdircval=1.0;
         Real rightdircval=0.0;
         int maxnonliniter=10;
+        int use_hypre=0;
         int max_coarsening_level = 0;    // typically a huge number so MG coarsens as much as possible
+        int max_iter=200;
+        Real relax_fac=0.0;
     
         Vector<int> is_periodic(AMREX_SPACEDIM,0);
         amrex::Vector<int> bc_lo{0,0,0};
@@ -43,6 +46,8 @@ int main (int argc, char* argv[])
         pp.query("electrolyte_dcoeff",electrolyte_dcoeff);
         pp.query("maxnonliniter",maxnonliniter);
         pp.query("max_coarsening_level",max_coarsening_level);
+        pp.query("max_iter",max_iter);
+        pp.query("relaxation",relax_fac);
     
         pp.queryarr("lo_bc", bc_lo, 0, AMREX_SPACEDIM);
         pp.queryarr("hi_bc", bc_hi, 0, AMREX_SPACEDIM);
@@ -87,6 +92,19 @@ int main (int argc, char* argv[])
         info.setMaxCoarseningLevel(max_coarsening_level);
         MLABecLaplacian mlabec({geom}, {grids}, {dmap}, info);
         MLMG mlmg(mlabec);
+        mlmg.setMaxIter(max_iter);
+
+#ifdef AMREX_USE_HYPRE
+        if(use_hypre)
+        {
+          mlmg.setBottomSolver(MLMG::BottomSolver::hypre);
+          Hypre::Interface hypre_interface = Hypre::Interface::ij;
+          amrex::Print() << "using hypre" << std::endl;
+                 mlmg.setHypreOptionsNamespace("hypre");
+           mlmg.setHypreInterface(hypre_interface);
+        }
+#endif
+
 
         // relative and absolute tolerances for linear solve
         const Real tol_rel = 1.e-10;
@@ -143,13 +161,13 @@ int main (int argc, char* argv[])
 
         // operator looks like (ACoef - div BCoef grad) phi = rhs
         // scaling factors; these multiply ACoef and BCoef
-        Real ascalar = 0.0;
+        Real ascalar = relax_fac;
         Real bscalar = 1.0;
         mlabec.setScalars(ascalar, bscalar);
 
         // set ACoef to zero
         MultiFab acoef(grids, dmap, 1, 0);
-        acoef.setVal(0.);
+        acoef.setVal(1.0);
         mlabec.setACoeffs(0, acoef);
 
 
@@ -161,9 +179,11 @@ int main (int argc, char* argv[])
         }
 
 
+        Real rel_errnorm;
+        Real errnorm_1st=1.0;
         for(int iter=0;iter<maxnonliniter;iter++)
         {
-
+            //relax_fac=relax_fac/pow(1.03,Real(iter));
             rhs.setVal(0.0);
             phi.FillBoundary(geom.periodicity());
             amrex::MultiFab::Copy(err,phi, 0, 0, 1 ,0);
@@ -202,11 +222,34 @@ int main (int argc, char* argv[])
             #include "bvflux.H"
             mlabec.setBCoeffs(0, amrex::GetArrOfConstPtrs(bcoef));
 
+            //relaxation term
+            for (MFIter mfi(phi); mfi.isValid(); ++mfi)
+            {
+                const auto dx = geom.CellSizeArray();
+                const Box& bx = mfi.tilebox();
+
+                Array4<Real> phi_arr = phi.array(mfi);
+                Array4<Real> rhs_arr = rhs.array(mfi);
+
+                amrex::ParallelFor(bx,
+                [=] AMREX_GPU_DEVICE (int i, int j, int k)
+                {
+                    rhs_arr(i,j,k) += phi_arr(i,j,k)*relax_fac;
+                });
+            }
+
             mlmg.solve({&soln}, {&rhs}, tol_rel, tol_abs);
 
             amrex::MultiFab::Subtract(err,soln, 0, 0, 1 ,0);
             Real errnorm=err.norm2();
-            amrex::Print()<<"errnorm:"<<errnorm<<"\n";
+            if(iter==0)
+            {
+                errnorm_1st=errnorm;
+            }
+            rel_errnorm=errnorm/errnorm_1st;
+
+            amrex::Print()<<"iter, relax_fac, abs errnorm, rel errnorm:"
+                <<iter<<"\t"<<relax_fac<<"\t"<<errnorm<<"\t"<<rel_errnorm<<"\n";
             amrex::MultiFab::Copy(phi,soln, 0, 0, 1 ,0);
 
             if(errnorm < 1e-8)

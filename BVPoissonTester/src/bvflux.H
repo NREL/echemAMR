@@ -86,34 +86,52 @@ for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
                 Real dphidt1 = (pot_top-pot_bot)/(2.0*dx[trans1dir]);
                 Real dphidt2 = (pot_frnt-pot_back)/(2.0*dx[trans2dir]);
 
-                Real gradc_tolfac=1e-4;
+                Real gradc_tolfac=1e-2;
                 Real gradc_max=1.0/min_dx; //maximum gradient possible on the current grid
                 Real gradc_cutoff=gradc_tolfac*gradc_max;
 
-                Real mod_gradc = amrex::max(sqrt(dcdn*dcdn + dcdt1*dcdt1 + dcdt2*dcdt2),gradc_cutoff);
+                Real mod_gradc = sqrt(dcdn*dcdn + dcdt1*dcdt1 + dcdt2*dcdt2);
+                
+                if(mod_gradc > gradc_cutoff)
+                {
+                        Real n_ls[3];
+                        n_ls[0] = dcdn/mod_gradc;
+                        n_ls[1] = dcdt1/mod_gradc;
+                        n_ls[2] = dcdt2/mod_gradc;
 
-                //jump along the level set normal (phi_electrolyte-phi_electrode)
-                Real phi_jump  = (dphidn*dcdn + dphidt1*dcdt1 + dphidt2*dcdt2)/pow(mod_gradc,2.0);
+                        Real activ_func = bv_activation_function(0.5*(c_right+c_left),
+                                mod_gradc, gradc_cutoff);
 
-                //FIXME: pass ion concentration also
-                //FIXME: ideally it should be the ion concentration at the closest electrode cell
-                Real j_bv = bvcurrent(phi_jump);
-                Real jdash_bv = bvcurrent_der(phi_jump);
+                        //jump along the level set normal (phi_electrolyte-phi_electrode)
+                        Real phi_jump  = (dphidn*n_ls[0] + dphidt1*n_ls[1] + dphidt2*n_ls[2])/mod_gradc;
+                        if(phi_jump > 100)
+                        {
+                                Print()<<"phi_jump:"<<phi_jump<<"\t"<<dphidn<<"\t"<<dphidt1<<"\t"<<dphidt2<<"\t"
+                                <<dcdn<<"\t"<<dcdt1<<"\t"<<dcdt2<<"\t"<<mod_gradc<<"\n";
+                        }
 
-                Real activ_func = bv_activation_function(0.5*(c_right+c_left),
-                        mod_gradc, gradc_cutoff);
+                        //FIXME: pass ion concentration also
+                        //FIXME: ideally it should be the ion concentration at the closest electrode cell
+                        Real j_bv = bvcurrent(phi_jump);
+                        Real jdash_bv = bvcurrent_der(phi_jump);
 
-                dcoeff_arr(i,j,k) *= (1.0-activ_func);
-                dcoeff_arr(i,j,k) += -jdash_bv*activ_func/pow(mod_gradc,3.0) * dcdn*dcdn;
 
-                //expl term1
-                explterms_arr(i,j,k) =   j_bv*activ_func*dcdn/mod_gradc;
+                        dcoeff_arr(i,j,k) *= (1.0-activ_func);
+                        //dcoeff_arr(i,j,k) += -jdash_bv*activ_func/pow(mod_gradc,3.0) * dcdn*dcdn;
+                        dcoeff_arr(i,j,k) += -jdash_bv*activ_func/mod_gradc * n_ls[0]*n_ls[0];
 
-                //expl term2
-                explterms_arr(i,j,k) += -jdash_bv*phi_jump*activ_func*dcdn/mod_gradc; 
+                        //expl term1
+                        //explterms_arr(i,j,k) =   j_bv*activ_func*dcdn/mod_gradc;
+                        explterms_arr(i,j,k) =   j_bv*activ_func*n_ls[0];
 
-                //expl term3 (mix derivative terms from tensor product)
-                explterms_arr(i,j,k) +=  jdash_bv*activ_func/pow(mod_gradc,3.0)*(dcdn*dcdt1*dphidt1+dcdn*dcdt2*dphidt2); 
+                        //expl term2
+                        //explterms_arr(i,j,k) += -jdash_bv*phi_jump*activ_func*dcdn/mod_gradc; 
+                        explterms_arr(i,j,k) += -jdash_bv*phi_jump*activ_func*n_ls[0]; 
+
+                        //expl term3 (mix derivative terms from tensor product)
+                        //explterms_arr(i,j,k) +=  jdash_bv*activ_func/pow(mod_gradc,3.0)*(dcdn*dcdt1*dphidt1+dcdn*dcdt2*dphidt2);
+                        explterms_arr(i,j,k) +=  jdash_bv*activ_func/mod_gradc*(n_ls[0]*n_ls[1]*dphidt1+n_ls[0]*n_ls[2]*dphidt2);
+                    } 
                 });
 
     }
