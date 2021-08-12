@@ -53,7 +53,7 @@ void echemAMR::Evolve ()
         
         if(potential_solve==1 && step % pot_solve_int == 0)
         {
-            solve_potential(cur_time);
+            for(int i=0;i<20;++i) solve_potential(cur_time);
         }
         
 	timeStep(lev, cur_time, iteration);
@@ -332,9 +332,12 @@ void echemAMR::solve_potential(Real current_time)
                         int trans1dir=(idim+1)%AMREX_SPACEDIM;
                         int trans2dir=(idim+2)%AMREX_SPACEDIM;
 
-                        left[idim]       -= 1;
-                        top_left[idim]   -= 1;
-                        front_left[idim] -= 1;
+
+                        left[idim]              -= 1;
+                        top_left[idim]          -= 1;
+                        bottom_left[idim]       -= 1;
+                        front_left[idim]        -= 1;
+                        back_left[idim]         -= 1;
 
                         top_left[trans1dir]     += 1;
                         top_right[trans1dir]    += 1;
