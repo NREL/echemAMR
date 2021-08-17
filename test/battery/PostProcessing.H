@@ -114,14 +114,6 @@ void line_plot(
                                     // line indices
                                     const int line_ind_lo = amrex::min(amrex::max(static_cast<int>((cell_xlo - xlo) / line_dx), 0), num_points - 1);
                                     const int line_ind_hi = amrex::min(amrex::max(static_cast<int>((cell_xhi - xlo) / line_dx), 0), num_points - 1);
-#ifndef AMREX_USE_GPU
-                                    if (print_stuff)
-                                    {
-                                        amrex::Print() << std::endl << "index i: " << idxOp(i, j, k) << std::endl;
-                                        amrex::Print() << "cell_xlo: " << cell_xlo << " cell_xhi: " << cell_xhi << std::endl;
-                                        amrex::Print() << "line_ind_lo: " << line_ind_lo << " line_ind_hi: " << line_ind_hi << std::endl;
-                                    }
-#endif
 
                                     AMREX_ALWAYS_ASSERT(line_ind_lo >= 0);
                                     AMREX_ALWAYS_ASSERT(line_ind_hi >= 0);
@@ -145,16 +137,6 @@ void line_plot(
                                             dx = line_dx;
 
                                         dx = amrex::min(dx, geomData.CellSize()[axis]);
-
-#ifndef AMREX_USE_GPU
-                                        if (print_stuff)
-                                        {
-                                            amrex::Print() << "line index: " << ind << std::endl;
-                                            amrex::Print() << "line_xlo: " << line_xlo << " line_xhi: " << line_xhi << std::endl;
-                                            amrex::Print() << "dx: " << dx << std::endl;
-                                            if (dx < 0.0) amrex::Print() << "negative volume error: " << idxOp(i, j, k) << ' ' << dx << std::endl;
-                                        }
-#endif
 
                                         for (int n = 0; n < num_comps; ++n)
                                         {
