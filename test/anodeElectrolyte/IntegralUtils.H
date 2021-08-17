@@ -38,12 +38,15 @@ namespace electrochem_integral_utils
                 const int* domlo,const int *domhi,
                 const GpuArray<Real, AMREX_SPACEDIM>& dx)
         {
+
             // Init some values
             Real val = 1.0;
             Real out = 0.0;
             int same_domain = 1;
 
-            // Check if we are trying to find the total surface area of domain1 (a -1 means we are looking for the neighboring cell to be different)
+            // Check if we are trying to find the total surface 
+            // area of domain1 (a -1 means we are looking for 
+            // the neighboring cell to be different)
             if (domain1 == domain2)
                 same_domain = -1;
 
@@ -59,7 +62,8 @@ namespace electrochem_integral_utils
             Real z_prev = phi(i,j,k-1,domain2);
             Real z_next = phi(i,j,k+1,domain2);
 
-            // Check if any of the adjacent cells is OOB (a -1 means the neighboring cell is different)
+            // Check if any of the adjacent cells is 
+            // OOB (a -1 means the neighboring cell is different)
             if (i-1 < domlo[0]) x_prev = -1;
             if (i+1 > domhi[0]) x_next = -1;
             if (j-1 < domlo[1]) y_prev = -1;
@@ -67,22 +71,23 @@ namespace electrochem_integral_utils
             if (k-1 < domlo[2]) z_prev = -1;
             if (k+1 > domhi[2]) z_next = -1;
 
-            // Check if we are in domain1 and the adjacent cell is domain2 or boundary
+            // Check if we are in domain1 and the 
+            // adjacent cell is domain2 or boundary
             if( (phi(i,j,k,domain1) > 0) )
             {
-                //if ( same_domain*x_prev > 0) out += val*dx[1]*dx[2];
-                if ( same_domain*x_prev > 0) out += val;
-                /*if ( same_domain*x_next > 0) out += val*dx[1]*dx[2];
+                if ( same_domain*x_prev > 0) out += val*dx[1]*dx[2];
+                if ( same_domain*x_next > 0) out += val*dx[1]*dx[2];
                 if ( same_domain*y_prev > 0) out += val*dx[0]*dx[2];
                 if ( same_domain*y_next > 0) out += val*dx[0]*dx[2];
                 if ( same_domain*z_prev > 0) out += val*dx[0]*dx[1];
-                if ( same_domain*z_next > 0) out += val*dx[0]*dx[1];*/
+                if ( same_domain*z_next > 0) out += val*dx[0]*dx[1];
             }
 
             return out;
         }
 
-    //Returns the state value of <comp> if on the current collectors located at +/- x
+    //Returns the state value of <comp> if on the current 
+    //collectors located at +/- x
     //TODO: incorporate a level mask
     AMREX_GPU_HOST_DEVICE
         AMREX_FORCE_INLINE
@@ -110,28 +115,9 @@ namespace electrochem_integral_utils
         }
 }
 
-void echemAMR::init_volumes(ProbParm& h_prob_parm, ProbParm& d_prob_parm)
+void echemAMR::init_volumes()
 {
-#ifdef AMREX_USE_GPU
-    amrex::Gpu::dtoh_memcpy(&h_prob_parm, &d_prob_parm, sizeof(ProbParm));
-#else
-    std::memcpy(&h_prob_parm, &d_prob_parm, sizeof(ProbParm));
-#endif
 
-    // Volumes
-    host_global_storage->anode_volume =   VolumeIntegral(-1, A_ID);
-    host_global_storage->ele_sep_volume = VolumeIntegral(-1, E_ID) + VolumeIntegral(-1, S_ID);
-    host_global_storage->cathode_volume = VolumeIntegral(-1, C_ID);
-
-    // Surface Areas
-    host_global_storage->anode_SA =       SurfaceIntegral(-1, A_ID, A_ID);
-    host_global_storage->electrolyte_SA = SurfaceIntegral(-1, E_ID, E_ID);
-    host_global_storage->sepatator_SA =   SurfaceIntegral(-1, S_ID, S_ID);
-    host_global_storage->cathode_SA =     SurfaceIntegral(-1, C_ID, C_ID);
-    host_global_storage->anode_ele_SA =   SurfaceIntegral(-1, A_ID, E_ID);
-    host_global_storage->cathode_ele_SA = SurfaceIntegral(-1, C_ID, E_ID);
-    host_global_storage->anode_cc_SA =    CurrentCollectorIntegral(-1, A_ID);
-    host_global_storage->cathode_cc_SA =  CurrentCollectorIntegral(-1, C_ID);
 }
 
 #endif

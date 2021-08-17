@@ -120,6 +120,8 @@ echemAMR::~echemAMR ()
 // initializes multilevel data
 void echemAMR::InitData ()
 {
+    ProbParm* localprobparm = d_prob_parm;
+
     if (restart_chkfile == "") 
     {
         // start simulation from the beginning
@@ -144,12 +146,12 @@ void echemAMR::InitData ()
                 amrex::launch(box,
                 [=] AMREX_GPU_DEVICE (Box const& tbx)
                 {
-                    initproblemdata(box, fab, geomData);
+                    initproblemdata(box, fab, geomData,localprobparm);
                 });
             }
         }
 
-        print_init_data();
+        //print_init_data(echemAMR::h_prob_parm);
 
         if (chk_int > 0) 
         {
@@ -280,11 +282,18 @@ void echemAMR::ReadParameters ()
         ParmParse pp("echemamr");
 	
         pp.query("cfl", cfl);
+        pp.query("dtmin",dtmin);
+        pp.query("dtmax",dtmax);
         pp.query("do_reflux", do_reflux);
         pp.query("potential_solve",potential_solve);
         pp.query("potential_solve_int",pot_solve_int);
         pp.query("potential_initial_guess",pot_initial_guess);
-        
+       
+        pp.query("buttler_vohlmer_flux",buttler_vohlmer_flux);
+        pp.query("bv_levelset_id",bv_levset_id);
+
+        pp.query("bv_relaxation_factor",bv_relaxfac);
+
     }
 }
 

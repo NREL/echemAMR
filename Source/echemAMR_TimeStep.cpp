@@ -203,5 +203,13 @@ Real echemAMR::EstTimeStep (int lev, bool local)
     }
 
     dt_est *= cfl;
+    dt_est=amrex::min(amrex::max(dt_est,dtmin),dtmax);
+
+    if(dt_est==dtmin)
+        amrex::Print()<<"*****Using minimum timestep specified****\n";
+
+    if(dt_est==dtmax)
+        amrex::Print()<<"*****Using maximum timestep specified****\n";
+
     return dt_est;
 }

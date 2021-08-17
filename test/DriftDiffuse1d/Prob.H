@@ -27,7 +27,8 @@ void amrex_probinit (ProbParm & h_prob_parm, ProbParm & d_prob_parm)
 
 AMREX_GPU_DEVICE
 AMREX_INLINE
-void initdomaindata(Box const& bx, Array4<Real> const& phi, GeometryData const& geomdata)
+void initdomaindata(Box const& bx, Array4<Real> const& phi, GeometryData const& geomdata,
+        ProbParm *prob_parm)
 {
     const auto lo = lbound(bx);
     const auto hi = ubound(bx);    
@@ -62,13 +63,14 @@ void initdomaindata(Box const& bx, Array4<Real> const& phi, GeometryData const& 
 
 AMREX_GPU_DEVICE
 AMREX_INLINE
-void initproblemdata(Box const& bx, Array4<Real> const& phi, GeometryData const& geomdata)
+void initproblemdata(Box const& bx, Array4<Real> const& phi, GeometryData const& geomdata,
+        ProbParm* prob_parm)
 {
 
 }
 
 AMREX_INLINE
-void print_init_data()
+void print_init_data(ProbParm* prob_parm)
 {
 
 }

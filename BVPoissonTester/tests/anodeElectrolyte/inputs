@@ -1,0 +1,23 @@
+amrex.fpe_trap_invalid=1
+
+n_cell = 128 4 4
+max_grid_size = 32
+prob_lo=0.0 0.0 0.0
+prob_hi=1.0 0.125 0.125
+electrode_dcoeff=3.0
+electrolyte_dcoeff=1.0
+
+is_periodic=0 0 0
+
+#0 periodic
+#1 dirichlet
+#2 homogenous neumann
+#3 inhomogenous neumann
+lo_bc=3 2 2 
+hi_bc=1 2 2 
+
+interface_location=0.5
+current_input=3.0
+transport_dir=0
+maxnonliniter=10
+sharpness=1000

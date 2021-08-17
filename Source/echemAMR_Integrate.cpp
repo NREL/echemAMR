@@ -11,6 +11,8 @@ Real echemAMR::VolumeIntegral(int comp, int domain)
 {
     Real int_tmp = 0;
     Real exact_con;
+    int captured_comp=comp;
+    int captured_dm=domain;
     for (int lev = 0; lev <= finest_level; ++lev)
     {
 
@@ -32,7 +34,8 @@ Real echemAMR::VolumeIntegral(int comp, int domain)
             Real r = 0.0;
             AMREX_LOOP_3D(bx, i, j, k,
             {
-                r += electrochem_integral_utils::volume_value(i, j, k, comp, domain, fab, dx);
+                r += electrochem_integral_utils::volume_value(i, j, k, captured_comp, 
+                        captured_dm, fab, dx);
             });
             return r;
         });
@@ -59,6 +62,9 @@ Real echemAMR::SurfaceIntegral(int comp, int domain1, int domain2)
 {
     Real int_tmp = 0;
     Real exact_con;
+    int captured_comp=comp;
+    int captured_dm1=domain1;
+    int captured_dm2=domain2;
     for (int lev = 0; lev <= finest_level; ++lev)
     {
 
@@ -84,7 +90,7 @@ Real echemAMR::SurfaceIntegral(int comp, int domain1, int domain2)
             Real r = 0.0;
             AMREX_LOOP_3D(bx, i, j, k,
             {
-                r += electrochem_integral_utils::surface_value(i, j, k, comp, domain1, domain2, fab, domlo, domhi,dx);
+                r += electrochem_integral_utils::surface_value(i, j, k, captured_comp, captured_dm1, captured_dm2, fab, domlo, domhi,dx);
             });
             return r;
         });
@@ -111,6 +117,8 @@ Real echemAMR::CurrentCollectorIntegral(int comp, int domain)
 {
     Real int_tmp = 0;
     Real exact_con;
+    int captured_comp=comp;
+    int captured_dm=domain;
     for (int lev = 0; lev <= finest_level; ++lev)
     {
 
@@ -136,7 +144,7 @@ Real echemAMR::CurrentCollectorIntegral(int comp, int domain)
             Real r = 0.0;
             AMREX_LOOP_3D(bx, i, j, k,
             {
-                r += electrochem_integral_utils::current_collector_value(i, j, k, comp, domain, fab, domlo, domhi, dx);
+                r += electrochem_integral_utils::current_collector_value(i, j, k, captured_comp, captured_dm, fab, domlo, domhi, dx);
             });
             return r;
         });
