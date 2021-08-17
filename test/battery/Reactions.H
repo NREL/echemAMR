@@ -82,5 +82,46 @@ AMREX_GPU_DEVICE AMREX_INLINE void compute_potential_source(
     }
 }
 
+AMREX_GPU_DEVICE AMREX_INLINE Real bvcurrent(Real phi_jump)
+{
+    Real ocp = 0.2;
+    Real j0 = 3.0;
+    Real phi0 = 1.0;
+    Real jbv;
+
+    // sinh definition
+    jbv = -j0 * sinh((phi_jump + ocp) / phi0);
+
+    // linear case
+    // jbv=-(j0/phi0)*(phi_jump+ocp);
+    return (jbv);
+}
+
+AMREX_GPU_DEVICE AMREX_INLINE Real bvcurrent_der(Real phi_jump)
+{
+    Real ocp = 0.2;
+    Real j0 = 3.0;
+    Real phi0 = 1.0;
+    Real jbvder;
+
+    // sinh definition
+    jbvder = -j0 * cosh((phi_jump + ocp) / phi0) * (1.0 / phi0);
+
+    // linear case
+    // jbvder=-(j0/phi0);
+    return (jbvder);
+}
+
+AMREX_GPU_DEVICE AMREX_INLINE Real bv_activation_function(Real c, Real gradc, Real gradc_cutoff)
+{
+    Real f;
+    Real maxval = 0.25;
+    Real tol = 1e-2;
+
+    // f=(gradc > gradc_cutoff)?1.0:0.0;
+    f = (c * (1 - c) > tol * maxval) ? 1.0 : 0.0;
+    return (f);
+}
+
 } // namespace electrochem_reactions
 #endif
