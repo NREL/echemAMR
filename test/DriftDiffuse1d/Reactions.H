@@ -35,5 +35,23 @@ namespace electrochem_reactions
     {
         source(i,j,k)=0.0;
     }
+    
+    AMREX_GPU_DEVICE AMREX_INLINE
+    Real bvcurrent(Real phi_jump)
+    {
+       return(0);
+    }
+    
+    AMREX_GPU_DEVICE AMREX_INLINE
+    Real bvcurrent_der(Real phi_jump)
+    {
+       return(0);
+    }
+    
+    AMREX_GPU_DEVICE AMREX_INLINE
+    Real bv_activation_function(Real c, Real gradc, Real gradc_cutoff)
+    {
+        return(0);
+    }
 }
 #endif
