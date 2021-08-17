@@ -232,14 +232,14 @@ namespace electrochem
     amrex::Real K_D(amrex::Real Ce, const ProbParm& prob_parm)
     {
         // FIXME: hard coding this for now
-        return -0.1;
+        // return -0.1;
 
-//        const amrex::Real RTF = prob_parm.R_gas_const*prob_parm.T0/prob_parm.Faraday_const;
-//        if(prob_parm.use_KDstar)  { 
-//            return amrex::min(-(1.0 - t_plus(Ce, prob_parm)) * (1.0 + Activity_el(Ce, prob_parm)) * 2.0 * KeC_star(Ce, prob_parm) * RTF, -myeps);
-//        } else {
-//            return amrex::min(-(1.0 - t_plus(Ce, prob_parm)) * (1.0 + Activity_el(Ce, prob_parm)) * 2.0 * KeC(Ce, prob_parm) * RTF, -myeps);
-//        }
+       const amrex::Real RTF = prob_parm.R_gas_const*prob_parm.T0/prob_parm.Faraday_const;
+       if(prob_parm.use_KDstar)  { 
+           return amrex::max((1.0 - t_plus(Ce, prob_parm)) * (1.0 + Activity_el(Ce, prob_parm)) * 2.0 * KeC_star(Ce, prob_parm) * RTF, myeps);
+       } else {
+           return amrex::max((1.0 - t_plus(Ce, prob_parm)) * (1.0 + Activity_el(Ce, prob_parm)) * 2.0 * KeC(Ce, prob_parm) * RTF, myeps);
+       }
     }
 
     // ANODE MATERIAL COEFFICIENTS
@@ -726,13 +726,13 @@ namespace electrochem
             const amrex::Real Pc = phi(ileft,jleft,kleft,PO_ID);
             const amrex::Real Ce = phi(iright,jright,kright,CO_ID);
             const amrex::Real Pe = phi(iright,jright,kright,PO_ID);
-            reaction = -normal*intercalation_reaction_cathode(Cc, Pc, Ce, Pe, prob_parm);
+            reaction = normal*intercalation_reaction_cathode(Cc, Pc, Ce, Pe, prob_parm);
         } else if(cl == electrolyte && cr == cathode){
             const amrex::Real Ce = phi(ileft,jleft,kleft,CO_ID);
             const amrex::Real Pe = phi(ileft,jleft,kleft,PO_ID);
             const amrex::Real Cc = phi(iright,jright,kright,CO_ID);
             const amrex::Real Pc = phi(iright,jright,kright,PO_ID);
-            reaction = normal*intercalation_reaction_cathode(Cc, Pc, Ce, Pe, prob_parm);
+            reaction = -normal*intercalation_reaction_cathode(Cc, Pc, Ce, Pe, prob_parm);
         } else if(cl == electrolyte && cr == anode){
             const amrex::Real Ce = phi(ileft,jleft,kleft,CO_ID);
             const amrex::Real Pe = phi(ileft,jleft,kleft,PO_ID);
@@ -756,7 +756,7 @@ namespace electrochem
         else
             return amrex::max(reaction,-0.1*std::abs(normal));
 
-//        return reaction;
+       // return reaction;
 
     }
 
