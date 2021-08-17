@@ -52,20 +52,18 @@ using ZDir = DirectionSelector<2>;
 // For example, if we're using ZDir, return a box covering the x-y plane.
 // The IntVect is used to set the constant index in the parallel direction.
 template <typename IndexSelector>
-AMREX_GPU_HOST_DEVICE amrex::Box PerpendicularBox(const amrex::Box& bx, const amrex::IntVect& iv)
+AMREX_GPU_HOST_DEVICE amrex::Box
+PerpendicularBox(const amrex::Box& bx, const amrex::IntVect& iv)
 {
     amrex::IntVect plane_lo, plane_hi;
 
-    if (std::is_same<IndexSelector, XDir>::value)
-    {
+    if (std::is_same<IndexSelector, XDir>::value) {
         plane_lo = {iv[0], bx.smallEnd(1), bx.smallEnd(2)};
         plane_hi = {iv[0], bx.bigEnd(1), bx.bigEnd(2)};
-    } else if (std::is_same<IndexSelector, YDir>::value)
-    {
+    } else if (std::is_same<IndexSelector, YDir>::value) {
         plane_lo = {bx.smallEnd(0), iv[1], bx.smallEnd(2)};
         plane_hi = {bx.bigEnd(0), iv[1], bx.bigEnd(2)};
-    } else
-    {
+    } else {
         plane_lo = {bx.smallEnd(0), bx.smallEnd(1), iv[2]};
         plane_hi = {bx.bigEnd(0), bx.bigEnd(1), iv[2]};
     }
@@ -80,20 +78,18 @@ AMREX_GPU_HOST_DEVICE amrex::Box PerpendicularBox(const amrex::Box& bx, const am
 // The IntVect is used to set the constant indices in the perpendicular
 // direction.
 template <typename IndexSelector>
-AMREX_GPU_HOST_DEVICE amrex::Box ParallelBox(const amrex::Box& bx, const amrex::IntVect& iv)
+AMREX_GPU_HOST_DEVICE amrex::Box
+ParallelBox(const amrex::Box& bx, const amrex::IntVect& iv)
 {
     amrex::IntVect line_lo, line_hi;
 
-    if (std::is_same<IndexSelector, XDir>::value)
-    {
+    if (std::is_same<IndexSelector, XDir>::value) {
         line_lo = {bx.smallEnd(0), iv[1], iv[2]};
         line_hi = {bx.bigEnd(0), iv[1], iv[2]};
-    } else if (std::is_same<IndexSelector, YDir>::value)
-    {
+    } else if (std::is_same<IndexSelector, YDir>::value) {
         line_lo = {iv[0], bx.smallEnd(1), iv[2]};
         line_hi = {iv[0], bx.bigEnd(1), iv[2]};
-    } else
-    {
+    } else {
         line_lo = {iv[0], iv[1], bx.smallEnd(2)};
         line_hi = {iv[0], iv[1], bx.bigEnd(2)};
     }
