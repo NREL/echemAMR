@@ -193,6 +193,10 @@ private:
 
     amrex::Real dtmin=1e-20;
     amrex::Real dtmax=1e10;
+    
+    //by default no relaxation for
+    //BV poisson solves
+    amrex::Real bv_relaxfac=0.0;
 
     // how often each level regrids the higher levels of refinement
     // (after a level advances that many time steps)

@@ -292,6 +292,8 @@ void echemAMR::ReadParameters ()
         pp.query("buttler_vohlmer_flux",buttler_vohlmer_flux);
         pp.query("bv_levelset_id",bv_levset_id);
 
+        pp.query("bv_relaxation_factor",bv_relaxfac);
+
     }
 }
 

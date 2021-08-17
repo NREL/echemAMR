@@ -100,15 +100,13 @@ void externalbc(const amrex::Real x[AMREX_SPACEDIM],
 
     if(sgn > 0) //left lo side
     {
-        dirc_val_S1=0.0;
+        s_ext[S1_ID]=1.0;
         s_ext[POT_ID]=1.0;
     }
     else
     {
-        dirc_val_S1=0.0;
+        s_ext[S1_ID]=1.0;
         s_ext[POT_ID]=1.0;
     }
-
-    s_ext[S1_ID]=2.0*dirc_val_S1-s_int[S1_ID];
 }
 #endif

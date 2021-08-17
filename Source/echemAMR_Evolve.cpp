@@ -156,18 +156,27 @@ void echemAMR::solve_potential(Real current_time)
     mlabec.setMaxOrder(linop_maxorder);
 
     //set A and B, A=0, B=1
+    //
+    if(buttler_vohlmer_flux)
+    {
+        ascalar=bv_relaxfac;   
+    }
+    else
+    {
+        ascalar=0.0;
+    }
     mlabec.setScalars(ascalar, bscalar);
 
     // default to inhomogNeumann since it is defaulted to flux = 0.0 anyways
     std::array<LinOpBCType,AMREX_SPACEDIM> bc_potential_lo
         ={LinOpBCType::inhomogNeumann,
-          LinOpBCType::inhomogNeumann,
-          LinOpBCType::inhomogNeumann};
+            LinOpBCType::inhomogNeumann,
+            LinOpBCType::inhomogNeumann};
 
     std::array<LinOpBCType,AMREX_SPACEDIM> bc_potential_hi
         ={LinOpBCType::inhomogNeumann,
-          LinOpBCType::inhomogNeumann,
-          LinOpBCType::inhomogNeumann};
+            LinOpBCType::inhomogNeumann,
+            LinOpBCType::inhomogNeumann};
 
 
     for(int idim=0;idim<AMREX_SPACEDIM;idim++)
@@ -206,9 +215,9 @@ void echemAMR::solve_potential(Real current_time)
     potential.resize(finest_level+1);
     solution.resize(finest_level+1);
     rhs.resize(finest_level+1);
-    
+
     const int num_grow=1;
-    
+
     for(int ilev=0; ilev<=finest_level; ilev++)
     {
         MultiFab Sborder(grids[ilev], dmap[ilev], phi_new[ilev].nComp(), num_grow);
@@ -226,7 +235,7 @@ void echemAMR::solve_potential(Real current_time)
 
         acoeff[ilev].setVal(0.0);
         mlabec.setACoeffs(ilev, acoeff[ilev]);
-        
+
         bcoeff[ilev].setVal(1.0);
         solution[ilev].setVal(0.0);
         rhs[ilev].setVal(0.0);
@@ -439,19 +448,23 @@ void echemAMR::solve_potential(Real current_time)
                 const auto dx = geom[ilev].CellSizeArray();
 
                 Array4<Real> rhs_arr      = rhs[ilev].array(mfi);
+                Array4<Real> phi_arr      = Sborder.array(mfi);
 
                 Array4<Real> term_x = bv_explicit_terms[0].array(mfi);
                 Array4<Real> term_y = bv_explicit_terms[1].array(mfi);
                 Array4<Real> term_z = bv_explicit_terms[2].array(mfi);
 
+                Real relax_fac=bv_relaxfac;
+
                 amrex::ParallelFor(bx,
                         [=] AMREX_GPU_DEVICE (int i, int j, int k)
-                        {
+                {
                         rhs_arr(i,j,k) =      (term_x(i,j,k) - term_x(i+1,j,k)) / dx[0] 
                         +   (term_y(i,j,k) - term_y(i,j+1,k)) / dx[1] 
                         +   (term_z(i,j,k) - term_z(i,j,k+1)) / dx[2];
 
-                        });
+                        rhs_arr(i,j,k) += phi_arr(i,j,k,NVAR-1)*relax_fac;
+                });
             }
         }
 
