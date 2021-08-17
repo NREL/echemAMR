@@ -44,10 +44,10 @@ namespace electrochem_reactions
        Real jbv;
 
        //sinh definition
-       //jbv=-j0*sinh((phi_jump+ocp)/phi0);
+       jbv=-j0*sinh((phi_jump+ocp)/phi0);
                     
        //linear case
-       jbv=-(j0/phi0)*(phi_jump+ocp);
+       //jbv=-(j0/phi0)*(phi_jump+ocp);
        return(jbv);
     }
     
@@ -60,20 +60,23 @@ namespace electrochem_reactions
        Real jbvder;
 
        //sinh definition
-       //jbvder=-j0*cosh((jump_phi+ocp)/phi0)*(1.0/phi0)
+       jbvder=-j0*cosh((phi_jump+ocp)/phi0)*(1.0/phi0);
                     
        //linear case
-       jbvder=-(j0/phi0);
+       //jbvder=-(j0/phi0);
        return(jbvder);
     }
     
     AMREX_GPU_DEVICE AMREX_INLINE
     Real bv_activation_function(Real c, Real gradc, Real gradc_cutoff)
     {
-       Real f;
+        Real f;
+        Real maxval=0.25;
+        Real tol=1e-2;
 
-       f=(gradc > gradc_cutoff)?1.0:0.0;
-       return(f);
+        //f=(gradc > gradc_cutoff)?1.0:0.0;
+        f=(c*(1-c) > tol*maxval)?1.0:0.0;
+        return(f);
     }
 }
 #endif
