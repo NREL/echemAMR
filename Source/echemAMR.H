@@ -209,6 +209,10 @@ private:
     // level-set id for buttler-vohlmer
     int bv_levset_id = 0;
 
+    int bv_nonlinear_iters = 1;
+    Real bv_nonlinear_tol = 1e-8;
+    int use_hypre=0;
+
     // frequency to output line plots
     int line_plot_int = -1;
     // direction to create line plot

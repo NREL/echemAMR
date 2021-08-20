@@ -40,7 +40,7 @@ echemamr.S1_refinegrad = 0.2
 #buttler vohlmer flux
 echemamr.buttler_vohlmer_flux=1
 echemamr.bv_levelset_id=0
-
+echemamr.bv_nonlinear_iters=20
 echemamr.dtmax=1e-3
 
 # PLOTFILES

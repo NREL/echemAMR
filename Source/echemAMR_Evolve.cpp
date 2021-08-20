@@ -107,7 +107,7 @@ void echemAMR::solve_potential(Real current_time)
     // FIXME: add these as inputs
     int agglomeration = 1;
     int consolidation = 1;
-    int max_coarsening_level = 30;
+    int max_coarsening_level = 0;
     bool semicoarsening = false;
     int max_semicoarsening_level = 0;
     int linop_maxorder = 2;
@@ -117,6 +117,7 @@ void echemAMR::solve_potential(Real current_time)
     int bottom_verbose = 0;
     Real ascalar = 0.0;
     Real bscalar = 1.0;
+    int num_nonlinear_iters;
 
     //==================================================
     // amrex solves
@@ -158,9 +159,12 @@ void echemAMR::solve_potential(Real current_time)
     if (buttler_vohlmer_flux)
     {
         ascalar = bv_relaxfac;
-    } else
+        num_nonlinear_iters=bv_nonlinear_iters;
+    } 
+    else
     {
         ascalar = 0.0;
+        num_nonlinear_iters=1;
     }
     mlabec.setScalars(ascalar, bscalar);
 
@@ -174,7 +178,8 @@ void echemAMR::solve_potential(Real current_time)
         if (bc_lo[idim] == BCType::int_dir)
         {
             bc_potential_lo[idim] = LinOpBCType::Periodic;
-        } else if (bc_lo[idim] == BCType::ext_dir)
+        }
+        if (bc_lo[idim] == BCType::ext_dir)
         {
             bc_potential_lo[idim] = LinOpBCType::Dirichlet;
         }
@@ -197,6 +202,7 @@ void echemAMR::solve_potential(Real current_time)
     Vector<Array<MultiFab*, AMREX_SPACEDIM>> gradsoln;
     Vector<MultiFab> solution;
     Vector<MultiFab> rhs;
+    Vector<MultiFab> err;
 
     acoeff.resize(finest_level + 1);
     bcoeff.resize(finest_level + 1);
@@ -204,6 +210,7 @@ void echemAMR::solve_potential(Real current_time)
     potential.resize(finest_level + 1);
     solution.resize(finest_level + 1);
     rhs.resize(finest_level + 1);
+    err.resize(finest_level + 1);
 
     const int num_grow = 1;
 
@@ -233,11 +240,11 @@ void echemAMR::solve_potential(Real current_time)
         bcoeff[ilev].define(grids[ilev], dmap[ilev], 1, 1);
         solution[ilev].define(grids[ilev], dmap[ilev], 1, 1);
         rhs[ilev].define(grids[ilev], dmap[ilev], 1, 0);
+        err[ilev].define(grids[ilev], dmap[ilev], 1, 0);
     }
 
-    int num_nonlinear_its = 20;
-
-    for (int nl_it = 0; nl_it < num_nonlinear_its; ++nl_it)
+    Real errnorm_1st_iter;
+    for (int nl_it = 0; nl_it < num_nonlinear_iters; ++nl_it)
     {
         for (int ilev = 0; ilev <= finest_level; ilev++)
         {
@@ -512,6 +519,36 @@ void echemAMR::solve_potential(Real current_time)
         // need user-defined rhs
 
         mlmg.solve(GetVecOfPtrs(solution), GetVecOfConstPtrs(rhs), tol_rel, tol_abs);
+
+        //error norm calculation
+        // copy solution back to phi_new
+        if(buttler_vohlmer_flux)
+        {
+            Real errnorm_all=0.0;
+            for (int ilev = 0; ilev <= finest_level; ilev++)
+            {
+                amrex::MultiFab::Copy(err[ilev], phi_new[ilev], NVAR - 1, 0, 1, 0);
+                amrex::MultiFab::Subtract(err[ilev],solution[ilev], 0, 0, 1 ,0);
+                Real errnorm=err[ilev].norm2();
+
+                if(nl_it==0)
+                {
+                    errnorm_1st_iter=errnorm;
+                }
+                Real rel_errnorm=errnorm/errnorm_1st_iter;
+                amrex::Print()<<"lev, iter, abs errnorm, rel errnorm:"<<ilev<<"\t"
+                    <<nl_it<<"\t"<<errnorm<<"\t"<<rel_errnorm<<"\n";
+
+                errnorm_all += errnorm;
+            }
+
+            if(errnorm_all < bv_nonlinear_tol)
+            {
+                amrex::Print()<<"Converged with final error:"<<errnorm_all<<"\n";
+                break;
+            }
+        }
+
 
         // copy solution back to phi_new
         for (int ilev = 0; ilev <= finest_level; ilev++)

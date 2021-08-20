@@ -272,6 +272,10 @@ void echemAMR::ReadParameters()
         pp.query("bv_levelset_id", bv_levset_id);
 
         pp.query("bv_relaxation_factor", bv_relaxfac);
+        pp.query("bv_nonlinear_iters", bv_nonlinear_iters);
+        pp.query("bv_nonlinear_tol", bv_nonlinear_tol);
+
+        pp.query("use_hypre",use_hypre);
     }
 }
 

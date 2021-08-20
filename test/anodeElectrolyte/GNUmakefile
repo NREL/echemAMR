@@ -9,7 +9,7 @@ DEBUG      = FALSE
 #DIM        = 2
 DIM       = 3
 
-COMP	   = clang
+COMP	   = gnu
 BL_NO_FORT=TRUE
 
 USE_MPI    = TRUE
