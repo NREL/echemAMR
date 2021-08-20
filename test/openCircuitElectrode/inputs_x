@@ -12,11 +12,11 @@ amr.n_cell           =  32  2     2
 amr.v              = 1       # verbosity in Amr
 
 # REFINEMENT
-amr.max_level       = 0       # maximum level number allowed
+amr.max_level       = 1       # maximum level number allowed
 amr.blocking_factor = 2       # block factor in grid generation
 amr.max_grid_size   = 8
 
-amr.regrid_int      = 2       # how often to regrid
+amr.regrid_int      = 1       # how often to regrid
 
 # TIME STEP CONTROL
 echemamr.cfl            = 0.8    
@@ -29,8 +29,8 @@ echemamr.potential_solve_int = 1
 #extdir 3
 #foextrap 2 
 
-echemamr.lo_bc = 2 2 2
-echemamr.hi_bc = 2 2 2
+echemamr.lo_bc = 3 2 2
+echemamr.hi_bc = 3 2 2
 
 # Tagging
 echemamr.tagged_vars = S1
