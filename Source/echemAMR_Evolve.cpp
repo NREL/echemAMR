@@ -548,10 +548,10 @@ void echemAMR::solve_potential(Real current_time)
         mlmg.solve(GetVecOfPtrs(solution), GetVecOfConstPtrs(rhs), tol_rel, tol_abs);
         mlmg_res.compResidual(GetVecOfPtrs(residual),GetVecOfPtrs(solution), GetVecOfConstPtrs(rhs_res));
 
-        amrex::Print() << "BV NON-LINEAR RESIDUAL: " <<  residual[0].norm0() << std::endl;
         // copy solution back to phi_new
         for (int ilev = 0; ilev <= finest_level; ilev++)
         {
+            amrex::Print() << "level: " << ilev << " BV NON-LINEAR RESIDUAL: " <<  residual[ilev].norm2() << std::endl;
             amrex::MultiFab::Copy(phi_new[ilev], solution[ilev], 0, NVAR - 1, 1, 0);
         }
     }
