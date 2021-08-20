@@ -235,10 +235,10 @@ void echemAMR::solve_potential(Real current_time)
         rhs[ilev].define(grids[ilev], dmap[ilev], 1, 0);
     }
 
-
     int num_nonlinear_its = 20;
 
-    for(int nl_it = 0; nl_it < num_nonlinear_its; ++nl_it) {
+    for (int nl_it = 0; nl_it < num_nonlinear_its; ++nl_it)
+    {
         for (int ilev = 0; ilev <= finest_level; ilev++)
         {
             MultiFab Sborder(grids[ilev], dmap[ilev], phi_new[ilev].nComp(), num_grow);
@@ -509,7 +509,6 @@ void echemAMR::solve_potential(Real current_time)
             mlabec.setLevelBC(ilev, &(potential[ilev]));
         }
 
-
         // need user-defined rhs
 
         mlmg.solve(GetVecOfPtrs(solution), GetVecOfConstPtrs(rhs), tol_rel, tol_abs);
@@ -519,9 +518,7 @@ void echemAMR::solve_potential(Real current_time)
         {
             amrex::MultiFab::Copy(phi_new[ilev], solution[ilev], 0, NVAR - 1, 1, 0);
         }
-
     }
-
 
     mlmg.getGradSolution(gradsoln);
 
