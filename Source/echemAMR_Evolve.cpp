@@ -135,7 +135,7 @@ void echemAMR::solve_potential(Real current_time)
     // this could be due to missing terms in the intercalation reaction or sign mistakes...
     ProbParm const* localprobparm = d_prob_parm;
 
-    const Real tol_rel = 1.0e-12;
+    const Real tol_rel = 1.0e-6;
     const Real tol_abs = 1.0e-13;
 
 #ifdef AMREX_USE_HYPRE
@@ -548,7 +548,7 @@ void echemAMR::solve_potential(Real current_time)
         mlmg.solve(GetVecOfPtrs(solution), GetVecOfConstPtrs(rhs), tol_rel, tol_abs);
         mlmg_res.compResidual(GetVecOfPtrs(residual),GetVecOfPtrs(solution), GetVecOfConstPtrs(rhs_res));
 
-        amrex::Print() << "RESIDUAL: " <<  residual[0].norm0() << std::endl;
+        amrex::Print() << "BV NON-LINEAR RESIDUAL: " <<  residual[0].norm0() << std::endl;
         // copy solution back to phi_new
         for (int ilev = 0; ilev <= finest_level; ilev++)
         {
