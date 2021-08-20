@@ -54,7 +54,7 @@ void echemAMR::Evolve()
 
         if (potential_solve == 1 && step % pot_solve_int == 0)
         {
-            for (int i = 0; i < 20; ++i) solve_potential(cur_time);
+            solve_potential(cur_time);
         }
 
         timeStep(lev, cur_time, iteration);
@@ -207,280 +207,6 @@ void echemAMR::solve_potential(Real current_time)
 
     const int num_grow = 1;
 
-    for (int ilev = 0; ilev <= finest_level; ilev++)
-    {
-        MultiFab Sborder(grids[ilev], dmap[ilev], phi_new[ilev].nComp(), num_grow);
-        FillPatch(ilev, current_time, Sborder, 0, Sborder.nComp());
-        potential[ilev].define(grids[ilev], dmap[ilev], 1, num_grow);
-        potential[ilev].setVal(0.0);
-
-        // Copy (FabArray<FAB>& dst, FabArray<FAB> const& src, int srccomp, int dstcomp, int numcomp, const IntVect& nghost)
-        amrex::Copy(potential[ilev], Sborder, NVAR - 1, 0, 1, num_grow);
-
-        acoeff[ilev].define(grids[ilev], dmap[ilev], 1, 0);
-        bcoeff[ilev].define(grids[ilev], dmap[ilev], 1, 1);
-        solution[ilev].define(grids[ilev], dmap[ilev], 1, 1);
-        rhs[ilev].define(grids[ilev], dmap[ilev], 1, 0);
-
-        acoeff[ilev].setVal(0.0);
-        mlabec.setACoeffs(ilev, acoeff[ilev]);
-
-        bcoeff[ilev].setVal(1.0);
-        solution[ilev].setVal(0.0);
-        rhs[ilev].setVal(0.0);
-
-        for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
-        {
-            const BoxArray& faceba = amrex::convert(grids[ilev], IntVect::TheDimensionVector(idim));
-
-            gradsoln[ilev][idim] = new MultiFab(faceba, dmap[ilev], 1, 0);
-        }
-
-        // copy current solution for better guess
-        if (pot_initial_guess)
-        {
-            amrex::MultiFab::Copy(solution[ilev], potential[ilev], 0, 0, 1, 0);
-            // solution[ilev].copy(potential[ilev], 0, 0, 1);
-        }
-
-        // fill cell centered diffusion coefficients and rhs
-        for (MFIter mfi(phi_new[ilev], TilingIfNotGPU()); mfi.isValid(); ++mfi)
-        {
-            const Box& bx = mfi.tilebox();
-            const Box& gbx = amrex::grow(bx, 1);
-            const auto dx = geom[ilev].CellSizeArray();
-            auto prob_lo = geom[ilev].ProbLoArray();
-            auto prob_hi = geom[ilev].ProbHiArray();
-            const Box& domain = geom[ilev].Domain();
-
-            Real time = current_time; // for GPU capture
-
-            Array4<Real> phi_arr = Sborder.array(mfi);
-            Array4<Real> bcoeff_arr = bcoeff[ilev].array(mfi);
-            Array4<Real> rhs_arr = rhs[ilev].array(mfi);
-
-            amrex::ParallelFor(gbx, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
-                electrochem_transport::compute_potential_dcoeff(i, j, k, phi_arr, bcoeff_arr, prob_lo, prob_hi, dx, time, *localprobparm);
-            });
-            amrex::ParallelFor(bx, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
-                electrochem_reactions::compute_potential_source(i, j, k, phi_arr, rhs_arr, prob_lo, prob_hi, dx, time, *localprobparm);
-            });
-        }
-
-        // average cell coefficients to faces, this includes boundary faces
-        Array<MultiFab, AMREX_SPACEDIM> face_bcoeff;
-        for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
-        {
-            const BoxArray& ba = amrex::convert(bcoeff[ilev].boxArray(), IntVect::TheDimensionVector(idim));
-            face_bcoeff[idim].define(ba, bcoeff[ilev].DistributionMap(), 1, 0);
-        }
-        // true argument for harmonic averaging
-        amrex::average_cellcenter_to_face(GetArrOfPtrs(face_bcoeff), bcoeff[ilev], geom[ilev], true);
-
-        if (buttler_vohlmer_flux)
-        {
-            int lset_id = bv_levset_id;
-
-            Array<MultiFab, AMREX_SPACEDIM> bv_explicit_terms;
-            for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
-            {
-                const BoxArray& ba = amrex::convert(bcoeff[ilev].boxArray(), IntVect::TheDimensionVector(idim));
-                bv_explicit_terms[idim].define(ba, bcoeff[ilev].DistributionMap(), 1, 0);
-            }
-
-            for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
-            {
-                for (MFIter mfi(phi_new[ilev], TilingIfNotGPU()); mfi.isValid(); ++mfi)
-                {
-                    const auto dx = geom[ilev].CellSizeArray();
-                    const Box& bx = mfi.tilebox();
-                    Real min_dx = amrex::min(dx[0], amrex::min(dx[1], dx[2]));
-
-                    // face box
-                    Box fbox = convert(bx, IntVect::TheDimensionVector(idim));
-                    Array4<Real> phi_arr = Sborder.array(mfi);
-                    Array4<Real> dcoeff_arr = face_bcoeff[idim].array(mfi);
-                    Array4<Real> explterms_arr = bv_explicit_terms[idim].array(mfi);
-
-                    amrex::ParallelFor(fbox, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
-                        IntVect left(i, j, k);
-                        IntVect right(i, j, k);
-
-                        IntVect top_left(i, j, k);
-                        IntVect bottom_left(i, j, k);
-                        IntVect top_right(i, j, k);
-                        IntVect bottom_right(i, j, k);
-
-                        IntVect front_left(i, j, k);
-                        IntVect back_left(i, j, k);
-                        IntVect front_right(i, j, k);
-                        IntVect back_right(i, j, k);
-
-                        int normaldir = idim;
-                        int trans1dir = (idim + 1) % AMREX_SPACEDIM;
-                        int trans2dir = (idim + 2) % AMREX_SPACEDIM;
-
-                        left[idim] -= 1;
-                        top_left[idim] -= 1;
-                        bottom_left[idim] -= 1;
-                        front_left[idim] -= 1;
-                        back_left[idim] -= 1;
-
-                        top_left[trans1dir] += 1;
-                        top_right[trans1dir] += 1;
-                        bottom_left[trans1dir] -= 1;
-                        bottom_right[trans1dir] -= 1;
-
-                        front_left[trans2dir] += 1;
-                        front_right[trans2dir] += 1;
-                        back_left[trans2dir] -= 1;
-                        back_right[trans2dir] -= 1;
-
-                        // levelset color
-                        Real c_left = phi_arr(left, lset_id);
-                        Real c_right = phi_arr(right, lset_id);
-
-                        Real c_top = 0.5 * (phi_arr(top_left, lset_id) + phi_arr(top_right, lset_id));
-                        Real c_bot = 0.5 * (phi_arr(bottom_left, lset_id) + phi_arr(bottom_right, lset_id));
-
-                        Real c_frnt = 0.5 * (phi_arr(front_left, lset_id) + phi_arr(front_right, lset_id));
-                        Real c_back = 0.5 * (phi_arr(back_left, lset_id) + phi_arr(back_right, lset_id));
-
-                        // phi
-                        Real pot_left = phi_arr(left, NVAR - 1);
-                        Real pot_right = phi_arr(right, NVAR - 1);
-
-                        Real pot_top = 0.5 * (phi_arr(top_left, NVAR - 1) + phi_arr(top_right, NVAR - 1));
-                        Real pot_bot = 0.5 * (phi_arr(bottom_left, NVAR - 1) + phi_arr(bottom_right, NVAR - 1));
-
-                        Real pot_frnt = 0.5 * (phi_arr(front_left, NVAR - 1) + phi_arr(front_right, NVAR - 1));
-                        Real pot_back = 0.5 * (phi_arr(back_left, NVAR - 1) + phi_arr(back_right, NVAR - 1));
-
-                        // x,y or z
-                        Real dcdn = (c_right - c_left) / dx[normaldir];
-                        Real dcdt1 = (c_top - c_bot) / (2.0 * dx[trans1dir]);
-                        Real dcdt2 = (c_frnt - c_back) / (2.0 * dx[trans2dir]);
-
-                        // grad of potential
-                        Real dphidn = (pot_right - pot_left) / dx[normaldir];
-                        Real dphidt1 = (pot_top - pot_bot) / (2.0 * dx[trans1dir]);
-                        Real dphidt2 = (pot_frnt - pot_back) / (2.0 * dx[trans2dir]);
-
-                        Real gradc_tolfac = 1e-4;
-                        Real gradc_max = 1.0 / min_dx; // maximum gradient possible on the current grid
-                        Real gradc_cutoff = gradc_tolfac * gradc_max;
-
-                        Real mod_gradc = sqrt(dcdn * dcdn + dcdt1 * dcdt1 + dcdt2 * dcdt2);
-
-                        if (mod_gradc > gradc_cutoff)
-                        {
-                            Real n_ls[3];
-                            n_ls[0] = dcdn / mod_gradc;
-                            n_ls[1] = dcdt1 / mod_gradc;
-                            n_ls[2] = dcdt2 / mod_gradc;
-
-                            Real activ_func = electrochem_reactions::bv_activation_function(0.5 * (c_right + c_left), mod_gradc, gradc_cutoff);
-
-                            // jump along the level set normal (phi_electrolyte-phi_electrode)
-                            Real phi_jump = (dphidn * n_ls[0] + dphidt1 * n_ls[1] + dphidt2 * n_ls[2]) / mod_gradc;
-
-                            /*if(phi_jump > 100)
-                            {
-                                Print()<<"phi_jump:"<<phi_jump<<"\t"<<dphidn<<"\t"<<dphidt1<<"\t"<<dphidt2<<"\t"
-                                    <<dcdn<<"\t"<<dcdt1<<"\t"<<dcdt2<<"\t"<<mod_gradc<<"\n";
-                            }*/
-
-                            // FIXME: pass ion concentration also
-                            // FIXME: ideally it should be the ion concentration at the closest electrode cell
-                            Real j_bv = electrochem_reactions::bvcurrent(phi_jump);
-                            Real jdash_bv = electrochem_reactions::bvcurrent_der(phi_jump);
-
-                            dcoeff_arr(i, j, k) *= (1.0 - activ_func);
-                            // dcoeff_arr(i,j,k) += -jdash_bv*activ_func/pow(mod_gradc,3.0) * dcdn*dcdn;
-                            dcoeff_arr(i, j, k) += -jdash_bv * activ_func / mod_gradc * n_ls[0] * n_ls[0];
-
-                            // expl term1
-                            // explterms_arr(i,j,k) =   j_bv*activ_func*dcdn/mod_gradc;
-                            explterms_arr(i, j, k) = j_bv * activ_func * n_ls[0];
-
-                            // expl term2
-                            // explterms_arr(i,j,k) += -jdash_bv*phi_jump*activ_func*dcdn/mod_gradc;
-                            explterms_arr(i, j, k) += -jdash_bv * phi_jump * activ_func * n_ls[0];
-
-                            // expl term3 (mix derivative terms from tensor product)
-                            // explterms_arr(i,j,k) +=  jdash_bv*activ_func/pow(mod_gradc,3.0)*(dcdn*dcdt1*dphidt1+dcdn*dcdt2*dphidt2);
-                            explterms_arr(i, j, k) += jdash_bv * activ_func / mod_gradc * (n_ls[0] * n_ls[1] * dphidt1 + n_ls[0] * n_ls[2] * dphidt2);
-                        }
-                    });
-                }
-            }
-
-            for (MFIter mfi(phi_new[ilev], TilingIfNotGPU()); mfi.isValid(); ++mfi)
-            {
-                const Box& bx = mfi.tilebox();
-                const auto dx = geom[ilev].CellSizeArray();
-
-                Array4<Real> rhs_arr = rhs[ilev].array(mfi);
-                Array4<Real> phi_arr = Sborder.array(mfi);
-
-                Array4<Real> term_x = bv_explicit_terms[0].array(mfi);
-                Array4<Real> term_y = bv_explicit_terms[1].array(mfi);
-                Array4<Real> term_z = bv_explicit_terms[2].array(mfi);
-
-                Real relax_fac = bv_relaxfac;
-
-                amrex::ParallelFor(bx, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
-                    rhs_arr(i, j, k) = (term_x(i, j, k) - term_x(i + 1, j, k)) / dx[0] + (term_y(i, j, k) - term_y(i, j + 1, k)) / dx[1] +
-                                       (term_z(i, j, k) - term_z(i, j, k + 1)) / dx[2];
-
-                    rhs_arr(i, j, k) += phi_arr(i, j, k, NVAR - 1) * relax_fac;
-                });
-            }
-        }
-
-        // set boundary conditions
-        for (MFIter mfi(phi_new[ilev], TilingIfNotGPU()); mfi.isValid(); ++mfi)
-        {
-            const Box& bx = mfi.tilebox();
-            const auto dx = geom[ilev].CellSizeArray();
-            auto prob_lo = geom[ilev].ProbLoArray();
-            auto prob_hi = geom[ilev].ProbHiArray();
-            const Box& domain = geom[ilev].Domain();
-
-            Array4<Real> phi_arr = Sborder.array(mfi);
-            Array4<Real> bc_arr = potential[ilev].array(mfi);
-            Real time = current_time; // for GPU capture
-
-            for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
-            {
-                const amrex::Real bclo = host_global_storage->pot_bc_lo[idim];
-                const amrex::Real bchi = host_global_storage->pot_bc_hi[idim];
-
-                if (!geom[ilev].isPeriodic(idim))
-                {
-                    if (bx.smallEnd(idim) == domain.smallEnd(idim))
-                    {
-                        amrex::ParallelFor(amrex::bdryLo(bx, idim), [=] AMREX_GPU_DEVICE(int i, int j, int k) noexcept {
-                            electrochem_transport::potential_bc(i, j, k, idim, -1, phi_arr, bc_arr, prob_lo, prob_hi, dx, time, bclo, bchi);
-                        });
-                    }
-                    if (bx.bigEnd(idim) == domain.bigEnd(idim))
-                    {
-                        amrex::ParallelFor(amrex::bdryHi(bx, idim), [=] AMREX_GPU_DEVICE(int i, int j, int k) noexcept {
-                            electrochem_transport::potential_bc(i, j, k, idim, 1, phi_arr, bc_arr, prob_lo, prob_hi, dx, time, bclo, bchi);
-                        });
-                    }
-                }
-            }
-        }
-
-        // set b with diffusivities
-        mlabec.setBCoeffs(ilev, amrex::GetArrOfConstPtrs(face_bcoeff));
-
-        // bc's are stored in the ghost cells of potential
-        mlabec.setLevelBC(ilev, &(potential[ilev]));
-    }
-
     MLMG mlmg(mlabec);
     mlmg.setMaxIter(max_iter);
     mlmg.setMaxFmgIter(max_fmg_iter);
@@ -500,83 +226,301 @@ void echemAMR::solve_potential(Real current_time)
     }
 #endif
 
-    // need user-defined rhs
+    for (int ilev = 0; ilev <= finest_level; ilev++)
+    {
+        potential[ilev].define(grids[ilev], dmap[ilev], 1, num_grow);
+        acoeff[ilev].define(grids[ilev], dmap[ilev], 1, 0);
+        bcoeff[ilev].define(grids[ilev], dmap[ilev], 1, 1);
+        solution[ilev].define(grids[ilev], dmap[ilev], 1, 1);
+        rhs[ilev].define(grids[ilev], dmap[ilev], 1, 0);
+    }
 
-    mlmg.solve(GetVecOfPtrs(solution), GetVecOfConstPtrs(rhs), tol_rel, tol_abs);
+    int num_nonlinear_its = 20;
+
+    for (int nl_it = 0; nl_it < num_nonlinear_its; ++nl_it)
+    {
+        for (int ilev = 0; ilev <= finest_level; ilev++)
+        {
+            MultiFab Sborder(grids[ilev], dmap[ilev], phi_new[ilev].nComp(), num_grow);
+            FillPatch(ilev, current_time, Sborder, 0, Sborder.nComp());
+            potential[ilev].setVal(0.0);
+
+            // Copy (FabArray<FAB>& dst, FabArray<FAB> const& src, int srccomp, int dstcomp, int numcomp, const IntVect& nghost)
+            amrex::Copy(potential[ilev], Sborder, NVAR - 1, 0, 1, num_grow);
+
+            acoeff[ilev].setVal(0.0);
+            mlabec.setACoeffs(ilev, acoeff[ilev]);
+
+            bcoeff[ilev].setVal(1.0);
+            solution[ilev].setVal(0.0);
+            rhs[ilev].setVal(0.0);
+
+            for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
+            {
+                const BoxArray& faceba = amrex::convert(grids[ilev], IntVect::TheDimensionVector(idim));
+
+                gradsoln[ilev][idim] = new MultiFab(faceba, dmap[ilev], 1, 0);
+            }
+
+            // copy current solution for better guess
+            if (pot_initial_guess)
+            {
+                amrex::MultiFab::Copy(solution[ilev], potential[ilev], 0, 0, 1, 0);
+                // solution[ilev].copy(potential[ilev], 0, 0, 1);
+            }
+
+            // fill cell centered diffusion coefficients and rhs
+            for (MFIter mfi(phi_new[ilev], TilingIfNotGPU()); mfi.isValid(); ++mfi)
+            {
+                const Box& bx = mfi.tilebox();
+                const Box& gbx = amrex::grow(bx, 1);
+                const auto dx = geom[ilev].CellSizeArray();
+                auto prob_lo = geom[ilev].ProbLoArray();
+                auto prob_hi = geom[ilev].ProbHiArray();
+                const Box& domain = geom[ilev].Domain();
+
+                Real time = current_time; // for GPU capture
+
+                Array4<Real> phi_arr = Sborder.array(mfi);
+                Array4<Real> bcoeff_arr = bcoeff[ilev].array(mfi);
+                Array4<Real> rhs_arr = rhs[ilev].array(mfi);
+
+                amrex::ParallelFor(gbx, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
+                    electrochem_transport::compute_potential_dcoeff(i, j, k, phi_arr, bcoeff_arr, prob_lo, prob_hi, dx, time, *localprobparm);
+                });
+                amrex::ParallelFor(bx, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
+                    electrochem_reactions::compute_potential_source(i, j, k, phi_arr, rhs_arr, prob_lo, prob_hi, dx, time, *localprobparm);
+                });
+            }
+
+            // average cell coefficients to faces, this includes boundary faces
+            Array<MultiFab, AMREX_SPACEDIM> face_bcoeff;
+            for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
+            {
+                const BoxArray& ba = amrex::convert(bcoeff[ilev].boxArray(), IntVect::TheDimensionVector(idim));
+                face_bcoeff[idim].define(ba, bcoeff[ilev].DistributionMap(), 1, 0);
+            }
+            // true argument for harmonic averaging
+            amrex::average_cellcenter_to_face(GetArrOfPtrs(face_bcoeff), bcoeff[ilev], geom[ilev], true);
+
+            if (buttler_vohlmer_flux)
+            {
+                int lset_id = bv_levset_id;
+
+                Array<MultiFab, AMREX_SPACEDIM> bv_explicit_terms;
+                for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
+                {
+                    const BoxArray& ba = amrex::convert(bcoeff[ilev].boxArray(), IntVect::TheDimensionVector(idim));
+                    bv_explicit_terms[idim].define(ba, bcoeff[ilev].DistributionMap(), 1, 0);
+                }
+
+                for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
+                {
+                    for (MFIter mfi(phi_new[ilev], TilingIfNotGPU()); mfi.isValid(); ++mfi)
+                    {
+                        const auto dx = geom[ilev].CellSizeArray();
+                        const Box& bx = mfi.tilebox();
+                        Real min_dx = amrex::min(dx[0], amrex::min(dx[1], dx[2]));
+
+                        // face box
+                        Box fbox = convert(bx, IntVect::TheDimensionVector(idim));
+                        Array4<Real> phi_arr = Sborder.array(mfi);
+                        Array4<Real> dcoeff_arr = face_bcoeff[idim].array(mfi);
+                        Array4<Real> explterms_arr = bv_explicit_terms[idim].array(mfi);
+
+                        amrex::ParallelFor(fbox, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
+                            IntVect left(i, j, k);
+                            IntVect right(i, j, k);
+
+                            IntVect top_left(i, j, k);
+                            IntVect bottom_left(i, j, k);
+                            IntVect top_right(i, j, k);
+                            IntVect bottom_right(i, j, k);
+
+                            IntVect front_left(i, j, k);
+                            IntVect back_left(i, j, k);
+                            IntVect front_right(i, j, k);
+                            IntVect back_right(i, j, k);
+
+                            int normaldir = idim;
+                            int trans1dir = (idim + 1) % AMREX_SPACEDIM;
+                            int trans2dir = (idim + 2) % AMREX_SPACEDIM;
+
+                            left[idim] -= 1;
+                            top_left[idim] -= 1;
+                            bottom_left[idim] -= 1;
+                            front_left[idim] -= 1;
+                            back_left[idim] -= 1;
+
+                            top_left[trans1dir] += 1;
+                            top_right[trans1dir] += 1;
+                            bottom_left[trans1dir] -= 1;
+                            bottom_right[trans1dir] -= 1;
+
+                            front_left[trans2dir] += 1;
+                            front_right[trans2dir] += 1;
+                            back_left[trans2dir] -= 1;
+                            back_right[trans2dir] -= 1;
+
+                            // levelset color
+                            Real c_left = phi_arr(left, lset_id);
+                            Real c_right = phi_arr(right, lset_id);
+
+                            Real c_top = 0.5 * (phi_arr(top_left, lset_id) + phi_arr(top_right, lset_id));
+                            Real c_bot = 0.5 * (phi_arr(bottom_left, lset_id) + phi_arr(bottom_right, lset_id));
+
+                            Real c_frnt = 0.5 * (phi_arr(front_left, lset_id) + phi_arr(front_right, lset_id));
+                            Real c_back = 0.5 * (phi_arr(back_left, lset_id) + phi_arr(back_right, lset_id));
+
+                            // phi
+                            Real pot_left = phi_arr(left, NVAR - 1);
+                            Real pot_right = phi_arr(right, NVAR - 1);
+
+                            Real pot_top = 0.5 * (phi_arr(top_left, NVAR - 1) + phi_arr(top_right, NVAR - 1));
+                            Real pot_bot = 0.5 * (phi_arr(bottom_left, NVAR - 1) + phi_arr(bottom_right, NVAR - 1));
+
+                            Real pot_frnt = 0.5 * (phi_arr(front_left, NVAR - 1) + phi_arr(front_right, NVAR - 1));
+                            Real pot_back = 0.5 * (phi_arr(back_left, NVAR - 1) + phi_arr(back_right, NVAR - 1));
+
+                            // x,y or z
+                            Real dcdn = (c_right - c_left) / dx[normaldir];
+                            Real dcdt1 = (c_top - c_bot) / (2.0 * dx[trans1dir]);
+                            Real dcdt2 = (c_frnt - c_back) / (2.0 * dx[trans2dir]);
+
+                            // grad of potential
+                            Real dphidn = (pot_right - pot_left) / dx[normaldir];
+                            Real dphidt1 = (pot_top - pot_bot) / (2.0 * dx[trans1dir]);
+                            Real dphidt2 = (pot_frnt - pot_back) / (2.0 * dx[trans2dir]);
+
+                            Real gradc_tolfac = 1e-4;
+                            Real gradc_max = 1.0 / min_dx; // maximum gradient possible on the current grid
+                            Real gradc_cutoff = gradc_tolfac * gradc_max;
+
+                            Real mod_gradc = sqrt(dcdn * dcdn + dcdt1 * dcdt1 + dcdt2 * dcdt2);
+
+                            explterms_arr(i, j, k) = 0.0;
+
+                            if (mod_gradc > gradc_cutoff)
+                            {
+                                Real n_ls[3];
+                                n_ls[0] = dcdn / mod_gradc;
+                                n_ls[1] = dcdt1 / mod_gradc;
+                                n_ls[2] = dcdt2 / mod_gradc;
+
+                                Real activ_func = electrochem_reactions::bv_activation_function(0.5 * (c_right + c_left), mod_gradc, gradc_cutoff);
+
+                                // jump along the level set normal (phi_electrolyte-phi_electrode)
+                                Real phi_jump = (dphidn * n_ls[0] + dphidt1 * n_ls[1] + dphidt2 * n_ls[2]) / mod_gradc;
+
+                                /*if(phi_jump > 100)
+                                {
+                                    Print()<<"phi_jump:"<<phi_jump<<"\t"<<dphidn<<"\t"<<dphidt1<<"\t"<<dphidt2<<"\t"
+                                        <<dcdn<<"\t"<<dcdt1<<"\t"<<dcdt2<<"\t"<<mod_gradc<<"\n";
+                                }*/
+
+                                // FIXME: pass ion concentration also
+                                // FIXME: ideally it should be the ion concentration at the closest electrode cell
+                                Real j_bv = electrochem_reactions::bvcurrent(phi_jump);
+                                Real jdash_bv = electrochem_reactions::bvcurrent_der(phi_jump);
+
+                                dcoeff_arr(i, j, k) *= (1.0 - activ_func);
+                                // dcoeff_arr(i,j,k) += -jdash_bv*activ_func/pow(mod_gradc,3.0) * dcdn*dcdn;
+                                dcoeff_arr(i, j, k) += -jdash_bv * activ_func / mod_gradc * n_ls[0] * n_ls[0];
+
+                                // expl term1
+                                // explterms_arr(i,j,k) =   j_bv*activ_func*dcdn/mod_gradc;
+                                explterms_arr(i, j, k) = j_bv * activ_func * n_ls[0];
+
+                                // expl term2
+                                // explterms_arr(i,j,k) += -jdash_bv*phi_jump*activ_func*dcdn/mod_gradc;
+                                explterms_arr(i, j, k) += -jdash_bv * phi_jump * activ_func * n_ls[0];
+
+                                // expl term3 (mix derivative terms from tensor product)
+                                // explterms_arr(i,j,k) +=  jdash_bv*activ_func/pow(mod_gradc,3.0)*(dcdn*dcdt1*dphidt1+dcdn*dcdt2*dphidt2);
+                                explterms_arr(i, j, k) += jdash_bv * activ_func / mod_gradc * (n_ls[0] * n_ls[1] * dphidt1 + n_ls[0] * n_ls[2] * dphidt2);
+                            }
+                        });
+                    }
+                }
+
+                for (MFIter mfi(phi_new[ilev], TilingIfNotGPU()); mfi.isValid(); ++mfi)
+                {
+                    const Box& bx = mfi.tilebox();
+                    const auto dx = geom[ilev].CellSizeArray();
+
+                    Array4<Real> rhs_arr = rhs[ilev].array(mfi);
+                    Array4<Real> phi_arr = Sborder.array(mfi);
+
+                    Array4<Real> term_x = bv_explicit_terms[0].array(mfi);
+                    Array4<Real> term_y = bv_explicit_terms[1].array(mfi);
+                    Array4<Real> term_z = bv_explicit_terms[2].array(mfi);
+
+                    Real relax_fac = bv_relaxfac;
+
+                    amrex::ParallelFor(bx, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
+                        rhs_arr(i, j, k) = (term_x(i, j, k) - term_x(i + 1, j, k)) / dx[0] + (term_y(i, j, k) - term_y(i, j + 1, k)) / dx[1] +
+                                           (term_z(i, j, k) - term_z(i, j, k + 1)) / dx[2];
+
+                        rhs_arr(i, j, k) += phi_arr(i, j, k, NVAR - 1) * relax_fac;
+                    });
+                }
+            }
+
+            // set boundary conditions
+            for (MFIter mfi(phi_new[ilev], TilingIfNotGPU()); mfi.isValid(); ++mfi)
+            {
+                const Box& bx = mfi.tilebox();
+                const auto dx = geom[ilev].CellSizeArray();
+                auto prob_lo = geom[ilev].ProbLoArray();
+                auto prob_hi = geom[ilev].ProbHiArray();
+                const Box& domain = geom[ilev].Domain();
+
+                Array4<Real> phi_arr = Sborder.array(mfi);
+                Array4<Real> bc_arr = potential[ilev].array(mfi);
+                Real time = current_time; // for GPU capture
+
+                for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
+                {
+                    const amrex::Real bclo = host_global_storage->pot_bc_lo[idim];
+                    const amrex::Real bchi = host_global_storage->pot_bc_hi[idim];
+
+                    if (!geom[ilev].isPeriodic(idim))
+                    {
+                        if (bx.smallEnd(idim) == domain.smallEnd(idim))
+                        {
+                            amrex::ParallelFor(amrex::bdryLo(bx, idim), [=] AMREX_GPU_DEVICE(int i, int j, int k) noexcept {
+                                electrochem_transport::potential_bc(i, j, k, idim, -1, phi_arr, bc_arr, prob_lo, prob_hi, dx, time, bclo, bchi);
+                            });
+                        }
+                        if (bx.bigEnd(idim) == domain.bigEnd(idim))
+                        {
+                            amrex::ParallelFor(amrex::bdryHi(bx, idim), [=] AMREX_GPU_DEVICE(int i, int j, int k) noexcept {
+                                electrochem_transport::potential_bc(i, j, k, idim, 1, phi_arr, bc_arr, prob_lo, prob_hi, dx, time, bclo, bchi);
+                            });
+                        }
+                    }
+                }
+            }
+
+            // set b with diffusivities
+            mlabec.setBCoeffs(ilev, amrex::GetArrOfConstPtrs(face_bcoeff));
+
+            // bc's are stored in the ghost cells of potential
+            mlabec.setLevelBC(ilev, &(potential[ilev]));
+        }
+
+        // need user-defined rhs
+
+        mlmg.solve(GetVecOfPtrs(solution), GetVecOfConstPtrs(rhs), tol_rel, tol_abs);
+
+        // copy solution back to phi_new
+        for (int ilev = 0; ilev <= finest_level; ilev++)
+        {
+            amrex::MultiFab::Copy(phi_new[ilev], solution[ilev], 0, NVAR - 1, 1, 0);
+        }
+    }
 
     mlmg.getGradSolution(gradsoln);
-    // reset ghost cells using boundary condition values
-    // this is commented out since the fillpatch will overwrite this anyways
-    //    for(int ilev=0; ilev<=finest_level; ilev++)
-    //    {
-    //        for (MFIter mfi(phi_new[ilev],TilingIfNotGPU()); mfi.isValid(); ++mfi)
-    //        {
-    //            const Box& bx = mfi.tilebox();
-    //            const Box& gbx = amrex::grow(bx,1);
-    //            const auto dx = geom[ilev].CellSizeArray();
-    //            auto prob_lo = geom[ilev].ProbLoArray();
-    //            auto prob_hi = geom[ilev].ProbHiArray();
-    //            const Box& domain = geom[ilev].Domain();
-    //
-    //            Array4<Real> bc_arr = potential[ilev].array(mfi);
-    //            Array4<Real> sol_arr = solution[ilev].array(mfi);
-    //
-    //            int idim = 0;
-    //            if (!geom[ilev].isPeriodic(idim)) {
-    //                if (bx.smallEnd(idim) == domain.smallEnd(idim)) {
-    //                      amrex::ParallelFor(
-    //                          amrex::bdryLo(bx, idim),
-    //                          [=] AMREX_GPU_DEVICE(int i, int j, int k) noexcept {
-    //                            //(sol(i) - sol(i-1))/dx = bc -> sol(i-1) = sol(i) - bc*dx
-    //                            sol_arr(i-1,j,k) = sol_arr(i,j,k) - bc_arr(i-1,j,k)*dx[idim];
-    //                          });
-    //                  }
-    //                  if (bx.bigEnd(idim) == domain.bigEnd(idim)) {
-    //                      amrex::ParallelFor(
-    //                          amrex::bdryHi(bx, idim),
-    //                          [=] AMREX_GPU_DEVICE(int i, int j, int k) noexcept {
-    //                              sol_arr(i,j,k) = - sol_arr(i-1,j,k) + bc_arr(i,j,k)*dx[idim];
-    //                          });
-    //                  }
-    //            }
-    //
-    //            idim = 1;
-    //            if (!geom[ilev].isPeriodic(idim)) {
-    //                if (bx.smallEnd(idim) == domain.smallEnd(idim)) {
-    //                      amrex::ParallelFor(
-    //                          amrex::bdryLo(bx, idim),
-    //                          [=] AMREX_GPU_DEVICE(int i, int j, int k) noexcept {
-    //                            sol_arr(i,j-1,k) = sol_arr(i,j,k) - bc_arr(i,j-1,k)*dx[idim];
-    //                          });
-    //                  }
-    //                  if (bx.bigEnd(idim) == domain.bigEnd(idim)) {
-    //                      amrex::ParallelFor(
-    //                          amrex::bdryHi(bx, idim),
-    //                          [=] AMREX_GPU_DEVICE(int i, int j, int k) noexcept {
-    //                              sol_arr(i,j,k) = - sol_arr(i,j-1,k) + bc_arr(i,j,k)*dx[idim];
-    //                          });
-    //                  }
-    //            }
-    //
-    //            idim = 2;
-    //            if (!geom[ilev].isPeriodic(idim)) {
-    //                if (bx.smallEnd(idim) == domain.smallEnd(idim)) {
-    //                      amrex::ParallelFor(
-    //                          amrex::bdryLo(bx, idim),
-    //                          [=] AMREX_GPU_DEVICE(int i, int j, int k) noexcept {
-    //                            sol_arr(i,j,k-1) = sol_arr(i,j,k) - bc_arr(i,j,k-1)*dx[idim];
-    //                          });
-    //                  }
-    //                  if (bx.bigEnd(idim) == domain.bigEnd(idim)) {
-    //                      amrex::ParallelFor(
-    //                          amrex::bdryHi(bx, idim),
-    //                          [=] AMREX_GPU_DEVICE(int i, int j, int k) noexcept {
-    //                              sol_arr(i,j,k) = - sol_arr(i,j,k-1) + bc_arr(i,j,k)*dx[idim];
-    //                          });
-    //                  }
-    //            }
-    //        }
-    //    }
 
     // copy solution back to phi_new
     for (int ilev = 0; ilev <= finest_level; ilev++)
