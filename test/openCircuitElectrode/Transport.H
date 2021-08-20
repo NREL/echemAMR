@@ -27,16 +27,6 @@ namespace electrochem_transport
         const int im1 = (dir == 0) ? i-1 : i;
         const int jm1 = (dir == 1) ? j-1 : j;
         const int km1 = (dir == 2) ? k-1 : k;
-        
-        xlen=prob_hi[0]-prob_lo[0];
-        ylen=prob_hi[1]-prob_lo[1];
-        zlen=prob_hi[2]-prob_lo[2];
-
-        maxlen=std::max(xlen,std::max(ylen,zlen));
-
-        if(maxlen==xlen) axialdir=0;
-        if(maxlen==ylen) axialdir=1;
-        if(maxlen==zlen) axialdir=2;
 
         if(sgn == -1) 
         { // lo sides
@@ -71,19 +61,6 @@ namespace electrochem_transport
                 const Real time,
                 ProbParm const& prob_parm)
         {
-            Real xlen,ylen,zlen,maxlen;
-            int dir=0;
-
-            xlen=prob_hi[0]-prob_lo[0];
-            ylen=prob_hi[1]-prob_lo[1];
-            zlen=prob_hi[2]-prob_lo[2];
-
-            maxlen=std::max(xlen,std::max(ylen,zlen));
-
-            if(maxlen==xlen) dir=0;
-            if(maxlen==ylen) dir=1;
-            if(maxlen==zlen) dir=2;
-
             velx(i,j,k,S1_ID)=0.0;
         }
     AMREX_GPU_DEVICE AMREX_INLINE
@@ -96,19 +73,6 @@ namespace electrochem_transport
                 const Real time,
                 ProbParm const& prob_parm)
         {
-            Real xlen,ylen,zlen,maxlen;
-            int dir=0;
-
-            xlen=prob_hi[0]-prob_lo[0];
-            ylen=prob_hi[1]-prob_lo[1];
-            zlen=prob_hi[2]-prob_lo[2];
-
-            maxlen=std::max(xlen,std::max(ylen,zlen));
-
-            if(maxlen==xlen) dir=0;
-            if(maxlen==ylen) dir=1;
-            if(maxlen==zlen) dir=2;
-
             vely(i,j,k,S1_ID)=0.0;
         }
 
@@ -122,19 +86,6 @@ namespace electrochem_transport
                 const Real time,
                 ProbParm const& prob_parm)
         {
-            Real xlen,ylen,zlen,maxlen;
-            int dir=0;
-
-            xlen=prob_hi[0]-prob_lo[0];
-            ylen=prob_hi[1]-prob_lo[1];
-            zlen=prob_hi[2]-prob_lo[2];
-
-            maxlen=std::max(xlen,std::max(ylen,zlen));
-
-            if(maxlen==xlen) dir=0;
-            if(maxlen==ylen) dir=1;
-            if(maxlen==zlen) dir=2;
-
             velz(i,j,k,S1_ID)=0.0;
         }
 
