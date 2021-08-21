@@ -276,6 +276,10 @@ void echemAMR::ReadParameters()
         pp.query("bv_nonlinear_tol", bv_nonlinear_tol);
 
         pp.query("use_hypre",use_hypre);
+
+        pp.query("linsolve_reltol",linsolve_reltol);
+        pp.query("linsolve_abstol",linsolve_abstol);
+        pp.query("linsolve_maxiter",linsolve_maxiter);
     }
 }
 

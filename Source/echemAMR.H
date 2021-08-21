@@ -190,6 +190,10 @@ private:
     // BV poisson solves
     amrex::Real bv_relaxfac = 0.0;
 
+    amrex::Real linsolve_reltol = 1e-6;
+    amrex::Real linsolve_abstol = 1e-10;
+    int linsolve_maxiter=100;
+
     // how often each level regrids the higher levels of refinement
     // (after a level advances that many time steps)
     int regrid_int = 2;

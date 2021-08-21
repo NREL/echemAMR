@@ -111,7 +111,6 @@ void echemAMR::solve_potential(Real current_time)
     bool semicoarsening = false;
     int max_semicoarsening_level = 0;
     int linop_maxorder = 2;
-    int max_iter = 100;
     int max_fmg_iter = 0;
     int verbose = 2;
     int bottom_verbose = 0;
@@ -136,18 +135,16 @@ void echemAMR::solve_potential(Real current_time)
     // this could be due to missing terms in the intercalation reaction or sign mistakes...
     ProbParm const* localprobparm = d_prob_parm;
 
-    const Real tol_rel = 1.0e-6;
-    const Real tol_abs = 1.0e-13;
+    const Real tol_rel = linsolve_reltol;
+    const Real tol_abs = linsolve_abstol;
 
 #ifdef AMREX_USE_HYPRE
-    int hypre_interface_i = 1; // 1. structed, 2. semi-structed, 3. ij
-    Hypre::Interface hypre_interface = Hypre::Interface::structed;
+    Hypre::Interface hypre_interface = Hypre::Interface::ij;
     if(use_hypre)
     {
         amrex::Print()<<"using hypre\n";
     }
 #endif
-
     info.setAgglomeration(agglomeration);
     info.setConsolidation(consolidation);
     info.setSemicoarsening(semicoarsening);
@@ -227,7 +224,7 @@ void echemAMR::solve_potential(Real current_time)
     const int num_grow = 1;
 
     MLMG mlmg(mlabec);
-    mlmg.setMaxIter(max_iter);
+    mlmg.setMaxIter(linsolve_maxiter);
     mlmg.setMaxFmgIter(max_fmg_iter);
     mlmg.setVerbose(verbose);
     mlmg.setBottomVerbose(bottom_verbose);
@@ -271,7 +268,7 @@ void echemAMR::solve_potential(Real current_time)
             // Copy (FabArray<FAB>& dst, FabArray<FAB> const& src, int srccomp, int dstcomp, int numcomp, const IntVect& nghost)
             amrex::Copy(potential[ilev], Sborder, NVAR - 1, 0, 1, num_grow);
 
-            acoeff[ilev].setVal(0.0);
+            acoeff[ilev].setVal(1.0); //will be scaled by ascalar
             mlabec.setACoeffs(ilev, acoeff[ilev]);
 
             bcoeff[ilev].setVal(1.0);
