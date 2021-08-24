@@ -24,34 +24,34 @@ namespace electrochem_reactions
         }
 
     AMREX_GPU_DEVICE AMREX_INLINE
-    void compute_potential_source(int i, int j, int k,
-            Array4<Real> const& phi,
-            Array4<Real> const& source,
-            GpuArray<Real, AMREX_SPACEDIM> prob_lo,
-            GpuArray<Real, AMREX_SPACEDIM> prob_hi,
-            GpuArray<Real, AMREX_SPACEDIM> dx,
-            const Real time,
-            ProbParm const& prob_parm)
-    {
-        source(i,j,k)=0.0;
-    }
-    
-    AMREX_GPU_DEVICE AMREX_INLINE
-    Real bvcurrent(Real phi_jump)
-    {
-       return(0);
-    }
-    
-    AMREX_GPU_DEVICE AMREX_INLINE
-    Real bvcurrent_der(Real phi_jump)
-    {
-       return(0);
-    }
-    
-    AMREX_GPU_DEVICE AMREX_INLINE
-    Real bv_activation_function(Real c, Real gradc, Real gradc_cutoff)
+        void compute_potential_source(int i, int j, int k,
+                Array4<Real> const& phi,
+                Array4<Real> const& source,
+                GpuArray<Real, AMREX_SPACEDIM> prob_lo,
+                GpuArray<Real, AMREX_SPACEDIM> prob_hi,
+                GpuArray<Real, AMREX_SPACEDIM> dx,
+                const Real time,
+                ProbParm const& prob_parm)
+        {
+            source(i,j,k)=0.0;
+        }
+
+    AMREX_GPU_DEVICE AMREX_INLINE Real bvcurrent(int i,int j,int k,int normaldir,
+            Real phi_jump,Array4<Real> const& phi,ProbParm const& prob_parm)
     {
         return(0);
     }
+
+    AMREX_GPU_DEVICE AMREX_INLINE Real bvcurrent_der(int i,int j,int k,int normaldir,
+            Real phi_jump,Array4<Real> const& phi,ProbParm const& prob_parm)
+    {
+        return(0);
+    }
+
+    AMREX_GPU_DEVICE AMREX_INLINE
+        Real bv_activation_function(Real c, Real gradc, Real gradc_cutoff)
+        {
+            return(0);
+        }
 }
 #endif
