@@ -107,12 +107,12 @@ void echemAMR::solve_potential(Real current_time)
     // FIXME: add these as inputs
     int agglomeration = 1;
     int consolidation = 1;
-    int max_coarsening_level = 0;
+    int max_coarsening_level = linsolve_max_coarsening_level;
     bool semicoarsening = false;
     int max_semicoarsening_level = 0;
     int linop_maxorder = 2;
     int max_fmg_iter = 0;
-    int verbose = 2;
+    int verbose = 1;
     int bottom_verbose = 0;
     Real ascalar = 0.0;
     Real bscalar = 1.0;
@@ -440,7 +440,7 @@ void echemAMR::solve_potential(Real current_time)
                                 // jump along the level set normal (phi_electrolyte-phi_electrode)
                                 Real phi_jump = (dphidn * n_ls[0] + dphidt1 * n_ls[1] + dphidt2 * n_ls[2]) / mod_gradc;
 
-                                /*if(phi_jump > 100)
+                                /*if(fabs(phi_jump) > 1)
                                 {
                                     Print()<<"phi_jump:"<<phi_jump<<"\t"<<dphidn<<"\t"<<dphidt1<<"\t"<<dphidt2<<"\t"
                                         <<dcdn<<"\t"<<dcdt1<<"\t"<<dcdt2<<"\t"<<mod_gradc<<"\n";
@@ -448,8 +448,8 @@ void echemAMR::solve_potential(Real current_time)
 
                                 // FIXME: pass ion concentration also
                                 // FIXME: ideally it should be the ion concentration at the closest electrode cell
-                                Real j_bv = electrochem_reactions::bvcurrent(phi_jump);
-                                Real jdash_bv = electrochem_reactions::bvcurrent_der(phi_jump);
+                                Real j_bv = electrochem_reactions::bvcurrent(i,j,k,normaldir,phi_jump,phi_arr,*localprobparm);
+                                Real jdash_bv = electrochem_reactions::bvcurrent_der(i,j,k,normaldir,phi_jump,phi_arr,*localprobparm);
 
                                 dcoeff_arr(i, j, k) *= (1.0 - activ_func);
                                 dcoeff_arr_res(i, j, k) = dcoeff_arr(i, j, k);
@@ -560,7 +560,8 @@ void echemAMR::solve_potential(Real current_time)
         // copy solution back to phi_new
         if(buttler_vohlmer_flux)
         {
-            Real errnorm_all=0.0;
+            Real abs_errnorm_all=0.0;
+            Real rel_errnorm_all=0.0;
             for (int ilev = 0; ilev <= finest_level; ilev++)
             {
                 amrex::MultiFab::Copy(err[ilev], phi_new[ilev], NVAR - 1, 0, 1, 0);
@@ -575,12 +576,14 @@ void echemAMR::solve_potential(Real current_time)
                 amrex::Print()<<"lev, iter, abs errnorm, rel errnorm:"<<ilev<<"\t"
                     <<nl_it<<"\t"<<errnorm<<"\t"<<rel_errnorm<<"\n";
 
-                errnorm_all += errnorm;
+               abs_errnorm_all += errnorm;
+               rel_errnorm_all += rel_errnorm;
             }
 
-            if(errnorm_all < bv_nonlinear_tol)
+            if(rel_errnorm_all < bv_nonlinear_tol)
             {
-                amrex::Print()<<"Converged with final error:"<<errnorm_all<<"\n";
+                amrex::Print()<<"Converged with final error:"<<rel_errnorm_all
+                    <<"\t"<<abs_errnorm_all<<"\n";
                 break;
             }
         }
@@ -722,6 +725,8 @@ void echemAMR::compute_dsdt(int lev, const int num_grow, MultiFab& Sborder, Mult
     auto prob_hi = geom[lev].ProbHiArray();
     ProbParm const* localprobparm = d_prob_parm;
 
+    int bvflux=buttler_vohlmer_flux;
+
     int ncomp = Sborder.nComp();
 
     // Build temporary multiFabs to work on.
@@ -797,15 +802,15 @@ void echemAMR::compute_dsdt(int lev, const int num_grow, MultiFab& Sborder, Mult
             });
 
             amrex::ParallelFor(bx_x, ncomp, [=] AMREX_GPU_DEVICE(int i, int j, int k, int n) {
-                compute_flux_x(i, j, k, n, sborder_arr, velx_arr, dcoeff_arr, flux_arr[0], dx);
+                compute_flux_x(i, j, k, n, sborder_arr, velx_arr, dcoeff_arr, flux_arr[0], dx, bvflux);
             });
 
             amrex::ParallelFor(bx_y, ncomp, [=] AMREX_GPU_DEVICE(int i, int j, int k, int n) {
-                compute_flux_y(i, j, k, n, sborder_arr, vely_arr, dcoeff_arr, flux_arr[1], dx);
+                compute_flux_y(i, j, k, n, sborder_arr, vely_arr, dcoeff_arr, flux_arr[1], dx, bvflux);
             });
 
             amrex::ParallelFor(bx_z, ncomp, [=] AMREX_GPU_DEVICE(int i, int j, int k, int n) {
-                compute_flux_z(i, j, k, n, sborder_arr, velz_arr, dcoeff_arr, flux_arr[2], dx);
+                compute_flux_z(i, j, k, n, sborder_arr, velz_arr, dcoeff_arr, flux_arr[2], dx, bvflux);
             });
 
             // update residual

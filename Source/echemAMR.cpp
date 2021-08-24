@@ -270,6 +270,7 @@ void echemAMR::ReadParameters()
 
         pp.query("buttler_vohlmer_flux", buttler_vohlmer_flux);
         pp.query("bv_levelset_id", bv_levset_id);
+        pp.query("bv_species_id", bv_spec_id);
 
         pp.query("bv_relaxation_factor", bv_relaxfac);
         pp.query("bv_nonlinear_iters", bv_nonlinear_iters);
@@ -280,6 +281,7 @@ void echemAMR::ReadParameters()
         pp.query("linsolve_reltol",linsolve_reltol);
         pp.query("linsolve_abstol",linsolve_abstol);
         pp.query("linsolve_maxiter",linsolve_maxiter);
+        pp.query("linsolve_max_coarsening_level",linsolve_max_coarsening_level);
     }
 }
 

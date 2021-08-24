@@ -20,11 +20,12 @@ void compute_flux_x(
     Array4<Real> const& vel,
     Array4<Real> const& dcoeff,
     Array4<Real> const& fx,
-    const GpuArray<Real, AMREX_SPACEDIM>& dx)
+    const GpuArray<Real, AMREX_SPACEDIM>& dx, int bvflux)
 {
 
     const amrex::Real d1 = dcoeff(i, j, k, n);
     const amrex::Real d2 = dcoeff(i - 1, j, k, n);
+
     fx(i, j, k, n) = -2.0 * d1 * d2 / (d1 + d2 + heps) * (phi(i, j, k, n) - phi(i - 1, j, k, n)) / dx[0];
     //    fx(i,j,k,n) = -0.5 * (dcoeff(i,j,k,n)+dcoeff(i-1,j,k,n)) * (phi(i,j,k,n) - phi(i-1,j,k,n))/dx[0];
 
@@ -51,6 +52,7 @@ void compute_flux_x(
 
     Real vel_mid = vel(i, j, k, n);
     fx(i, j, k, n) += phi_L * 0.5 * (vel_mid + fabs(vel_mid)) + phi_R * 0.5 * (vel_mid - fabs(vel_mid));
+
 }
 
 AMREX_GPU_DEVICE
@@ -64,7 +66,7 @@ void compute_flux_y(
     Array4<Real> const& vel,
     Array4<Real> const& dcoeff,
     Array4<Real> const& fy,
-    const GpuArray<Real, AMREX_SPACEDIM>& dx)
+    const GpuArray<Real, AMREX_SPACEDIM>& dx, int bvflux)
 {
 
     const amrex::Real d1 = dcoeff(i, j, k, n);
@@ -108,7 +110,7 @@ void compute_flux_z(
     Array4<Real> const& vel,
     Array4<Real> const& dcoeff,
     Array4<Real> const& fz,
-    const GpuArray<Real, AMREX_SPACEDIM>& dx)
+    const GpuArray<Real, AMREX_SPACEDIM>& dx, int bvflux)
 {
 
     const amrex::Real d1 = dcoeff(i, j, k, n);

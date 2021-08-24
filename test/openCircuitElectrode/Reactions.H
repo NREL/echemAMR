@@ -38,7 +38,8 @@ AMREX_GPU_DEVICE AMREX_INLINE void compute_potential_source(
     source(i, j, k) = 0.0;
 }
 
-AMREX_GPU_DEVICE AMREX_INLINE Real bvcurrent(Real phi_jump)
+AMREX_GPU_DEVICE AMREX_INLINE Real bvcurrent(int i,int j,int k,int normaldir,
+        Real phi_jump,Array4<Real> const& phi,ProbParm const& prob_parm)
 {
     Real ocp = 0.2;
     Real j0 = 1.0;
@@ -53,7 +54,8 @@ AMREX_GPU_DEVICE AMREX_INLINE Real bvcurrent(Real phi_jump)
     return (jbv);
 }
 
-AMREX_GPU_DEVICE AMREX_INLINE Real bvcurrent_der(Real phi_jump)
+AMREX_GPU_DEVICE AMREX_INLINE Real bvcurrent_der(int i,int j,int k,int normaldir,
+        Real phi_jump,Array4<Real> const& phi,ProbParm const& prob_parm)
 {
     Real ocp = 0.2;
     Real j0 = 1.0;

@@ -36,7 +36,8 @@ namespace electrochem_reactions
     }
     
     AMREX_GPU_DEVICE AMREX_INLINE
-    Real bvcurrent(Real phi_jump)
+    Real bvcurrent(int i,int j,int k,int normaldir,Real phi_jump,
+            Array4<Real> const& phi,ProbParm const& prob_parm)
     {
        Real ocp=0.2;
        Real j0=3.0;
@@ -52,7 +53,8 @@ namespace electrochem_reactions
     }
     
     AMREX_GPU_DEVICE AMREX_INLINE
-    Real bvcurrent_der(Real phi_jump)
+    Real bvcurrent_der(int i,int j,int k,int normaldir,Real phi_jump,
+            Array4<Real> const& phi,ProbParm const& prob_parm)
     {
        Real ocp=0.2;
        Real j0=3.0;
