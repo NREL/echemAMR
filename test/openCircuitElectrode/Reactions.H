@@ -21,6 +21,7 @@ AMREX_GPU_DEVICE AMREX_INLINE void compute_react_source(
     ProbParm const& prob_parm)
 {
     reactsource(i, j, k, S1_ID) = 0.0;
+    reactsource(i, j, k, LS_ID) = 0.0;
 }
 
 AMREX_GPU_DEVICE AMREX_INLINE void compute_potential_source(

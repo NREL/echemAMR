@@ -22,8 +22,6 @@
 #define POT_ID  9
 #define NVAR NUM_SPECIES+4 
 
-#define FARADCONST 96387.0
-#define GASCONST   8.31446261815324
 
 namespace electrochem
 {

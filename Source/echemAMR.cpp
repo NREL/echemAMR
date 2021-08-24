@@ -274,7 +274,8 @@ void echemAMR::ReadParameters()
 
         pp.query("bv_relaxation_factor", bv_relaxfac);
         pp.query("bv_nonlinear_iters", bv_nonlinear_iters);
-        pp.query("bv_nonlinear_tol", bv_nonlinear_tol);
+        pp.query("bv_nonlinear_reltol", bv_nonlinear_reltol);
+        pp.query("bv_nonlinear_abstol", bv_nonlinear_abstol);
 
         pp.query("use_hypre",use_hypre);
 

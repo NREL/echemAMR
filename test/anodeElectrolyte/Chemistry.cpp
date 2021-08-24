@@ -7,6 +7,7 @@ namespace electrochem
     void init()
     {
         specnames[S1_ID]="S1";
+        specnames[LS_ID]="levelset";
     }    
     void close()
     {

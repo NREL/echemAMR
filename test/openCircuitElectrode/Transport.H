@@ -51,7 +51,8 @@ AMREX_GPU_DEVICE AMREX_INLINE void compute_dcoeff(
     const Real time,
     ProbParm const& prob_parm)
 {
-    dcoeff(i, j, k, S1_ID) = 0.0;
+    dcoeff(i, j, k, S1_ID) = 0.1;
+    dcoeff(i, j, k, LS_ID) = 0.0;
 }
 
 AMREX_GPU_DEVICE AMREX_INLINE void compute_velx(
@@ -67,6 +68,7 @@ AMREX_GPU_DEVICE AMREX_INLINE void compute_velx(
     ProbParm const& prob_parm)
 {
     velx(i, j, k, S1_ID) = 0.0;
+    velx(i, j, k, LS_ID) = 0.0;
 }
 AMREX_GPU_DEVICE AMREX_INLINE void compute_vely(
     int i,
@@ -81,6 +83,7 @@ AMREX_GPU_DEVICE AMREX_INLINE void compute_vely(
     ProbParm const& prob_parm)
 {
     vely(i, j, k, S1_ID) = 0.0;
+    vely(i, j, k, LS_ID) = 0.0;
 }
 
 AMREX_GPU_DEVICE AMREX_INLINE void compute_velz(
@@ -96,6 +99,7 @@ AMREX_GPU_DEVICE AMREX_INLINE void compute_velz(
     ProbParm const& prob_parm)
 {
     velz(i, j, k, S1_ID) = 0.0;
+    velz(i, j, k, LS_ID) = 0.0;
 }
 
 AMREX_GPU_DEVICE AMREX_INLINE void compute_potential_dcoeff(

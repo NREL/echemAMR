@@ -9,12 +9,13 @@
 #include <AMReX_FArrayBox.H>
 #include <AMReX_Box.H>
 
-#define NUM_SPECIES 1
-#define S1_ID 0
-#define EFX_ID 1
-#define EFY_ID 2
-#define EFZ_ID 3
-#define POT_ID 4
+#define NUM_SPECIES 2
+#define S1_ID   0
+#define LS_ID   1
+#define EFX_ID  2
+#define EFY_ID  3
+#define EFZ_ID  4
+#define POT_ID  5
 #define NVAR NUM_SPECIES+4 
 
 namespace electrochem

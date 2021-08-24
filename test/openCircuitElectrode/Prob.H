@@ -55,8 +55,9 @@ void initdomaindata(Box const& bx, Array4<Real> const& phi, GeometryData const& 
             for (int i = lo.x; i <= hi.x; ++i) 
             {
                 Real x = prob_lo[0] + (0.5+i) * dx[0];
-                phi(i,j,k,S1_ID)=  0.5*(1.0-tanh(prob_parm->sharpness_factor*(x-xi1)))
-                                  +0.5*(1.0+tanh(prob_parm->sharpness_factor*(x-xi2)));
+                phi(i,j,k,LS_ID) =  0.5*(1.0-tanh(prob_parm->sharpness_factor*(x-xi1)))
+                                     +0.5*(1.0+tanh(prob_parm->sharpness_factor*(x-xi2)));
+                phi(i,j,k,S1_ID)   = phi(i,j,k,LS_ID);
                 phi(i,j,k,EFX_ID) = 0.0;
                 phi(i,j,k,EFY_ID) = 0.0;
                 phi(i,j,k,EFZ_ID) = 0.0;
@@ -96,17 +97,6 @@ void externalbc(const amrex::Real x[AMREX_SPACEDIM],
     for(int c=0;c<NVAR;c++)
     {
         s_ext[c]=s_int[c];
-    }
-
-    if(sgn > 0) //left lo side
-    {
-        s_ext[S1_ID]=1.0;
-        s_ext[POT_ID]=1.0;
-    }
-    else
-    {
-        s_ext[S1_ID]=1.0;
-        s_ext[POT_ID]=1.0;
     }
 }
 #endif

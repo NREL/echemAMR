@@ -20,6 +20,7 @@
 #include <AMReX_BCRec.H>
 #include <ChemistryProbParm.H>
 
+
 using namespace amrex;
 
 class echemAMR : public amrex::AmrCore
@@ -216,7 +217,8 @@ private:
     int bv_spec_id = 0;
 
     int bv_nonlinear_iters = 1;
-    Real bv_nonlinear_tol = 1e-8;
+    Real bv_nonlinear_reltol = 1e-8;
+    Real bv_nonlinear_abstol = 1e-12;
     int use_hypre=0;
 
     // frequency to output line plots

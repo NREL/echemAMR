@@ -1,5 +1,5 @@
 AMREX_HOME ?= ../../../..
-ECHEM_DIR   = ../../../echemAMR
+ECHEM_DIR   ?= ../../../echemAMR
 
 TOP := $(ECHEM_DIR)
 

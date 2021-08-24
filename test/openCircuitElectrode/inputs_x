@@ -33,13 +33,14 @@ echemamr.lo_bc = 3 2 2
 echemamr.hi_bc = 3 2 2
 
 # Tagging
-echemamr.tagged_vars = S1
-echemamr.S1_refine = 1e20
-echemamr.S1_refinegrad = 0.2
+echemamr.tagged_vars = levelset
+echemamr.levelset_refine = 1e20
+echemamr.levelset_refinegrad = 0.2
 
 #buttler vohlmer flux
 echemamr.buttler_vohlmer_flux=1
-echemamr.bv_levelset_id=0
+echemamr.bv_species_id =0
+echemamr.bv_levelset_id=1
 echemamr.bv_nonlinear_iters=40
 echemamr.dtmax=1e-3
 

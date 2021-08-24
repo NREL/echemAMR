@@ -58,7 +58,8 @@ namespace electrochem_transport
                 const Real time,
                 ProbParm const& prob_parm)
         {
-            dcoeff(i,j,k,S1_ID)   = 0.0;
+            dcoeff(i,j,k,S1_ID)   = 1.0;
+            dcoeff(i,j,k,LS_ID)   = 0.0;
         }
 
     AMREX_GPU_DEVICE AMREX_INLINE
@@ -72,6 +73,7 @@ namespace electrochem_transport
                 ProbParm const& prob_parm)
         {
             velx(i,j,k,S1_ID)=0.0;
+            velx(i,j,k,LS_ID)=0.0;
         }
     AMREX_GPU_DEVICE AMREX_INLINE
         void compute_vely(int i, int j, int k,
@@ -84,6 +86,7 @@ namespace electrochem_transport
                 ProbParm const& prob_parm)
         {
             vely(i,j,k,S1_ID)=0.0;
+            vely(i,j,k,LS_ID)=0.0;
         }
 
     AMREX_GPU_DEVICE AMREX_INLINE
@@ -97,6 +100,7 @@ namespace electrochem_transport
                 ProbParm const& prob_parm)
         {
             velz(i,j,k,S1_ID)=0.0;
+            velz(i,j,k,LS_ID)=0.0;
         }
 
     AMREX_GPU_DEVICE AMREX_INLINE
@@ -109,7 +113,7 @@ namespace electrochem_transport
                 const Real time,
                 ProbParm const& prob_parm)
         {
-            const amrex::Real ls = phi(i,j,k,S1_ID);
+            const amrex::Real ls = phi(i,j,k,LS_ID);
             dcoeff(i,j,k) = (1.0-ls)*prob_parm.electrode_dcoeff + prob_parm.electrolyte_dcoeff*ls;
         }
 

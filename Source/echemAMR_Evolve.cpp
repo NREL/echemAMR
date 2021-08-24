@@ -118,6 +118,9 @@ void echemAMR::solve_potential(Real current_time)
     Real bscalar = 1.0;
     int num_nonlinear_iters;
 
+    //FIXME:need a compiler macro variable for potential id to be NVAR-1
+    //FIXME:call get_grads_and_jumps function from Src3d for BVflux
+
     //==================================================
     // amrex solves
     // read small a as alpha, b as beta
@@ -580,14 +583,14 @@ void echemAMR::solve_potential(Real current_time)
                rel_errnorm_all += rel_errnorm;
             }
 
-            if(rel_errnorm_all < bv_nonlinear_tol)
+            if(abs_errnorm_all < bv_nonlinear_abstol ||
+                    rel_errnorm_all < bv_nonlinear_reltol)
             {
                 amrex::Print()<<"Converged with final error:"<<rel_errnorm_all
                     <<"\t"<<abs_errnorm_all<<"\n";
                 break;
             }
         }
-
 
         // copy solution back to phi_new
         for (int ilev = 0; ilev <= finest_level; ilev++)
@@ -725,7 +728,9 @@ void echemAMR::compute_dsdt(int lev, const int num_grow, MultiFab& Sborder, Mult
     auto prob_hi = geom[lev].ProbHiArray();
     ProbParm const* localprobparm = d_prob_parm;
 
-    int bvflux=buttler_vohlmer_flux;
+    int bvflux = buttler_vohlmer_flux;
+    int bvspec    = bv_spec_id;
+    int bvlset    = bv_levset_id;
 
     int ncomp = Sborder.nComp();
 
@@ -802,15 +807,15 @@ void echemAMR::compute_dsdt(int lev, const int num_grow, MultiFab& Sborder, Mult
             });
 
             amrex::ParallelFor(bx_x, ncomp, [=] AMREX_GPU_DEVICE(int i, int j, int k, int n) {
-                compute_flux_x(i, j, k, n, sborder_arr, velx_arr, dcoeff_arr, flux_arr[0], dx, bvflux);
+                compute_flux_x(i, j, k, n, sborder_arr, velx_arr, dcoeff_arr, flux_arr[0], dx, *localprobparm, bvflux, bvlset, bvspec);
             });
 
             amrex::ParallelFor(bx_y, ncomp, [=] AMREX_GPU_DEVICE(int i, int j, int k, int n) {
-                compute_flux_y(i, j, k, n, sborder_arr, vely_arr, dcoeff_arr, flux_arr[1], dx, bvflux);
+                compute_flux_y(i, j, k, n, sborder_arr, vely_arr, dcoeff_arr, flux_arr[1], dx, *localprobparm, bvflux, bvlset, bvspec);
             });
 
             amrex::ParallelFor(bx_z, ncomp, [=] AMREX_GPU_DEVICE(int i, int j, int k, int n) {
-                compute_flux_z(i, j, k, n, sborder_arr, velz_arr, dcoeff_arr, flux_arr[2], dx, bvflux);
+                compute_flux_z(i, j, k, n, sborder_arr, velz_arr, dcoeff_arr, flux_arr[2], dx, *localprobparm, bvflux, bvlset, bvspec);
             });
 
             // update residual
