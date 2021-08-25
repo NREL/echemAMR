@@ -104,12 +104,10 @@ void bv_get_grads_and_jumps(int i,int j,int k,int normaldir,int lset_id,
         n_ls[0] = dcdn / mod_gradc;
         n_ls[1] = dcdt1 / mod_gradc;
         n_ls[2] = dcdt2 / mod_gradc;
-
-        Real activ_func = electrochem_reactions::bv_activation_function(0.5 * (c_right + c_left), mod_gradc, gradc_cutoff);
-
         // jump along the level set normal (phi_electrolyte-phi_electrode)
-        Real phi_jump = (dphidn * n_ls[0] + dphidt1 * n_ls[1] + dphidt2 * n_ls[2]) / mod_gradc;
-
+        potjump = (dphidn * n_ls[0] + dphidt1 * n_ls[1] + dphidt2 * n_ls[2]) / mod_gradc;
+        /*Print()<<"dphidn,dphidt1,dphidt2:"<<dphidn<<"\t"<<dphidt1<<"\t"<<dphidt2<<"\n";
+        Print()<<"n_ls:"<<n_ls[0]<<"\t"<<n_ls[1]<<"\t"<<n_ls[2]<<"\n";*/
     }
 }
 
@@ -180,6 +178,11 @@ void compute_flux_x(
                 fx(i,j,k,n)=fx(i,j,k,n)*(1.0-activ_func);
                 Real j_bv = electrochem_reactions::bvcurrent(i,j,k,dir,potjump,phi,prob_parm);
                 fx(i,j,k,n)=fx(i,j,k,n)+j_bv/FARADCONST*activ_func*n_ls[dir];
+                /*amrex::Print()<<"bvflux:"<<j_bv/FARADCONST*activ_func*n_ls[dir]<<"\t"<<
+                    phi(i-1,j,k,LS_ID)<<"\t"<<phi(i,j,k,LS_ID)<<"\t"<<
+                    phi(i-1,j,k,E_ID)<<"\t"<<phi(i,j,k,E_ID)<<"\t"<<
+                    phi(i-1,j,k,C_ID)<<"\t"<<phi(i,j,k,C_ID)<<"\t"<<
+                    potjump<<"\t"<<n_ls[dir]<<"\n";*/
             }
         }
     }
