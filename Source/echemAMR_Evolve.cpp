@@ -118,8 +118,7 @@ void echemAMR::solve_potential(Real current_time)
     Real bscalar = 1.0;
     int num_nonlinear_iters;
 
-    //FIXME:need a compiler macro variable for potential id to be NVAR-1
-    //FIXME:call get_grads_and_jumps function from Src3d for BVflux
+    //FIXME:use get_grads_and_jumps function from Src3d for BVflux
 
     //==================================================
     // amrex solves
@@ -275,7 +274,7 @@ void echemAMR::solve_potential(Real current_time)
             potential[ilev].setVal(0.0);
 
             // Copy (FabArray<FAB>& dst, FabArray<FAB> const& src, int srccomp, int dstcomp, int numcomp, const IntVect& nghost)
-            amrex::Copy(potential[ilev], Sborder, NVAR - 1, 0, 1, num_grow);
+            amrex::Copy(potential[ilev], Sborder, POT_ID, 0, 1, num_grow);
 
             acoeff[ilev].setVal(1.0); //will be scaled by ascalar
             mlabec.setACoeffs(ilev, acoeff[ilev]);
@@ -403,14 +402,14 @@ void echemAMR::solve_potential(Real current_time)
                             Real c_back = 0.5 * (phi_arr(back_left, lset_id) + phi_arr(back_right, lset_id));
 
                             // phi
-                            Real pot_left = phi_arr(left, NVAR - 1);
-                            Real pot_right = phi_arr(right, NVAR - 1);
+                            Real pot_left = phi_arr(left, POT_ID);
+                            Real pot_right = phi_arr(right, POT_ID);
 
-                            Real pot_top = 0.5 * (phi_arr(top_left, NVAR - 1) + phi_arr(top_right, NVAR - 1));
-                            Real pot_bot = 0.5 * (phi_arr(bottom_left, NVAR - 1) + phi_arr(bottom_right, NVAR - 1));
+                            Real pot_top = 0.5 * (phi_arr(top_left, POT_ID) + phi_arr(top_right, POT_ID));
+                            Real pot_bot = 0.5 * (phi_arr(bottom_left, POT_ID) + phi_arr(bottom_right, POT_ID));
 
-                            Real pot_frnt = 0.5 * (phi_arr(front_left, NVAR - 1) + phi_arr(front_right, NVAR - 1));
-                            Real pot_back = 0.5 * (phi_arr(back_left, NVAR - 1) + phi_arr(back_right, NVAR - 1));
+                            Real pot_frnt = 0.5 * (phi_arr(front_left, POT_ID) + phi_arr(front_right, POT_ID));
+                            Real pot_back = 0.5 * (phi_arr(back_left, POT_ID) + phi_arr(back_right, POT_ID));
 
                             // x,y or z
                             Real dcdn = (c_right - c_left) / dx[normaldir];
@@ -500,7 +499,7 @@ void echemAMR::solve_potential(Real current_time)
                         rhs_arr(i, j, k) = (term_x(i, j, k) - term_x(i + 1, j, k)) / dx[0] + (term_y(i, j, k) - term_y(i, j + 1, k)) / dx[1] +
                                            (term_z(i, j, k) - term_z(i, j, k + 1)) / dx[2];
 
-                        rhs_arr(i, j, k) += phi_arr(i, j, k, NVAR - 1) * relax_fac;
+                        rhs_arr(i, j, k) += phi_arr(i, j, k, POT_ID) * relax_fac;
 
                         rhs_arr_res(i, j, k) = (term_x_res(i, j, k) - term_x_res(i + 1, j, k)) / dx[0] + (term_y_res(i, j, k) - term_y_res(i, j + 1, k)) / dx[1] +
                                            (term_z_res(i, j, k) - term_z_res(i, j, k + 1)) / dx[2];
@@ -567,7 +566,7 @@ void echemAMR::solve_potential(Real current_time)
             Real rel_errnorm_all=0.0;
             for (int ilev = 0; ilev <= finest_level; ilev++)
             {
-                amrex::MultiFab::Copy(err[ilev], phi_new[ilev], NVAR - 1, 0, 1, 0);
+                amrex::MultiFab::Copy(err[ilev], phi_new[ilev], POT_ID, 0, 1, 0);
                 amrex::MultiFab::Subtract(err[ilev],solution[ilev], 0, 0, 1 ,0);
                 Real errnorm=err[ilev].norm2();
 
@@ -596,7 +595,7 @@ void echemAMR::solve_potential(Real current_time)
         for (int ilev = 0; ilev <= finest_level; ilev++)
         {
             amrex::Print() << "level: " << ilev << " BV NON-LINEAR RESIDUAL: " <<  residual[ilev].norm2() << std::endl;
-            amrex::MultiFab::Copy(phi_new[ilev], solution[ilev], 0, NVAR - 1, 1, 0);
+            amrex::MultiFab::Copy(phi_new[ilev], solution[ilev], 0, POT_ID, 1, 0);
         }
     }
 
@@ -605,11 +604,11 @@ void echemAMR::solve_potential(Real current_time)
     // copy solution back to phi_new
     for (int ilev = 0; ilev <= finest_level; ilev++)
     {
-        amrex::MultiFab::Copy(phi_new[ilev], solution[ilev], 0, NVAR - 1, 1, 0);
+        amrex::MultiFab::Copy(phi_new[ilev], solution[ilev], 0, POT_ID, 1, 0);
         //phi_new[ilev].copy(solution[ilev], 0, NVAR-1, 1);
         const Array<const MultiFab*, AMREX_SPACEDIM> allgrad = {gradsoln[ilev][0], gradsoln[ilev][1], gradsoln[ilev][2]};
-        average_face_to_cellcenter(phi_new[ilev], NVAR - 4, allgrad);
-        phi_new[ilev].mult(-1.0, NVAR - 4, 3);
+        average_face_to_cellcenter(phi_new[ilev], EFX_ID, allgrad);
+        phi_new[ilev].mult(-1.0, EFX_ID, 3);
     }
 }
 

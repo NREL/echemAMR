@@ -17,7 +17,7 @@ using namespace amrex;
 AMREX_GPU_DEVICE
     AMREX_FORCE_INLINE
 void bv_get_grads_and_jumps(int i,int j,int k,int normaldir,int lset_id,
-        int pot_id,const GpuArray<Real, AMREX_SPACEDIM>& dx,
+        const GpuArray<Real, AMREX_SPACEDIM>& dx,
         Array4<Real> const& phi_arr,
         Real& mod_gradc, Real &gradc_cutoff,
         Real &facecolor, Real &potjump,
@@ -67,14 +67,14 @@ void bv_get_grads_and_jumps(int i,int j,int k,int normaldir,int lset_id,
     Real c_back = 0.5 * (phi_arr(back_left, lset_id) + phi_arr(back_right, lset_id));
 
     // phi
-    Real pot_left = phi_arr(left, NVAR - 1);
-    Real pot_right = phi_arr(right, NVAR - 1);
+    Real pot_left = phi_arr(left, POT_ID);
+    Real pot_right = phi_arr(right, POT_ID);
 
-    Real pot_top = 0.5 * (phi_arr(top_left, NVAR - 1) + phi_arr(top_right, NVAR - 1));
-    Real pot_bot = 0.5 * (phi_arr(bottom_left, NVAR - 1) + phi_arr(bottom_right, NVAR - 1));
+    Real pot_top = 0.5 * (phi_arr(top_left, POT_ID) + phi_arr(top_right, POT_ID));
+    Real pot_bot = 0.5 * (phi_arr(bottom_left, POT_ID) + phi_arr(bottom_right, POT_ID));
 
-    Real pot_frnt = 0.5 * (phi_arr(front_left, NVAR - 1) + phi_arr(front_right, NVAR - 1));
-    Real pot_back = 0.5 * (phi_arr(back_left, NVAR - 1) + phi_arr(back_right, NVAR - 1));
+    Real pot_frnt = 0.5 * (phi_arr(front_left, POT_ID) + phi_arr(front_right, POT_ID));
+    Real pot_back = 0.5 * (phi_arr(back_left, POT_ID) + phi_arr(back_right, POT_ID));
 
     // x,y or z
     Real dcdn = (c_right - c_left) / dx[normaldir];
@@ -169,7 +169,7 @@ void compute_flux_x(
             Real n_ls[AMREX_SPACEDIM];
             int dir=0;
 
-            bv_get_grads_and_jumps(i,j,k,dir,lset_id, NVAR-1,dx,phi,
+            bv_get_grads_and_jumps(i,j,k,dir,lset_id,dx,phi,
                     mod_gradc,gradc_cutoff,facecolor,potjump,n_ls);
 
             if(mod_gradc > gradc_cutoff)
@@ -247,7 +247,7 @@ void compute_flux_y(
             Real n_ls[AMREX_SPACEDIM];
             int dir=1;
 
-            bv_get_grads_and_jumps(i,j,k,dir,lset_id, NVAR-1,dx,phi,
+            bv_get_grads_and_jumps(i,j,k,dir,lset_id,dx,phi,
                     mod_gradc,gradc_cutoff,facecolor,potjump,n_ls);
 
             if(mod_gradc > gradc_cutoff)
@@ -320,7 +320,7 @@ void compute_flux_z(
             Real n_ls[AMREX_SPACEDIM];
             int dir=2;
 
-            bv_get_grads_and_jumps(i,j,k,dir, lset_id, NVAR-1,dx,phi,
+            bv_get_grads_and_jumps(i,j,k,dir, lset_id,dx,phi,
                     mod_gradc,gradc_cutoff,facecolor,potjump,n_ls);
 
             if(mod_gradc > gradc_cutoff)
