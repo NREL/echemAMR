@@ -257,6 +257,12 @@ void echemAMR::solve_potential(Real current_time)
         rhs[ilev].define(grids[ilev], dmap[ilev], 1, 0);
         err[ilev].define(grids[ilev], dmap[ilev], 1, 0);
         rhs_res[ilev].define(grids[ilev], dmap[ilev], 1, 0);
+        for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
+        {
+            const BoxArray& faceba = amrex::convert(grids[ilev], 
+                                        IntVect::TheDimensionVector(idim));
+            gradsoln[ilev][idim] = new MultiFab(faceba, dmap[ilev], 1, 0);
+        }
     }
 
     Real errnorm_1st_iter;
@@ -278,12 +284,6 @@ void echemAMR::solve_potential(Real current_time)
             solution[ilev].setVal(0.0);
             rhs[ilev].setVal(0.0);
 
-            for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
-            {
-                const BoxArray& faceba = amrex::convert(grids[ilev], IntVect::TheDimensionVector(idim));
-
-                gradsoln[ilev][idim] = new MultiFab(faceba, dmap[ilev], 1, 0);
-            }
 
             // copy current solution for better guess
             if (pot_initial_guess)
@@ -443,11 +443,11 @@ void echemAMR::solve_potential(Real current_time)
                                 // jump along the level set normal (phi_electrolyte-phi_electrode)
                                 Real phi_jump = (dphidn * n_ls[0] + dphidt1 * n_ls[1] + dphidt2 * n_ls[2]) / mod_gradc;
 
-                                /*if(fabs(phi_jump) > 1)
-                                {
-                                    Print()<<"phi_jump:"<<phi_jump<<"\t"<<dphidn<<"\t"<<dphidt1<<"\t"<<dphidt2<<"\t"
-                                        <<dcdn<<"\t"<<dcdt1<<"\t"<<dcdt2<<"\t"<<mod_gradc<<"\n";
-                                }*/
+                                //if(fabs(phi_jump) > 1)
+                                //{
+                                 //   Print()<<"phi_jump:"<<phi_jump<<"\t"<<dphidn<<"\t"<<dphidt1<<"\t"<<dphidt2<<"\t"
+                                   //     <<dcdn<<"\t"<<dcdt1<<"\t"<<dcdt2<<"\t"<<mod_gradc<<"\n";
+                                //}
 
                                 // FIXME: pass ion concentration also
                                 // FIXME: ideally it should be the ion concentration at the closest electrode cell
@@ -606,7 +606,7 @@ void echemAMR::solve_potential(Real current_time)
     for (int ilev = 0; ilev <= finest_level; ilev++)
     {
         amrex::MultiFab::Copy(phi_new[ilev], solution[ilev], 0, NVAR - 1, 1, 0);
-        // phi_new[ilev].copy(solution[ilev], 0, NVAR-1, 1);
+        //phi_new[ilev].copy(solution[ilev], 0, NVAR-1, 1);
         const Array<const MultiFab*, AMREX_SPACEDIM> allgrad = {gradsoln[ilev][0], gradsoln[ilev][1], gradsoln[ilev][2]};
         average_face_to_cellcenter(phi_new[ilev], NVAR - 4, allgrad);
         phi_new[ilev].mult(-1.0, NVAR - 4, 3);
