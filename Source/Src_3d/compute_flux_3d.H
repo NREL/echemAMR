@@ -180,8 +180,7 @@ void compute_flux_x(
                 fx(i,j,k,n)=fx(i,j,k,n)+j_bv/FARADCONST*activ_func*n_ls[dir];
                 /*amrex::Print()<<"bvflux:"<<j_bv/FARADCONST*activ_func*n_ls[dir]<<"\t"<<
                     phi(i-1,j,k,LS_ID)<<"\t"<<phi(i,j,k,LS_ID)<<"\t"<<
-                    phi(i-1,j,k,E_ID)<<"\t"<<phi(i,j,k,E_ID)<<"\t"<<
-                    phi(i-1,j,k,C_ID)<<"\t"<<phi(i,j,k,C_ID)<<"\t"<<
+                    phi(i-1,j,k,S1_ID)<<"\t"<<phi(i,j,k,S1_ID)<<"\t"<<
                     potjump<<"\t"<<n_ls[dir]<<"\n";*/
             }
         }
