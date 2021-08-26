@@ -52,10 +52,13 @@ namespace electrochem_reactions
             Real KDk  = 0.5 * (phi(i,j,k-1,E_ID)+phi(i,j,k,E_ID)) * KDe;
             Real KDf  = 0.5 * (phi(i,j,k+1,E_ID)+phi(i,j,k,E_ID)) * KDe;
            
+            Real LSX = min(phi(i-1,j,k,LS_ID),min(phi(i,j,k,LS_ID),phi(i+1,j,k,LS_ID)));
+            Real LSY = min(phi(i,j-1,k,LS_ID),min(phi(i,j,k,LS_ID),phi(i,j+1,k,LS_ID)));
+            Real LSZ = min(phi(i,j,k-1,LS_ID),min(phi(i,j,k,LS_ID),phi(i,j,k+1,LS_ID)));
 
-            source(i,j,k) = -(1.0/C)*(KDr*(phi(i+1,j,k,CO_ID)-phi(i,j,k,CO_ID)) - KDl*(phi(i,j,k,CO_ID)-phi(i-1,j,k,CO_ID)))/dx[0]
-                                   + (KDt*(phi(i,j+1,k,CO_ID)-phi(i,j,k,CO_ID))  - KDb*(phi(i,j,k,CO_ID)-phi(i,j-1,k,CO_ID)))/dx[1]
-                                   + (KDf*(phi(i,j,k+1,CO_ID)-phi(i,j,k,CO_ID))  - KDk*(phi(i,j,k,CO_ID)-phi(i,j,k-1,CO_ID)))/dx[2];
+            source(i,j,k) = -(1.0/C)*(LSX*(KDr*(phi(i+1,j,k,CO_ID)-phi(i,j,k,CO_ID)) - KDl*(phi(i,j,k,CO_ID)-phi(i-1,j,k,CO_ID)))/dx[0]/dx[0]
+                                   +  LSY*(KDt*(phi(i,j+1,k,CO_ID)-phi(i,j,k,CO_ID)) - KDb*(phi(i,j,k,CO_ID)-phi(i,j-1,k,CO_ID)))/dx[1]/dx[1]
+                                   +  LSZ*(KDf*(phi(i,j,k+1,CO_ID)-phi(i,j,k,CO_ID)) - KDk*(phi(i,j,k,CO_ID)-phi(i,j,k-1,CO_ID)))/dx[2]/dx[2]);
         }
 
     AMREX_GPU_DEVICE AMREX_INLINE
