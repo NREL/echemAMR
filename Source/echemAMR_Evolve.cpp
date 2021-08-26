@@ -230,6 +230,9 @@ void echemAMR::solve_potential(Real current_time)
     mlmg.setMaxFmgIter(max_fmg_iter);
     mlmg.setVerbose(verbose);
     mlmg.setBottomVerbose(bottom_verbose);
+//    mlmg.setBottomTolerance(1.0e-14);
+//    mlmg.setBottomToleranceAbs(1.0e-14);
+
 #ifdef AMREX_USE_HYPRE
     if (use_hypre)
     {
@@ -496,8 +499,8 @@ void echemAMR::solve_potential(Real current_time)
                     Real relax_fac = bv_relaxfac;
 
                     amrex::ParallelFor(bx, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
-                        rhs_arr(i, j, k) = (term_x(i, j, k) - term_x(i + 1, j, k)) / dx[0] + (term_y(i, j, k) - term_y(i, j + 1, k)) / dx[1] +
-                                           (term_z(i, j, k) - term_z(i, j, k + 1)) / dx[2];
+                        rhs_arr(i, j, k) += (term_x(i, j, k) - term_x(i + 1, j, k)) / dx[0] + (term_y(i, j, k) - term_y(i, j + 1, k)) / dx[1] +
+                                            (term_z(i, j, k) - term_z(i, j, k + 1)) / dx[2];
 
                         rhs_arr(i, j, k) += phi_arr(i, j, k, POT_ID) * relax_fac;
 
