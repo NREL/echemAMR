@@ -25,6 +25,7 @@ jobs:
         cd ..
         cd openCircuitElectrode
         make -j 2 COMP=gnu
+        cd ..
         cd anodeElectrolyte
         make -j 2 COMP=gnu
     - name: Run
@@ -37,6 +38,7 @@ jobs:
           cd ..
           cd openCircuitElectrode
           mpirun -n 2 ./echemAMR3d.gnu.MPI.ex inputs_x
+          cd ..
           cd anodeElectrolyte
           mpirun -n 2 ./echemAMR3d.gnu.MPI.ex inputs_x
   gputest:
@@ -66,5 +68,6 @@ jobs:
         cd ..
         cd openCircuitElectrode
         make -j 2 COMP=gnu USE_CUDA=TRUE
+        cd ..
         cd anodeElectrolyte
         make -j 2 COMP=gnu USE_CUDA=TRUE
