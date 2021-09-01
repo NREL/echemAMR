@@ -37,37 +37,24 @@ namespace electrochem_reactions
     }
     
     AMREX_GPU_DEVICE AMREX_INLINE
-    Real bvcurrent(int i,int j,int k,int normaldir,Real phi_jump,
-            Array4<Real> const& phi,ProbParm const& prob_parm)
+    void bvcurrent_and_der(int i,int j,int k,int normaldir,Real phi_jump,
+            Array4<Real> const& phi,ProbParm const& prob_parm,Real &jbv,Real &jbvder)
     {
        Real ocp=0.2;
        Real j0=3.0;
        Real phi0=1.0;
-       Real jbv;
 
        //sinh definition
        jbv=-j0*sinh((phi_jump+ocp)/phi0);
                     
        //linear case
        //jbv=-(j0/phi0)*(phi_jump+ocp);
-       return(jbv);
-    }
-    
-    AMREX_GPU_DEVICE AMREX_INLINE
-    Real bvcurrent_der(int i,int j,int k,int normaldir,Real phi_jump,
-            Array4<Real> const& phi,ProbParm const& prob_parm)
-    {
-       Real ocp=0.2;
-       Real j0=3.0;
-       Real phi0=1.0;
-       Real jbvder;
 
        //sinh definition
        jbvder=-j0*cosh((phi_jump+ocp)/phi0)*(1.0/phi0);
                     
        //linear case
        //jbvder=-(j0/phi0);
-       return(jbvder);
     }
     
     AMREX_GPU_DEVICE AMREX_INLINE

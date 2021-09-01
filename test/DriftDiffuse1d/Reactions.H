@@ -36,22 +36,16 @@ namespace electrochem_reactions
             source(i,j,k)=0.0;
         }
 
-    AMREX_GPU_DEVICE AMREX_INLINE Real bvcurrent(int i,int j,int k,int normaldir,
-            Real phi_jump,Array4<Real> const& phi,ProbParm const& prob_parm)
-    {
-        return(0);
-    }
-
-    AMREX_GPU_DEVICE AMREX_INLINE Real bvcurrent_der(int i,int j,int k,int normaldir,
-            Real phi_jump,Array4<Real> const& phi,ProbParm const& prob_parm)
+    AMREX_GPU_DEVICE AMREX_INLINE void bvcurrent_and_der(int i,int j,int k,int normaldir,
+            Real phi_jump,Array4<Real> const& phi,ProbParm const& prob_parm, Real &jbv,Real &jbvder)
     {
         return(0);
     }
 
     AMREX_GPU_DEVICE AMREX_INLINE
         Real bv_activation_function(Real c, Real gradc, Real gradc_cutoff)
-        {
-            return(0);
-        }
+    {
+       return(0);
+    }
 }
 #endif

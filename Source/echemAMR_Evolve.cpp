@@ -453,8 +453,8 @@ void echemAMR::solve_potential(Real current_time)
 
                                 // FIXME: pass ion concentration also
                                 // FIXME: ideally it should be the ion concentration at the closest electrode cell
-                                Real j_bv = electrochem_reactions::bvcurrent(i,j,k,normaldir,phi_jump,phi_arr,*localprobparm);
-                                Real jdash_bv = electrochem_reactions::bvcurrent_der(i,j,k,normaldir,phi_jump,phi_arr,*localprobparm);
+                                Real j_bv,jdash_bv;
+                                electrochem_reactions::bvcurrent_and_der(i,j,k,normaldir,phi_jump,phi_arr,*localprobparm,j_bv,jdash_bv);
 
                                 dcoeff_arr(i, j, k) *= (1.0 - activ_func);
                                 dcoeff_arr_res(i, j, k) = dcoeff_arr(i, j, k);

@@ -62,14 +62,14 @@ namespace electrochem_reactions
         }
 
     AMREX_GPU_DEVICE AMREX_INLINE
-        Real bvcurrent(int i,int j,int k,int normaldir,
-                Real phi_jump, Array4<Real> const& phi, ProbParm const& prob_parm)
+        void bvcurrent_and_der(int i,int j,int k,int normaldir,
+                Real phi_jump, Array4<Real> const& phi, ProbParm const& prob_parm,Real &jbv,Real &jbvder)
         {
             Real ocp=0.2; //FIXME:should be function of phi(i,j,k,CO_ID)
             Real j0=3.0; 
             Real phi0=(2.0*GASCONST*prob_parm.Temperature)/FARADCONST;
             Real csmax=60000;
-            Real jbv0,jbv;
+            Real jbv0;
             Real jbv_cutoff=0.1;
             
             IntVect left(i, j, k);
@@ -85,35 +85,12 @@ namespace electrochem_reactions
 
             //linear case
             jbv=-(jbv0/phi0)*(phi_jump+ocp);
-            return(jbv);
-        }
-
-    AMREX_GPU_DEVICE AMREX_INLINE
-        Real bvcurrent_der(int i,int j,int k,int normaldir,
-                Real phi_jump, Array4<Real> const& phi, ProbParm const& prob_parm)
-        {
-            Real ocp=0.2; //FIXME:should be function of phi(i,j,k,CO_ID)
-            Real j0=3.0;  
-            Real jbv0,jbvder;
-            Real csmax=60000;
-            Real jbv_cutoff=0.1;
-
-            Real phi0=(2.0*GASCONST*prob_parm.Temperature)/FARADCONST; 
-            
-            IntVect left(i, j, k);
-            IntVect right(i, j, k);
-            left[normaldir] -= 1;
-
-            Real x=max(0.5*(phi(left,CO_ID)+phi(right,CO_ID))/csmax,0.0);
-
-            jbv0=max(4.0*j0*x*(1.0-x),jbv_cutoff);
 
             //sinh definition
             //jbvder=-j0*cosh((phi_jump+ocp)/phi0)*(1.0/phi0);
 
             //linear case
             jbvder=-(jbv0/phi0);
-            return(jbvder);
         }
 
     AMREX_GPU_DEVICE AMREX_INLINE

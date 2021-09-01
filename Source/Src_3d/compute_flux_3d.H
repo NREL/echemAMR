@@ -176,11 +176,12 @@ void compute_flux_x(
             {
                 Real activ_func = electrochem_reactions::bv_activation_function(facecolor, mod_gradc, gradc_cutoff);
                 fx(i,j,k,n)=fx(i,j,k,n)*(1.0-activ_func);
-                Real j_bv = electrochem_reactions::bvcurrent(i,j,k,dir,potjump,phi,prob_parm);
+                Real j_bv,jdash_bv;
+                electrochem_reactions::bvcurrent_and_der(i,j,k,dir,potjump,phi,prob_parm,j_bv,jdash_bv);
                 fx(i,j,k,n)=fx(i,j,k,n)+j_bv/FARADCONST*activ_func*n_ls[dir];
                 /*amrex::Print()<<"bvflux:"<<j_bv/FARADCONST*activ_func*n_ls[dir]<<"\t"<<
-                    phi(i-1,j,k,LS_ID)<<"\t"<<phi(i,j,k,LS_ID)<<"\t"<<
-                    phi(i-1,j,k,S1_ID)<<"\t"<<phi(i,j,k,S1_ID)<<"\t"<<
+                    phi(i-1,j,k,lset_id)<<"\t"<<phi(i,j,k,lset_id)<<"\t"<<
+                    phi(i-1,j,k,n)<<"\t"<<phi(i,j,k,n)<<"\t"<<
                     potjump<<"\t"<<n_ls[dir]<<"\n";*/
             }
         }
@@ -253,7 +254,8 @@ void compute_flux_y(
             {
                 Real activ_func = electrochem_reactions::bv_activation_function(facecolor, mod_gradc, gradc_cutoff);
                 fy(i,j,k,n)=fy(i,j,k,n)*(1.0-activ_func);
-                Real j_bv = electrochem_reactions::bvcurrent(i,j,k,dir,potjump,phi,prob_parm);
+                Real j_bv,jdash_bv;
+                electrochem_reactions::bvcurrent_and_der(i,j,k,dir,potjump,phi,prob_parm,j_bv,jdash_bv);
                 fy(i,j,k,n)=fy(i,j,k,n)+j_bv/FARADCONST*activ_func*n_ls[dir];
             }
         }
@@ -326,7 +328,8 @@ void compute_flux_z(
             {
                 Real activ_func = electrochem_reactions::bv_activation_function(facecolor, mod_gradc, gradc_cutoff);
                 fz(i,j,k,n)=fz(i,j,k,n)*(1.0-activ_func);
-                Real j_bv = electrochem_reactions::bvcurrent(i,j,k,dir,potjump,phi,prob_parm);
+                Real j_bv,jdash_bv;
+                electrochem_reactions::bvcurrent_and_der(i,j,k,dir,potjump,phi,prob_parm,j_bv,jdash_bv);
                 fz(i,j,k,n)=fz(i,j,k,n)+j_bv/FARADCONST*activ_func*n_ls[dir];
             }
         }
