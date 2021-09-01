@@ -25,6 +25,8 @@ jobs:
         cd ..
         cd openCircuitElectrode
         make -j 2 COMP=gnu
+        cd anodeElectrolyte
+        make -j 2 COMP=gnu
     - name: Run
       working-directory: ./test
       run: |
@@ -34,6 +36,8 @@ jobs:
           mpirun -n 2 ./echemAMR3d.gnu.MPI.ex inputs_z
           cd ..
           cd openCircuitElectrode
+          mpirun -n 2 ./echemAMR3d.gnu.MPI.ex inputs_x
+          cd anodeElectrolyte
           mpirun -n 2 ./echemAMR3d.gnu.MPI.ex inputs_x
   gputest:
     runs-on: ubuntu-latest
@@ -61,4 +65,6 @@ jobs:
         make -j 2 COMP=gnu USE_CUDA=TRUE
         cd ..
         cd openCircuitElectrode
+        make -j 2 COMP=gnu USE_CUDA=TRUE
+        cd anodeElectrolyte
         make -j 2 COMP=gnu USE_CUDA=TRUE

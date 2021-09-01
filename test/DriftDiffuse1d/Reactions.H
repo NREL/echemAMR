@@ -39,7 +39,7 @@ namespace electrochem_reactions
     AMREX_GPU_DEVICE AMREX_INLINE void bvcurrent_and_der(int i,int j,int k,int normaldir,
             Real phi_jump,Array4<Real> const& phi,ProbParm const& prob_parm, Real &jbv,Real &jbvder)
     {
-        return(0);
+    
     }
 
     AMREX_GPU_DEVICE AMREX_INLINE
