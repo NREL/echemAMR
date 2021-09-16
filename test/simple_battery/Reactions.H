@@ -65,6 +65,9 @@ namespace electrochem_reactions
         void bvcurrent_and_der(int i,int j,int k,int normaldir,
                 Real phi_jump, Array4<Real> const& phi, ProbParm const& prob_parm,Real &jbv,Real &jbvder)
         {
+            // THIS SHOULD USE   Chemisty.H/intercalation_reaction_anode for the anode
+            //               and Chemisty.H/intercalation_reaction_cathode for the cathode
+            //               bvcurrent_and_der is called in source... i do not want to mess things at source.
             Real ocp=0.2; //FIXME:should be function of phi(i,j,k,CO_ID)
             Real j0=3.0; 
             Real phi0=(2.0*GASCONST*prob_parm.Temperature)/FARADCONST;

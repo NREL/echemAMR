@@ -38,7 +38,6 @@ namespace electrochem_integral_utils
                 const int* domlo,const int *domhi,
                 const GpuArray<Real, AMREX_SPACEDIM>& dx)
         {
-
             // Init some values
             Real val = 1.0;
             Real out = 0.0;
@@ -115,9 +114,30 @@ namespace electrochem_integral_utils
         }
 }
 
+//void echemAMR::init_volumes(ProbParm& h_prob_parm, ProbParm& d_prob_parm)
 void echemAMR::init_volumes()
 {
+//#ifdef AMREX_USE_GPU
+//    amrex::Gpu::dtoh_memcpy(&h_prob_parm, &d_prob_parm, sizeof(ProbParm));
+//#else
+//    std::memcpy(&h_prob_parm, &d_prob_parm, sizeof(ProbParm));
+//#endif
 
+    // Volumes
+    host_global_storage->anode_volume =   VolumeIntegral(-1, A_ID);
+    host_global_storage->ele_sep_volume = VolumeIntegral(-1, E_ID) + VolumeIntegral(-1, S_ID);
+    host_global_storage->cathode_volume = VolumeIntegral(-1, C_ID);
+
+    // Surface Areas
+    host_global_storage->anode_SA =       SurfaceIntegral(-1, A_ID, A_ID);
+    host_global_storage->electrolyte_SA = SurfaceIntegral(-1, E_ID, E_ID);
+    host_global_storage->sepatator_SA =   SurfaceIntegral(-1, S_ID, S_ID);
+    host_global_storage->cathode_SA =     SurfaceIntegral(-1, C_ID, C_ID);
+    host_global_storage->anode_ele_SA =   SurfaceIntegral(-1, A_ID, E_ID);
+    host_global_storage->cathode_ele_SA = SurfaceIntegral(-1, C_ID, E_ID);
+    host_global_storage->anode_cc_SA =    CurrentCollectorIntegral(-1, A_ID);
+    host_global_storage->cathode_cc_SA =  CurrentCollectorIntegral(-1, C_ID);
 }
+
 
 #endif

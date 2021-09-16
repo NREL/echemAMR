@@ -140,7 +140,7 @@ void echemAMR::InitData()
             }
         }
 
-        // print_init_data(echemAMR::h_prob_parm);
+        print_init_data(echemAMR::h_prob_parm);
 
         if (chk_int > 0)
         {
