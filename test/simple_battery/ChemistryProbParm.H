@@ -20,7 +20,7 @@ struct ProbParm
     // --------------
 
     // INITIAL CONDITIONS
-    amrex::Real ce_atrest = 12000; // Electrolyte initial concentration in both separator and electrodes [mol.m-3]
+    amrex::Real ce_atrest = 1200; // Electrolyte initial concentration in both separator and electrodes [mol.m-3]
     amrex::Real soc_anode_t0 = 0.5; // [] Initial state of charge for the solid anode (ratio of cs,max). Must be between anode_soc_min and anode_soc_max.
     amrex::Real soc_cathode_t0 = 0.92; // [] Initial state of charge for the solid cathode (ratio of cs,max). Must be between cathode_soc_min and cathode_soc_max.
     amrex::Real phi_reference = 5.0; // [V] Arbitrary value (avoid 0.0 for numerical convergence)

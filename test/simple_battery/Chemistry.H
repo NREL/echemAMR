@@ -278,7 +278,7 @@ namespace electrochem
         const amrex::Real ioa = Io_a(Ca, Ce, prob_parm);
         const amrex::Real OCPa = OCP_a(Ca, prob_parm);
         const amrex::Real eta = phi_a - phi_e - OCPa;
-        const amrex::Real FRT = prob_parm.Faraday_const/(prob_parm.R_gas_const * prob_parm.T0);
+        const amrex::Real FRT = prob_parm.Faraday_const/(prob_parm.R_gas_const * prob_parm.Temperature);
         bool use_sinh = false;
         if(use_sinh) {
             return 2.0 * ioa * std::sinh(0.5 * FRT * eta); //FIXME: gpu safe?
@@ -294,7 +294,7 @@ namespace electrochem
         const amrex::Real ioc = Io_c(Cc, Ce, prob_parm);
         const amrex::Real OCPc = OCP_c(Cc, prob_parm);
         const amrex::Real eta = phi_c - phi_e - OCPc;
-        const amrex::Real FRT = prob_parm.Faraday_const/(prob_parm.R_gas_const * prob_parm.T0);
+        const amrex::Real FRT = prob_parm.Faraday_const/(prob_parm.R_gas_const * prob_parm.Temperature);
         bool use_sinh = false;
         if(use_sinh) {
             return 2.0 * ioc * std::sinh(0.5 * FRT * eta); //FIXME: gpu safe?
@@ -304,7 +304,7 @@ namespace electrochem
         }
     }
 
-
+/*
     AMREX_GPU_DEVICE AMREX_FORCE_INLINE
     amrex::Real ic_reaction(const int i, const int j, const int k, const int dir, const amrex::Real normal, amrex::Array4<amrex::Real> const& phi, const ProbParm& prob_parm)
     {
@@ -365,27 +365,27 @@ namespace electrochem
 
         if(cl == cathode && cr == electrolyte ){
             const amrex::Real Cc = phi(ileft,jleft,kleft,CO_ID);
-            const amrex::Real Pc = phi(ileft,jleft,kleft,PO_ID);
+            const amrex::Real Pc = phi(ileft,jleft,kleft,POT_ID);
             const amrex::Real Ce = phi(iright,jright,kright,CO_ID);
-            const amrex::Real Pe = phi(iright,jright,kright,PO_ID);
+            const amrex::Real Pe = phi(iright,jright,kright,POT_ID);
             reaction = -normal*intercalation_reaction_cathode(Cc, Pc, Ce, Pe, prob_parm);
         } else if(cl == electrolyte && cr == cathode){
             const amrex::Real Ce = phi(ileft,jleft,kleft,CO_ID);
-            const amrex::Real Pe = phi(ileft,jleft,kleft,PO_ID);
+            const amrex::Real Pe = phi(ileft,jleft,kleft,POT_ID);
             const amrex::Real Cc = phi(iright,jright,kright,CO_ID);
-            const amrex::Real Pc = phi(iright,jright,kright,PO_ID);
+            const amrex::Real Pc = phi(iright,jright,kright,POT_ID);
             reaction = normal*intercalation_reaction_cathode(Cc, Pc, Ce, Pe, prob_parm);
         } else if(cl == electrolyte && cr == anode){
             const amrex::Real Ce = phi(ileft,jleft,kleft,CO_ID);
-            const amrex::Real Pe = phi(ileft,jleft,kleft,PO_ID);
+            const amrex::Real Pe = phi(ileft,jleft,kleft,POT_ID);
             const amrex::Real Ca = phi(iright,jright,kright,CO_ID);
-            const amrex::Real Pa = phi(iright,jright,kright,PO_ID);
+            const amrex::Real Pa = phi(iright,jright,kright,POT_ID);
             reaction = normal*intercalation_reaction_anode(Ca, Pa, Ce, Pe, prob_parm);
         } else if(cl == anode && cr == electrolyte){
             const amrex::Real Ca = phi(ileft,jleft,kleft,CO_ID);
-            const amrex::Real Pa = phi(ileft,jleft,kleft,PO_ID);
+            const amrex::Real Pa = phi(ileft,jleft,kleft,POT_ID);
             const amrex::Real Ce = phi(iright,jright,kright,CO_ID);
-            const amrex::Real Pe = phi(iright,jright,kright,PO_ID);
+            const amrex::Real Pe = phi(iright,jright,kright,POT_ID);
             reaction = -normal*intercalation_reaction_anode(Ca, Pa, Ce, Pe, prob_parm);
         }
 
@@ -401,7 +401,7 @@ namespace electrochem
 //        return reaction;
 
     }
-
+*/
 
 }
 #endif
