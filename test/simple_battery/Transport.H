@@ -24,14 +24,21 @@ namespace electrochem_transport
         const int im1 = (dir == 0) ? i-1 : i;
         const int jm1 = (dir == 1) ? j-1 : j;
         const int km1 = (dir == 2) ? k-1 : k;
-        
-        if(sgn == -1 && dir==0) 
-        { // lo side along x
-            bc(im1,jm1,km1) = bclo;
-        } 
-        if(sgn == +1 && dir==0)
-        { // hi side along x
-          bc(i,j,k) = bchi;
+
+        if(dir == 0) {
+            if(sgn == -1)
+            { // lo side along x
+                bc(im1,jm1,km1) = bclo;
+            } else { // hi side along x
+              bc(i,j,k) = bchi;
+            }
+        } else {
+            if(sgn == -1)
+            { // lo side along x
+                bc(im1,jm1,km1) = 0.0;
+            } else { // hi side along x
+                bc(i,j,k) = 0.0;
+            }
         }
     }
 

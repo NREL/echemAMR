@@ -499,12 +499,15 @@ void echemAMR::solve_potential(Real current_time)
                     Real relax_fac = bv_relaxfac;
 
                     amrex::ParallelFor(bx, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
+
+                        rhs_arr_res(i,j,k) = rhs_arr(i,j,k);
+
                         rhs_arr(i, j, k) += (term_x(i, j, k) - term_x(i + 1, j, k)) / dx[0] + (term_y(i, j, k) - term_y(i, j + 1, k)) / dx[1] +
                                             (term_z(i, j, k) - term_z(i, j, k + 1)) / dx[2];
 
                         rhs_arr(i, j, k) += phi_arr(i, j, k, POT_ID) * relax_fac;
 
-                        rhs_arr_res(i, j, k) = (term_x_res(i, j, k) - term_x_res(i + 1, j, k)) / dx[0] + (term_y_res(i, j, k) - term_y_res(i, j + 1, k)) / dx[1] +
+                        rhs_arr_res(i, j, k) += (term_x_res(i, j, k) - term_x_res(i + 1, j, k)) / dx[0] + (term_y_res(i, j, k) - term_y_res(i, j + 1, k)) / dx[1] +
                                            (term_z_res(i, j, k) - term_z_res(i, j, k + 1)) / dx[2];
 
                     });
