@@ -499,12 +499,15 @@ void echemAMR::solve_potential(Real current_time)
                     Real relax_fac = bv_relaxfac;
 
                     amrex::ParallelFor(bx, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
+
+                        rhs_arr_res(i,j,k) = rhs_arr(i,j,k);
+
                         rhs_arr(i, j, k) += (term_x(i, j, k) - term_x(i + 1, j, k)) / dx[0] + (term_y(i, j, k) - term_y(i, j + 1, k)) / dx[1] +
                                             (term_z(i, j, k) - term_z(i, j, k + 1)) / dx[2];
 
                         rhs_arr(i, j, k) += phi_arr(i, j, k, POT_ID) * relax_fac;
 
-                        rhs_arr_res(i, j, k) = (term_x_res(i, j, k) - term_x_res(i + 1, j, k)) / dx[0] + (term_y_res(i, j, k) - term_y_res(i, j + 1, k)) / dx[1] +
+                        rhs_arr_res(i, j, k) += (term_x_res(i, j, k) - term_x_res(i + 1, j, k)) / dx[0] + (term_y_res(i, j, k) - term_y_res(i, j + 1, k)) / dx[1] +
                                            (term_z_res(i, j, k) - term_z_res(i, j, k + 1)) / dx[2];
 
                     });
@@ -559,7 +562,7 @@ void echemAMR::solve_potential(Real current_time)
         // need user-defined rhs
 
         mlmg.solve(GetVecOfPtrs(solution), GetVecOfConstPtrs(rhs), tol_rel, tol_abs);
-        mlmg_res.compResidual(GetVecOfPtrs(residual),GetVecOfPtrs(solution), GetVecOfConstPtrs(rhs_res));
+        mlmg_res.apply(GetVecOfPtrs(residual),GetVecOfPtrs(solution));
 
         //error norm calculation
         // copy solution back to phi_new
@@ -585,20 +588,49 @@ void echemAMR::solve_potential(Real current_time)
                rel_errnorm_all += rel_errnorm;
             }
 
-            if(abs_errnorm_all < bv_nonlinear_abstol ||
-                    rel_errnorm_all < bv_nonlinear_reltol)
-            {
-                amrex::Print()<<"Converged with final error:"<<rel_errnorm_all
-                    <<"\t"<<abs_errnorm_all<<"\n";
-                break;
-            }
+//            if(abs_errnorm_all < bv_nonlinear_abstol ||
+//                    rel_errnorm_all < bv_nonlinear_reltol)
+//            {
+//                amrex::Print()<<"Converged with final error:"<<rel_errnorm_all
+//                    <<"\t"<<abs_errnorm_all<<"\n";
+//                break;
+//            }
         }
 
         // copy solution back to phi_new
+        for (int ilev = 0; ilev <= finest_level; ilev++) {
+            amrex::MultiFab::Copy(phi_new[ilev], solution[ilev], 0, POT_ID, 1, 0);
+        }
+
+        Real total_nl_res = 0.0;
         for (int ilev = 0; ilev <= finest_level; ilev++)
         {
-            amrex::Print() << "level: " << ilev << " BV NON-LINEAR RESIDUAL: " <<  residual[ilev].norm2() << std::endl;
-            amrex::MultiFab::Copy(phi_new[ilev], solution[ilev], 0, POT_ID, 1, 0);
+            amrex::MultiFab level_mask;
+            if (ilev < finest_level) {
+                level_mask = makeFineMask(grids[ilev],dmap[ilev],grids[ilev+1], amrex::IntVect(2), 1.0, 0.0);
+            } else {
+                level_mask.define(grids[ilev], dmap[ilev], 1, 0,
+                    amrex::MFInfo());
+                level_mask.setVal(1);
+            }
+            amrex::MultiFab::Subtract(residual[ilev],rhs_res[ilev], 0, 0, 1 ,0);
+            amrex::MultiFab::Multiply(residual[ilev],level_mask, 0, 0, 1, 1);
+            Real nl_res = residual[ilev].norm2();
+            total_nl_res += nl_res;
+        }
+
+        if(nl_it==0) {
+            errnorm_1st_iter=total_nl_res;
+        }
+
+        amrex::Print() <<"BV NON-LINEAR RESIDUAL (rel,abs): " <<  total_nl_res/errnorm_1st_iter << ' ' << total_nl_res << std::endl;
+
+        if(total_nl_res < bv_nonlinear_abstol ||
+                total_nl_res/errnorm_1st_iter < bv_nonlinear_reltol)
+        {
+            amrex::Print()<<"Converged with final rel,abs error: "<< total_nl_res/errnorm_1st_iter
+                <<"\t"<< total_nl_res <<"\n";
+                break;
         }
     }
 
