@@ -49,11 +49,50 @@ void amrex_probinit (ProbParm & h_prob_parm, ProbParm & d_prob_parm)
 //    STEP 1: IDENTIFY DOMAINS (SET LEVEL SET ID)
 // ---------------------------------------------------
 
+
 AMREX_GPU_DEVICE
 AMREX_INLINE
 void initdomaindata(Box const& bx, Array4<Real> const& phi, GeometryData const& geomdata,
         ProbParm *prob_parm)
 {
+    // CREATE 3D ARRAY GEOMETRY READ FILE
+    std::string inFileName = prob_parm->geometry_filename;
+    std::ifstream inFile;
+
+    // 1: Get dimension: first 3 integers
+    int dimension_geometry[3];
+    inFile.open(inFileName.c_str());
+    if (inFile.is_open())
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            inFile >> dimension_geometry[i];
+        }
+        inFile.close(); // Close input file
+    }
+    else { //Error message
+        amrex::Print() << "Can't find input file " << inFileName << std::endl;
+    }
+
+    // 2: Get domain id
+    int geo1D [dimension_geometry[0]*dimension_geometry[1]*dimension_geometry[2]];
+    inFile.open(inFileName.c_str());
+    if (inFile.is_open())
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            inFile >> dimension_geometry[i];
+        }
+        for (int i = 0; i < dimension_geometry[0]*dimension_geometry[1]*dimension_geometry[2]-1; i++)
+        {
+            inFile >> geo1D[i];
+        }
+        inFile.close(); // Close input file
+    }
+    else { //Error message
+        amrex::Print() << "Can't find input file " << inFileName << std::endl;
+    }
+
     const auto lo = lbound(bx);
     const auto hi = ubound(bx);    
 
@@ -73,93 +112,36 @@ void initdomaindata(Box const& bx, Array4<Real> const& phi, GeometryData const& 
     for (int k = lo.z; k <= hi.z; ++k) 
     {
         const Real z = prob_lo[2] + (k+0.5)*dx[2];
-        for (int j = lo.y; j <= hi.y; ++j) 
+        int idz = std::round( (dimension_geometry[2]-1) / Lz * z + 1 ) -1; // Convert z in the index of imported geometry geo3D 
+        for (int j = lo.y; j <= hi.y; ++j)
         {
             const Real y = prob_lo[1] + (j+0.5)*dx[1];
-
-            AMREX_PRAGMA_SIMD
+            int idy = std::round( (dimension_geometry[1]-1) / Ly * y +1) -1; // Convert y in the index of imported geometry geo3D 
             for (int i = lo.x; i <= hi.x; ++i) 
             {
                 const Real x = prob_lo[0] + (i+0.5)*dx[0];
-                
+                int idx = std::round( (dimension_geometry[0]-1) / Lx * x +1 ) -1; // Convert x in the index of imported geometry geo3D 
                 for (int n = 0; n < ncomp; ++n)
                 {
-                    phi(i, j, k, n) = 0.0;
+                    phi(i, j, k, n) = 0.0; // Initialize all composant to 0
                 }
+                int id = (idx+1 + (idy+1-1)*(dimension_geometry[0]) + (idz+1-1)*(dimension_geometry[1])*(dimension_geometry[0]))-1;
                 
-                //by default electrolyte
-                phi(i,j,k,LS_ID)=1.0;
-                
-                // Separator
-                const amrex::Real s_xlo = 0.45*Lx;
-                const amrex::Real s_xhi = 0.55*Lx;
 
-                bool comp_found = false;
-                for(int jj = 0; jj < 3; ++jj)
-                {
-                    Real y0 = jj*Ly/2.0;
-                    for(int kk = 0; kk < 3; ++kk)
-                    {
-                        Real z0 = kk*Lz/2.0;
-                        // cathode
-                        for(int ii = 0; ii < 5; ++ii)
-                        {
-                            Real x0 = ii*.35*Lx/4.0;
-                            Real r = std::sqrt((x-x0)*(x-x0) + (y-y0)*(y-y0) + (z-z0)*(z-z0));
-                            if(r < Lx/20.0)
-                            {
-                                phi(i,j,k,A_ID)  = 0.0;
-                                phi(i,j,k,C_ID)  = 1.0;
-                                phi(i,j,k,S_ID)  = 0.0;
-                                phi(i,j,k,E_ID)  = 0.0;
-                                phi(i,j,k,LS_ID) = 0.0;
-                                comp_found = true;
-                            }
-                        }
-                        // anode
-                        for(int ii = 0; ii < 5; ++ii)
-                        {
-                            Real x0 = 0.65*Lx + ii*.35*Lx/4.0;
-                            Real r = std::sqrt((x-x0)*(x-x0) + (y-y0)*(y-y0) + (z-z0)*(z-z0));
-                            if(r < Lx/20.0)
-                            {
-                                phi(i,j,k,A_ID)  = 1.0;
-                                phi(i,j,k,C_ID)  = 0.0;
-                                phi(i,j,k,S_ID)  = 0.0;
-                                phi(i,j,k,E_ID)  = 0.0;
-                                phi(i,j,k,LS_ID) = 0.0;
-                                comp_found = true;
-                            }
-                        }
-                    }
+                if (geo1D[id] == 1) {
+                    phi(i,j,k,A_ID) = 1;
+                } else if (geo1D[id] == 3) {
+                    phi(i,j,k,E_ID) = 1;
+                    phi(i,j,k,LS_ID) = 1;
+                } else if (geo1D[id] == 4) {
+                    phi(i,j,k,S_ID) = 1;
+                    phi(i,j,k,LS_ID) = 1;
+                } else if (geo1D[id] == 2) {
+                    phi(i,j,k,C_ID) = 1;
+                } else {
+                    amrex::Print() << "Error for idx= " << idx << " idy= " << idy << " idz= " << idz << " geo1D[id]= " << geo1D[id] << std::endl;
+                    phi(i,j,k,A_ID) = 1;
                 }
-
-                if(!comp_found)
-                {
-                    if(x > s_xlo && x < s_xhi) 
-                    {
-                        // separator
-                        phi(i,j,k,A_ID)  = 0.0;
-                        phi(i,j,k,C_ID)  = 0.0;
-                        phi(i,j,k,S_ID)  = 1.0;
-                        phi(i,j,k,E_ID)  = 0.0;
-                        phi(i,j,k,LS_ID) = 1.0;
-                    } 
-                    else 
-                    {
-                        // electrolyte
-                        phi(i,j,k,A_ID)  = 0.0;
-                        phi(i,j,k,C_ID)  = 0.0;
-                        phi(i,j,k,S_ID)  = 0.0;
-                        phi(i,j,k,E_ID)  = 1.0;
-                        phi(i,j,k,LS_ID) = 1.0;
-                    }
-                }
-
-                phi(i,j,k,EFX_ID) = 0.0;
-                phi(i,j,k,EFY_ID) = 0.0;
-                phi(i,j,k,EFZ_ID) = 0.0;
-                phi(i,j,k,POT_ID) = 0.0; // Potential initialize to 0
             }
         }
     }
@@ -254,9 +236,6 @@ void initproblemdata(Box const& bx, Array4<Real> const& phi, GeometryData const&
     const amrex::Real phie_to = electrochem::get_phie_initial_from_anode(Activeinterface_current_density_anode, phis_a_to, *prob_parm);
     const amrex::Real phis_c_to = electrochem::get_phic_initial_from_electrolyte(Activeinterface_current_density_cathode, phie_to, *prob_parm);
 
-
-
-
     // INITIAL CONCENTRATION
     const amrex::Real cs_a_to = prob_parm->soc_anode_t0 * electrochem::Cs_max_anode(*prob_parm);
     const amrex::Real cs_c_to = prob_parm->soc_cathode_t0 * electrochem::Cs_max_cathode(*prob_parm);
@@ -281,9 +260,6 @@ void initproblemdata(Box const& bx, Array4<Real> const& phi, GeometryData const&
             }
         }
     }
-
-
-
 }
 
 // ---------------------------------------------------

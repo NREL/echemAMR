@@ -16,6 +16,13 @@ struct ProbParm
     amrex::Real R_gas_const = 8.31446261815324; // [J.mol-1.K-1]
 
     // --------------
+    // GEOMETRY
+    // --------------
+    std::string geometry_filename = "Geometry_cube.txt";
+    //std::string geometry_filename = "Geometry_NMC.txt";
+
+
+    // --------------
     // USER-PARAMETER
     // --------------
 

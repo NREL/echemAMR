@@ -5,18 +5,21 @@ stop_time = 100.0
 geometry.is_periodic =  0  0  0
 geometry.coord_sys   =  0       # 0 => cart
 geometry.prob_lo     =  0.0    0.0    0.0 
-geometry.prob_hi     =  150e-6  25e-6  25e-6
-amr.n_cell           =  80  16  16
+#geometry.prob_hi     =  150e-6  25e-6  25e-6
+#amr.n_cell           =  80  16  16
+
+#geometry.prob_hi     =  150e-6  40e-6  40e-6
+#amr.n_cell           =  180 48 48
+geometry.prob_hi     =  100e-6  20e-6  20e-6
+amr.n_cell           =  30 6 6
 
 # VERBOSITY
 amr.v              = 1       # verbosity in Amr
 
 # REFINEMENT
-amr.max_level       = 2       # maximum level number allowed
-amr.blocking_factor = 2       # block factor in grid generation
-amr.max_grid_size   = 8
-
-amr.regrid_int      = 2       # how often to regrid
+amr.max_level       = 2       # maximum level number allowed # (2)
+amr.blocking_factor = 2       # block factor in grid generation # (2)
+amr.max_grid_size   = 8       # (8)
 
 # TIME STEP CONTROL
 echemamr.cfl            = 0.8    

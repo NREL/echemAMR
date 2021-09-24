@@ -273,11 +273,11 @@ namespace electrochem
     // ------------------------------------------------------
 
     AMREX_GPU_DEVICE AMREX_FORCE_INLINE
-    amrex::Real intercalation_reaction_anode(amrex::Real Ca, amrex::Real phi_a, amrex::Real Ce, amrex::Real phi_e, const ProbParm& prob_parm)
+    amrex::Real intercalation_reaction_anode(amrex::Real Ca, amrex::Real Ce, amrex::Real Phi_jump, const ProbParm& prob_parm)
     {
         const amrex::Real ioa = Io_a(Ca, Ce, prob_parm);
         const amrex::Real OCPa = OCP_a(Ca, prob_parm);
-        const amrex::Real eta = phi_a - phi_e - OCPa;
+        const amrex::Real eta = Phi_jump - OCPa; // Phi_jump = phi_a - phi_e
         const amrex::Real FRT = prob_parm.Faraday_const/(prob_parm.R_gas_const * prob_parm.Temperature);
         bool use_sinh = false;
         if(use_sinh) {
@@ -289,11 +289,11 @@ namespace electrochem
     }
 
     AMREX_GPU_DEVICE AMREX_FORCE_INLINE
-    amrex::Real intercalation_reaction_cathode(amrex::Real Cc, amrex::Real phi_c, amrex::Real Ce, amrex::Real phi_e, const ProbParm& prob_parm)
+    amrex::Real intercalation_reaction_cathode(amrex::Real Cc, amrex::Real Ce, amrex::Real Phi_jump, const ProbParm& prob_parm)
     {
         const amrex::Real ioc = Io_c(Cc, Ce, prob_parm);
         const amrex::Real OCPc = OCP_c(Cc, prob_parm);
-        const amrex::Real eta = phi_c - phi_e - OCPc;
+        const amrex::Real eta = Phi_jump - OCPc; // Phi_jump = phi_c - phi_e
         const amrex::Real FRT = prob_parm.Faraday_const/(prob_parm.R_gas_const * prob_parm.Temperature);
         bool use_sinh = false;
         if(use_sinh) {
