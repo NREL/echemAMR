@@ -562,7 +562,7 @@ void echemAMR::solve_potential(Real current_time)
         // need user-defined rhs
 
         mlmg.solve(GetVecOfPtrs(solution), GetVecOfConstPtrs(rhs), tol_rel, tol_abs);
-        mlmg_res.compResidual(GetVecOfPtrs(residual),GetVecOfPtrs(solution), GetVecOfConstPtrs(rhs_res));
+        mlmg_res.apply(GetVecOfPtrs(residual),GetVecOfPtrs(solution));
 
         //error norm calculation
         // copy solution back to phi_new
@@ -593,13 +593,23 @@ void echemAMR::solve_potential(Real current_time)
             {
                 amrex::Print()<<"Converged with final error:"<<rel_errnorm_all
                     <<"\t"<<abs_errnorm_all<<"\n";
-                break;
+//                break;
             }
         }
 
         // copy solution back to phi_new
         for (int ilev = 0; ilev <= finest_level; ilev++)
         {
+            amrex::MultiFab level_mask;
+            if (ilev < finest_level) {
+                level_mask = makeFineMask(grids[ilev],dmap[ilev],grids[ilev+1], amrex::IntVect(2), 1.0, 0.0);
+            } else {
+                level_mask.define(grids[ilev], dmap[ilev], 1, 0,
+                    amrex::MFInfo());
+                level_mask.setVal(1);
+            }
+            amrex::MultiFab::Subtract(residual[ilev],rhs_res[ilev], 0, 0, 1 ,0);
+            amrex::MultiFab::Multiply(residual[ilev],level_mask, 0, 0, 1, 1);
             amrex::Print() << "level: " << ilev << " BV NON-LINEAR RESIDUAL: " <<  residual[ilev].norm2() << std::endl;
             amrex::MultiFab::Copy(phi_new[ilev], solution[ilev], 0, POT_ID, 1, 0);
         }
