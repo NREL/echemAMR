@@ -588,16 +588,21 @@ void echemAMR::solve_potential(Real current_time)
                rel_errnorm_all += rel_errnorm;
             }
 
-            if(abs_errnorm_all < bv_nonlinear_abstol ||
-                    rel_errnorm_all < bv_nonlinear_reltol)
-            {
-                amrex::Print()<<"Converged with final error:"<<rel_errnorm_all
-                    <<"\t"<<abs_errnorm_all<<"\n";
+//            if(abs_errnorm_all < bv_nonlinear_abstol ||
+//                    rel_errnorm_all < bv_nonlinear_reltol)
+//            {
+//                amrex::Print()<<"Converged with final error:"<<rel_errnorm_all
+//                    <<"\t"<<abs_errnorm_all<<"\n";
 //                break;
-            }
+//            }
         }
 
         // copy solution back to phi_new
+        for (int ilev = 0; ilev <= finest_level; ilev++) {
+            amrex::MultiFab::Copy(phi_new[ilev], solution[ilev], 0, POT_ID, 1, 0);
+        }
+
+        Real total_nl_res = 0.0;
         for (int ilev = 0; ilev <= finest_level; ilev++)
         {
             amrex::MultiFab level_mask;
@@ -610,8 +615,22 @@ void echemAMR::solve_potential(Real current_time)
             }
             amrex::MultiFab::Subtract(residual[ilev],rhs_res[ilev], 0, 0, 1 ,0);
             amrex::MultiFab::Multiply(residual[ilev],level_mask, 0, 0, 1, 1);
-            amrex::Print() << "level: " << ilev << " BV NON-LINEAR RESIDUAL: " <<  residual[ilev].norm2() << std::endl;
-            amrex::MultiFab::Copy(phi_new[ilev], solution[ilev], 0, POT_ID, 1, 0);
+            Real nl_res = residual[ilev].norm2();
+            total_nl_res += nl_res;
+        }
+
+        if(nl_it==0) {
+            errnorm_1st_iter=total_nl_res;
+        }
+
+        amrex::Print() <<"BV NON-LINEAR RESIDUAL (rel,abs): " <<  total_nl_res/errnorm_1st_iter << ' ' << total_nl_res << std::endl;
+
+        if(total_nl_res < bv_nonlinear_abstol ||
+                total_nl_res/errnorm_1st_iter < bv_nonlinear_reltol)
+        {
+            amrex::Print()<<"Converged with final rel,abs error: "<< total_nl_res/errnorm_1st_iter
+                <<"\t"<< total_nl_res <<"\n";
+                break;
         }
     }
 
