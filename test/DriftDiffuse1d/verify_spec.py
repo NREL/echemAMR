@@ -49,6 +49,8 @@ fig.colorbar(im, ax=ax[1][1])
 dir_char=chr(ord('x')+int(argv[2]))
 fig.suptitle("S1 and S2 solution along "+dir_char+" direction "+argv[3])
 plt.savefig("species_"+dir_char+"_"+argv[3]+".png")
-plt.show()
+
+print(np.sqrt(np.mean( (fld_S1-exactsoln)**2 ) )/len(x) )
+print(np.sqrt(np.mean( (fld_S2-0.5*(x-x**2))**2 ) )/len(x) )
 #=======================================
 
