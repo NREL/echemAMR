@@ -98,8 +98,8 @@ ax.plot(x,phi_exact,'r^-',label="exact",markersize=6,markevery=1)
 ax.legend(loc="best")
 
 dir_char=chr(ord('x')+int(axialdir))
-fig.suptitle("Potential solution along "+dir_char+" direction ")
-plt.savefig("pot_"+dir_char+".png")
+fig.suptitle("Potential solution along "+dir_char+" direction (CEA)")
+plt.savefig("pot_"+dir_char+"_CEA.png")
 plt.show()
 #=======================================
 
