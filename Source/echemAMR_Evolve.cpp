@@ -551,7 +551,7 @@ void echemAMR::solve_potential(Real current_time)
                 level_mask.setVal(1);
             }
             amrex::MultiFab::Subtract(residual[ilev],rhs_res[ilev], 0, 0, 1 ,0);
-            amrex::MultiFab::Multiply(residual[ilev],level_mask, 0, 0, 1, 1);
+            amrex::MultiFab::Multiply(residual[ilev],level_mask, 0, 0, 1, 0);
             Real nl_res = residual[ilev].norm2();
             total_nl_res += nl_res;
         }
