@@ -6,5 +6,6 @@
 #include <compute_flux_3d.H>
 #include <echemAMR_Tagging.H>
 #include <echemAMR_BCFill.H>
+#include <bv_utils.H>
 
 #endif
