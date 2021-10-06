@@ -26,7 +26,7 @@ fld_pot = np.array(frb["Potential"])[res//2,:]
 c=1.0;
 d=0.1;
 exactsoln=np.zeros(res);
-exactsoln[x>=0.25]=0.2
+exactsoln[x>=0.25]=-0.2
 exactsoln[x>0.75]=0.0
 #exactsoln[:]-=0.1
 #=======================================
@@ -40,8 +40,8 @@ ax.plot(x,fld_pot,'k-',label="echemAMR",markersize=2)
 ax.legend(loc="best")
 
 dir_char=chr(ord('x')+int(axialdir))
-fig.suptitle("potential solution along "+dir_char+" direction ")
-plt.savefig("pot_"+dir_char+".png")
+fig.suptitle("potential solution along "+dir_char+" direction (OCE)")
+plt.savefig("pot_"+dir_char+"_OCE.png")
 plt.show()
 #=======================================
 

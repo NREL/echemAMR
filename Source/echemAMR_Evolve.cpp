@@ -124,7 +124,7 @@ void echemAMR::solve_potential(Real current_time)
     // amrex solves
     // read small a as alpha, b as beta
 
-    //(A a - B del.b) phi = f
+    //(A a - B del.(b del)) phi = f
     //
     // A and B are scalar constants
     // a and b are scalar fields
@@ -361,100 +361,37 @@ void echemAMR::solve_potential(Real current_time)
                         Array4<Real> explterms_arr_res = bv_explicit_terms_res[idim].array(mfi);
 
                         amrex::ParallelFor(fbox, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
-                            IntVect left(i, j, k);
-                            IntVect right(i, j, k);
-
-                            IntVect top_left(i, j, k);
-                            IntVect bottom_left(i, j, k);
-                            IntVect top_right(i, j, k);
-                            IntVect bottom_right(i, j, k);
-
-                            IntVect front_left(i, j, k);
-                            IntVect back_left(i, j, k);
-                            IntVect front_right(i, j, k);
-                            IntVect back_right(i, j, k);
 
                             int normaldir = idim;
-                            int trans1dir = (idim + 1) % AMREX_SPACEDIM;
-                            int trans2dir = (idim + 2) % AMREX_SPACEDIM;
-
-                            left[idim] -= 1;
-                            top_left[idim] -= 1;
-                            bottom_left[idim] -= 1;
-                            front_left[idim] -= 1;
-                            back_left[idim] -= 1;
-
-                            top_left[trans1dir] += 1;
-                            top_right[trans1dir] += 1;
-                            bottom_left[trans1dir] -= 1;
-                            bottom_right[trans1dir] -= 1;
-
-                            front_left[trans2dir] += 1;
-                            front_right[trans2dir] += 1;
-                            back_left[trans2dir] -= 1;
-                            back_right[trans2dir] -= 1;
-
-                            // levelset color
-                            Real c_left = phi_arr(left, lset_id);
-                            Real c_right = phi_arr(right, lset_id);
-
-                            Real c_top = 0.5 * (phi_arr(top_left, lset_id) + phi_arr(top_right, lset_id));
-                            Real c_bot = 0.5 * (phi_arr(bottom_left, lset_id) + phi_arr(bottom_right, lset_id));
-
-                            Real c_frnt = 0.5 * (phi_arr(front_left, lset_id) + phi_arr(front_right, lset_id));
-                            Real c_back = 0.5 * (phi_arr(back_left, lset_id) + phi_arr(back_right, lset_id));
-
-                            // phi
-                            Real pot_left = phi_arr(left, POT_ID);
-                            Real pot_right = phi_arr(right, POT_ID);
-
-                            Real pot_top = 0.5 * (phi_arr(top_left, POT_ID) + phi_arr(top_right, POT_ID));
-                            Real pot_bot = 0.5 * (phi_arr(bottom_left, POT_ID) + phi_arr(bottom_right, POT_ID));
-
-                            Real pot_frnt = 0.5 * (phi_arr(front_left, POT_ID) + phi_arr(front_right, POT_ID));
-                            Real pot_back = 0.5 * (phi_arr(back_left, POT_ID) + phi_arr(back_right, POT_ID));
-
-                            // x,y or z
-                            Real dcdn = (c_right - c_left) / dx[normaldir];
-                            Real dcdt1 = (c_top - c_bot) / (2.0 * dx[trans1dir]);
-                            Real dcdt2 = (c_frnt - c_back) / (2.0 * dx[trans2dir]);
-
-                            // grad of potential
-                            Real dphidn = (pot_right - pot_left) / dx[normaldir];
-                            Real dphidt1 = (pot_top - pot_bot) / (2.0 * dx[trans1dir]);
-                            Real dphidt2 = (pot_frnt - pot_back) / (2.0 * dx[trans2dir]);
-
-                            Real gradc_tolfac = 1e-4;
-                            Real gradc_max = 1.0 / min_dx; // maximum gradient possible on the current grid
-                            Real gradc_cutoff = gradc_tolfac * gradc_max;
-
-                            Real mod_gradc = sqrt(dcdn * dcdn + dcdt1 * dcdt1 + dcdt2 * dcdt2);
+                            Real mod_gradc=0.0;
+                            Real facecolor=0.0;
+                            Real potjump=0.0;
+                            Real gradc_cutoff=0.0;
+                            Real dphidn = 0.0;
+                            Real dphidt1 = 0.0;
+                            Real dphidt2 = 0.0;
+                            Real n_ls[AMREX_SPACEDIM];
+                            
+                            bv_get_grads_and_jumps(i, j, k, normaldir, lset_id, dx, phi_arr,
+                                mod_gradc, gradc_cutoff, facecolor, potjump, dphidn, dphidt1, dphidt2, n_ls);
 
                             explterms_arr(i, j, k) = 0.0;
                             explterms_arr_res(i, j, k) = 0.0;
 
                             if (mod_gradc > gradc_cutoff)
                             {
-                                Real n_ls[3];
-                                n_ls[0] = dcdn / mod_gradc;
-                                n_ls[1] = dcdt1 / mod_gradc;
-                                n_ls[2] = dcdt2 / mod_gradc;
+                                Real activ_func = electrochem_reactions::bv_activation_function(facecolor, mod_gradc, gradc_cutoff);
 
-                                Real activ_func = electrochem_reactions::bv_activation_function(0.5 * (c_right + c_left), mod_gradc, gradc_cutoff);
-
-                                // jump along the level set normal (phi_electrolyte-phi_electrode)
-                                Real phi_jump = (dphidn * n_ls[0] + dphidt1 * n_ls[1] + dphidt2 * n_ls[2]) / mod_gradc;
-
-                                //if(fabs(phi_jump) > 1)
+                                //if(fabs(potjump) > 1)
                                 //{
-                                 //   Print()<<"phi_jump:"<<phi_jump<<"\t"<<dphidn<<"\t"<<dphidt1<<"\t"<<dphidt2<<"\t"
+                                 //   Print()<<"potjump:"<<potjump<<"\t"<<dphidn<<"\t"<<dphidt1<<"\t"<<dphidt2<<"\t"
                                    //     <<dcdn<<"\t"<<dcdt1<<"\t"<<dcdt2<<"\t"<<mod_gradc<<"\n";
                                 //}
 
                                 // FIXME: pass ion concentration also
                                 // FIXME: ideally it should be the ion concentration at the closest electrode cell
                                 Real j_bv,jdash_bv;
-                                electrochem_reactions::bvcurrent_and_der(i,j,k,normaldir,phi_jump,phi_arr,*localprobparm,j_bv,jdash_bv);
+                                electrochem_reactions::bvcurrent_and_der(i,j,k,normaldir,potjump,phi_arr,*localprobparm,j_bv,jdash_bv);
 
                                 dcoeff_arr(i, j, k) *= (1.0 - activ_func);
                                 dcoeff_arr_res(i, j, k) = dcoeff_arr(i, j, k);
@@ -468,8 +405,8 @@ void echemAMR::solve_potential(Real current_time)
                                 explterms_arr_res(i, j, k) = explterms_arr(i, j, k);
 
                                 // expl term2
-                                // explterms_arr(i,j,k) += -jdash_bv*phi_jump*activ_func*dcdn/mod_gradc;
-                                explterms_arr(i, j, k) += -jdash_bv * phi_jump * activ_func * n_ls[0];
+                                // explterms_arr(i,j,k) += -jdash_bv*potjump*activ_func*dcdn/mod_gradc;
+                                explterms_arr(i, j, k) += -jdash_bv * potjump * activ_func * n_ls[0];
 
                                 // expl term3 (mix derivative terms from tensor product)
                                 // explterms_arr(i,j,k) +=  jdash_bv*activ_func/pow(mod_gradc,3.0)*(dcdn*dcdt1*dphidt1+dcdn*dcdt2*dphidt2);
@@ -841,15 +778,15 @@ void echemAMR::compute_dsdt(int lev, const int num_grow, MultiFab& Sborder, Mult
             });
 
             amrex::ParallelFor(bx_x, ncomp, [=] AMREX_GPU_DEVICE(int i, int j, int k, int n) {
-                compute_flux_x(i, j, k, n, sborder_arr, velx_arr, dcoeff_arr, flux_arr[0], dx, *localprobparm, bvflux, bvlset, bvspec);
+                compute_flux(i, j, k, n, 0, sborder_arr, velx_arr, dcoeff_arr, flux_arr[0], dx, *localprobparm, bvflux, bvlset, bvspec);
             });
 
             amrex::ParallelFor(bx_y, ncomp, [=] AMREX_GPU_DEVICE(int i, int j, int k, int n) {
-                compute_flux_y(i, j, k, n, sborder_arr, vely_arr, dcoeff_arr, flux_arr[1], dx, *localprobparm, bvflux, bvlset, bvspec);
+                compute_flux(i, j, k, n, 1, sborder_arr, vely_arr, dcoeff_arr, flux_arr[1], dx, *localprobparm, bvflux, bvlset, bvspec);
             });
 
             amrex::ParallelFor(bx_z, ncomp, [=] AMREX_GPU_DEVICE(int i, int j, int k, int n) {
-                compute_flux_z(i, j, k, n, sborder_arr, velz_arr, dcoeff_arr, flux_arr[2], dx, *localprobparm, bvflux, bvlset, bvspec);
+                compute_flux(i, j, k, n, 2, sborder_arr, velz_arr, dcoeff_arr, flux_arr[2], dx, *localprobparm, bvflux, bvlset, bvspec);
             });
 
             // update residual

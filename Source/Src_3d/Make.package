@@ -1,2 +1,3 @@
 CEXE_headers += advance_$(DIM)d.H
-CEXE_headers += compute_diff_flux_$(DIM)d.H
+CEXE_headers += compute_flux_$(DIM)d.H
+CEXE_headers += bv_utils.H
