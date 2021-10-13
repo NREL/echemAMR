@@ -230,6 +230,7 @@ void echemAMR::solve_potential(Real current_time)
     mlmg.setMaxFmgIter(max_fmg_iter);
     mlmg.setVerbose(verbose);
     mlmg.setBottomVerbose(bottom_verbose);
+    mlmg.setHypreOptionsNamespace("hypre");
 //    mlmg.setBottomTolerance(1.0e-14);
 //    mlmg.setBottomToleranceAbs(1.0e-14);
 
