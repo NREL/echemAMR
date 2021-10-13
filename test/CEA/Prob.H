@@ -37,9 +37,10 @@ void initdomaindata(Box const& bx, Array4<Real> const& phi, GeometryData const& 
     const Real* AMREX_RESTRICT prob_lo = geomdata.ProbLo();
     const Real* AMREX_RESTRICT prob_hi = geomdata.ProbHi();
     const Real* AMREX_RESTRICT dx      = geomdata.CellSize();
-    
-    Real xi1=prob_parm->int1;
-    Real xi2=prob_parm->int2;
+
+    Real length = prob_hi[0] - prob_lo[0];
+    Real xi1=prob_parm->int1*length;
+    Real xi2=prob_parm->int2*length;
 
     
 #ifdef _OPENMP
@@ -57,8 +58,8 @@ void initdomaindata(Box const& bx, Array4<Real> const& phi, GeometryData const& 
                 Real x = prob_lo[0] + (0.5+i) * dx[0];
                 Real xmid=0.5*(prob_lo[0]+prob_hi[0]);
 
-                phi(i,j,k,LS_ID) =  0.5*(1.0-tanh(prob_parm->sharpness_factor*(x-xi1)))
-                                     +0.5*(1.0+tanh(prob_parm->sharpness_factor*(x-xi2)));
+                phi(i,j,k,LS_ID) =  0.5*(1.0-tanh(prob_parm->sharpness_factor*(x-xi1)/length))
+                                     +0.5*(1.0+tanh(prob_parm->sharpness_factor*(x-xi2)/length));
                 
                 phi(i,j,k,LS_ID)  = 1.0-phi(i,j,k,LS_ID);
                 
