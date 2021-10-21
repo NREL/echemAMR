@@ -673,8 +673,6 @@ void echemAMR::Advance(int lev, Real time, Real dt_lev, int iteration, int ncycl
     MultiFab dsdt(grids[lev], dmap[lev], S_new.nComp(), 0);
 
     // stage 1
-    Print()<<"stage 1\n";
-
     // time is current time which is t_old, so phi_old is picked up!
     // but wait, we swapped phi_old and new, so we get phi_new here
     FillPatch(lev, time, Sborder, 0, Sborder.nComp());
@@ -684,9 +682,6 @@ void echemAMR::Advance(int lev, Real time, Real dt_lev, int iteration, int ncycl
     MultiFab::LinComb(S_new, 1.0, Sborder, 0, 0.5 * dt_lev, dsdt, 0, 0, S_new.nComp(), 0);
 
     // stage 2
-    //
-    Print()<<"stage 2\n";
-
     // time+dt_lev lets me pick S_new for sborder
     FillPatch(lev, time + dt_lev, Sborder, 0, Sborder.nComp());
     // dsdt for full time-step
