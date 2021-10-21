@@ -335,6 +335,7 @@ void echemAMR::solve_potential(Real current_time)
             if (buttler_vohlmer_flux)
             {
                 int lset_id = bv_levset_id;
+                Real gradctol = lsgrad_tolerance;
 
                 Array<MultiFab, AMREX_SPACEDIM> bv_explicit_terms;
                 Array<MultiFab, AMREX_SPACEDIM> bv_explicit_terms_res;
@@ -373,7 +374,7 @@ void echemAMR::solve_potential(Real current_time)
                             Real dphidt2 = 0.0;
                             Real n_ls[AMREX_SPACEDIM];
                             
-                            bv_get_grads_and_jumps(i, j, k, normaldir, lset_id, dx, phi_arr,
+                            bv_get_grads_and_jumps(i, j, k, normaldir, lset_id, dx, phi_arr, gradctol,
                                 mod_gradc, gradc_cutoff, facecolor, potjump, dphidn, dphidt1, dphidt2, n_ls);
 
                             explterms_arr(i, j, k) = 0.0;
@@ -672,7 +673,6 @@ void echemAMR::Advance(int lev, Real time, Real dt_lev, int iteration, int ncycl
     MultiFab dsdt(grids[lev], dmap[lev], S_new.nComp(), 0);
 
     // stage 1
-
     // time is current time which is t_old, so phi_old is picked up!
     // but wait, we swapped phi_old and new, so we get phi_new here
     FillPatch(lev, time, Sborder, 0, Sborder.nComp());
@@ -682,7 +682,6 @@ void echemAMR::Advance(int lev, Real time, Real dt_lev, int iteration, int ncycl
     MultiFab::LinComb(S_new, 1.0, Sborder, 0, 0.5 * dt_lev, dsdt, 0, 0, S_new.nComp(), 0);
 
     // stage 2
-
     // time+dt_lev lets me pick S_new for sborder
     FillPatch(lev, time + dt_lev, Sborder, 0, Sborder.nComp());
     // dsdt for full time-step
@@ -703,6 +702,8 @@ void echemAMR::compute_dsdt(int lev, const int num_grow, MultiFab& Sborder, Mult
     int bvflux = buttler_vohlmer_flux;
     int bvspec    = bv_spec_id;
     int bvlset    = bv_levset_id;
+
+    Real lsgrad_tol=lsgrad_tolerance;
 
     int ncomp = Sborder.nComp();
 
@@ -779,15 +780,15 @@ void echemAMR::compute_dsdt(int lev, const int num_grow, MultiFab& Sborder, Mult
             });
 
             amrex::ParallelFor(bx_x, ncomp, [=] AMREX_GPU_DEVICE(int i, int j, int k, int n) {
-                compute_flux(i, j, k, n, 0, sborder_arr, velx_arr, dcoeff_arr, flux_arr[0], dx, *localprobparm, bvflux, bvlset, bvspec);
+                compute_flux(i, j, k, n, 0, sborder_arr, velx_arr, dcoeff_arr, flux_arr[0], dx, *localprobparm, bvflux, bvlset, bvspec, lsgrad_tol);
             });
 
             amrex::ParallelFor(bx_y, ncomp, [=] AMREX_GPU_DEVICE(int i, int j, int k, int n) {
-                compute_flux(i, j, k, n, 1, sborder_arr, vely_arr, dcoeff_arr, flux_arr[1], dx, *localprobparm, bvflux, bvlset, bvspec);
+                compute_flux(i, j, k, n, 1, sborder_arr, vely_arr, dcoeff_arr, flux_arr[1], dx, *localprobparm, bvflux, bvlset, bvspec, lsgrad_tol);
             });
 
             amrex::ParallelFor(bx_z, ncomp, [=] AMREX_GPU_DEVICE(int i, int j, int k, int n) {
-                compute_flux(i, j, k, n, 2, sborder_arr, velz_arr, dcoeff_arr, flux_arr[2], dx, *localprobparm, bvflux, bvlset, bvspec);
+                compute_flux(i, j, k, n, 2, sborder_arr, velz_arr, dcoeff_arr, flux_arr[2], dx, *localprobparm, bvflux, bvlset, bvspec, lsgrad_tol);
             });
 
             // update residual
