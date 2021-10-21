@@ -219,6 +219,7 @@ private:
     int bv_nonlinear_iters = 1;
     Real bv_nonlinear_reltol = 1e-8;
     Real bv_nonlinear_abstol = 1e-12;
+    Real lsgrad_tolerance = 1e-2;
     int use_hypre=0;
 
     // frequency to output line plots

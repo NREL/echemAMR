@@ -283,6 +283,7 @@ void echemAMR::ReadParameters()
         pp.query("linsolve_abstol",linsolve_abstol);
         pp.query("linsolve_maxiter",linsolve_maxiter);
         pp.query("linsolve_max_coarsening_level",linsolve_max_coarsening_level);
+        pp.query("lsgrad_tol",lsgrad_tolerance);
     }
 }
 

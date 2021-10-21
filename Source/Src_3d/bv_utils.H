@@ -13,7 +13,7 @@ AMREX_GPU_DEVICE
     AMREX_FORCE_INLINE
 void bv_get_grads_and_jumps(int i,int j,int k,int normaldir,int lset_id,
         const GpuArray<Real, AMREX_SPACEDIM>& dx,
-        Array4<Real> const& phi_arr,
+        Array4<Real> const& phi_arr, Real gradc_tolfac,
         Real& mod_gradc, Real &gradc_cutoff,
         Real &facecolor, Real &potjump, Real &dphidn, Real &dphidt1, Real &dphidt2,
         Real n_ls[AMREX_SPACEDIM])
@@ -81,7 +81,6 @@ void bv_get_grads_and_jumps(int i,int j,int k,int normaldir,int lset_id,
     dphidt1 = (pot_top - pot_bot) / (2.0 * dx[trans1dir]);
     dphidt2 = (pot_frnt - pot_back) / (2.0 * dx[trans2dir]);
 
-    Real gradc_tolfac = 1e-4;
     Real gradc_max = 1.0 / min_dx; // maximum gradient possible on the current grid
     
     gradc_cutoff = gradc_tolfac * gradc_max;

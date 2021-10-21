@@ -26,7 +26,7 @@ void compute_flux(
         Array4<Real> const& fx,
         const GpuArray<Real, AMREX_SPACEDIM>& dx,
         ProbParm const& prob_parm,
-        int bvflux=0,int lset_id=0,int bvspec=1)
+        int bvflux=0,int lset_id=0,int bvspec=1,Real lsgrad_tol=1e-2)
 {
 
     //|--left1--|--left--|--right--|--right1--|
@@ -88,8 +88,8 @@ void compute_flux(
             Real dphidt1=0.0;
             Real dphidt2=0.0;
 
-            bv_get_grads_and_jumps(i, j, k, sweepdir, lset_id, dx, phi,
-                    mod_gradc, gradc_cutoff, facecolor, potjump,dphidn, dphidt1, dphidt2, n_ls);
+            bv_get_grads_and_jumps(i, j, k, sweepdir, lset_id, dx, phi, lsgrad_tol, 
+                    mod_gradc, gradc_cutoff, facecolor, potjump, dphidn, dphidt1, dphidt2, n_ls);
 
             if(mod_gradc > gradc_cutoff)
             {
