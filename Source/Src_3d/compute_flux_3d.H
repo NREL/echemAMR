@@ -97,7 +97,9 @@ void compute_flux(
                 fx(i,j,k,n)=fx(i,j,k,n)*(1.0-activ_func);
                 Real j_bv,jdash_bv;
                 electrochem_reactions::bvcurrent_and_der(i,j,k,sweepdir,potjump,phi,prob_parm,j_bv,jdash_bv);
-                fx(i,j,k,n)=fx(i,j,k,n)+j_bv/FARADCONST*activ_func*n_ls[sweepdir];
+
+                //note n_ls[0] is along the sweep direction
+                fx(i,j,k,n)=fx(i,j,k,n)+j_bv/FARADCONST*activ_func*n_ls[0];
 
                 //debug print
                 /*amrex::Print()<<"bvflux:"<<j_bv/FARADCONST*activ_func*n_ls[sweepdir]<<"\t"<<
