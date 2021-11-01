@@ -5,7 +5,7 @@
 #include <AMReX_FArrayBox.H>
 #include <AMReX_Geometry.H>
 #include <Chemistry.H>
-#include <ChemistryProbParm.H>
+#include <ProbParm.H>
 #include <echemAMR_constants.H>
 #include <echemAMR.H>
 

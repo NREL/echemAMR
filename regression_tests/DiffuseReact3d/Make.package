@@ -1,4 +1,4 @@
-CEXE_headers += Prob.H Transport.H Chemistry.H Reactions.H ChemistryProbParm.H
+CEXE_headers += Prob.H Transport.H Chemistry.H Reactions.H ProbParm.H
 CEXE_sources += Chemistry.cpp
 
 #f90EXE_sources += face_velocity_$(DIM)d.f90

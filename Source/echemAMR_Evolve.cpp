@@ -16,7 +16,7 @@
 #include <Transport.H>
 #include <Reactions.H>
 #include <PostProcessing.H>
-#include <ChemistryProbParm.H>
+#include <ProbParm.H>
 #include <AMReX_MLABecLaplacian.H>
 
 // advance solution to final time

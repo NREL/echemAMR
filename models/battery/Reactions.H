@@ -5,7 +5,7 @@
 #include <AMReX_FArrayBox.H>
 #include <AMReX_REAL.H>
 #include <Chemistry.H>
-#include <ChemistryProbParm.H>
+#include <ProbParm.H>
 #include <AMReX_Tuple.H>
 #include <tuple>
 using namespace amrex;

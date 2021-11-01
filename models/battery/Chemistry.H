@@ -8,7 +8,7 @@
 #include <AMReX_Geometry.H>
 #include <AMReX_FArrayBox.H>
 #include <AMReX_Box.H>
-#include <ChemistryProbParm.H>
+#include <ProbParm.H>
 #include <math.h> // signbit, exp
 #include <cmath>  // pow
 
@@ -94,7 +94,7 @@ AMREX_GPU_DEVICE AMREX_FORCE_INLINE bool is_electrode(int i, int j, int k, amrex
 // ---------------------
 // MATERIAL COEFFICIENTS
 // ---------------------
-// Parameter selection is available in ChemistryProbParm.H
+// Parameter selection is available in ProbParm.H
 
 // ELECTROLYTE MATERIAL COEFFICIENTS
 
@@ -128,7 +128,7 @@ AMREX_GPU_DEVICE AMREX_FORCE_INLINE amrex::Real Ke_Bulk(amrex::Real Ce, const Pr
         return amrex::max((((a4 * Ce + a3) * Ce + a2) * Ce + a1) * Ce + a0, myeps);
     } else
     {
-        amrex::Abort("Incorrect user-parameter mater_electrolyte in ChemistryProbParm.H");
+        amrex::Abort("Incorrect user-parameter mater_electrolyte in ProbParm.H");
         return 0;
     }
 }
@@ -183,7 +183,7 @@ AMREX_GPU_DEVICE AMREX_FORCE_INLINE amrex::Real De_Bulk(amrex::Real Ce, const Pr
         return amrex::max((((a4 * Ce + a3) * Ce + a2) * Ce + a1) * Ce + a0, myeps); // [m2.s-1]
     } else
     {
-        amrex::Abort("Incorrect user-parameter mater_electrolyte in ChemistryProbParm.H");
+        amrex::Abort("Incorrect user-parameter mater_electrolyte in ProbParm.H");
         return 0;
     }
 }
@@ -214,7 +214,7 @@ AMREX_GPU_DEVICE AMREX_FORCE_INLINE amrex::Real t_plus(amrex::Real Ce, const Pro
         return amrex::max((a2 * Ce + a1) * Ce + a0, myeps);
     } else
     {
-        amrex::Abort("Incorrect user-parameter mater_electrolyte in ChemistryProbParm.H");
+        amrex::Abort("Incorrect user-parameter mater_electrolyte in ProbParm.H");
         return 0;
     }
 }
@@ -236,7 +236,7 @@ AMREX_GPU_DEVICE AMREX_FORCE_INLINE amrex::Real Activity_el(amrex::Real Ce, cons
         return amrex::max((a2 * Ce + a1) * Ce + a0, myeps);
     } else
     {
-        amrex::Abort("Incorrect user-parameter mater_electrolyte in ChemistryProbParm.H");
+        amrex::Abort("Incorrect user-parameter mater_electrolyte in ProbParm.H");
         return 0;
     }
 }
@@ -278,7 +278,7 @@ AMREX_GPU_HOST_DEVICE AMREX_FORCE_INLINE amrex::Real Cs_max_anode(const ProbParm
         return csmax_anode;
     } else
     {
-        amrex::Abort("Incorrect user-parameter mater_anode in ChemistryProbParm.H");
+        amrex::Abort("Incorrect user-parameter mater_anode in ProbParm.H");
         return 0;
     }
 }
@@ -297,7 +297,7 @@ AMREX_GPU_DEVICE AMREX_FORCE_INLINE amrex::Real Ka_bulk(amrex::Real Cs, const Pr
         return Kabulk;
     } else
     {
-        amrex::Abort("Incorrect user-parameter mater_anode in ChemistryProbParm.H");
+        amrex::Abort("Incorrect user-parameter mater_anode in ProbParm.H");
         return 0;
     }
 }
@@ -316,7 +316,7 @@ AMREX_GPU_DEVICE AMREX_FORCE_INLINE amrex::Real Da_bulk(amrex::Real Cs, const Pr
         return Dabulk;
     } else
     {
-        amrex::Abort("Incorrect user-parameter mater_anode in ChemistryProbParm.H");
+        amrex::Abort("Incorrect user-parameter mater_anode in ProbParm.H");
         return 0;
     }
 }
@@ -336,7 +336,7 @@ AMREX_GPU_HOST_DEVICE AMREX_FORCE_INLINE amrex::Real Io_a(amrex::Real Cs, amrex:
         return ioa;
     } else
     {
-        amrex::Abort("Incorrect user-parameter mater_anode in ChemistryProbParm.H");
+        amrex::Abort("Incorrect user-parameter mater_anode in ProbParm.H");
         return 0;
     }
 }
@@ -415,7 +415,7 @@ AMREX_GPU_HOST_DEVICE AMREX_FORCE_INLINE amrex::Real OCP_a(amrex::Real Cs, const
         }
     } else
     {
-        amrex::Abort("Incorrect user-parameter mater_anode in ChemistryProbParm.H");
+        amrex::Abort("Incorrect user-parameter mater_anode in ProbParm.H");
         return 0;
     }
 }
@@ -436,7 +436,7 @@ AMREX_GPU_HOST_DEVICE AMREX_FORCE_INLINE amrex::Real Cs_max_cathode(const ProbPa
         return csmax_cathode;
     } else
     {
-        amrex::Abort("Incorrect user-parameter mater_cathode in ChemistryProbParm.H");
+        amrex::Abort("Incorrect user-parameter mater_cathode in ProbParm.H");
         return 0;
     }
 }
@@ -456,7 +456,7 @@ AMREX_GPU_DEVICE AMREX_FORCE_INLINE amrex::Real Kc_bulk(amrex::Real Cs, const Pr
         return Kcbulk;
     } else
     {
-        amrex::Abort("Incorrect user-parameter mater_cathode in ChemistryProbParm.H");
+        amrex::Abort("Incorrect user-parameter mater_cathode in ProbParm.H");
         return 0;
     }
 }
@@ -550,7 +550,7 @@ AMREX_GPU_DEVICE AMREX_FORCE_INLINE amrex::Real Dc_bulk(amrex::Real Cs, const Pr
         return Dcbulk;
     } else
     {
-        amrex::Abort("Incorrect user-parameter mater_cathode in ChemistryProbParm.H");
+        amrex::Abort("Incorrect user-parameter mater_cathode in ProbParm.H");
         return 0;
     }
 }
@@ -582,7 +582,7 @@ AMREX_GPU_HOST_DEVICE AMREX_FORCE_INLINE amrex::Real Io_c(amrex::Real Cs, amrex:
         return ioc;
     } else
     {
-        amrex::Abort("Incorrect user-parameter mater_cathode in ChemistryProbParm.H");
+        amrex::Abort("Incorrect user-parameter mater_cathode in ProbParm.H");
         return 0;
     }
 }
@@ -626,7 +626,7 @@ AMREX_GPU_HOST_DEVICE AMREX_FORCE_INLINE amrex::Real OCP_c(amrex::Real Cs, const
         return OCPc;
     } else
     {
-        amrex::Abort("Incorrect user-parameter mater_cathode in ChemistryProbParm.H");
+        amrex::Abort("Incorrect user-parameter mater_cathode in ProbParm.H");
         return 0;
     }
 }

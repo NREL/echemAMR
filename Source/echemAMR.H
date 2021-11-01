@@ -18,7 +18,7 @@
 #include <AMReX_AmrCore.H>
 #include <AMReX_FluxRegister.H>
 #include <AMReX_BCRec.H>
-#include <ChemistryProbParm.H>
+#include <ProbParm.H>
 
 
 using namespace amrex;

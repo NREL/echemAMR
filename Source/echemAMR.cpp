@@ -13,7 +13,7 @@
 
 #include <echemAMR.H>
 #include <Chemistry.H>
-#include <ChemistryProbParm.H>
+#include <ProbParm.H>
 
 using namespace amrex;
 
