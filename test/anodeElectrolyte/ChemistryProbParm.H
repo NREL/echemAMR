@@ -13,6 +13,7 @@ struct ProbParm
     amrex::Real current_intput=3.0;
     amrex::Real electrode_dcoeff=3.0;
     amrex::Real electrolyte_dcoeff=1.0;
+    int direction = 0;   
 };
 struct GlobalStorage
 {

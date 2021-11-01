@@ -1,21 +1,25 @@
 import yt
 from sys import argv
+import os
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
     
+root_dirctory = os.path.abspath(os.path.join(argv[1], os.pardir))+"/"
+ds=yt.load(argv[1])
 
-#axialdir = int(argv[2])
-axialdir=0
-clength   = 1.0
-cwidth    = 0.125
-cdepth    = 0.125
+axialdir=np.argmax(ds.domain_dimensions)
+prob_lo=ds.domain_left_edge.d
+prob_hi=ds.domain_right_edge.d
+lengths=prob_hi-prob_lo
+clength   = lengths[axialdir]
+cwidth    = lengths[(axialdir+1)%3]
+cdepth    = lengths[(axialdir+2)%3]
 ar     = (clength/cwidth)
 
 axialdir_char=chr(ord('x')+axialdir)
 
-ds=yt.load(argv[1])
 res=100
 slicedepth = cdepth/2
 slc = ds.slice((axialdir+2)%3,slicedepth)
@@ -41,7 +45,7 @@ ax.legend(loc="best")
 
 dir_char=chr(ord('x')+int(axialdir))
 fig.suptitle("potential solution along "+dir_char+" direction (OCE)")
-plt.savefig("pot_"+dir_char+"_OCE.png")
+plt.savefig(root_dirctory+"pot_"+dir_char+"_OCE.png")
 plt.show()
 #=======================================
 

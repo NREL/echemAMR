@@ -16,7 +16,8 @@ struct ProbParm
     amrex::Real cathode_dcoeff           = 1.0e-6;  
     amrex::Real anode_conductivity       = 5.0;   
     amrex::Real cathode_conductivity     = 2.0; 
-    amrex::Real electrolyte_conductivity = 1.0;    
+    amrex::Real electrolyte_conductivity = 1.0; 
+    int direction = 0;   
 };
 struct GlobalStorage
 {

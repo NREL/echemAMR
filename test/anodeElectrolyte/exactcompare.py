@@ -1,5 +1,6 @@
 import yt
 from sys import argv
+import os
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -14,9 +15,10 @@ def bvfunction_inv(jbv,j0):
     return(finv)
 
 #axialdir = int(argv[2])
+root_dirctory = os.path.abspath(os.path.join(argv[1], os.pardir))+"/"
 ds=yt.load(argv[1])
 
-axialdir=0
+axialdir=np.argmax(ds.domain_dimensions)
 prob_lo=ds.domain_left_edge.d
 prob_hi=ds.domain_right_edge.d
 lengths=prob_hi-prob_lo
@@ -66,7 +68,7 @@ ax.legend(loc="best")
 
 dir_char=chr(ord('x')+int(axialdir))
 fig.suptitle("Potential solution along "+dir_char+" direction (AE) ")
-plt.savefig("pot_"+dir_char+"_AE.png")
+plt.savefig(root_dirctory+"pot_"+dir_char+"_AE.png")
 plt.show()
 #=======================================
 

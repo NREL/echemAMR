@@ -16,6 +16,7 @@ void amrex_probinit (ProbParm & h_prob_parm, ProbParm & d_prob_parm)
     amrex::ParmParse pp("prob");
     pp.query("interface_location", h_prob_parm.interface_location);
     pp.query("interface_sharpness", h_prob_parm.sharpness_factor);
+    pp.query("direction", h_prob_parm.direction);
 
 #ifdef AMREX_USE_GPU
     amrex::Gpu::htod_memcpy(&d_prob_parm, &h_prob_parm, sizeof(ProbParm));
@@ -37,9 +38,12 @@ void initdomaindata(Box const& bx, Array4<Real> const& phi, GeometryData const& 
     const Real* AMREX_RESTRICT prob_hi = geomdata.ProbHi();
     const Real* AMREX_RESTRICT dx      = geomdata.CellSize();
 
+
     Real int_loc=prob_parm->interface_location;
-    int transport_dir=0;
+    int transport_dir=prob_parm->direction;
     Real x[AMREX_SPACEDIM];
+
+
 
 #ifdef _OPENMP
 #pragma omp parallel for collapse(2) if (GPU::notInLaunchRegion)
@@ -49,7 +53,6 @@ void initdomaindata(Box const& bx, Array4<Real> const& phi, GeometryData const& 
         x[2] = prob_lo[2] + (k+0.5)*dx[2];
         for (int j = lo.y; j <= hi.y; ++j) 
         {
-            Real z = prob_lo[2] + (0.5+k) * dx[2];
             x[1] = prob_lo[1] + (j+0.5)*dx[1];
 
             AMREX_PRAGMA_SIMD
