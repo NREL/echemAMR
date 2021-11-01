@@ -1,0 +1,9 @@
+
+*.csv
+*.ex
+*.0
+*.DS_Store
+*plt*
+*tmp*
+*output*
+*Backtrace.*
