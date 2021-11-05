@@ -24,10 +24,6 @@ namespace electrochem_transport
         Real xlen,ylen,zlen,maxlen;
         int axialdir=0;
 
-        const int im1 = (dir == 0) ? i-1 : i;
-        const int jm1 = (dir == 1) ? j-1 : j;
-        const int km1 = (dir == 2) ? k-1 : k;
-        
         xlen=prob_hi[0]-prob_lo[0];
         ylen=prob_hi[1]-prob_lo[1];
         zlen=prob_hi[2]-prob_lo[2];
@@ -38,9 +34,14 @@ namespace electrochem_transport
         if(maxlen==ylen) axialdir=1;
         if(maxlen==zlen) axialdir=2;
 
+        const int im1 = (dir == 0) ? i-1 : i;
+        const int jm1 = (dir == 1) ? j-1 : j;
+        const int km1 = (dir == 2) ? k-1 : k;
+
         if(sgn == -1) 
         { // lo sides
-            bc(im1,jm1,km1) = (dir==0) ? -1.0 : 0.0;
+            // amrex::Print() << "axialdir: " << axialdir << ", dir: " << dir <<  std::endl;
+            bc(im1,jm1,km1) = (dir==axialdir) ? -1.0 : 0.0;
         } 
         else 
         { // hi sides

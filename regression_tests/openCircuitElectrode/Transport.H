@@ -30,9 +30,19 @@ AMREX_GPU_DEVICE AMREX_INLINE void potential_bc(
     const int jm1 = (dir == 1) ? j - 1 : j;
     const int km1 = (dir == 2) ? k - 1 : k;
 
+    xlen=prob_hi[0]-prob_lo[0];
+    ylen=prob_hi[1]-prob_lo[1];
+    zlen=prob_hi[2]-prob_lo[2];
+
+    maxlen=std::max(xlen,std::max(ylen,zlen));
+
+    if(maxlen==xlen) axialdir=0;
+    if(maxlen==ylen) axialdir=1;
+    if(maxlen==zlen) axialdir=2;
+    
     if (sgn == -1)
     { // lo sides
-        bc(im1, jm1, km1) = (dir == 0) ? bclo : 0.0;
+        bc(im1, jm1, km1) = (dir == axialdir) ? bclo : 0.0;
     } else
     { // hi sides
         bc(i, j, k) = (dir == 0) ? bchi : 0.0;

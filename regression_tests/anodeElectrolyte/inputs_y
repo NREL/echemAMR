@@ -31,7 +31,7 @@ echemamr.potential_solve_int = 1
 #foextrap 2 
 
 echemamr.lo_bc = 2 2 2
-echemamr.hi_bc = 3 2 2
+echemamr.hi_bc = 2 3 2
 
 # Tagging
 echemamr.tagged_vars = S1

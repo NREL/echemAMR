@@ -30,7 +30,7 @@ fld_pot = np.array(frb["Potential"])[res//2,:]
 c=1.0;
 d=0.1;
 exactsoln=np.zeros(res);
-exactsoln[x>=0.25]=-0.2
+exactsoln[x>=0.25]=0.2
 exactsoln[x>0.75]=0.0
 #exactsoln[:]-=0.1
 #=======================================
