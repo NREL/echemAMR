@@ -18,7 +18,7 @@ jobs:
         sudo apt-get install -y --no-install-recommends \
         build-essential g++ gfortran libopenmpi-dev openmpi-bin
     - name: Build
-      working-directory: ./test
+      working-directory: ./regression_tests
       run: |
         cd DriftDiffuse1d
         make -j 2 COMP=gnu
@@ -28,8 +28,11 @@ jobs:
         cd ..
         cd anodeElectrolyte
         make -j 2 COMP=gnu
+        cd ..
+        cd CEA
+        make -j 2 COMP=gnu
     - name: Run
-      working-directory: ./test
+      working-directory: ./regression_tests
       run: |
           cd DriftDiffuse1d
           mpirun -n 2 ./echemAMR3d.gnu.MPI.ex inputs_x
@@ -38,9 +41,18 @@ jobs:
           cd ..
           cd openCircuitElectrode
           mpirun -n 2 ./echemAMR3d.gnu.MPI.ex inputs_x
+          mpirun -n 2 ./echemAMR3d.gnu.MPI.ex inputs_y
+          mpirun -n 2 ./echemAMR3d.gnu.MPI.ex inputs_z
           cd ..
           cd anodeElectrolyte
           mpirun -n 2 ./echemAMR3d.gnu.MPI.ex inputs_x
+          mpirun -n 2 ./echemAMR3d.gnu.MPI.ex inputs_y
+          mpirun -n 2 ./echemAMR3d.gnu.MPI.ex inputs_z
+          cd ..
+          cd CEA
+          mpirun -n 2 ./echemAMR3d.gnu.MPI.ex inputs_x
+          mpirun -n 2 ./echemAMR3d.gnu.MPI.ex inputs_y
+          mpirun -n 2 ./echemAMR3d.gnu.MPI.ex inputs_z
   gputest:
     runs-on: ubuntu-latest
     steps:
@@ -59,7 +71,7 @@ jobs:
           cuda-compiler-11-1 cuda-minimal-build-11-1 \
           cuda-nvml-dev-11-1 cuda-nvtx-11-1 libcurand-dev-11-1 cuda-cupti-dev-11-1
     - name: Build
-      working-directory: ./test
+      working-directory: ./regression_tests
       run: |
         export PATH=/usr/local/nvidia/bin:/usr/local/cuda-11.1/bin:${PATH}
         export LD_LIBRARY_PATH=/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda-11.1/lib:${LD_LIBRARY_PATH}
@@ -70,4 +82,7 @@ jobs:
         make -j 2 COMP=gnu USE_CUDA=TRUE
         cd ..
         cd anodeElectrolyte
+        make -j 2 COMP=gnu USE_CUDA=TRUE
+        cd ..
+        cd CEA
         make -j 2 COMP=gnu USE_CUDA=TRUE
