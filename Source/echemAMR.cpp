@@ -20,7 +20,6 @@ using namespace amrex;
 ProbParm* echemAMR::h_prob_parm = nullptr;
 ProbParm* echemAMR::d_prob_parm = nullptr;
 GlobalStorage* echemAMR::host_global_storage = nullptr;
-
 // constructor - reads in parameters from inputs file
 //             - sizes multilevel arrays and data structures
 //             - initializes BCRec boundary condition object
@@ -56,25 +55,28 @@ echemAMR::echemAMR()
     phi_old.resize(nlevs_max);
 
     ParmParse pp("echemamr");
-    pp.queryarr("lo_bc", bc_lo, 0, AMREX_SPACEDIM);
-    pp.queryarr("hi_bc", bc_hi, 0, AMREX_SPACEDIM);
+    pp.queryarr("lo_bc_spec", bc_lo_spec, 0, AMREX_SPACEDIM);
+    pp.queryarr("hi_bc_spec", bc_hi_spec, 0, AMREX_SPACEDIM);
+    
+    pp.queryarr("lo_bc_pot", bc_lo_pot, 0, AMREX_SPACEDIM);
+    pp.queryarr("hi_bc_pot", bc_hi_pot, 0, AMREX_SPACEDIM);
 
     /*
         // walls (Neumann)
         int bc_lo[] = {FOEXTRAP, FOEXTRAP, FOEXTRAP};
         int bc_hi[] = {FOEXTRAP, FOEXTRAP, FOEXTRAP};
     */
-    bcs.resize(NVAR);
+    bcspec.resize(NVAR);
     for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
     {
         // lo-side BCs
-        if (bc_lo[idim] == BCType::int_dir ||  // periodic uses "internal Dirichlet"
-            bc_lo[idim] == BCType::foextrap || // first-order extrapolation
-            bc_lo[idim] == BCType::ext_dir || bc_lo[idim] == BCType::hoextrapcc)
+        if (bc_lo_spec[idim] == BCType::int_dir ||  // periodic uses "internal Dirichlet"
+            bc_lo_spec[idim] == BCType::foextrap || // first-order extrapolation
+            bc_lo_spec[idim] == BCType::ext_dir || bc_lo[idim] == BCType::hoextrapcc)
         {
             for (int sp = 0; sp < NVAR; sp++)
             {
-                bcs[sp].setLo(idim, bc_lo[idim]);
+                bcspec[sp].setLo(idim, bc_lo[idim]);
             }
         } else
         {
@@ -82,13 +84,13 @@ echemAMR::echemAMR()
         }
 
         // hi-side BCSs
-        if (bc_hi[idim] == BCType::int_dir ||  // periodic uses "internal Dirichlet"
-            bc_hi[idim] == BCType::foextrap || // first-order extrapolation
-            bc_hi[idim] == BCType::ext_dir || bc_hi[idim] == BCType::hoextrapcc)
+        if (bc_hi_spec[idim] == BCType::int_dir ||  // periodic uses "internal Dirichlet"
+            bc_hi_spec[idim] == BCType::foextrap || // first-order extrapolation
+            bc_hi_spec[idim] == BCType::ext_dir || bc_hi[idim] == BCType::hoextrapcc)
         {
             for (int sp = 0; sp < NVAR; sp++)
             {
-                bcs[sp].setHi(idim, bc_hi[idim]);
+                bcspec[sp].setHi(idim, bc_hi[idim]);
             }
         } else
         {

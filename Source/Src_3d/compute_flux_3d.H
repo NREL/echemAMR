@@ -111,4 +111,52 @@ void compute_flux(
     }
 
 }
+
+AMREX_GPU_DEVICE
+    AMREX_FORCE_INLINE
+void bvflux_sweep(
+        int i,
+        int j,
+        int k,
+        int n,
+        int sweepdir,
+        Array4<Real> const& phi, // state variable
+        Array4<Real> const& fx,
+        const GpuArray<Real, AMREX_SPACEDIM>& dx,
+        ProbParm const& prob_parm,
+        int lset_id,int bvspec,Real lsgrad_tol)
+{
+
+    //|--left1--|--left--|--right--|--right1--|
+    //|--(i-2)--|--(i-1)--|--i--|--(i+1)--|
+    //remember: face i separates (i-1) and i cells
+
+    if(n==bvspec)
+    {
+        Real mod_gradc=0.0;
+        Real facecolor=0.0;
+        Real potjump=0.0;
+        Real gradc_cutoff=0.0;
+        Real n_ls[AMREX_SPACEDIM];
+        Real dphidn=0.0;
+        Real dphidt1=0.0;
+        Real dphidt2=0.0;
+
+        bv_get_grads_and_jumps(i, j, k, sweepdir, lset_id, dx, phi, lsgrad_tol, 
+                mod_gradc, gradc_cutoff, facecolor, potjump, dphidn, dphidt1, dphidt2, n_ls);
+
+        if(mod_gradc > gradc_cutoff)
+        {
+            Real activ_func = electrochem_reactions::bv_activation_function(facecolor, mod_gradc, gradc_cutoff);
+            fx(i,j,k,n)=fx(i,j,k,n)*(1.0-activ_func);
+            Real j_bv,jdash_bv;
+            electrochem_reactions::bvcurrent_and_der(i,j,k,sweepdir,potjump,phi,prob_parm,j_bv,jdash_bv);
+
+            //note n_ls[0] is along the sweep direction
+            fx(i,j,k,n)=fx(i,j,k,n)+j_bv/FARADCONST*activ_func*n_ls[0];
+
+        }
+    }
+
+}
 #endif
