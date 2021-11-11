@@ -67,11 +67,11 @@ echemAMR::echemAMR()
         // lo-side BCs
         if (bc_lo_spec[idim] == BCType::int_dir ||  // periodic uses "internal Dirichlet"
             bc_lo_spec[idim] == BCType::foextrap || // first-order extrapolation
-            bc_lo_spec[idim] == BCType::ext_dir || bc_lo[idim] == BCType::hoextrapcc)
+            bc_lo_spec[idim] == BCType::ext_dir || bc_lo_spec[idim] == BCType::hoextrapcc)
         {
             for (int sp = 0; sp < NVAR; sp++)
             {
-                bcspec[sp].setLo(idim, bc_lo[idim]);
+                bcspec[sp].setLo(idim, bc_lo_spec[idim]);
             }
         } else
         {
@@ -81,11 +81,11 @@ echemAMR::echemAMR()
         // hi-side BCSs
         if (bc_hi_spec[idim] == BCType::int_dir ||  // periodic uses "internal Dirichlet"
             bc_hi_spec[idim] == BCType::foextrap || // first-order extrapolation
-            bc_hi_spec[idim] == BCType::ext_dir || bc_hi[idim] == BCType::hoextrapcc)
+            bc_hi_spec[idim] == BCType::ext_dir || bc_hi_spec[idim] == BCType::hoextrapcc)
         {
             for (int sp = 0; sp < NVAR; sp++)
             {
-                bcspec[sp].setHi(idim, bc_hi[idim]);
+                bcspec[sp].setHi(idim, bc_hi_spec[idim]);
             }
         } else
         {

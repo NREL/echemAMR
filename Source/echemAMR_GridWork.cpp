@@ -128,7 +128,7 @@ void echemAMR::FillPatch(int lev, Real time, MultiFab& mf, int icomp, int ncomp)
         GetData(0, time, smf, stime);
 
         GpuBndryFuncFab<AmrCoreFill> gpu_bndry_func(amrcore_fill_func);
-        PhysBCFunct<GpuBndryFuncFab<AmrCoreFill>> physbc(geom[lev], bcs, gpu_bndry_func);
+        PhysBCFunct<GpuBndryFuncFab<AmrCoreFill>> physbc(geom[lev], bcspec, gpu_bndry_func);
         amrex::FillPatchSingleLevel(mf, time, smf, stime, 0, icomp, ncomp, geom[lev], physbc, 0);
     } else
     {
@@ -140,11 +140,11 @@ void echemAMR::FillPatch(int lev, Real time, MultiFab& mf, int icomp, int ncomp)
         Interpolater* mapper = &cell_cons_interp;
 
         GpuBndryFuncFab<AmrCoreFill> gpu_bndry_func(amrcore_fill_func);
-        PhysBCFunct<GpuBndryFuncFab<AmrCoreFill>> cphysbc(geom[lev - 1], bcs, gpu_bndry_func);
-        PhysBCFunct<GpuBndryFuncFab<AmrCoreFill>> fphysbc(geom[lev], bcs, gpu_bndry_func);
+        PhysBCFunct<GpuBndryFuncFab<AmrCoreFill>> cphysbc(geom[lev - 1], bcspec, gpu_bndry_func);
+        PhysBCFunct<GpuBndryFuncFab<AmrCoreFill>> fphysbc(geom[lev], bcspec, gpu_bndry_func);
 
         amrex::FillPatchTwoLevels(
-            mf, time, cmf, ctime, fmf, ftime, 0, icomp, ncomp, geom[lev - 1], geom[lev], cphysbc, 0, fphysbc, 0, refRatio(lev - 1), mapper, bcs, 0);
+            mf, time, cmf, ctime, fmf, ftime, 0, icomp, ncomp, geom[lev - 1], geom[lev], cphysbc, 0, fphysbc, 0, refRatio(lev - 1), mapper, bcspec, 0);
     }
 }
 
@@ -165,8 +165,8 @@ void echemAMR::FillCoarsePatch(int lev, Real time, MultiFab& mf, int icomp, int 
     }
 
     GpuBndryFuncFab<AmrCoreFill> gpu_bndry_func(amrcore_fill_func);
-    PhysBCFunct<GpuBndryFuncFab<AmrCoreFill>> cphysbc(geom[lev - 1], bcs, gpu_bndry_func);
-    PhysBCFunct<GpuBndryFuncFab<AmrCoreFill>> fphysbc(geom[lev], bcs, gpu_bndry_func);
+    PhysBCFunct<GpuBndryFuncFab<AmrCoreFill>> cphysbc(geom[lev - 1], bcspec, gpu_bndry_func);
+    PhysBCFunct<GpuBndryFuncFab<AmrCoreFill>> fphysbc(geom[lev], bcspec, gpu_bndry_func);
 
-    amrex::InterpFromCoarseLevel(mf, time, *cmf[0], 0, icomp, ncomp, geom[lev - 1], geom[lev], cphysbc, 0, fphysbc, 0, refRatio(lev - 1), mapper, bcs, 0);
+    amrex::InterpFromCoarseLevel(mf, time, *cmf[0], 0, icomp, ncomp, geom[lev - 1], geom[lev], cphysbc, 0, fphysbc, 0, refRatio(lev - 1), mapper, bcspec, 0);
 }
