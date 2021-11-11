@@ -6,11 +6,6 @@
 #include <AMReX_VisMF.H>
 #include <AMReX_PhysBCFunct.H>
 #include <Kernels_3d.H>
-
-#ifdef AMREX_MEM_PROFILING
-#include <AMReX_MemProfiler.H>
-#endif
-
 #include <echemAMR.H>
 #include <Chemistry.H>
 #include <ProbParm.H>
@@ -286,6 +281,7 @@ void echemAMR::ReadParameters()
         pp.query("linsolve_maxiter",linsolve_maxiter);
         pp.query("linsolve_max_coarsening_level",linsolve_max_coarsening_level);
         pp.query("lsgrad_tol",lsgrad_tolerance);
+        pp.query("species_implicit_solve",species_implicit_solve);
     }
 }
 

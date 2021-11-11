@@ -65,7 +65,13 @@ public:
 
     // advance a single level for a single time step, updates flux registers
     void Advance(int lev, amrex::Real time, amrex::Real dt_lev, int iteration, int ncycle);
-    void compute_dsdt(int lev, const int num_grow, MultiFab& Sborder, MultiFab& dsdt, Real time, Real dt, bool reflux_this_stage);
+
+    void compute_fluxes(int lev, const int num_grow, MultiFab& Sborder, 
+        Array<MultiFab,AMREX_SPACEDIM>& flux, Real time, bool implicit_diffusion=false);
+
+    void compute_dsdt(int lev, const int num_grow, MultiFab& Sborder, 
+        Array<MultiFab,AMREX_SPACEDIM>& flux, MultiFab& dsdt,
+        Real time, Real dt, bool reflux_this_stage);
 
     void solve_potential(Real current_time);
 
@@ -212,6 +218,9 @@ private:
     int pot_solve_int = 1;
     // use old solution as initial guess for potential
     int pot_initial_guess = 0;
+
+    int species_implicit_solve=0;
+    Real species_implicit_solve_dt=0.01; //sec
 
     // apply Buttler-Vohlmer conditions
     int buttler_vohlmer_flux = 0;

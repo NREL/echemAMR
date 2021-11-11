@@ -25,7 +25,7 @@ void compute_flux(
         Array4<Real> const& dcoeff,
         Array4<Real> const& fx,
         const GpuArray<Real, AMREX_SPACEDIM>& dx,
-        ProbParm const& prob_parm,
+        ProbParm const& prob_parm,int implicit_diffusion,
         int bvflux=0,int lset_id=0,int bvspec=1,Real lsgrad_tol=1e-2)
 {
 
@@ -41,14 +41,6 @@ void compute_flux(
     left[sweepdir] -= 1;
     left1[sweepdir] -= 2;
     right1[sweepdir] += 1;
-
-    const amrex::Real d1 = dcoeff(right, n);
-    const amrex::Real d2 = dcoeff(left, n);
-
-    fx(i, j, k, n) = -2.0 * d1 * d2 / (d1 + d2 + heps) * (phi(right, n) - phi(left, n)) / dx[sweepdir];
-
-    //arithmetic mean case
-    //fx(i, j, k, n) = -0.5*(d1 + d2) * (phi(right, n) - phi(left, n)) / dx[sweepdir];
 
     // find face vel
     Real smallval = 1e-10;
@@ -72,7 +64,18 @@ void compute_flux(
     Real phi_R = phi(right, n) - 0.5 * lim_right * (phi(right1, n) - phi(right, n));
 
     Real vel_mid = vel(i, j, k, n);
-    fx(i, j, k, n) += phi_L * 0.5 * (vel_mid + fabs(vel_mid)) + phi_R * 0.5 * (vel_mid - fabs(vel_mid));
+    fx(i, j, k, n) = phi_L * 0.5 * (vel_mid + fabs(vel_mid)) + phi_R * 0.5 * (vel_mid - fabs(vel_mid));
+
+    if(!implicit_diffusion)
+    {
+        const amrex::Real d1 = dcoeff(right, n);
+        const amrex::Real d2 = dcoeff(left, n);
+
+        fx(i, j, k, n) += -2.0 * d1 * d2 / (d1 + d2 + heps) * (phi(right, n) - phi(left, n)) / dx[sweepdir];
+
+        //arithmetic mean case
+        //fx(i, j, k, n) += -0.5*(d1 + d2) * (phi(right, n) - phi(left, n)) / dx[sweepdir];
+    }
 
     if(bvflux)
     {
@@ -103,58 +106,10 @@ void compute_flux(
 
                 //debug print
                 /*amrex::Print()<<"bvflux:"<<j_bv/FARADCONST*activ_func*n_ls[sweepdir]<<"\t"<<
-                    phi(left,lset_id)<<"\t"<<phi(right,lset_id)<<"\t"<<
-                    phi(left,n)<<"\t"<<phi(right,n)<<"\t"<<
-                    potjump<<"\t"<<n_ls[sweepdir]<<"\n";*/
+                  phi(left,lset_id)<<"\t"<<phi(right,lset_id)<<"\t"<<
+                  phi(left,n)<<"\t"<<phi(right,n)<<"\t"<<
+                  potjump<<"\t"<<n_ls[sweepdir]<<"\n";*/
             }
-        }
-    }
-
-}
-
-AMREX_GPU_DEVICE
-    AMREX_FORCE_INLINE
-void bvflux_sweep(
-        int i,
-        int j,
-        int k,
-        int n,
-        int sweepdir,
-        Array4<Real> const& phi, // state variable
-        Array4<Real> const& fx,
-        const GpuArray<Real, AMREX_SPACEDIM>& dx,
-        ProbParm const& prob_parm,
-        int lset_id,int bvspec,Real lsgrad_tol)
-{
-
-    //|--left1--|--left--|--right--|--right1--|
-    //|--(i-2)--|--(i-1)--|--i--|--(i+1)--|
-    //remember: face i separates (i-1) and i cells
-
-    if(n==bvspec)
-    {
-        Real mod_gradc=0.0;
-        Real facecolor=0.0;
-        Real potjump=0.0;
-        Real gradc_cutoff=0.0;
-        Real n_ls[AMREX_SPACEDIM];
-        Real dphidn=0.0;
-        Real dphidt1=0.0;
-        Real dphidt2=0.0;
-
-        bv_get_grads_and_jumps(i, j, k, sweepdir, lset_id, dx, phi, lsgrad_tol, 
-                mod_gradc, gradc_cutoff, facecolor, potjump, dphidn, dphidt1, dphidt2, n_ls);
-
-        if(mod_gradc > gradc_cutoff)
-        {
-            Real activ_func = electrochem_reactions::bv_activation_function(facecolor, mod_gradc, gradc_cutoff);
-            fx(i,j,k,n)=fx(i,j,k,n)*(1.0-activ_func);
-            Real j_bv,jdash_bv;
-            electrochem_reactions::bvcurrent_and_der(i,j,k,sweepdir,potjump,phi,prob_parm,j_bv,jdash_bv);
-
-            //note n_ls[0] is along the sweep direction
-            fx(i,j,k,n)=fx(i,j,k,n)+j_bv/FARADCONST*activ_func*n_ls[0];
-
         }
     }
 

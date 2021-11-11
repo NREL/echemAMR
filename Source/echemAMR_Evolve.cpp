@@ -6,11 +6,6 @@
 #include <AMReX_VisMF.H>
 #include <AMReX_PhysBCFunct.H>
 #include <Kernels_3d.H>
-
-#ifdef AMREX_MEM_PROFILING
-#include <AMReX_MemProfiler.H>
-#endif
-
 #include <echemAMR.H>
 #include <Chemistry.H>
 #include <Transport.H>
@@ -27,22 +22,6 @@ void echemAMR::Evolve()
 
     postprocess(cur_time, 0, 0.0, echemAMR::host_global_storage);
 
-    // feel free to delete this commented chunk
-    // amrex::Print() << "ProbParm Anode Volume:   " << echemAMR::h_prob_parm->anode_volume << std::endl;
-    // amrex::Print() << "ProbParm ELSEP Volume:   " << echemAMR::h_prob_parm->ele_sep_volume << std::endl;
-    // amrex::Print() << "ProbParm Cathode Volume: " << echemAMR::h_prob_parm->cathode_volume << std::endl;
-    // amrex::Print() << "ProbParm Anode SA:       " << echemAMR::h_prob_parm->anode_SA << std::endl;
-    // amrex::Print() << "ProbParm Electrolyte SA: " << echemAMR::h_prob_parm->electrolyte_SA << std::endl;
-    // amrex::Print() << "ProbParm Separator SA:   " << echemAMR::h_prob_parm->sepatator_SA << std::endl;
-    // amrex::Print() << "ProbParm Cathode SA:     " << echemAMR::h_prob_parm->cathode_SA << std::endl;
-    // amrex::Print() << "ProbParm AE SA:          " << echemAMR::h_prob_parm->anode_ele_SA << std::endl;
-    // amrex::Print() << "ProbParm CE SA:          " << echemAMR::h_prob_parm->cathode_ele_SA << std::endl;
-    // amrex::Print() << "ProbParm Anode CC SA:    " << echemAMR::h_prob_parm->anode_cc_SA << std::endl;
-    // amrex::Print() << "ProbParm Cathode CC SA:  " << echemAMR::h_prob_parm->cathode_cc_SA << std::endl;
-    // amrex::Print() << "ProbParm Total SA:       " << echemAMR::h_prob_parm->anode_SA + echemAMR::h_prob_parm->electrolyte_SA +
-    // echemAMR::h_prob_parm->sepatator_SA + echemAMR::h_prob_parm->cathode_SA - 2.0*echemAMR::h_prob_parm->anode_ele_SA
-    // - 2.0*echemAMR::h_prob_parm->cathode_ele_SA - 10e-6*10e-6*4 << std::endl; exit(1);
-
     for (int step = istep[0]; step < max_step && cur_time < stop_time; ++step)
     {
         amrex::Print() << "\nCoarse STEP " << step + 1 << " starts ..." << std::endl;
@@ -56,15 +35,91 @@ void echemAMR::Evolve()
         {
             solve_potential(cur_time);
         }
+        if(!species_implicit_solve)
+        {
+           timeStep(lev, cur_time, iteration);
+        }
+        else
+        {
+            if (max_level > 0 && regrid_int > 0)  // We may need to regrid
+            {
+                if (istep[0] % regrid_int == 0)
+                {
+                    regrid(0, time);
+                }
+            }
+            
+            for (int lev = 0; lev <= finest_level; lev++)
+            {
+                amrex::Print() << "[Level " << lev << " step " << istep[lev]+1 << "] ";
+                amrex::Print() << "ADVANCE with time = " << t_new[lev]
+                    << " dt = " << dt[0] << std::endl;
+            }
+            
+            Vector< Array<MultiFab,AMREX_SPACEDIM> > fluxes(finest_level+1);
+            for (int lev = 0; lev <= finest_level; lev++)
+            {
+                for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
+                {
+                    BoxArray ba = grids[lev];
+                    ba.surroundingNodes(idim);
+                    fluxes[lev][idim] = MultiFab(ba, dmap[lev], 1, 0);
+                }
+            }
+            Vector<MultiFab> expl_src(finest_level+1);
+            for(int lev=0;lev<=finest_level;lev++)
+            {
+                std::swap(phi_old[lev], phi_new[lev]);
+                t_old[lev] = t_new[lev];
+                t_new[lev] += dt_lev;
 
-        timeStep(lev, cur_time, iteration);
+                int num_grow=2;
+                MultiFab Sborder(grids[lev], dmap[lev], phi_new[lev].nComp(), num_grow);
+                FillPatch(lev, time, Sborder, 0, Sborder.nComp());
+                compute_fluxes(lev, num_grow, Sborder, flux[lev], time, true);
+            }
+            // =======================================================
+            // Average down the fluxes before using them to update phi
+            // =======================================================
+            for (int lev = finest_level; lev > 0; lev--)
+            {
+                average_down_faces(amrex::GetArrOfConstPtrs(fluxes[lev  ]),
+                        amrex::GetArrOfPtrs     (fluxes[lev-1]),
+                        refRatio(lev-1), Geom(lev-1));
+            }
+            for(int lev=0;lev<=finest_level;lev++)
+            {
+                int num_grow=2;
+                MultiFab Sborder(grids[lev], dmap[lev], phi_new[lev].nComp(), num_grow);
+                expl_src[lev].define(grids[lev], dmap[lev], phi_new[lev].nComp(), 0);
 
+                //FIXME: need to avoid this fillpatch
+                FillPatch(lev, time, Sborder, 0, Sborder.nComp());
+                compute_dsdt(lev,num_grow,Sborder,flux[lev], exp_src[lev], time, 0.5 * dt_lev, false);
+            }
+
+            for(int sp=0;sp<NUM_SPECIES;sp++)
+            {
+                implicit_solve_species(cur_time,species_implicit_solve_dt,
+                        sp,exp_src);
+            }
+            AverageDown ();
+            
+            for (int lev = 0; lev <= finest_level; lev++)
+                ++istep[lev];
+
+            for (int lev = 0; lev <= finest_level; lev++)
+            {
+                amrex::Print() << "[Level " << lev << " step " << istep[lev] << "] ";
+                amrex::Print() << "Advanced " << CountCells(lev) << " cells" << std::endl;
+            }
+        }
         cur_time += dt[0];
 
         postprocess(cur_time, step, dt[0], echemAMR::host_global_storage);
 
         amrex::Print() << "Coarse STEP " << step + 1 << " ends."
-                       << " TIME = " << cur_time << " DT = " << dt[0] << std::endl;
+            << " TIME = " << cur_time << " DT = " << dt[0] << std::endl;
 
         // sync up time
         for (lev = 0; lev <= finest_level; ++lev)
@@ -83,14 +138,6 @@ void echemAMR::Evolve()
             WriteCheckpointFile();
         }
 
-#ifdef AMREX_MEM_PROFILING
-        {
-            std::ostringstream ss;
-            ss << "[STEP " << step + 1 << "]";
-            MemProfiler::report(ss.str());
-        }
-#endif
-
         if (cur_time >= stop_time - 1.e-6 * dt[0]) break;
     }
 
@@ -100,9 +147,10 @@ void echemAMR::Evolve()
     }
 }
 
-void echemAMR::implicit_solve_species(Real current_time,int spec_id, const 
+void echemAMR::implicit_solve_species(Real current_time,Real dt,int spec_id, const 
         Vector<MultiFab> dsdt_expl)
 {
+    //FIXME:create mlmg and mlabec objects outside this function
     LPInfo info;
 
     // FIXME: add these as inputs
@@ -119,8 +167,6 @@ void echemAMR::implicit_solve_species(Real current_time,int spec_id, const
     Real bscalar = 1.0;
     int num_nonlinear_iters;
 
-    //FIXME:use get_grads_and_jumps function from Src3d for BVflux
-
     //==================================================
     // amrex solves
     // read small a as alpha, b as beta
@@ -134,8 +180,6 @@ void echemAMR::implicit_solve_species(Real current_time,int spec_id, const
     // note also the negative sign
     //====================================================
 
-    // FIXME: had to adjust for constant coefficent,
-    // this could be due to missing terms in the intercalation reaction or sign mistakes...
     ProbParm const* localprobparm = d_prob_parm;
 
     const Real tol_rel = linsolve_reltol;
@@ -425,83 +469,6 @@ void echemAMR::timeStep(int lev, Real time, int iteration)
         AverageDownTo(lev); // average lev+1 down to lev
     }
 }
-void echemAMR::get_explicit_source(int lev, Real time, MultiFab& dsdt)
-{
-    MultiFab Sborder(grids[lev], dmap[lev], S_new.nComp(), num_grow);
-    FillPatch(lev, time, Sborder, 0, Sborder.nComp());
-    
-    const auto dx = geom[lev].CellSizeArray();
-    auto prob_lo = geom[lev].ProbLoArray();
-    auto prob_hi = geom[lev].ProbHiArray();
-    ProbParm const* localprobparm = d_prob_parm;
-
-    int bvflux = buttler_vohlmer_flux;
-    int bvspec    = bv_spec_id;
-    int bvlset    = bv_levset_id;
-
-    Real lsgrad_tol=lsgrad_tolerance;
-
-    int ncomp = Sborder.nComp();
-    
-    Array<MultiFab, AMREX_SPACEDIM> flux;
-    for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
-    {
-        BoxArray ba = amrex::convert(dsdt.boxArray(), IntVect::TheDimensionVector(idim));
-        flux[idim].define(ba, dsdt.DistributionMap(), ncomp, 0);
-        flux[idim].setVal(0.0);
-    }
-
-#ifdef _OPENMP
-#pragma omp parallel if (Gpu::notInLaunchRegion())
-#endif
-    {
-        for (MFIter mfi(dsdt, TilingIfNotGPU()); mfi.isValid(); ++mfi)
-        {
-            const Box& bx = mfi.tilebox();
-            const Box& gbx = amrex::grow(bx, 1);
-            Box bx_x = convert(bx, {1, 0, 0});
-            Box bx_y = convert(bx, {0, 1, 0});
-            Box bx_z = convert(bx, {0, 0, 1});
-
-            Array4<Real> sborder_arr = Sborder.array(mfi);
-            Array4<Real> dsdt_arr = dsdt.array(mfi);
-            Array4<Real> reactsource_arr = reactsource_fab.array();
-
-            reactsource_fab.setVal<RunOn::Device>(0.0);
-            GpuArray<Array4<Real>, AMREX_SPACEDIM> flux_arr{AMREX_D_DECL(flux[0].array(mfi), flux[1].array(mfi), flux[2].array(mfi))};
-
-            amrex::ParallelFor(bx, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
-                    electrochem_reactions::compute_react_source(i, j, k, sborder_arr, dsdt_arr, 
-                            prob_lo, prob_hi, dx, time, *localprobparm);
-                    });
-
-            if(bvflux)
-            {
-                amrex::ParallelFor(bx_x, ncomp, [=] AMREX_GPU_DEVICE(int i, int j, int k, int n) {
-                        bvflux_sweep(i, j, k, n, 0, sborder_arr, flux_arr[0], dx, *localprobparm, bvlset, bvspec, lsgrad_tol);
-                        });
-
-                amrex::ParallelFor(bx_y, ncomp, [=] AMREX_GPU_DEVICE(int i, int j, int k, int n) {
-                        bvflux_sweep(i, j, k, n, 1, sborder_arr, flux_arr[1], dx, *localprobparm, bvlset, bvspec, lsgrad_tol);
-                        });
-
-                amrex::ParallelFor(bx_z, ncomp, [=] AMREX_GPU_DEVICE(int i, int j, int k, int n) {
-                        bvflux_sweep(i, j, k, n, 2, sborder_arr, flux_arr[2], dx, *localprobparm, bvlset, bvspec, lsgrad_tol);
-                        });
-            
-                amrex::ParallelFor(bx, ncomp, [=] AMREX_GPU_DEVICE(int i, int j, int k, int n) {
-    
-                        dsdt(i, j, k, n) += (flux_arr[0](i, j, k, n) - flux_arr[0](i + 1, j, k, n)) / dx[0] 
-                                          + (flux_arr[1](i, j, k, n) - flux_arr[1](i, j + 1, k, n)) / dx[1] +
-                                          + (flux_arr[2](i, j, k, n) - flux_arr[2](i, j, k + 1, n)) / dx[2];
-                    });
-
-            }
-
-        }
-    }
-
-}
 
 void echemAMR::Advance(int lev, Real time, Real dt_lev, int iteration, int ncycle)
 {
@@ -511,48 +478,8 @@ void echemAMR::Advance(int lev, Real time, Real dt_lev, int iteration, int ncycl
     t_new[lev] += dt_lev;                  // new time is ahead
     MultiFab& S_new = phi_new[lev];        // this is the old value, beware!
     MultiFab& S_old = phi_old[lev];        // current value
-
-    // State with ghost cells
-    MultiFab Sborder(grids[lev], dmap[lev], S_new.nComp(), num_grow);
-    // source term
-    MultiFab dsdt(grids[lev], dmap[lev], S_new.nComp(), 0);
-
-    // stage 1
-    // time is current time which is t_old, so phi_old is picked up!
-    // but wait, we swapped phi_old and new, so we get phi_new here
-    FillPatch(lev, time, Sborder, 0, Sborder.nComp());
-    // compute dsdt for 1/2 timestep
-    compute_dsdt(lev, num_grow, Sborder, dsdt, time, 0.5 * dt_lev, false);
-    // S_new=S_old+0.5*dt*dsdt //sold is the current value
-    MultiFab::LinComb(S_new, 1.0, Sborder, 0, 0.5 * dt_lev, dsdt, 0, 0, S_new.nComp(), 0);
-
-    // stage 2
-    // time+dt_lev lets me pick S_new for sborder
-    FillPatch(lev, time + dt_lev, Sborder, 0, Sborder.nComp());
-    // dsdt for full time-step
-    compute_dsdt(lev, num_grow, Sborder, dsdt, time + 0.5 * dt_lev, dt_lev, true);
-    // S_new=S_old+dt*dsdt
-    MultiFab::LinComb(S_new, 1.0, S_old, 0, dt_lev, dsdt, 0, 0, S_new.nComp(), 0);
-}
-
-// advance a single level for a single time step, updates flux registers
-void echemAMR::compute_dsdt(int lev, const int num_grow, MultiFab& Sborder, MultiFab& dsdt, Real time, Real dt, bool reflux_this_stage)
-{
-
-    const auto dx = geom[lev].CellSizeArray();
-    auto prob_lo = geom[lev].ProbLoArray();
-    auto prob_hi = geom[lev].ProbHiArray();
-    ProbParm const* localprobparm = d_prob_parm;
-
-    int bvflux = buttler_vohlmer_flux;
-    int bvspec    = bv_spec_id;
-    int bvlset    = bv_levset_id;
-
-    Real lsgrad_tol=lsgrad_tolerance;
-
-    int ncomp = Sborder.nComp();
-
-    // Build temporary multiFabs to work on.
+    
+    // Build flux multiFabs to work on.
     Array<MultiFab, AMREX_SPACEDIM> flux;
     for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
     {
@@ -560,6 +487,48 @@ void echemAMR::compute_dsdt(int lev, const int num_grow, MultiFab& Sborder, Mult
         flux[idim].define(ba, dsdt.DistributionMap(), ncomp, 0);
         flux[idim].setVal(0.0);
     }
+
+    // State with ghost cells
+    MultiFab Sborder(grids[lev], dmap[lev], S_new.nComp(), num_grow);
+    // source term
+    MultiFab dsdt(grids[lev], dmap[lev], S_new.nComp(), 0);
+    dsdt.setVal(0.0);
+
+    // stage 1
+    // time is current time which is t_old, so phi_old is picked up!
+    // but wait, we swapped phi_old and new, so we get phi_new here
+    FillPatch(lev, time, Sborder, 0, Sborder.nComp());
+    // compute dsdt for 1/2 timestep
+    compute_fluxes(lev, num_grow, Sborder, flux, time);
+    compute_dsdt(lev,num_grow, Sborder, flux, dsdt, time, 0.5 * dt_lev, false);
+    // S_new=S_old+0.5*dt*dsdt //sold is the current value
+    MultiFab::LinComb(S_new, 1.0, Sborder, 0, 0.5 * dt_lev, dsdt, 0, 0, S_new.nComp(), 0);
+
+    // stage 2
+    // time+dt_lev lets me pick S_new for sborder
+    FillPatch(lev, time + dt_lev, Sborder, 0, Sborder.nComp());
+    // dsdt for full time-step
+    for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
+    {
+        flux[idim].setVal(0.0);
+    }
+    dsdt.setVal(0.0);
+    compute_fluxes(lev, num_grow, Sborder, flux, time);
+    compute_dsdt(lev,num_grow, Sborder, flux, time, 0.5 * dt_lev, false);
+    // S_new=S_old+dt*dsdt
+    MultiFab::LinComb(S_new, 1.0, S_old, 0, dt_lev, dsdt, 0, 0, S_new.nComp(), 0);
+}
+
+void echemAMR::compute_dsdt(int lev, const int num_grow, MultiFab& Sborder, 
+        Array<MultiFab,AMREX_SPACEDIM>& flux, MultiFab& dsdt,
+        Real time, Real dt, bool reflux_this_stage)
+{
+    const auto dx = geom[lev].CellSizeArray();
+    auto prob_lo = geom[lev].ProbLoArray();
+    auto prob_hi = geom[lev].ProbHiArray();
+    ProbParm const* localprobparm = d_prob_parm;
+
+    int ncomp = Sborder.nComp();
 
 #ifdef _OPENMP
 #pragma omp parallel if (Gpu::notInLaunchRegion())
@@ -569,68 +538,20 @@ void echemAMR::compute_dsdt(int lev, const int num_grow, MultiFab& Sborder, Mult
         {
             const Box& bx = mfi.tilebox();
             const Box& gbx = amrex::grow(bx, 1);
-            Box bx_x = convert(bx, {1, 0, 0});
-            Box bx_y = convert(bx, {0, 1, 0});
-            Box bx_z = convert(bx, {0, 0, 1});
-
-            FArrayBox dcoeff_fab(gbx, ncomp);
-            FArrayBox velx_fab(bx_x, ncomp);
-            FArrayBox vely_fab(bx_y, ncomp);
-            FArrayBox velz_fab(bx_z, ncomp);
             FArrayBox reactsource_fab(bx, ncomp);
 
-            Elixir dcoeff_fab_eli = dcoeff_fab.elixir();
-            Elixir velx_fab_eli = velx_fab.elixir();
-            Elixir vely_fab_eli = vely_fab.elixir();
-            Elixir velz_fab_eli = velz_fab.elixir();
             Elixir reactsource_fab_eli = reactsource_fab.elixir();
 
             Array4<Real> sborder_arr = Sborder.array(mfi);
-            Array4<Real> dcoeff_arr = dcoeff_fab.array();
             Array4<Real> dsdt_arr = dsdt.array(mfi);
             Array4<Real> reactsource_arr = reactsource_fab.array();
-            Array4<Real> velx_arr = velx_fab.array();
-            Array4<Real> vely_arr = vely_fab.array();
-            Array4<Real> velz_arr = velz_fab.array();
 
             GpuArray<Array4<Real>, AMREX_SPACEDIM> flux_arr{AMREX_D_DECL(flux[0].array(mfi), flux[1].array(mfi), flux[2].array(mfi))};
 
-            dcoeff_fab.setVal<RunOn::Device>(0.0);
-            velx_fab.setVal<RunOn::Device>(0.0);
-            vely_fab.setVal<RunOn::Device>(0.0);
-            velz_fab.setVal<RunOn::Device>(0.0);
             reactsource_fab.setVal<RunOn::Device>(0.0);
-
-            amrex::ParallelFor(bx_x, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
-                    electrochem_transport::compute_velx(i, j, k, sborder_arr, velx_arr, prob_lo, prob_hi, dx, time, *localprobparm);
-                    });
-
-            amrex::ParallelFor(bx_y, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
-                    electrochem_transport::compute_vely(i, j, k, sborder_arr, vely_arr, prob_lo, prob_hi, dx, time, *localprobparm);
-                    });
-
-            amrex::ParallelFor(bx_z, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
-                    electrochem_transport::compute_velz(i, j, k, sborder_arr, velz_arr, prob_lo, prob_hi, dx, time, *localprobparm);
-                    });
-
-            amrex::ParallelFor(gbx, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
-                    electrochem_transport::compute_dcoeff(i, j, k, sborder_arr, dcoeff_arr, prob_lo, prob_hi, dx, time, *localprobparm);
-                    });
 
             amrex::ParallelFor(bx, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
                     electrochem_reactions::compute_react_source(i, j, k, sborder_arr, reactsource_arr, prob_lo, prob_hi, dx, time, *localprobparm);
-                    });
-
-            amrex::ParallelFor(bx_x, ncomp, [=] AMREX_GPU_DEVICE(int i, int j, int k, int n) {
-                    compute_flux(i, j, k, n, 0, sborder_arr, velx_arr, dcoeff_arr, flux_arr[0], dx, *localprobparm, bvflux, bvlset, bvspec, lsgrad_tol);
-                    });
-
-            amrex::ParallelFor(bx_y, ncomp, [=] AMREX_GPU_DEVICE(int i, int j, int k, int n) {
-                    compute_flux(i, j, k, n, 1, sborder_arr, vely_arr, dcoeff_arr, flux_arr[1], dx, *localprobparm, bvflux, bvlset, bvspec, lsgrad_tol);
-                    });
-
-            amrex::ParallelFor(bx_z, ncomp, [=] AMREX_GPU_DEVICE(int i, int j, int k, int n) {
-                    compute_flux(i, j, k, n, 2, sborder_arr, velz_arr, dcoeff_arr, flux_arr[2], dx, *localprobparm, bvflux, bvlset, bvspec, lsgrad_tol);
                     });
 
             // update residual
@@ -661,6 +582,102 @@ void echemAMR::compute_dsdt(int lev, const int num_grow, MultiFab& Sborder, Mult
                 const Real scale = dt * dA;
                 flux_reg[lev]->FineAdd(flux[i], i, 0, 0, ncomp, scale);
             }
+        }
+    }
+
+}
+
+// advance a single level for a single time step, updates flux registers
+void echemAMR::compute_fluxes(int lev, const int num_grow, MultiFab& Sborder, 
+        Array<MultiFab,AMREX_SPACEDIM>& flux, Real time, bool implicit_diffusion=false)
+{
+
+    const auto dx = geom[lev].CellSizeArray();
+    auto prob_lo = geom[lev].ProbLoArray();
+    auto prob_hi = geom[lev].ProbHiArray();
+    ProbParm const* localprobparm = d_prob_parm;
+
+    int bvflux = buttler_vohlmer_flux;
+    int bvspec    = bv_spec_id;
+    int bvlset    = bv_levset_id;
+
+    Real lsgrad_tol=lsgrad_tolerance;
+
+    int ncomp = Sborder.nComp();
+
+
+#ifdef _OPENMP
+#pragma omp parallel if (Gpu::notInLaunchRegion())
+#endif
+    {
+        for (MFIter mfi(dsdt, TilingIfNotGPU()); mfi.isValid(); ++mfi)
+        {
+            const Box& bx = mfi.tilebox();
+            const Box& gbx = amrex::grow(bx, 1);
+            Box bx_x = convert(bx, {1, 0, 0});
+            Box bx_y = convert(bx, {0, 1, 0});
+            Box bx_z = convert(bx, {0, 0, 1});
+
+            FArrayBox dcoeff_fab(gbx, ncomp);
+            FArrayBox velx_fab(bx_x, ncomp);
+            FArrayBox vely_fab(bx_y, ncomp);
+            FArrayBox velz_fab(bx_z, ncomp);
+
+            Elixir dcoeff_fab_eli = dcoeff_fab.elixir();
+            Elixir velx_fab_eli = velx_fab.elixir();
+            Elixir vely_fab_eli = vely_fab.elixir();
+            Elixir velz_fab_eli = velz_fab.elixir();
+
+            Array4<Real> sborder_arr = Sborder.array(mfi);
+            Array4<Real> dcoeff_arr = dcoeff_fab.array();
+            Array4<Real> velx_arr = velx_fab.array();
+            Array4<Real> vely_arr = vely_fab.array();
+            Array4<Real> velz_arr = velz_fab.array();
+
+            GpuArray<Array4<Real>, AMREX_SPACEDIM> flux_arr{AMREX_D_DECL(flux[0].array(mfi), flux[1].array(mfi), flux[2].array(mfi))};
+
+            dcoeff_fab.setVal<RunOn::Device>(0.0);
+            velx_fab.setVal<RunOn::Device>(0.0);
+            vely_fab.setVal<RunOn::Device>(0.0);
+            velz_fab.setVal<RunOn::Device>(0.0);
+
+            amrex::ParallelFor(bx_x, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
+                    electrochem_transport::compute_velx(i, j, k, sborder_arr, velx_arr, prob_lo, prob_hi, dx, time, *localprobparm);
+                    });
+
+            amrex::ParallelFor(bx_y, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
+                    electrochem_transport::compute_vely(i, j, k, sborder_arr, vely_arr, prob_lo, prob_hi, dx, time, *localprobparm);
+                    });
+
+            amrex::ParallelFor(bx_z, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
+                    electrochem_transport::compute_velz(i, j, k, sborder_arr, velz_arr, prob_lo, prob_hi, dx, time, *localprobparm);
+                    });
+
+            if(!implicit_diffusion)
+            {
+                amrex::ParallelFor(gbx, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
+                        electrochem_transport::compute_dcoeff(i, j, k, sborder_arr, dcoeff_arr, prob_lo, prob_hi, dx, time, *localprobparm);
+                        });
+            }
+
+            amrex::ParallelFor(bx, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
+                    electrochem_reactions::compute_react_source(i, j, k, sborder_arr, reactsource_arr, prob_lo, prob_hi, dx, time, *localprobparm);
+                    });
+
+            amrex::ParallelFor(bx_x, ncomp, [=] AMREX_GPU_DEVICE(int i, int j, int k, int n) {
+                    compute_flux(i, j, k, n, 0, sborder_arr, velx_arr, dcoeff_arr, flux_arr[0], dx, *localprobparm, 
+                            implicit_diffusion, bvflux, bvlset, bvspec, lsgrad_tol);
+                    });
+
+            amrex::ParallelFor(bx_y, ncomp, [=] AMREX_GPU_DEVICE(int i, int j, int k, int n) {
+                    compute_flux(i, j, k, n, 1, sborder_arr, vely_arr, dcoeff_arr, flux_arr[1], dx, *localprobparm, 
+                            implicit_diffusion, bvflux, bvlset, bvspec, lsgrad_tol);
+                    });
+
+            amrex::ParallelFor(bx_z, ncomp, [=] AMREX_GPU_DEVICE(int i, int j, int k, int n) {
+                    compute_flux(i, j, k, n, 2, sborder_arr, velz_arr, dcoeff_arr, flux_arr[2], dx, *localprobparm, 
+                            implicit_diffusion, bvflux, bvlset, bvspec, lsgrad_tol);
+                    });
         }
     }
 }
