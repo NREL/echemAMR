@@ -757,9 +757,11 @@ void echemAMR::solve_potential(Real current_time)
     mlabec_res.setScalars(0.0, bscalar);
 
     // default to inhomogNeumann since it is defaulted to flux = 0.0 anyways
-    std::array<LinOpBCType, AMREX_SPACEDIM> bc_potential_lo = {LinOpBCType::inhomogNeumann, LinOpBCType::inhomogNeumann, LinOpBCType::inhomogNeumann};
+    std::array<LinOpBCType, AMREX_SPACEDIM> bc_potential_lo = {LinOpBCType::inhomogNeumann, 
+        LinOpBCType::inhomogNeumann, LinOpBCType::inhomogNeumann};
 
-    std::array<LinOpBCType, AMREX_SPACEDIM> bc_potential_hi = {LinOpBCType::inhomogNeumann, LinOpBCType::inhomogNeumann, LinOpBCType::inhomogNeumann};
+    std::array<LinOpBCType, AMREX_SPACEDIM> bc_potential_hi = {LinOpBCType::inhomogNeumann, 
+        LinOpBCType::inhomogNeumann, LinOpBCType::inhomogNeumann};
 
     for (int idim = 0; idim < AMREX_SPACEDIM; idim++)
     {
@@ -1048,6 +1050,9 @@ void echemAMR::solve_potential(Real current_time)
 
                 for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
                 {
+                    const amrex::Real bclo = host_global_storage->pot_bc_lo[idim];
+                    const amrex::Real bchi = host_global_storage->pot_bc_hi[idim];
+                    
                     if (!geom[ilev].isPeriodic(idim))
                     {
                         if (bx.smallEnd(idim) == domain.smallEnd(idim))
