@@ -6,13 +6,13 @@ geometry.is_periodic =  0  0  0
 geometry.coord_sys   =  0       # 0 => cart
 geometry.prob_lo     =  0.0   0.0    0.0 
 geometry.prob_hi     =  70e-6 2.1875e-6  2.1875e-6
-amr.n_cell           =  64  2     2
+amr.n_cell           =  64 2 2
 
 # VERBOSITY
 amr.v              = 1       # verbosity in Amr
 
 # REFINEMENT
-amr.max_level       = 0       # maximum level number allowed
+amr.max_level       = 1      # maximum level number allowed
 amr.blocking_factor = 2       # block factor in grid generation
 amr.max_grid_size   = 8
 
@@ -38,20 +38,20 @@ echemamr.dtmax=2000.0
 echemamr.tagged_vars = levelset
 echemamr.levelset_refine = 1e20
 echemamr.levelset_refinegrad = 0.2
-echemamr.bv_nonlinear_reltol=1e-16
-echemamr.bv_nonlinear_abstol=1e-16
 
 #buttler vohlmer flux
 echemamr.buttler_vohlmer_flux=1
 echemamr.bv_species_id =0
 echemamr.bv_levelset_id=4
-echemamr.bv_nonlinear_iters=50
+echemamr.bv_nonlinear_iters=20
 
-echemamr.bv_nonlinear_reltol=1e-8
-echemamr.bv_nonlinear_abstol=1e-10
-echemamr.linsolve_maxiter=1000
-echemamr.linsolve_reltol=1e-5
-echemamr.linsolve_abstol=1e-8
+echemamr.bv_nonlinear_reltol=1e-6
+echemamr.bv_nonlinear_abstol=1e-7
+echemamr.linsolve_maxiter=2000
+echemamr.linsolve_reltol=1e-8
+echemamr.linsolve_abstol=1e-9
+echemamr.linsolve_num_pre_smooth=10 
+echemamr.linsolve_num_post_smooth=10
 echemamr.linsolve_max_coarsening_level=0
 echemamr.use_hypre=1
 

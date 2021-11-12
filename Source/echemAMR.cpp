@@ -281,6 +281,14 @@ void echemAMR::ReadParameters()
 
         pp.query("linsolve_reltol",linsolve_reltol);
         pp.query("linsolve_abstol",linsolve_abstol);
+        pp.query("linsolve_bot_reltol",linsolve_bot_reltol);
+        pp.query("linsolve_bot_abstol",linsolve_bot_abstol);
+
+        pp.query("linsolve_num_pre_smooth",linsolve_num_pre_smooth);
+        pp.query("linsolve_num_post_smooth",linsolve_num_post_smooth);
+        pp.query("linsolve_num_final_smooth",linsolve_num_final_smooth);
+        pp.query("linsolve_num_bottom_smooth",linsolve_num_bottom_smooth);
+
         pp.query("linsolve_maxiter",linsolve_maxiter);
         pp.query("linsolve_max_coarsening_level",linsolve_max_coarsening_level);
         pp.query("lsgrad_tol",lsgrad_tolerance);
