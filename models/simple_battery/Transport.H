@@ -59,10 +59,11 @@ namespace electrochem_transport
             dcoeff(i,j,k,S_ID)    = 0.0;
             dcoeff(i,j,k,LS_ID)   = 0.0;
 
-            dcoeff(i,j,k,CO_ID) =  prob_parm.anode_dcoeff       * phi(i,j,k,A_ID)
-                                 + prob_parm.cathode_dcoeff     * phi(i,j,k,C_ID)
-                                 + prob_parm.electrolyte_dcoeff * phi(i,j,k,E_ID)
-                                 + prob_parm.separator_dcoeff   * phi(i,j,k,S_ID);
+            // Diffusion coefficient = sum( diffusion_coefficient domain i * levelset i), with levelset i=1 if x within domain i, 0 otherwise
+            dcoeff(i,j,k,CO_ID) = + electrochem::Ds_bulk_anode(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,A_ID)
+                                  + electrochem::Ds_bulk_cathode(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,C_ID)
+                                  + electrochem::De_bulk(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,E_ID)
+                                  + electrochem::De_bulk(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,S_ID);
         }
 
     AMREX_GPU_DEVICE AMREX_INLINE
@@ -122,11 +123,16 @@ namespace electrochem_transport
                 const Real time,
                 ProbParm const& prob_parm)
         {
-            //dcoeff(i,j,k)=10.0;
-            dcoeff(i,j,k) =  prob_parm.anode_conductivity       * phi(i,j,k,A_ID)
-                           + prob_parm.cathode_conductivity     * phi(i,j,k,C_ID)
-                           + prob_parm.electrolyte_conductivity * phi(i,j,k,E_ID)
-                           + prob_parm.separator_conductivity   * phi(i,j,k,S_ID);
+           
+            // Conduction coefficient = sum( conductivity_coefficient domain i * levelset i), with levelset i=1 if x within domain i, 0 otherwise
+            dcoeff(i,j,k,POT_ID) = + electrochem::Ks_bulk_anode(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,A_ID)
+                                  + electrochem::Ks_bulk_cathode(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,C_ID)
+                                  + electrochem::Ke_bulk(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,E_ID)
+                                  + electrochem::Ke_bulk(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,S_ID);
+            //dcoeff(i,j,k) =  prob_parm.anode_conductivity       * phi(i,j,k,A_ID)
+            //               + prob_parm.cathode_conductivity     * phi(i,j,k,C_ID)
+            //               + prob_parm.electrolyte_conductivity * phi(i,j,k,E_ID)
+            //               + prob_parm.separator_conductivity   * phi(i,j,k,S_ID);
 
         }
 

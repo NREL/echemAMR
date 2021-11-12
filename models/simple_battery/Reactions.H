@@ -36,12 +36,11 @@ namespace electrochem_reactions
                 ProbParm const& prob_parm)
         {
             // concentration
-           Real C = phi(i, j, k, CO_ID);
-           Real tplus=0.5;
-           Real Ac=25;
-           Real RTF = GASCONST * prob_parm.Temperature / FARADCONST;
-
-           Real KDe = (1.0-tplus)*(1+Ac)*2.0*RTF*prob_parm.electrolyte_conductivity;
+            Real C = phi(i, j, k, CO_ID);
+            Real Ke = electrochem::Ke_bulk(C, prob_parm);
+            Real Ac = electrochem::A_c(C, prob_parm);
+            Real tplus = electrochem::t_plus(C, prob_parm);
+            Real KDe = electrochem::Kd(Ke, Ac, tplus, prob_parm);
 
             Real KDl  = 0.5 * (phi(i-1,j,k,E_ID)+phi(i,j,k,E_ID)) * KDe;
             Real KDr  = 0.5 * (phi(i+1,j,k,E_ID)+phi(i,j,k,E_ID)) * KDe;
@@ -65,6 +64,20 @@ namespace electrochem_reactions
         void bvcurrent_and_der(int i,int j,int k,int normaldir,
                 Real phi_jump, Array4<Real> const& phi, ProbParm const& prob_parm,Real &jbv,Real &jbvder)
         {
+            IntVect left(i, j, k);
+            IntVect right(i, j, k);
+            left[normaldir] -= 1;
+
+            Real Cs= phi(left,CO_ID)*(phi(left,A_ID)+phi(left,C_ID)) + phi(right,CO_ID)*(phi(right,A_ID)+phi(right,C_ID));
+            Real Ce= phi(left,CO_ID)*(phi(left,E_ID)+phi(left,S_ID)) + phi(right,CO_ID)*(phi(right,E_ID)+phi(right,S_ID));
+            Real Io = electrochem::Io_a(Cs, Ce, prob_parm)*(phi(left,A_ID)+phi(right,A_ID)) + electrochem::Io_c(Cs, Ce, prob_parm)*(phi(left,C_ID)+phi(right,C_ID));
+            Real OCP = electrochem::OCP_a(Cs, prob_parm)*(phi(left,A_ID)+phi(right,A_ID)) + electrochem::OCP_c(Cs, prob_parm)*(phi(left,C_ID)+phi(right,C_ID));
+            Real eta = phi_jump - OCP;
+            Real FRT = FARADCONST/(GASCONST * prob_parm.Temperature);
+            jbv = 2.0 * Io * std::sinh(0.5 * FRT * eta);
+            jbvder = 1.0;
+
+            /*
             Real ocp=0.2; //FIXME:should be function of phi(i,j,k,CO_ID)
             Real j0=3.0; 
             Real phi0=(2.0*GASCONST*prob_parm.Temperature)/FARADCONST;
@@ -72,9 +85,7 @@ namespace electrochem_reactions
             Real jbv0;
             Real jbv_cutoff=0.1;
             
-            IntVect left(i, j, k);
-            IntVect right(i, j, k);
-            left[normaldir] -= 1;
+
 
             Real x=max(0.5*(phi(left,CO_ID)+phi(right,CO_ID))/csmax,0.0);
 
@@ -91,6 +102,7 @@ namespace electrochem_reactions
 
             //linear case
             jbvder=-(jbv0/phi0);
+            */
         }
 
     AMREX_GPU_DEVICE AMREX_INLINE
