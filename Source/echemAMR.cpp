@@ -60,9 +60,6 @@ echemAMR::echemAMR()
     pp.queryarr("lo_bc_pot", bc_lo_pot, 0, AMREX_SPACEDIM);
     pp.queryarr("hi_bc_pot", bc_hi_pot, 0, AMREX_SPACEDIM);
 
-    amrex::Print()<<"bc types:"<<BCType::int_dir<<"\t"<<BCType::foextrap<<"\t"
-        BCType::ext_dir<<"\t"<<BCType::hoextrapcc<<"\n";
-
     /*
         // walls (Neumann)
         int bc_lo[] = {FOEXTRAP, FOEXTRAP, FOEXTRAP};
@@ -92,7 +89,7 @@ echemAMR::echemAMR()
         {
             for (int sp = 0; sp < NVAR; sp++)
             {
-                bcspec[sp].setHi(idim, bc_hi[idim]);
+                bcspec[sp].setHi(idim, bc_hi_spec[idim]);
             }
         } else
         {

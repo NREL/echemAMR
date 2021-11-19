@@ -10,6 +10,22 @@ using namespace amrex;
 namespace electrochem_transport
 {
     AMREX_GPU_DEVICE AMREX_INLINE
+    void potential_mixedbc(int i, int j, int k,
+                      int dir, int sgn,
+                      Array4<Real> const& phi,
+                      Array4<Real> const& robin_a,
+                      Array4<Real> const& robin_b,
+                      Array4<Real> const& robin_f,
+                      GpuArray<Real, AMREX_SPACEDIM> prob_lo,
+                      GpuArray<Real, AMREX_SPACEDIM> prob_hi,
+                      GpuArray<Real, AMREX_SPACEDIM> dx,
+                      const Real time,
+                      const Real bclo,
+                      const Real bchi)
+    {
+    
+    }
+    AMREX_GPU_DEVICE AMREX_INLINE
     void potential_bc(int i, int j, int k,
                       int dir, int sgn,
                       Array4<Real> const& phi,

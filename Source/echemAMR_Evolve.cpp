@@ -296,9 +296,9 @@ void echemAMR::solve_potential(Real current_time)
             gradsoln[ilev][idim] = new MultiFab(faceba, dmap[ilev], 1, 0);
         }
 
-        robin_a.define(grids[ilev], dmap[ilev], 1, 1);
-        robin_b.define(grids[ilev], dmap[ilev], 1, 1);
-        robin_f.define(grids[ilev], dmap[ilev], 1, 1);
+        robin_a[ilev].define(grids[ilev], dmap[ilev], 1, 1);
+        robin_b[ilev].define(grids[ilev], dmap[ilev], 1, 1);
+        robin_f[ilev].define(grids[ilev], dmap[ilev], 1, 1);
     }
 
     Real errnorm_1st_iter;
@@ -321,9 +321,9 @@ void echemAMR::solve_potential(Real current_time)
             rhs[ilev].setVal(0.0);
 
             //default to homogenous Neumann
-            robin_a.setVal(0.0);
-            robin_b.setVal(1.0);
-            robin_f.setVal(0.0);
+            robin_a[ilev].setVal(0.0);
+            robin_b[ilev].setVal(1.0);
+            robin_f[ilev].setVal(0.0);
 
 
             // copy current solution for better guess
@@ -505,7 +505,7 @@ void echemAMR::solve_potential(Real current_time)
 
                 Array4<Real> robin_a_arr = robin_a[ilev].array(mfi);
                 Array4<Real> robin_b_arr = robin_b[ilev].array(mfi);
-                Array4<Real> robin_f_arr = robin_c[ilev].array(mfi);
+                Array4<Real> robin_f_arr = robin_f[ilev].array(mfi);
 
                 Real time = current_time; // for GPU capture
 
@@ -525,7 +525,7 @@ void echemAMR::solve_potential(Real current_time)
                         if (bx.bigEnd(idim) == domain.bigEnd(idim))
                         {
                             amrex::ParallelFor(amrex::bdryHi(bx, idim), [=] AMREX_GPU_DEVICE(int i, int j, int k) noexcept {
-                                    electrochem_transport::potential_bc(i, j, k, idim, 1, phi_arr, bc_arr, prob_lo, prob_hi, dx, time, bclo, bchi);
+                                    electrochem_transport::potential_bc(i, j, k, idim, +1, phi_arr, bc_arr, prob_lo, prob_hi, dx, time, bclo, bchi);
                                     });
                         }
 
@@ -534,15 +534,15 @@ void echemAMR::solve_potential(Real current_time)
                             if (bx.smallEnd(idim) == domain.smallEnd(idim))
                             {
                                 amrex::ParallelFor(amrex::bdryLo(bx, idim), [=] AMREX_GPU_DEVICE(int i, int j, int k) noexcept {
-                                        electrochem_transport::apply_mixed_bc(i, j, k, idim, -1, phi_arr, robin_a_arr, 
-                                                robin_b_arr, robin_c_arr, prob_lo, prob_hi, dx, time, bclo, bchi);
+                                        electrochem_transport::potential_mixedbc(i, j, k, idim, -1, phi_arr, robin_a_arr, 
+                                                robin_b_arr, robin_f_arr, prob_lo, prob_hi, dx, time, bclo, bchi);
                                         });
                             }
                             if (bx.bigEnd(idim) == domain.bigEnd(idim))
                             {
                                 amrex::ParallelFor(amrex::bdryHi(bx, idim), [=] AMREX_GPU_DEVICE(int i, int j, int k) noexcept {
-                                        electrochem_transport::apply_mixed_bc(i, j, k, idim, 1, phi_arr, robin_a_arr, 
-                                                robin_b_arr, robin_c_arr, prob_lo, prob_hi, dx, time, bclo, bchi);
+                                        electrochem_transport::potential_mixedbc(i, j, k, idim, +1, phi_arr, robin_a_arr, 
+                                                robin_b_arr, robin_f_arr, prob_lo, prob_hi, dx, time, bclo, bchi);
                                         });
                             }
                         }
@@ -555,19 +555,9 @@ void echemAMR::solve_potential(Real current_time)
             mlabec_res.setBCoeffs(ilev, amrex::GetArrOfConstPtrs(face_bcoeff_res));
 
             // bc's are stored in the ghost cells of potential
-            if(mixedbc)
-            {
-                mlabec.setLevelBC(0, &potential[ilev], &(robin_a[ilev]), &(robin_b[ilev]), &(robin_f[ilev]));
-                mlabec_res.setLevelBC(ilev, &(potential[ilev]), &(robin_a[ilev]), &(robin_b[ilev]), &(robin_f[ilev]));
-            }
-            else
-            {
-                mlabec.setLevelBC(ilev, &(potential[ilev]));
-                mlabec_res.setLevelBC(ilev, &(potential[ilev]));
-            }
+            mlabec.setLevelBC(ilev, &potential[ilev], &(robin_a[ilev]), &(robin_b[ilev]), &(robin_f[ilev]));
+            mlabec_res.setLevelBC(ilev, &(potential[ilev]), &(robin_a[ilev]), &(robin_b[ilev]), &(robin_f[ilev]));
         }
-
-        // need user-defined rhs
 
         mlmg.solve(GetVecOfPtrs(solution), GetVecOfConstPtrs(rhs), tol_rel, tol_abs);
         mlmg_res.apply(GetVecOfPtrs(residual),GetVecOfPtrs(solution));
