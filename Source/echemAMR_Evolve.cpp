@@ -259,8 +259,13 @@ void echemAMR::solve_potential(Real current_time)
     mlmg.setMaxFmgIter(max_fmg_iter);
     mlmg.setVerbose(verbose);
     mlmg.setBottomVerbose(bottom_verbose);
-    //    mlmg.setBottomTolerance(1.0e-14);
-    //    mlmg.setBottomToleranceAbs(1.0e-14);
+    mlmg.setBottomTolerance(linsolve_bot_reltol);
+    mlmg.setBottomToleranceAbs(linsolve_bot_abstol);
+
+    mlmg.setPreSmooth(linsolve_num_pre_smooth);
+    mlmg.setPostSmooth(linsolve_num_post_smooth);
+    mlmg.setFinalSmooth(linsolve_num_final_smooth);
+    mlmg.setBottomSmooth(linsolve_num_bottom_smooth);
 
 #ifdef AMREX_USE_HYPRE
     if (use_hypre)

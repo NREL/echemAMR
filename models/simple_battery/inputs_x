@@ -18,6 +18,10 @@ amr.max_grid_size   = 8
 
 amr.regrid_int      = 2       # how often to regrid
 
+amr.line_plot_int = 10
+amr.line_plot_dir = 0
+amr.line_plot_npoints = 100
+
 # TIME STEP CONTROL
 echemamr.cfl            = 0.8    
 
