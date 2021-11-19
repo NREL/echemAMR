@@ -193,6 +193,14 @@ private:
 
     amrex::Real linsolve_reltol = 1e-6;
     amrex::Real linsolve_abstol = 1e-10;
+    amrex::Real linsolve_bot_reltol = 1e-4;
+    amrex::Real linsolve_bot_abstol = -1.0;
+
+    int linsolve_num_pre_smooth = 2;
+    int linsolve_num_post_smooth = 2;
+    int linsolve_num_final_smooth = 8;
+    int linsolve_num_bottom_smooth = 0;
+
     int linsolve_maxiter=100;
     int linsolve_max_coarsening_level=0;
 
