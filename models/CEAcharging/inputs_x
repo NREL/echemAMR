@@ -23,14 +23,22 @@ echemamr.cfl            = 0.8
 
 echemamr.do_reflux = 1
 echemamr.potential_solve = 1
-echemamr.potential_solve_int = 5000
+echemamr.potential_solve_int = 100
 
 #periodic 0
 #extdir 3
 #foextrap 2 
+#highorderextrap 5
+echemamr.lo_bc_spec = 2 2 2
+echemamr.hi_bc_spec = 2 2 2
 
-echemamr.lo_bc = 2 2 2
-echemamr.hi_bc = 3 2 2
+#periodic 0
+#dirichlet 3
+#homogenous Neumann 2 
+#mixed (robin) 5
+#inhomogenous Neumann 6
+echemamr.lo_bc_pot = 6 2 2
+echemamr.hi_bc_pot = 3 2 2
 
 echemamr.dtmax=2000.0
 

@@ -29,9 +29,17 @@ echemamr.potential_solve_int = 1
 #periodic 0
 #extdir 3
 #foextrap 2 
+#highorderextrap 5
+echemamr.lo_bc_spec = 2 2 2
+echemamr.hi_bc_spec = 2 2 2
 
-echemamr.lo_bc = 2 2 3
-echemamr.hi_bc = 2 2 3
+#periodic 0
+#dirichlet 3
+#homogenous Neumann 2 
+#mixed (robin) 5
+#inhomogenous Neumann 6
+echemamr.lo_bc_pot = 2 2 3
+echemamr.hi_bc_pot = 2 2 3
 
 # Tagging
 echemamr.tagged_vars = levelset

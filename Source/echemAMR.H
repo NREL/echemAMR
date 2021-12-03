@@ -158,7 +158,7 @@ private:
 
     // this is essentially a 2*DIM integer array storing the physical boundary
     // condition types at the lo/hi walls in each direction
-    amrex::Vector<BCRec> bcs; // 1-component
+    amrex::Vector<BCRec> bcspec; // 1-component
 
     // stores fluxes at coarse-fine interface for synchronization
     // this will be sized "nlevs_max+1"
@@ -178,8 +178,11 @@ private:
     // if >= 0 we restart from a checkpoint
     std::string restart_chkfile = "";
 
-    amrex::Vector<int> bc_lo{BCType::foextrap, BCType::foextrap, BCType::foextrap};
-    amrex::Vector<int> bc_hi{BCType::foextrap, BCType::foextrap, BCType::foextrap};
+    amrex::Vector<int> bc_lo_spec{BCType::foextrap, BCType::foextrap, BCType::foextrap};
+    amrex::Vector<int> bc_hi_spec{BCType::foextrap, BCType::foextrap, BCType::foextrap};
+    
+    amrex::Vector<int> bc_lo_pot{BCType::foextrap, BCType::foextrap, BCType::foextrap};
+    amrex::Vector<int> bc_hi_pot{BCType::foextrap, BCType::foextrap, BCType::foextrap};
 
     // advective cfl number - dt = cfl*dx/umax
     amrex::Real cfl = 0.7;
