@@ -100,8 +100,7 @@ void echemAMR::Evolve()
 
             for(int sp=0;sp<NUM_SPECIES;sp++)
             {
-                implicit_solve_species(cur_time,species_implicit_solve_dt,
-                        sp,expl_src);
+                implicit_solve_species(cur_time,dt[0],sp,expl_src);
             }
             AverageDown ();
             
@@ -367,13 +366,15 @@ void echemAMR::implicit_solve_species(Real current_time,Real dt,int spec_id, con
                     if (bx.smallEnd(idim) == domain.smallEnd(idim))
                     {
                         amrex::ParallelFor(amrex::bdryLo(bx, idim), [=] AMREX_GPU_DEVICE(int i, int j, int k) noexcept {
-                                electrochem_transport::species_linsolve_bc(i, j, k, idim, -1, spec_id, phi_arr, bc_arr, prob_lo, prob_hi, dx, time, *localprobparm);
+                                electrochem_transport::species_linsolve_bc(i, j, k, idim, -1, spec_id, phi_arr, bc_arr, 
+                                        prob_lo, prob_hi, dx, time, *localprobparm);
                                 });
                     }
                     if (bx.bigEnd(idim) == domain.bigEnd(idim))
                     {
                         amrex::ParallelFor(amrex::bdryHi(bx, idim), [=] AMREX_GPU_DEVICE(int i, int j, int k) noexcept {
-                                electrochem_transport::species_linsolve_bc(i, j, k, idim, +1, spec_id, phi_arr, bc_arr, prob_lo, prob_hi, dx, time, *localprobparm);
+                                electrochem_transport::species_linsolve_bc(i, j, k, idim, +1, spec_id, phi_arr, bc_arr, 
+                                        prob_lo, prob_hi, dx, time, *localprobparm);
                                 });
                     }
                 }
