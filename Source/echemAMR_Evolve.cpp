@@ -751,35 +751,53 @@ void echemAMR::solve_potential(Real current_time)
     mlabec_res.setScalars(0.0, bscalar);
 
     // default to inhomogNeumann since it is defaulted to flux = 0.0 anyways
-    std::array<LinOpBCType, AMREX_SPACEDIM> bc_potential_lo = {LinOpBCType::inhomogNeumann, 
-        LinOpBCType::inhomogNeumann, LinOpBCType::inhomogNeumann};
+    std::array<LinOpBCType, AMREX_SPACEDIM> bc_potsolve_lo = {LinOpBCType::inhomogNeumann, LinOpBCType::inhomogNeumann, LinOpBCType::inhomogNeumann};
 
-    std::array<LinOpBCType, AMREX_SPACEDIM> bc_potential_hi = {LinOpBCType::inhomogNeumann, 
-        LinOpBCType::inhomogNeumann, LinOpBCType::inhomogNeumann};
+    std::array<LinOpBCType, AMREX_SPACEDIM> bc_potsolve_hi = {LinOpBCType::inhomogNeumann, LinOpBCType::inhomogNeumann, LinOpBCType::inhomogNeumann};
+
+    bool mixedbc=false;
 
     for (int idim = 0; idim < AMREX_SPACEDIM; idim++)
     {
         if (bc_lo_pot[idim] == BCType::int_dir)
         {
-            bc_potential_lo[idim] = LinOpBCType::Periodic;
+            bc_potsolve_lo[idim] = LinOpBCType::Periodic;
         }
         if (bc_lo_pot[idim] == BCType::ext_dir)
         {
-            bc_potential_lo[idim] = LinOpBCType::Dirichlet;
+            bc_potsolve_lo[idim] = LinOpBCType::Dirichlet;
+        }
+        if (bc_lo_pot[idim] == BCType::foextrap)
+        {
+            bc_potsolve_lo[idim] = LinOpBCType::Neumann;
+        }
+        if (bc_lo_pot[idim] == BCType::hoextrapcc)
+        {
+            bc_potsolve_lo[idim] = LinOpBCType::Robin;
+            mixedbc=true;
         }
 
         if (bc_hi_pot[idim] == BCType::int_dir)
         {
-            bc_potential_hi[idim] = LinOpBCType::Periodic;
+            bc_potsolve_hi[idim] = LinOpBCType::Periodic;
         }
         if (bc_hi_pot[idim] == BCType::ext_dir)
         {
-            bc_potential_hi[idim] = LinOpBCType::Dirichlet;
+            bc_potsolve_hi[idim] = LinOpBCType::Dirichlet;
+        }
+        if (bc_hi_pot[idim] == BCType::foextrap)
+        {
+            bc_potsolve_hi[idim] = LinOpBCType::Neumann;
+        }
+        if (bc_hi_pot[idim] == BCType::hoextrapcc)
+        {
+            bc_potsolve_hi[idim] = LinOpBCType::Robin;
+            mixedbc=true;
         }
     }
 
-    mlabec.setDomainBC(bc_potential_lo, bc_potential_hi);
-    mlabec_res.setDomainBC(bc_potential_lo, bc_potential_hi);
+    mlabec.setDomainBC(bc_potsolve_lo, bc_potsolve_hi);
+    mlabec_res.setDomainBC(bc_potsolve_lo, bc_potsolve_hi);
 
     Vector<MultiFab> potential;
     Vector<MultiFab> acoeff;
@@ -791,6 +809,10 @@ void echemAMR::solve_potential(Real current_time)
     Vector<MultiFab> residual;
     Vector<MultiFab> rhs_res;
 
+    Vector<MultiFab> robin_a;
+    Vector<MultiFab> robin_b;
+    Vector<MultiFab> robin_f;
+
     acoeff.resize(finest_level + 1);
     bcoeff.resize(finest_level + 1);
     gradsoln.resize(finest_level + 1);
@@ -801,6 +823,11 @@ void echemAMR::solve_potential(Real current_time)
     err.resize(finest_level + 1);
     rhs_res.resize(finest_level + 1);
 
+    //FIXME: find a way to not allocate when not using mixedbc
+    robin_a.resize(finest_level+1);
+    robin_b.resize(finest_level+1);
+    robin_f.resize(finest_level+1);
+
     const int num_grow = 1;
 
     MLMG mlmg(mlabec);
@@ -808,8 +835,14 @@ void echemAMR::solve_potential(Real current_time)
     mlmg.setMaxFmgIter(max_fmg_iter);
     mlmg.setVerbose(verbose);
     mlmg.setBottomVerbose(bottom_verbose);
-    //    mlmg.setBottomTolerance(1.0e-14);
-    //    mlmg.setBottomToleranceAbs(1.0e-14);
+    
+    mlmg.setBottomTolerance(linsolve_bot_reltol);
+    mlmg.setBottomToleranceAbs(linsolve_bot_abstol);
+
+    mlmg.setPreSmooth(linsolve_num_pre_smooth);
+    mlmg.setPostSmooth(linsolve_num_post_smooth);
+    mlmg.setFinalSmooth(linsolve_num_final_smooth);
+    mlmg.setBottomSmooth(linsolve_num_bottom_smooth);
 
 #ifdef AMREX_USE_HYPRE
     if (use_hypre)
@@ -844,6 +877,10 @@ void echemAMR::solve_potential(Real current_time)
                     IntVect::TheDimensionVector(idim));
             gradsoln[ilev][idim] = new MultiFab(faceba, dmap[ilev], 1, 0);
         }
+
+        robin_a[ilev].define(grids[ilev], dmap[ilev], 1, 1);
+        robin_b[ilev].define(grids[ilev], dmap[ilev], 1, 1);
+        robin_f[ilev].define(grids[ilev], dmap[ilev], 1, 1);
     }
 
     Real errnorm_1st_iter;
@@ -864,6 +901,11 @@ void echemAMR::solve_potential(Real current_time)
             bcoeff[ilev].setVal(1.0);
             solution[ilev].setVal(0.0);
             rhs[ilev].setVal(0.0);
+
+            //default to homogenous Neumann
+            robin_a[ilev].setVal(0.0);
+            robin_b[ilev].setVal(1.0);
+            robin_f[ilev].setVal(0.0);
 
 
             // copy current solution for better guess
@@ -1042,6 +1084,11 @@ void echemAMR::solve_potential(Real current_time)
 
                 Array4<Real> phi_arr = Sborder.array(mfi);
                 Array4<Real> bc_arr = potential[ilev].array(mfi);
+
+                Array4<Real> robin_a_arr = robin_a[ilev].array(mfi);
+                Array4<Real> robin_b_arr = robin_b[ilev].array(mfi);
+                Array4<Real> robin_f_arr = robin_f[ilev].array(mfi);
+
                 Real time = current_time; // for GPU capture
 
                 for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
@@ -1060,8 +1107,26 @@ void echemAMR::solve_potential(Real current_time)
                         if (bx.bigEnd(idim) == domain.bigEnd(idim))
                         {
                             amrex::ParallelFor(amrex::bdryHi(bx, idim), [=] AMREX_GPU_DEVICE(int i, int j, int k) noexcept {
-                                    electrochem_transport::potential_bc(i, j, k, idim, 1, phi_arr, bc_arr, prob_lo, prob_hi, dx, time, bclo, bchi);
+                                    electrochem_transport::potential_bc(i, j, k, idim, +1, phi_arr, bc_arr, prob_lo, prob_hi, dx, time, bclo, bchi);
                                     });
+                        }
+
+                        if(mixedbc)
+                        {
+                            if (bx.smallEnd(idim) == domain.smallEnd(idim))
+                            {
+                                amrex::ParallelFor(amrex::bdryLo(bx, idim), [=] AMREX_GPU_DEVICE(int i, int j, int k) noexcept {
+                                        electrochem_transport::potential_mixedbc(i, j, k, idim, -1, phi_arr, robin_a_arr, 
+                                                robin_b_arr, robin_f_arr, prob_lo, prob_hi, dx, time, bclo, bchi);
+                                        });
+                            }
+                            if (bx.bigEnd(idim) == domain.bigEnd(idim))
+                            {
+                                amrex::ParallelFor(amrex::bdryHi(bx, idim), [=] AMREX_GPU_DEVICE(int i, int j, int k) noexcept {
+                                        electrochem_transport::potential_mixedbc(i, j, k, idim, +1, phi_arr, robin_a_arr, 
+                                                robin_b_arr, robin_f_arr, prob_lo, prob_hi, dx, time, bclo, bchi);
+                                        });
+                            }
                         }
                     }
                 }
@@ -1072,11 +1137,9 @@ void echemAMR::solve_potential(Real current_time)
             mlabec_res.setBCoeffs(ilev, amrex::GetArrOfConstPtrs(face_bcoeff_res));
 
             // bc's are stored in the ghost cells of potential
-            mlabec.setLevelBC(ilev, &(potential[ilev]));
-            mlabec_res.setLevelBC(ilev, &(potential[ilev]));
+            mlabec.setLevelBC(ilev, &potential[ilev], &(robin_a[ilev]), &(robin_b[ilev]), &(robin_f[ilev]));
+            mlabec_res.setLevelBC(ilev, &(potential[ilev]), &(robin_a[ilev]), &(robin_b[ilev]), &(robin_f[ilev]));
         }
-
-        // need user-defined rhs
 
         mlmg.solve(GetVecOfPtrs(solution), GetVecOfConstPtrs(rhs), tol_rel, tol_abs);
         mlmg_res.apply(GetVecOfPtrs(residual),GetVecOfPtrs(solution));
@@ -1147,7 +1210,7 @@ void echemAMR::solve_potential(Real current_time)
         {
             amrex::Print()<<"Converged with final rel,abs error: "<< total_nl_res/errnorm_1st_iter
                 <<"\t"<< total_nl_res <<"\n";
-                break;
+            break;
         }
     }
 

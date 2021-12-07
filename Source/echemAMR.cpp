@@ -20,7 +20,6 @@ GlobalStorage* echemAMR::host_global_storage = nullptr;
 //             - initializes BCRec boundary condition object
 echemAMR::echemAMR()
 {
-
     h_prob_parm = new ProbParm{};
     d_prob_parm = (ProbParm*)The_Arena()->alloc(sizeof(ProbParm));
     host_global_storage = new GlobalStorage{};
@@ -52,7 +51,6 @@ echemAMR::echemAMR()
     ParmParse pp("echemamr");
     pp.queryarr("lo_bc_spec", bc_lo_spec, 0, AMREX_SPACEDIM);
     pp.queryarr("hi_bc_spec", bc_hi_spec, 0, AMREX_SPACEDIM);
-    
     pp.queryarr("lo_bc_pot", bc_lo_pot, 0, AMREX_SPACEDIM);
     pp.queryarr("hi_bc_pot", bc_hi_pot, 0, AMREX_SPACEDIM);
 
@@ -278,6 +276,14 @@ void echemAMR::ReadParameters()
 
         pp.query("linsolve_reltol",linsolve_reltol);
         pp.query("linsolve_abstol",linsolve_abstol);
+        pp.query("linsolve_bot_reltol",linsolve_bot_reltol);
+        pp.query("linsolve_bot_abstol",linsolve_bot_abstol);
+
+        pp.query("linsolve_num_pre_smooth",linsolve_num_pre_smooth);
+        pp.query("linsolve_num_post_smooth",linsolve_num_post_smooth);
+        pp.query("linsolve_num_final_smooth",linsolve_num_final_smooth);
+        pp.query("linsolve_num_bottom_smooth",linsolve_num_bottom_smooth);
+
         pp.query("linsolve_maxiter",linsolve_maxiter);
         pp.query("linsolve_max_coarsening_level",linsolve_max_coarsening_level);
         pp.query("lsgrad_tol",lsgrad_tolerance);
