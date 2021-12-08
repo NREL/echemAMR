@@ -74,8 +74,10 @@ public:
         Real time, Real dt, bool reflux_this_stage);
 
     void solve_potential(Real current_time);
-    void implicit_solve_species(Real current_time,Real dt,int spec_id, const 
-        Vector<MultiFab> dsdt_expl);
+    
+    //void implicit_solve_species(Real current_time,Real dt,int spec_id);
+    void implicit_solve_species(Real current_time,Real dt,int spec_id,
+            Vector<MultiFab *> dsdt_expl);
 
     // compute dt from CFL considerations
     Real EstTimeStep(int lev, bool local = false);
