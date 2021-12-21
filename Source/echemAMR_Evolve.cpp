@@ -75,7 +75,7 @@ void echemAMR::Evolve()
             Vector<MultiFab *> expl_src(finest_level+1);
             for(int lev=0;lev<=finest_level;lev++)
             {
-                std::swap(phi_old[lev], phi_new[lev]);
+                amrex::MultiFab::Copy(phi_old[lev], phi_new[lev], 0, 0, phi_new[lev].nComp(), 0);
                 t_old[lev] = t_new[lev];
                 t_new[lev] += dt[0];
 
@@ -98,6 +98,7 @@ void echemAMR::Evolve()
                 int num_grow=2;
                 MultiFab Sborder(grids[lev], dmap[lev], phi_new[lev].nComp(), num_grow);
                 expl_src[lev]=new MultiFab(grids[lev], dmap[lev], phi_new[lev].nComp(), 0);
+                expl_src[lev]->setVal(0.0);
 
                 //FIXME: need to avoid this fillpatch
                 FillPatch(lev, cur_time, Sborder, 0, Sborder.nComp());
@@ -107,7 +108,6 @@ void echemAMR::Evolve()
 
             for(int sp=0;sp<NUM_SPECIES;sp++)
             {
-                //implicit_solve_species(cur_time,dt[0],sp);
                 implicit_solve_species(cur_time,dt[0],sp,expl_src);
             }
             AverageDown ();
@@ -197,7 +197,8 @@ void echemAMR::solve_potential(Real current_time)
     //====================================================
 
     // FIXME: had to adjust for constant coefficent,
-    // this could be due to missing terms in the intercalation reaction or sign mistakes...
+    // this could be due to missing terms in the 
+    // intercalation reaction or sign mistakes...
     ProbParm const* localprobparm = d_prob_parm;
 
     const Real tol_rel = linsolve_reltol;
@@ -238,9 +239,11 @@ void echemAMR::solve_potential(Real current_time)
     mlabec_res.setScalars(0.0, bscalar);
 
     // default to inhomogNeumann since it is defaulted to flux = 0.0 anyways
-    std::array<LinOpBCType, AMREX_SPACEDIM> bc_potsolve_lo = {LinOpBCType::inhomogNeumann, LinOpBCType::inhomogNeumann, LinOpBCType::inhomogNeumann};
+    std::array<LinOpBCType, AMREX_SPACEDIM> bc_potsolve_lo 
+        = {LinOpBCType::inhomogNeumann, LinOpBCType::inhomogNeumann, LinOpBCType::inhomogNeumann};
 
-    std::array<LinOpBCType, AMREX_SPACEDIM> bc_potsolve_hi = {LinOpBCType::inhomogNeumann, LinOpBCType::inhomogNeumann, LinOpBCType::inhomogNeumann};
+    std::array<LinOpBCType, AMREX_SPACEDIM> bc_potsolve_hi 
+        = {LinOpBCType::inhomogNeumann, LinOpBCType::inhomogNeumann, LinOpBCType::inhomogNeumann};
 
     bool mixedbc=false;
 
@@ -857,7 +860,8 @@ void echemAMR::compute_dsdt(int lev, const int num_grow, MultiFab& Sborder,
             Array4<Real> dsdt_arr = dsdt.array(mfi);
             Array4<Real> reactsource_arr = reactsource_fab.array();
 
-            GpuArray<Array4<Real>, AMREX_SPACEDIM> flux_arr{AMREX_D_DECL(flux[0].array(mfi), flux[1].array(mfi), flux[2].array(mfi))};
+            GpuArray<Array4<Real>, AMREX_SPACEDIM> flux_arr{
+                AMREX_D_DECL(flux[0].array(mfi), flux[1].array(mfi), flux[2].array(mfi))};
 
             reactsource_fab.setVal<RunOn::Device>(0.0);
 
@@ -1006,9 +1010,6 @@ void echemAMR::implicit_solve_species(Real current_time,Real dt,int spec_id,
     int max_fmg_iter = 0;
     int verbose = 1;
     int bottom_verbose = 0;
-    Real ascalar = 0.0;
-    Real bscalar = 1.0;
-    int num_nonlinear_iters;
 
     //==================================================
     // amrex solves
@@ -1045,13 +1046,17 @@ void echemAMR::implicit_solve_species(Real current_time,Real dt,int spec_id,
     mlabec.setMaxOrder(linop_maxorder);
 
     // set A and B, A=1/dt, B=1
-    ascalar = 1.0/dt;
+    Real ascalar = 1.0/dt;
+    //Real ascalar = 0.0;
+    Real bscalar = 1.0;
     mlabec.setScalars(ascalar, bscalar);
 
     // default to inhomogNeumann since it is defaulted to flux = 0.0 anyways
-    std::array<LinOpBCType, AMREX_SPACEDIM> bc_linsolve_lo = {LinOpBCType::inhomogNeumann, LinOpBCType::inhomogNeumann, LinOpBCType::inhomogNeumann};
+    std::array<LinOpBCType, AMREX_SPACEDIM> bc_linsolve_lo 
+        = {LinOpBCType::inhomogNeumann, LinOpBCType::inhomogNeumann, LinOpBCType::inhomogNeumann};
 
-    std::array<LinOpBCType, AMREX_SPACEDIM> bc_linsolve_hi = {LinOpBCType::inhomogNeumann, LinOpBCType::inhomogNeumann, LinOpBCType::inhomogNeumann};
+    std::array<LinOpBCType, AMREX_SPACEDIM> bc_linsolve_hi 
+        = {LinOpBCType::inhomogNeumann, LinOpBCType::inhomogNeumann, LinOpBCType::inhomogNeumann};
 
     for (int idim = 0; idim < AMREX_SPACEDIM; idim++)
     {
@@ -1078,7 +1083,7 @@ void echemAMR::implicit_solve_species(Real current_time,Real dt,int spec_id,
         }
         if (bc_hi_spec[idim] == BCType::foextrap)
         {
-            bc_linsolve_lo[idim] = LinOpBCType::Neumann;
+            bc_linsolve_hi[idim] = LinOpBCType::Neumann;
         }
     }
 
@@ -1088,7 +1093,6 @@ void echemAMR::implicit_solve_species(Real current_time,Real dt,int spec_id,
     Vector<MultiFab> acoeff;
     Vector<MultiFab> bcoeff;
     Vector<MultiFab> solution;
-    Vector<MultiFab> residual;
     Vector<MultiFab> rhs;
 
     specdata.resize(finest_level + 1);
@@ -1104,8 +1108,13 @@ void echemAMR::implicit_solve_species(Real current_time,Real dt,int spec_id,
     mlmg.setMaxFmgIter(max_fmg_iter);
     mlmg.setVerbose(verbose);
     mlmg.setBottomVerbose(bottom_verbose);
-//    mlmg.setBottomTolerance(1.0e-14);
-//    mlmg.setBottomToleranceAbs(1.0e-14);
+    mlmg.setBottomTolerance(linsolve_bot_reltol);
+    mlmg.setBottomToleranceAbs(linsolve_bot_abstol);
+    
+    mlmg.setPreSmooth(linsolve_num_pre_smooth);
+    mlmg.setPostSmooth(linsolve_num_post_smooth);
+    mlmg.setFinalSmooth(linsolve_num_final_smooth);
+    mlmg.setBottomSmooth(linsolve_num_bottom_smooth);
 
 #ifdef AMREX_USE_HYPRE
     if (use_hypre)
@@ -1137,6 +1146,7 @@ void echemAMR::implicit_solve_species(Real current_time,Real dt,int spec_id,
        
         MultiFab Sborder(grids[ilev], dmap[ilev], phi_new[ilev].nComp(), num_grow);
         FillPatch(ilev, current_time, Sborder, 0, Sborder.nComp());
+        
         specdata[ilev].setVal(0.0);
         amrex::Copy(specdata[ilev], Sborder, spec_id, 0, 1, num_grow);
         
@@ -1144,11 +1154,11 @@ void echemAMR::implicit_solve_species(Real current_time,Real dt,int spec_id,
         mlabec.setACoeffs(ilev, acoeff[ilev]);
 
         bcoeff[ilev].setVal(1.0);
-        solution[ilev].setVal(0.0);
-       
-        rhs[ilev].setVal(0.0);
-        MultiFab::LinComb(rhs[ilev], 1.0, specdata[ilev], 0, 1.0/dt, *(dsdt_expl[ilev]), spec_id, 0, 1, 0);
 
+        rhs[ilev].setVal(0.0);
+        MultiFab::LinComb(rhs[ilev], 1.0/dt, specdata[ilev], 0, 1.0, *(dsdt_expl[ilev]), spec_id, 0, 1, 0);
+
+        solution[ilev].setVal(0.0);
         amrex::MultiFab::Copy(solution[ilev], specdata[ilev], 0, 0, 1, 0);
         int ncomp = Sborder.nComp();
 
@@ -1166,7 +1176,6 @@ void echemAMR::implicit_solve_species(Real current_time,Real dt,int spec_id,
 
             Array4<Real> phi_arr = Sborder.array(mfi);
             Array4<Real> bcoeff_arr = bcoeff[ilev].array(mfi);
-            Array4<Real> rhs_arr = rhs[ilev].array(mfi);
             
             FArrayBox dcoeff_fab(gbx, ncomp);
             Elixir dcoeff_fab_eli = dcoeff_fab.elixir();
@@ -1190,7 +1199,6 @@ void echemAMR::implicit_solve_species(Real current_time,Real dt,int spec_id,
         }
         // true argument for harmonic averaging
         amrex::average_cellcenter_to_face(GetArrOfPtrs(face_bcoeff), bcoeff[ilev], geom[ilev], true);
-        
 
         // set boundary conditions
         for (MFIter mfi(phi_new[ilev], TilingIfNotGPU()); mfi.isValid(); ++mfi)
@@ -1212,7 +1220,8 @@ void echemAMR::implicit_solve_species(Real current_time,Real dt,int spec_id,
                     if (bx.smallEnd(idim) == domain.smallEnd(idim))
                     {
                         amrex::ParallelFor(amrex::bdryLo(bx, idim), [=] AMREX_GPU_DEVICE(int i, int j, int k) noexcept {
-                                electrochem_transport::species_linsolve_bc(i, j, k, idim, -1, spec_id, phi_arr, bc_arr, 
+                                electrochem_transport::species_linsolve_bc(i, j, k, idim, -1, 
+                                        spec_id, phi_arr, bc_arr, 
                                         prob_lo, prob_hi, dx, time, *localprobparm);
                                 });
                     }
@@ -1239,6 +1248,11 @@ void echemAMR::implicit_solve_species(Real current_time,Real dt,int spec_id,
     // copy solution back to phi_new
     for (int ilev = 0; ilev <= finest_level; ilev++)
     {
+        Print()<<"max of solution:"<<solution[ilev].max(0)<<"\n";
+        Print()<<"min of solution:"<<solution[ilev].min(0)<<"\n";
+        Print()<<"max of rhs:"<<rhs[ilev].max(0)<<"\n";
+        Print()<<"min of rhs:"<<rhs[ilev].min(0)<<"\n";
         amrex::MultiFab::Copy(phi_new[ilev], solution[ilev], 0, spec_id, 1, 0);
     }
+    Print()<<"spec id:"<<spec_id<<"\n";
 }
