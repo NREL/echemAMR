@@ -106,9 +106,9 @@ void echemAMR::Evolve()
                         cur_time, dt[0], false);
             }
 
-            for(int sp=0;sp<NUM_SPECIES;sp++)
+            for(unsigned int ind=0;ind<transported_species_list.size();ind++)
             {
-                implicit_solve_species(cur_time,dt[0],sp,expl_src);
+                implicit_solve_species(cur_time,dt[0],transported_species_list[ind],expl_src);
             }
             AverageDown ();
             
@@ -1142,7 +1142,8 @@ void echemAMR::implicit_solve_species(Real current_time,Real dt,int spec_id,
 
     for (int ilev = 0; ilev <= finest_level; ilev++)
     {
-        // Copy args (FabArray<FAB>& dst, FabArray<FAB> const& src, int srccomp, int dstcomp, int numcomp, const IntVect& nghost)
+        // Copy args (FabArray<FAB>& dst, FabArray<FAB> const& src, 
+        // int srccomp, int dstcomp, int numcomp, const IntVect& nghost)
        
         MultiFab Sborder(grids[ilev], dmap[ilev], phi_new[ilev].nComp(), num_grow);
         FillPatch(ilev, current_time, Sborder, 0, Sborder.nComp());
@@ -1189,7 +1190,7 @@ void echemAMR::implicit_solve_species(Real current_time,Real dt,int spec_id,
                     bcoeff_arr(i,j,k)=dcoeff_arr(i,j,k,spec_id);
                     });
         }
-
+        
         // average cell coefficients to faces, this includes boundary faces
         Array<MultiFab, AMREX_SPACEDIM> face_bcoeff;
         for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
@@ -1199,6 +1200,51 @@ void echemAMR::implicit_solve_species(Real current_time,Real dt,int spec_id,
         }
         // true argument for harmonic averaging
         amrex::average_cellcenter_to_face(GetArrOfPtrs(face_bcoeff), bcoeff[ilev], geom[ilev], true);
+        
+        if (spec_id==bv_spec_id && buttler_vohlmer_flux)
+        {
+            int lset_id = bv_levset_id;
+            Real gradctol = lsgrad_tolerance;
+
+            for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
+            {
+                for (MFIter mfi(phi_new[ilev], TilingIfNotGPU()); mfi.isValid(); ++mfi)
+                {
+                    const auto dx = geom[ilev].CellSizeArray();
+                    const Box& bx = mfi.tilebox();
+                    Real min_dx = amrex::min(dx[0], amrex::min(dx[1], dx[2]));
+
+                    // face box
+                    Box fbox = convert(bx, IntVect::TheDimensionVector(idim));
+                    Array4<Real> phi_arr = Sborder.array(mfi);
+                    Array4<Real> dcoeff_arr = face_bcoeff[idim].array(mfi);
+
+                    amrex::ParallelFor(fbox, [=] AMREX_GPU_DEVICE(int i, int j, int k) 
+                    {
+
+                        int normaldir = idim;
+                        Real mod_gradc=0.0;
+                        Real facecolor=0.0;
+                        Real potjump=0.0;
+                        Real gradc_cutoff=0.0;
+                        Real dphidn = 0.0;
+                        Real dphidt1 = 0.0;
+                        Real dphidt2 = 0.0;
+                        Real n_ls[AMREX_SPACEDIM];
+
+                        bv_get_grads_and_jumps(i, j, k, normaldir, lset_id, dx, phi_arr, gradctol,
+                                mod_gradc, gradc_cutoff, facecolor, potjump, dphidn, dphidt1, dphidt2, n_ls);
+
+
+                        if (mod_gradc > gradc_cutoff)
+                        {
+                            Real activ_func = electrochem_reactions::bv_activation_function(facecolor, mod_gradc, gradc_cutoff);
+                            dcoeff_arr(i, j, k) *= (1.0 - activ_func);
+                        }
+                    });
+                }
+            }
+        }
 
         // set boundary conditions
         for (MFIter mfi(phi_new[ilev], TilingIfNotGPU()); mfi.isValid(); ++mfi)

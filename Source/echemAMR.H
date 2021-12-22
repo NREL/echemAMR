@@ -234,6 +234,8 @@ private:
     int species_implicit_solve=0;
     Real species_implicit_solve_dt=0.01; //sec
 
+    Vector<int> transported_species_list{0}; 
+
     // apply Buttler-Vohlmer conditions
     int buttler_vohlmer_flux = 0;
     // level-set id for buttler-vohlmer

@@ -24,6 +24,17 @@ namespace electrochem_transport {
         {
 
         }
+    AMREX_GPU_DEVICE AMREX_INLINE
+    void species_linsolve_bc(int i,int j,int k, int dir, int sgn, 
+            int spec_id, Array4<Real> const &phi, Array4<Real> const& bc,
+            GpuArray<Real, AMREX_SPACEDIM> prob_lo,
+            GpuArray<Real, AMREX_SPACEDIM> prob_hi,
+            GpuArray<Real, AMREX_SPACEDIM> dx,
+            const Real time,
+            ProbParm const& prob_parm)
+    {
+    
+    }
 AMREX_GPU_DEVICE AMREX_INLINE void potential_bc(
     int i,
     int j,
