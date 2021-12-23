@@ -25,6 +25,51 @@ namespace electrochem_transport
     {
     
     }
+
+    AMREX_GPU_DEVICE AMREX_INLINE
+    void species_linsolve_bc(int i,int j,int k, int dir, int sgn, 
+            int spec_id, Array4<Real> const &phi, Array4<Real> const& bc,
+            GpuArray<Real, AMREX_SPACEDIM> prob_lo,
+            GpuArray<Real, AMREX_SPACEDIM> prob_hi,
+            GpuArray<Real, AMREX_SPACEDIM> dx,
+            const Real time,
+            ProbParm const& prob_parm)
+    {
+        Real xlen,ylen,zlen,maxlen;
+        int axialdir=0;
+
+        const int im1 = (dir == 0) ? i-1 : i;
+        const int jm1 = (dir == 1) ? j-1 : j;
+        const int km1 = (dir == 2) ? k-1 : k;
+        
+        xlen=prob_hi[0]-prob_lo[0];
+        ylen=prob_hi[1]-prob_lo[1];
+        zlen=prob_hi[2]-prob_lo[2];
+
+        maxlen=std::max(xlen,std::max(ylen,zlen));
+
+        if(maxlen==xlen) axialdir=0;
+        if(maxlen==ylen) axialdir=1;
+        if(maxlen==zlen) axialdir=2;
+
+        if(sgn == -1) 
+        { // lo sides
+                bc(im1,jm1,km1) = 0.0;
+        } 
+        else 
+        { // hi sides
+            if(spec_id==S1_ID)
+            {
+               bc(i,j,k) = 1.0;
+            }
+            else
+            {
+               bc(i,j,k) = 0.0;
+            }
+        }
+    
+    }
+
     AMREX_GPU_DEVICE AMREX_INLINE
     void potential_bc(int i, int j, int k,
                       int dir, int sgn,

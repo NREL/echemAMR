@@ -6,11 +6,6 @@
 #include <AMReX_VisMF.H>
 #include <AMReX_PhysBCFunct.H>
 #include <Kernels_3d.H>
-
-#ifdef AMREX_MEM_PROFILING
-#include <AMReX_MemProfiler.H>
-#endif
-
 #include <echemAMR.H>
 #include <Chemistry.H>
 

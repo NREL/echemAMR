@@ -6,11 +6,6 @@
 #include <AMReX_VisMF.H>
 #include <AMReX_PhysBCFunct.H>
 #include <Kernels_3d.H>
-
-#ifdef AMREX_MEM_PROFILING
-#include <AMReX_MemProfiler.H>
-#endif
-
 #include <echemAMR.H>
 #include <Chemistry.H>
 
@@ -105,6 +100,8 @@ void echemAMR::MakeNewLevelFromScratch(int lev, Real time, const BoxArray& ba, c
             initdomaindata(tbx, fab, geomData, localprobparm);
         });
     }
+    
+    amrex::MultiFab::Copy(phi_old[lev], phi_new[lev], 0, 0, ncomp, 0);
 }
 
 // set covered coarse cells to be the average of overlying fine cells

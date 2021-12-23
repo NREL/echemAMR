@@ -6,11 +6,6 @@
 #include <AMReX_VisMF.H>
 #include <AMReX_PhysBCFunct.H>
 #include <Kernels_3d.H>
-
-#ifdef AMREX_MEM_PROFILING
-#include <AMReX_MemProfiler.H>
-#endif
-
 #include <echemAMR.H>
 #include <Chemistry.H>
 #include <ProbParm.H>
@@ -20,7 +15,6 @@ using namespace amrex;
 ProbParm* echemAMR::h_prob_parm = nullptr;
 ProbParm* echemAMR::d_prob_parm = nullptr;
 GlobalStorage* echemAMR::host_global_storage = nullptr;
-
 // constructor - reads in parameters from inputs file
 //             - sizes multilevel arrays and data structures
 //             - initializes BCRec boundary condition object
@@ -293,6 +287,9 @@ void echemAMR::ReadParameters()
         pp.query("linsolve_maxiter",linsolve_maxiter);
         pp.query("linsolve_max_coarsening_level",linsolve_max_coarsening_level);
         pp.query("lsgrad_tol",lsgrad_tolerance);
+        pp.query("species_implicit_solve",species_implicit_solve);
+
+        pp.queryarr("transported_species_list",transported_species_list);
     }
 }
 
