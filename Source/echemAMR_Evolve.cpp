@@ -217,11 +217,6 @@ void echemAMR::solve_potential(Real current_time)
     info.setMaxCoarseningLevel(max_coarsening_level);
     info.setMaxSemicoarseningLevel(max_semicoarsening_level);
 
-    MLABecLaplacian mlabec(geom, grids, dmap, info);
-    MLABecLaplacian mlabec_res(geom, grids, dmap, info);
-
-    mlabec.setMaxOrder(linop_maxorder);
-    mlabec_res.setMaxOrder(linop_maxorder);
 
     // set A and B, A=0, B=1
     //
@@ -235,8 +230,6 @@ void echemAMR::solve_potential(Real current_time)
         ascalar = 0.0;
         num_nonlinear_iters=1;
     }
-    mlabec.setScalars(ascalar, bscalar);
-    mlabec_res.setScalars(0.0, bscalar);
 
     // default to inhomogNeumann since it is defaulted to flux = 0.0 anyways
     std::array<LinOpBCType, AMREX_SPACEDIM> bc_potsolve_lo 
@@ -286,8 +279,6 @@ void echemAMR::solve_potential(Real current_time)
         }
     }
 
-    mlabec.setDomainBC(bc_potsolve_lo, bc_potsolve_hi);
-    mlabec_res.setDomainBC(bc_potsolve_lo, bc_potsolve_hi);
 
     Vector<MultiFab> potential;
     Vector<MultiFab> acoeff;
@@ -320,35 +311,6 @@ void echemAMR::solve_potential(Real current_time)
 
     const int num_grow = 1;
 
-    MLMG mlmg(mlabec);
-    mlmg.setMaxIter(linsolve_maxiter);
-    mlmg.setMaxFmgIter(max_fmg_iter);
-    mlmg.setVerbose(verbose);
-    mlmg.setBottomVerbose(bottom_verbose);
-    mlmg.setBottomTolerance(linsolve_bot_reltol);
-    mlmg.setBottomToleranceAbs(linsolve_bot_abstol);
-
-    mlmg.setPreSmooth(linsolve_num_pre_smooth);
-    mlmg.setPostSmooth(linsolve_num_post_smooth);
-    mlmg.setFinalSmooth(linsolve_num_final_smooth);
-    mlmg.setBottomSmooth(linsolve_num_bottom_smooth);
-
-#ifdef AMREX_USE_HYPRE
-    if (use_hypre)
-    {
-        mlmg.setHypreOptionsNamespace("hypre");
-        mlmg.setBottomSolver(MLMG::BottomSolver::hypre);
-        mlmg.setHypreInterface(hypre_interface);
-    }
-#endif
-#ifdef AMREX_USE_PETSC
-    if (use_petsc)
-    {
-        mlmg.setBottomSolver(MLMG::BottomSolver::petsc);
-    }
-#endif
-
-    MLMG mlmg_res(mlabec_res);
 
     for (int ilev = 0; ilev <= finest_level; ilev++)
     {
@@ -373,8 +335,51 @@ void echemAMR::solve_potential(Real current_time)
     }
 
     Real errnorm_1st_iter;
+    
+    MLABecLaplacian mlabec(geom, grids, dmap, info);
+    MLABecLaplacian mlabec_res(geom, grids, dmap, info);
+
+    mlabec.setMaxOrder(linop_maxorder);
+    mlabec_res.setMaxOrder(linop_maxorder);
+    
     for (int nl_it = 0; nl_it < num_nonlinear_iters; ++nl_it)
     {
+        mlabec.setScalars(ascalar, bscalar);
+        mlabec_res.setScalars(0.0, bscalar);
+    
+        mlabec.setDomainBC(bc_potsolve_lo, bc_potsolve_hi);
+        mlabec_res.setDomainBC(bc_potsolve_lo, bc_potsolve_hi);
+    
+        MLMG mlmg(mlabec);
+        mlmg.setMaxIter(linsolve_maxiter);
+        mlmg.setMaxFmgIter(max_fmg_iter);
+        mlmg.setVerbose(verbose);
+        mlmg.setBottomVerbose(bottom_verbose);
+        mlmg.setBottomTolerance(linsolve_bot_reltol);
+        mlmg.setBottomToleranceAbs(linsolve_bot_abstol);
+
+        mlmg.setPreSmooth(linsolve_num_pre_smooth);
+        mlmg.setPostSmooth(linsolve_num_post_smooth);
+        mlmg.setFinalSmooth(linsolve_num_final_smooth);
+        mlmg.setBottomSmooth(linsolve_num_bottom_smooth);
+
+#ifdef AMREX_USE_HYPRE
+        if (use_hypre)
+        {
+            mlmg.setHypreOptionsNamespace("hypre");
+            mlmg.setBottomSolver(MLMG::BottomSolver::hypre);
+            mlmg.setHypreInterface(hypre_interface);
+        }
+#endif
+#ifdef AMREX_USE_PETSC
+        if (use_petsc)
+        {
+            mlmg.setBottomSolver(MLMG::BottomSolver::petsc);
+        }
+#endif
+
+        MLMG mlmg_res(mlabec_res);
+        
         for (int ilev = 0; ilev <= finest_level; ilev++)
         {
             MultiFab Sborder(grids[ilev], dmap[ilev], phi_new[ilev].nComp(), num_grow);
@@ -699,11 +704,16 @@ void echemAMR::solve_potential(Real current_time)
         {
             amrex::Print()<<"Converged with final rel,abs error: "<< total_nl_res/errnorm_1st_iter
                 <<"\t"<< total_nl_res <<"\n";
+            mlmg.getGradSolution(gradsoln);
             break;
+        }
+
+        if(nl_it==num_nonlinear_iters-1)
+        {
+            mlmg.getGradSolution(gradsoln);
         }
     }
 
-    mlmg.getGradSolution(gradsoln);
 
     // copy solution back to phi_new
     for (int ilev = 0; ilev <= finest_level; ilev++)

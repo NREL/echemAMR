@@ -22,6 +22,22 @@ namespace electrochem_transport {
                 const Real bclo,
                 const Real bchi)
         {
+            const int im1 = (dir == 0) ? i-1 : i;
+            const int jm1 = (dir == 1) ? j-1 : j;
+            const int km1 = (dir == 2) ? k-1 : k;
+            
+            if(sgn == -1) 
+            { // lo sides
+                robin_a(im1,jm1,km1)=1.0;
+                robin_b(im1,jm1,km1)=0.0;
+                robin_f(im1,jm1,km1)=bclo;
+            } 
+            else 
+            { // hi sides
+                robin_a(i,j,k)=1.0;
+                robin_b(i,j,k)=0.0;
+                robin_f(i,j,k)=bchi;
+            }
 
         }
     AMREX_GPU_DEVICE AMREX_INLINE
@@ -50,29 +66,16 @@ namespace electrochem_transport {
             const Real bclo,
             const Real bchi)
     {
-        Real xlen,ylen,zlen,maxlen;
-        int axialdir=0;
-
-        xlen=prob_hi[0]-prob_lo[0];
-        ylen=prob_hi[1]-prob_lo[1];
-        zlen=prob_hi[2]-prob_lo[2];
-
-        maxlen=std::max(xlen,std::max(ylen,zlen));
-
-        if(maxlen==xlen) axialdir=0;
-        if(maxlen==ylen) axialdir=1;
-        if(maxlen==zlen) axialdir=2;
-
-        const int im1 = (dir == 0) ? i - 1 : i;
-        const int jm1 = (dir == 1) ? j - 1 : j;
-        const int km1 = (dir == 2) ? k - 1 : k;
-
+        const int im1 = (dir == 0) ? i-1 : i;
+        const int jm1 = (dir == 1) ? j-1 : j;
+        const int km1 = (dir == 2) ? k-1 : k;
+        
         if (sgn == -1)
         { // lo sides
-            bc(im1, jm1, km1) = (dir == axialdir) ? bclo : 0.0;
+            bc(im1, jm1, km1) = bclo;
         } else
         { // hi sides
-            bc(i, j, k) = (dir == 0) ? bchi : 0.0;
+            bc(i, j, k) = bchi;
         }
     }
 
