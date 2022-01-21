@@ -13,6 +13,7 @@ AMREX_GPU_HOST_DEVICE
 AMREX_FORCE_INLINE
 Real volume_value(int i, int j, int k, int comp, int domain,
                     Array4<Real const> const& phi,
+                    Array4<int const> const& mask_arr,
                     GpuArray<Real, AMREX_SPACEDIM> dx
                     )
 {
@@ -35,8 +36,9 @@ AMREX_GPU_HOST_DEVICE
 AMREX_FORCE_INLINE
 Real surface_value(int i, int j, int k, int comp, int domain1, int domain2,
                     Array4<Real const> const& phi,
-                const int* domlo,const int *domhi,
-                const GpuArray<Real, AMREX_SPACEDIM>& dx)
+                    Array4<int const> const& mask_arr,
+                    const int* domlo,const int *domhi,
+                    const GpuArray<Real, AMREX_SPACEDIM>& dx)
 {
     // Init some values
     Real val = 1.0;
@@ -87,8 +89,9 @@ AMREX_GPU_HOST_DEVICE
 AMREX_FORCE_INLINE
 Real current_collector_value(int i, int j, int k, int comp, int domain,
                              Array4<Real const> const& phi,
-                const int* domlo,const int *domhi,
-                const GpuArray<Real, AMREX_SPACEDIM>& dx)
+                             Array4<int const> const& mask_arr,
+                             const int* domlo,const int *domhi,
+                             const GpuArray<Real, AMREX_SPACEDIM>& dx)
 {
     // Init some values
     Real val = 1.0;
