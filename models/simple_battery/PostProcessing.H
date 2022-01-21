@@ -332,5 +332,62 @@ void echemAMR::postprocess(Real time, int timestep, Real dt, GlobalStorage* glob
             line_plot(ZDir(), line_plot_npoints, time, timestep, finest_level, geom, dmap, grids, phi_new, POT_ID, po);
         }
     }
+
+    if (timestep == 0)
+    { // Print static information
+        // Calculate domain volume
+        Real anode_volume = VolumeIntegral(-1, A_ID);
+        Real cathode_volume = VolumeIntegral(-1, C_ID);
+        Real electrolyte_volume = VolumeIntegral(-1, E_ID);
+        Real separator_volume = VolumeIntegral(-1, S_ID);
+        Real total_volume = anode_volume + cathode_volume + electrolyte_volume + separator_volume;
+
+        // Calculate surface areas
+        Real anode_SA = SurfaceIntegral(-1, A_ID, A_ID);
+        Real electrolyte_SA = SurfaceIntegral(-1, E_ID, E_ID);
+        Real sepatator_SA = SurfaceIntegral(-1, S_ID, S_ID);
+        Real cathode_SA = SurfaceIntegral(-1, C_ID, C_ID);
+        Real anode_ele_SA = SurfaceIntegral(-1, A_ID, E_ID);
+        Real cathode_ele_SA = SurfaceIntegral(-1, C_ID, E_ID);
+        Real anode_cc_SA = CurrentCollectorIntegral(-1, A_ID);
+        Real cathode_cc_SA = CurrentCollectorIntegral(-1, C_ID);
+
+        // // Calculate mol per domain (current value)
+        Real anode_current_mol = VolumeIntegral(CO_ID, A_ID);
+        Real cathode_current_mol = VolumeIntegral(CO_ID, C_ID);
+        Real electrolyte_current_mol = VolumeIntegral(CO_ID, E_ID);
+        Real separator_current_mol = VolumeIntegral(CO_ID, S_ID);
+        Real total_current_mol = anode_current_mol + cathode_current_mol + electrolyte_current_mol + separator_current_mol;
+
+        amrex::Print() << " VOLUMES:" << std::endl;
+        amrex::Print() << "    Anode Volume:       " << anode_volume << " m3" << std::endl;
+        amrex::Print() << "    Cathode Volume:     " << cathode_volume << " m3" << std::endl;
+        amrex::Print() << "    Electrolyte Volume: " << electrolyte_volume << " m3" << std::endl;
+        amrex::Print() << "    Separator Volume:   " << separator_volume << " m3" << std::endl;
+        amrex::Print() << "    Total Volume:       " << total_volume << " m3" << std::endl;
+        amrex::Print() << std::endl;
+
+        amrex::Print() << " SURFACE AREAS:" << std::endl;
+        amrex::Print() << "    Anode SA:       " << anode_SA << " m3" << std::endl;
+        amrex::Print() << "    Cathode SA:     " << cathode_SA << " m3" << std::endl;
+        amrex::Print() << "    Electrolyte SA: " << electrolyte_SA << " m3" << std::endl;
+        amrex::Print() << "    Separator SA:   " << sepatator_SA << " m3" << std::endl;
+        amrex::Print() << "    A-E SA:         " << anode_ele_SA << " m3" << std::endl;
+        amrex::Print() << "    C-E SA:         " << cathode_ele_SA << " m3" << std::endl;
+        amrex::Print() << std::endl;
+
+        amrex::Print() << " CURRENT COLLECTOR AREAS:" << std::endl;
+        amrex::Print() << "    Anode CC:   " << anode_cc_SA << " m3" << std::endl;
+        amrex::Print() << "    Cathode CC: " << cathode_cc_SA << " m3" << std::endl;
+        amrex::Print() << std::endl;
+
+        amrex::Print() << " MOL AND CONCENTRATIONS:       " << std::endl;
+        amrex::Print() << "    Anode:       " << anode_current_mol << " mol / " << anode_current_mol / anode_volume << " mol.m-3" << std::endl;
+        amrex::Print() << "    Cathode:     " << cathode_current_mol << " mol / " << cathode_current_mol / cathode_volume << " mol.m-3" << std::endl;
+        amrex::Print() << "    Electrolyte: " << electrolyte_current_mol << " mol / " << electrolyte_current_mol / electrolyte_volume << " mol.m-3" << std::endl;
+        amrex::Print() << "    Separator:   " << separator_current_mol << " mol / " << separator_current_mol / separator_volume << " mol.m-3" << std::endl;
+        amrex::Print() << std::endl;
+    }
+
 }
 #endif
