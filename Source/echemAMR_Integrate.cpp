@@ -43,7 +43,7 @@ Real echemAMR::VolumeIntegral(int comp, int domain)
 
                     Real vol_part = 0.0;
                     amrex::Loop(bx, [=, &vol_part](int i, int j, int k) noexcept {
-                        vol_part += electrochem_integral_utils::volume_value(i, j, k, lev, captured_comp, captured_dm, fab, mask_arr, dx);
+                        vol_part += electrochem_integral_utils::volume_value(i, j, k, captured_comp, captured_dm, fab, mask_arr, dx);
                     });
 
             return vol_part;
