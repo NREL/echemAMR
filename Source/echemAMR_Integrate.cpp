@@ -9,10 +9,10 @@
 // TODO: incorperate a level mask
 Real echemAMR::VolumeIntegral(int comp, int domain)
 {
-    Real int_tmp = 0;
     Real exact_con;
     int captured_comp = comp;
     int captured_dm = domain;
+    Real vol = 0.0;
     for (int lev = 0; lev <= finest_level; ++lev)
     {
 
@@ -21,30 +21,39 @@ Real echemAMR::VolumeIntegral(int comp, int domain)
         const Real cur_time = t_new[lev];
         MultiFab& S_new = phi_new[lev];
 
-        // need fillpatched data for velocity calculation
-        // constexpr int num_grow = 2;
-        // MultiFab Sborder(grids[lev], dmap[lev], S_new.nComp(), num_grow);
-        // FillPatch(lev, cur_time, Sborder, 0, Sborder.nComp());
+        // mask the level refinement overlap using: https://github.com/Exawind/amr-wind/blob/main/amr-wind/utilities/sampling/Enstrophy.cpp
+        amrex::iMultiFab level_mask;
+        if (lev < finest_level) {
+            level_mask = makeFineMask(
+                phi_new[lev].boxArray(), phi_new[lev].DistributionMap(),
+                phi_new[lev+1].boxArray(), amrex::IntVect(2), 1, 0);
+        } else {
+            level_mask.define(
+                phi_new[lev].boxArray(), phi_new[lev].DistributionMap(),
+                1, 0, amrex::MFInfo());
+            level_mask.setVal(1);
+        }
 
-        // need to implement the mask feature from https://github.com/Exawind/amr-wind/blob/main/amr-wind/utilities/sampling/Enstrophy.cpp
+        vol += amrex::ReduceSum(
+            S_new, level_mask, 0, 
+            [=] AMREX_GPU_HOST_DEVICE(
+                Box const& bx, 
+                Array4<Real const> const& fab, 
+                Array4<int const> const& mask_arr) -> Real {
 
-        Real nm1 = amrex::ReduceSum(S_new, lev, [=] AMREX_GPU_HOST_DEVICE(Box const& bx, Array4<Real const> const& fab) -> Real {
-            Real r = 0.0;
-            AMREX_LOOP_3D(bx, i, j, k, { r += electrochem_integral_utils::volume_value(i, j, k, captured_comp, captured_dm, fab, dx); });
-            return r;
+                    Real vol_part = 0.0;
+                    amrex::Loop(bx, [=, &vol_part](int i, int j, int k) noexcept {
+                        vol_part += electrochem_integral_utils::volume_value(i, j, k, captured_comp, captured_dm, fab, mask_arr, dx);
+                    });
+
+            return vol_part;
         });
 
-        ParallelAllReduce::Sum(nm1, ParallelContext::CommunicatorSub());
 
-        int_tmp = nm1;
-
-        // exact_con = S_new.norm1(0,0,true);
-        // ParallelDescriptor::ReduceRealSum(exact_con);
     }
+    ParallelAllReduce::Sum(vol, ParallelContext::CommunicatorSub());
 
-    // amrex::Print() << "Exact Concentration Integral: " << exact_con << std::endl;
-
-    return int_tmp;
+    return vol;
 }
 
 // Returns the surface integral <domain>
@@ -52,7 +61,7 @@ Real echemAMR::VolumeIntegral(int comp, int domain)
 // TODO: Extend to flux
 Real echemAMR::SurfaceIntegral(int comp, int domain1, int domain2)
 {
-    Real int_tmp = 0;
+    Real surface_area = 0;
     Real exact_con;
     int captured_comp = comp;
     int captured_dm1 = domain1;
@@ -74,26 +83,38 @@ Real echemAMR::SurfaceIntegral(int comp, int domain1, int domain2)
         MultiFab Sborder(grids[lev], dmap[lev], S_new.nComp(), num_grow);
         FillPatch(lev, cur_time, Sborder, 0, Sborder.nComp());
 
-        // need to implement the mask feature from https://github.com/Exawind/amr-wind/blob/main/amr-wind/utilities/sampling/Enstrophy.cpp
+        // mask the level refinement overlap using: https://github.com/Exawind/amr-wind/blob/main/amr-wind/utilities/sampling/Enstrophy.cpp
+        amrex::iMultiFab level_mask;
+        if (lev < finest_level) {
+            level_mask = makeFineMask(
+                phi_new[lev].boxArray(), phi_new[lev].DistributionMap(),
+                phi_new[lev+1].boxArray(), amrex::IntVect(2), 1, 0);
+        } else {
+            level_mask.define(
+                phi_new[lev].boxArray(), phi_new[lev].DistributionMap(),
+                1, 0, amrex::MFInfo());
+            level_mask.setVal(1);
+        }
 
-        Real nm1 = amrex::ReduceSum(Sborder, lev, [=] AMREX_GPU_HOST_DEVICE(Box const& bx, Array4<Real const> const& fab) -> Real {
-            Real r = 0.0;
-            AMREX_LOOP_3D(
-                bx, i, j, k, { r += electrochem_integral_utils::surface_value(i, j, k, captured_comp, captured_dm1, captured_dm2, fab, domlo, domhi, dx); });
-            return r;
+        surface_area += amrex::ReduceSum(
+            Sborder, level_mask, 0, 
+            [=] AMREX_GPU_HOST_DEVICE(
+                Box const& bx, 
+                Array4<Real const> const& fab, 
+                Array4<int const> const& mask_arr) -> Real {
+
+                    Real sa_part = 0.0;
+                    amrex::Loop(bx, [=, &sa_part](int i, int j, int k) noexcept {
+                         sa_part += electrochem_integral_utils::surface_value(i, j, k, captured_comp, captured_dm1, captured_dm2, fab, mask_arr, domlo, domhi, dx); 
+                    });
+            return sa_part;
         });
 
-        ParallelAllReduce::Sum(nm1, ParallelContext::CommunicatorSub());
-
-        int_tmp = nm1;
-
-        // exact_con = S_new.norm1(0,0,true);
-        // ParallelDescriptor::ReduceRealSum(exact_con);
     }
 
-    // amrex::Print() << "Exact Concentration Integral: " << exact_con << std::endl;
+    ParallelAllReduce::Sum(surface_area, ParallelContext::CommunicatorSub());
 
-    return int_tmp;
+    return surface_area;
 }
 
 // Returns the surface integral <domain>
@@ -101,7 +122,7 @@ Real echemAMR::SurfaceIntegral(int comp, int domain1, int domain2)
 // TODO: Extend to flux
 Real echemAMR::CurrentCollectorIntegral(int comp, int domain)
 {
-    Real int_tmp = 0;
+    Real surface_area = 0;
     Real exact_con;
     int captured_comp = comp;
     int captured_dm = domain;
@@ -122,24 +143,36 @@ Real echemAMR::CurrentCollectorIntegral(int comp, int domain)
         MultiFab Sborder(grids[lev], dmap[lev], S_new.nComp(), num_grow);
         FillPatch(lev, cur_time, Sborder, 0, Sborder.nComp());
 
-        // need to implement the mask feature from https://github.com/Exawind/amr-wind/blob/main/amr-wind/utilities/sampling/Enstrophy.cpp
+        // mask the level refinement overlap using: https://github.com/Exawind/amr-wind/blob/main/amr-wind/utilities/sampling/Enstrophy.cpp
+        amrex::iMultiFab level_mask;
+        if (lev < finest_level) {
+            level_mask = makeFineMask(
+                phi_new[lev].boxArray(), phi_new[lev].DistributionMap(),
+                phi_new[lev+1].boxArray(), amrex::IntVect(2), 1, 0);
+        } else {
+            level_mask.define(
+                phi_new[lev].boxArray(), phi_new[lev].DistributionMap(),
+                1, 0, amrex::MFInfo());
+            level_mask.setVal(1);
+        }
 
-        Real nm1 = amrex::ReduceSum(Sborder, lev, [=] AMREX_GPU_HOST_DEVICE(Box const& bx, Array4<Real const> const& fab) -> Real {
-            Real r = 0.0;
-            AMREX_LOOP_3D(
-                bx, i, j, k, { r += electrochem_integral_utils::current_collector_value(i, j, k, captured_comp, captured_dm, fab, domlo, domhi, dx); });
-            return r;
+        surface_area += amrex::ReduceSum(
+            Sborder, level_mask, 0, 
+                [=] AMREX_GPU_HOST_DEVICE(
+                    Box const& bx,
+                    Array4<Real const> const& fab, 
+                    Array4<int const> const& mask_arr) -> Real {
+
+                        Real sa_part = 0.0;
+                        amrex::Loop(bx, [=, &sa_part](int i, int j, int k) noexcept {
+                            sa_part += electrochem_integral_utils::current_collector_value(i, j, k, captured_comp, captured_dm, fab, mask_arr, domlo, domhi, dx); 
+                        });
+                return sa_part;
         });
 
-        ParallelAllReduce::Sum(nm1, ParallelContext::CommunicatorSub());
-
-        int_tmp = nm1;
-
-        // exact_con = S_new.norm1(0,0,true);
-        // ParallelDescriptor::ReduceRealSum(exact_con);
     }
 
-    // amrex::Print() << "Exact Concentration Integral: " << exact_con << std::endl;
+    ParallelAllReduce::Sum(surface_area, ParallelContext::CommunicatorSub());
 
-    return int_tmp;
+    return surface_area;
 }

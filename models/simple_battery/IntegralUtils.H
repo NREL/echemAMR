@@ -8,11 +8,11 @@ namespace electrochem_integral_utils
 {
 
     //Returns the state value of <comp> if within <domain>
-    //TODO: incorporate a level mask
     AMREX_GPU_HOST_DEVICE
         AMREX_FORCE_INLINE
         Real volume_value(int i, int j, int k, int comp, int domain,
                 Array4<Real const> const& phi,
+                Array4<int const> const& mask_arr,
                 GpuArray<Real, AMREX_SPACEDIM> dx
                 )
         {
@@ -23,18 +23,18 @@ namespace electrochem_integral_utils
                 val = phi(i,j,k,comp);
 
             if( phi(i,j,k,domain) > 0 )
-                return val*dx[0]*dx[1]*dx[2];
+                return val*dx[0]*dx[1]*dx[2]*mask_arr(i,j,k);
             else
                 return 0.0;
 
         }
 
     //Returns the state value of <comp> if on the interface of <domain1> and <domain1>
-    //TODO: incorporate a level mask
     AMREX_GPU_HOST_DEVICE
         AMREX_FORCE_INLINE
         Real surface_value(int i, int j, int k, int comp, int domain1, int domain2,
                 Array4<Real const> const& phi,
+                Array4<int const> const& mask_arr,
                 const int* domlo,const int *domhi,
                 const GpuArray<Real, AMREX_SPACEDIM>& dx)
         {
@@ -83,16 +83,16 @@ namespace electrochem_integral_utils
                 if ( same_domain*z_next > 0) out += val*dx[0]*dx[1];
             }
 
-            return out;
+            return out*mask_arr(i,j,k);
         }
 
     //Returns the state value of <comp> if on the current 
     //collectors located at +/- x
-    //TODO: incorporate a level mask
     AMREX_GPU_HOST_DEVICE
         AMREX_FORCE_INLINE
         Real current_collector_value(int i, int j, int k, int comp, int domain,
                 Array4<Real const> const& phi,
+                Array4<int const> const& mask_arr,
                 const int* domlo,const int *domhi,
                 const GpuArray<Real, AMREX_SPACEDIM>& dx)
         {
@@ -111,7 +111,7 @@ namespace electrochem_integral_utils
                 if (i+1 > domhi[0]) out += val*dx[1]*dx[2];
             }
 
-            return out;
+            return out*mask_arr(i,j,k);
         }
 }
 
