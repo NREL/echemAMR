@@ -60,7 +60,7 @@ AMREX_GPU_DEVICE AMREX_INLINE void potential_bc(
     if (sgn == -1)
     { 
         // lo sides
-        bc(im1, jm1, km1) = (dir == 0) ? -4.0 : 0.0;
+        bc(im1, jm1, km1) = (dir == 0) ? bclo : 0.0;
     }
     if(sgn == 1)
     { // hi sides

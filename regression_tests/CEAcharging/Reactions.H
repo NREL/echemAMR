@@ -44,32 +44,19 @@ namespace electrochem_reactions {
     
     AMREX_GPU_HOST_DEVICE AMREX_FORCE_INLINE amrex::Real Io_c(amrex::Real Cs, amrex::Real Ce, const ProbParm& prob_parm)
     {
-        amrex::Real x = Cs/prob_parm.Csmax_c;
-        amrex::Real ioc = 6.0 * pow(Ce / 1000, 0.5) * pow(x, 0.5) * pow(1 - x, 0.5);
-
-        ioc=0.3;
+        amrex::Real ioc=0.3;
         return ioc;
     }
     
     AMREX_GPU_HOST_DEVICE AMREX_FORCE_INLINE amrex::Real OCP_c(amrex::Real Cs, const ProbParm& prob_parm)
     {
-        amrex::Real x = Cs / prob_parm.Csmax_c;
-        constexpr amrex::Real a3 = -1.3711668;
-        constexpr amrex::Real a2 = 3.9033218;
-        constexpr amrex::Real a1 = -4.3438781;
-        constexpr amrex::Real a0 = 5.3701447;
-        amrex::Real OCPc = ((a3 * x + a2) * x + a1) * x + a0;
-
-        OCPc=3.5;
+        amrex::Real OCPc=3.5;
         return OCPc;
     }
     
     AMREX_GPU_HOST_DEVICE AMREX_FORCE_INLINE amrex::Real Io_a(amrex::Real Cs, amrex::Real Ce, const ProbParm& prob_parm)
     {
-        amrex::Real x = Cs / prob_parm.Csmax_a;
-        amrex::Real ioa = 11 * pow(Ce / 1000, 0.5) * pow(x, 0.5) * pow(1 - x, 0.5);
-
-        ioa=0.3;
+        amrex::Real ioa=0.3;
         return ioa;
     }
     
@@ -77,18 +64,7 @@ namespace electrochem_reactions {
     // Cs in mol.m-3
     AMREX_GPU_HOST_DEVICE AMREX_FORCE_INLINE amrex::Real OCP_a(amrex::Real Cs, const ProbParm& prob_parm)
     {
-        amrex::Real x = Cs / prob_parm.Csmax_a;
-        constexpr amrex::Real a7 = -201.8048;
-        constexpr amrex::Real a6 = 730.918;
-        constexpr amrex::Real a5 = -1074.645;
-        constexpr amrex::Real a4 = 825.0173;
-        constexpr amrex::Real a3 = -354.3316;
-        constexpr amrex::Real a2 = 84.66978;
-        constexpr amrex::Real a1 = -10.57909;
-        constexpr amrex::Real a0 = 0.6848288;
-        amrex::Real OCPa = ((((((a7 * x + a6) * x + a5) * x + a4) * x + a3) * x + a2) * x + a1) * x + a0;
-
-        OCPa=0.6;
+        amrex::Real OCPa=0.6;
         return OCPa;
     }
 
@@ -109,7 +85,6 @@ namespace electrochem_reactions {
         Real anodefrac   = 0.5*(phi(left,A_ID) + phi(right,A_ID));
         Real cathodefrac = 0.5*(phi(left,C_ID) + phi(right,C_ID));
 
-        //phi0 = 2.0*GASCONST*prob_parm.Temp/FARADCONST;
         phi0 = 0.05;
         
         Real ls_left  = phi(left,LS_ID);
@@ -117,8 +92,6 @@ namespace electrochem_reactions {
         Real c_left   = phi(left,CO_ID);
         Real c_right  = phi(right,CO_ID);
 
-        //Real cs = amrex::max( (1.0-ls_left)*c_left, (1.0-ls_right)*c_right);
-        //Real ce = amrex::max(ls_left*c_left, ls_right*c_right);
         cs = (1.0-ls_left)*c_left;
         ce = ls_left*c_left;
         for(int t2=-1; t2<=1; t2++)
