@@ -135,7 +135,8 @@ void echemAMR::InitData()
             }
         }
 
-        // print_init_data(echemAMR::h_prob_parm);
+        print_init_data(echemAMR::h_prob_parm);
+        // print_coefficients(echemAMR::h_prob_parm); // Uncomment for models/CEAcharging
 
         if (chk_int > 0)
         {
