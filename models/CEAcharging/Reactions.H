@@ -179,6 +179,91 @@ namespace electrochem_reactions {
         // linear case
         //jbvder=-(j0/phi0);
     }
+    
+    AMREX_GPU_DEVICE AMREX_INLINE void species_bvflux(int i,int j,int k,int n,int normaldir,
+            Real phi_jump, Array4<Real> const& phi, ProbParm const& prob_parm, Real &jbv)
+    {
+        Real ocp,j0,phi0;
+        Real jcutoff = 0.0000001;
+        Real cs,ce;
+    
+        int trans1dir = (normaldir + 1) % AMREX_SPACEDIM;
+        int trans2dir = (normaldir + 2) % AMREX_SPACEDIM;
+
+        IntVect left(i, j, k);
+        IntVect right(i, j, k);
+        left[normaldir] -= 1;
+
+        Real anodefrac   = 0.5*(phi(left,A_ID) + phi(right,A_ID));
+        Real cathodefrac = 0.5*(phi(left,C_ID) + phi(right,C_ID));
+
+        //phi0 = 2.0*GASCONST*prob_parm.Temp/FARADCONST;
+        phi0 = 0.05;
+        
+        Real ls_left  = phi(left,LS_ID);
+        Real ls_right = phi(right,LS_ID);
+        Real c_left   = phi(left,CO_ID);
+        Real c_right  = phi(right,CO_ID);
+
+        //Real cs = amrex::max( (1.0-ls_left)*c_left, (1.0-ls_right)*c_right);
+        //Real ce = amrex::max(ls_left*c_left, ls_right*c_right);
+        cs = (1.0-ls_left)*c_left;
+        ce = ls_left*c_left;
+        for(int t2=-1; t2<=1; t2++)
+        {
+            for(int t1=-1; t1<=1; t1++)
+            {
+                for(int n=-1; n<=0; n++)
+                {
+                   IntVect curid(i,j,k);
+                   Real ls,conc;
+
+                   curid[normaldir] += n;
+                   curid[trans1dir] += t1;
+                   curid[trans2dir] += t2;
+
+                   ls   = phi(curid, LS_ID);
+                   conc = phi(curid, CO_ID);
+
+                   if(ls*conc > ce)
+                   {
+                        ce=ls*conc;
+                   }
+                   if((1.0-ls)*conc > cs)
+                   {
+                        cs=(1.0-ls)*conc;
+                   } 
+                }
+            }
+        }
+
+        j0=0.0;
+        ocp=0.0;
+        if(anodefrac > 0.0)
+        {
+            ocp = OCP_a(cs,prob_parm);
+            j0  = Io_a(cs,ce,prob_parm);
+        }
+        if(cathodefrac > 0.0)
+        {
+            ocp = OCP_c(cs,prob_parm);
+            j0 = Io_c(cs,ce,prob_parm);
+        }
+
+        j0=amrex::max(j0,jcutoff);
+        //amrex::Print()<<"normaldir,j0,phi0,ocp,phijump,anodefrac,cathodefrac:"
+          //  <<"\t"<<normaldir<<"\t"<<j0<<"\t"<<phi0<<"\t"
+           // <<ocp<<"\t"<<phi_jump<<"\t"<<anodefrac<<"\t"<<cathodefrac<<"\n";
+
+        // sinh definition
+        jbv = -j0*sinh((phi_jump+ocp)/phi0);
+
+        // linear case
+        //jbv=-(j0/phi0)*(phi_jump+ocp);
+        //
+        jbv=jbv/FARADCONST;
+
+    }
 
     AMREX_GPU_DEVICE AMREX_INLINE Real bv_activation_function(Real c, Real gradc, Real gradc_cutoff)
     {
