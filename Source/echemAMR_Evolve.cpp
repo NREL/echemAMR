@@ -924,7 +924,12 @@ void echemAMR::compute_fluxes(int lev, const int num_grow, MultiFab& Sborder,
     ProbParm const* localprobparm = d_prob_parm;
 
     int bvflux = buttler_vohlmer_flux;
-    int bvspec    = bv_spec_id;
+    int bvspec[NUM_SPECIES]={0};
+
+    for(unsigned int i=0;i<bv_specid_list.size();i++)
+    {
+        bvspec[bv_specid_list[i]]=1;
+    }
     int bvlset    = bv_levset_id;
 
     Real lsgrad_tol=lsgrad_tolerance;
@@ -1033,6 +1038,12 @@ void echemAMR::implicit_solve_species(Real current_time,Real dt,int spec_id,
     // in this case: A=0,a=0,B=1,b=conductivity
     // note also the negative sign
     //====================================================
+    int bvspec[NUM_SPECIES]={0};
+
+    for(unsigned int i=0;i<bv_specid_list.size();i++)
+    {
+        bvspec[bv_specid_list[i]]=1;
+    }
 
     ProbParm const* localprobparm = d_prob_parm;
 
@@ -1167,7 +1178,8 @@ void echemAMR::implicit_solve_species(Real current_time,Real dt,int spec_id,
         bcoeff[ilev].setVal(1.0);
 
         rhs[ilev].setVal(0.0);
-        MultiFab::LinComb(rhs[ilev], 1.0/dt, specdata[ilev], 0, 1.0, *(dsdt_expl[ilev]), spec_id, 0, 1, 0);
+        MultiFab::LinComb(rhs[ilev], 1.0/dt, specdata[ilev], 0, 1.0, 
+                          *(dsdt_expl[ilev]), spec_id, 0, 1, 0);
 
         solution[ilev].setVal(0.0);
         amrex::MultiFab::Copy(solution[ilev], specdata[ilev], 0, 0, 1, 0);
@@ -1211,7 +1223,7 @@ void echemAMR::implicit_solve_species(Real current_time,Real dt,int spec_id,
         // true argument for harmonic averaging
         amrex::average_cellcenter_to_face(GetArrOfPtrs(face_bcoeff), bcoeff[ilev], geom[ilev], true);
         
-        if (spec_id==bv_spec_id && buttler_vohlmer_flux)
+        if (bvspec[spec_id]==1 && buttler_vohlmer_flux)
         {
             int lset_id = bv_levset_id;
             Real gradctol = lsgrad_tolerance;

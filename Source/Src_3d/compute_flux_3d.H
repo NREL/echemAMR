@@ -26,7 +26,7 @@ void compute_flux(
         Array4<Real> const& fx,
         const GpuArray<Real, AMREX_SPACEDIM>& dx,
         ProbParm const& prob_parm,int implicit_diffusion,
-        int bvflux=0,int lset_id=0,int bvspec=1,Real lsgrad_tol=1e-2)
+        int bvflux,int lset_id,const int bvspec[NUM_SPECIES],int lsgrad_tol)
 {
 
     //|--left1--|--left--|--right--|--right1--|
@@ -80,7 +80,7 @@ void compute_flux(
     if(bvflux)
     {
 
-        if(n==bvspec)
+        if(bvspec[n]==1)
         {
             Real mod_gradc=0.0;
             Real facecolor=0.0;
@@ -98,11 +98,12 @@ void compute_flux(
             {
                 Real activ_func = electrochem_reactions::bv_activation_function(facecolor, mod_gradc, gradc_cutoff);
                 fx(i,j,k,n)=fx(i,j,k,n)*(1.0-activ_func);
-                Real j_bv,jdash_bv;
-                electrochem_reactions::bvcurrent_and_der(i,j,k,sweepdir,potjump,phi,prob_parm,j_bv,jdash_bv);
+                Real j_bv;
+
+                electrochem_reactions::species_bvflux(i,j,k,n,sweepdir,potjump,phi,prob_parm,j_bv);
 
                 //note n_ls[0] is along the sweep direction
-                fx(i,j,k,n)=fx(i,j,k,n)+j_bv/FARADCONST*activ_func*n_ls[0];
+                fx(i,j,k,n)=fx(i,j,k,n)+j_bv*activ_func*n_ls[0];
 
                 //debug print
                 /*amrex::Print()<<"bvflux:"<<j_bv/FARADCONST*activ_func*n_ls[sweepdir]<<"\t"<<

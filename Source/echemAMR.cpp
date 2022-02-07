@@ -131,7 +131,8 @@ void echemAMR::InitData()
                 GeometryData geomData = geom[lev].data();
                 const Box& box = mfi.validbox();
 
-                amrex::launch(box, [=] AMREX_GPU_DEVICE(Box const& tbx) { initproblemdata(box, fab, geomData, localprobparm); });
+                amrex::launch(box, [=] AMREX_GPU_DEVICE(Box const& tbx) 
+                { initproblemdata(box, fab, geomData, localprobparm); });
             }
         }
 
@@ -265,7 +266,7 @@ void echemAMR::ReadParameters()
 
         pp.query("buttler_vohlmer_flux", buttler_vohlmer_flux);
         pp.query("bv_levelset_id", bv_levset_id);
-        pp.query("bv_species_id", bv_spec_id);
+        pp.queryarr("bv_species_ids", bv_specid_list);
 
         pp.query("bv_relaxation_factor", bv_relaxfac);
         pp.query("bv_nonlinear_iters", bv_nonlinear_iters);

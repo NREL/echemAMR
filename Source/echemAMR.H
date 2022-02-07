@@ -240,7 +240,7 @@ private:
     int buttler_vohlmer_flux = 0;
     // level-set id for buttler-vohlmer
     int bv_levset_id = 0;
-    int bv_spec_id = 0;
+    Vector<int> bv_specid_list{0};
 
     int bv_nonlinear_iters = 1;
     Real bv_nonlinear_reltol = 1e-8;
