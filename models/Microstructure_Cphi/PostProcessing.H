@@ -338,16 +338,14 @@ void echemAMR::postprocess(Real time, int timestep, Real dt, GlobalStorage* glob
     Real anode_volume = VolumeIntegral(-1, A_ID);
     Real cathode_volume = VolumeIntegral(-1, C_ID);
     Real electrolyte_volume = VolumeIntegral(-1, E_ID);
-    //Real separator_volume = VolumeIntegral(-1, S_ID);
-    Real separator_volume = 0;
+    Real separator_volume = VolumeIntegral(-1, S_ID);
     Real total_volume = anode_volume+cathode_volume+electrolyte_volume+separator_volume;
 
     // Calculate mol per domain (current value)
     Real anode_current_mol = VolumeIntegral(CO_ID, A_ID);
     Real cathode_current_mol = VolumeIntegral(CO_ID, C_ID);
     Real electrolyte_current_mol = VolumeIntegral(CO_ID, E_ID);
-    //Real separator_current_mol = VolumeIntegral(CO_ID, S_ID);
-    Real separator_current_mol = 0;
+    Real separator_current_mol = VolumeIntegral(CO_ID, S_ID);
     Real total_current_mol = anode_current_mol+cathode_current_mol+electrolyte_current_mol+separator_current_mol;
 
     // Expected mol per domain (target value)
@@ -382,9 +380,8 @@ void echemAMR::postprocess(Real time, int timestep, Real dt, GlobalStorage* glob
     Real anode_current_potential = VolumeIntegral(POT_ID, A_ID)/anode_volume;
     Real cathode_current_potential = VolumeIntegral(POT_ID, C_ID)/cathode_volume;
     Real electrolyte_current_potential = VolumeIntegral(POT_ID, E_ID)/electrolyte_volume;
-    //Real separator_current_potential = VolumeIntegral(POT_ID, S_ID)/separator_volume;
-    Real separator_current_potential = 0.0;
-
+    Real separator_current_potential = VolumeIntegral(POT_ID, S_ID)/separator_volume;
+    
     // Overwritte
     globalstorage->Mass_error[0]=time;
     globalstorage->Mass_error[1]=anode_current_mol; globalstorage->Mass_error[2]=electrolyte_current_mol; globalstorage->Mass_error[3]=cathode_current_mol; 

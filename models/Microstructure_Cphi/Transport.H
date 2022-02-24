@@ -84,11 +84,12 @@ AMREX_GPU_DEVICE AMREX_INLINE void compute_dcoeff(
     // Diffusion coefficient = sum( diffusion_coefficient domain i * levelset i), with levelset i=1 if x within domain i, 0 otherwise
     dcoeff(i,j,k,CO_ID) = electrochem::Ds_bulk_anode(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,A_ID)
                           + electrochem::Ds_bulk_cathode(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,C_ID)
-                          + electrochem::De_bulk(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,E_ID);
-                          //+ electrochem::De_bulk(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,S_ID);
+                          + electrochem::De_bulk(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,E_ID)
+                          + electrochem::De_bulk(phi(i, j, k, CO_ID), prob_parm) / electrochem::MacMullinSeparator(prob_parm) * phi(i,j,k,S_ID);
     dcoeff(i, j, k, A_ID) = 0.0;
     dcoeff(i, j, k, C_ID) = 0.0;
     dcoeff(i, j, k, E_ID) = 0.0;
+    dcoeff(i, j, k, S_ID) = 0.0;
     dcoeff(i, j, k, LS_ID) = 0.0;
 }
 
@@ -104,11 +105,10 @@ AMREX_GPU_DEVICE AMREX_INLINE void compute_velx(
         const Real time,
         ProbParm const& prob_parm)
 {
-    velx(i, j, k, CO_ID) = 0.0;
-    velx(i, j, k, A_ID) = 0.0;
-    velx(i, j, k, C_ID) = 0.0;
-    velx(i, j, k, E_ID) = 0.0;
-    velx(i, j, k, LS_ID) = 0.0;
+    for (int n = 0; n < phi.nComp(); ++n)
+    {
+        velx(i, j, k, n) = 0.0;
+    }
 }
 AMREX_GPU_DEVICE AMREX_INLINE void compute_vely(
         int i,
@@ -122,11 +122,10 @@ AMREX_GPU_DEVICE AMREX_INLINE void compute_vely(
         const Real time,
         ProbParm const& prob_parm)
 {
-    vely(i, j, k, CO_ID) = 0.0;
-    vely(i, j, k, A_ID) = 0.0;
-    vely(i, j, k, C_ID) = 0.0;
-    vely(i, j, k, E_ID) = 0.0;
-    vely(i, j, k, LS_ID) = 0.0;
+    for (int n = 0; n < phi.nComp(); ++n)
+    {
+        vely(i, j, k, n) = 0.0;
+    }
 }
 
 AMREX_GPU_DEVICE AMREX_INLINE void compute_velz(
@@ -141,11 +140,10 @@ AMREX_GPU_DEVICE AMREX_INLINE void compute_velz(
         const Real time,
         ProbParm const& prob_parm)
 {
-    velz(i, j, k, CO_ID) = 0.0;
-    velz(i, j, k, A_ID) = 0.0;
-    velz(i, j, k, C_ID) = 0.0;
-    velz(i, j, k, E_ID) = 0.0;
-    velz(i, j, k, LS_ID) = 0.0;
+    for (int n = 0; n < phi.nComp(); ++n)
+    {
+        velz(i, j, k, n) = 0.0;
+    }
 }
 
 AMREX_GPU_DEVICE AMREX_INLINE void compute_potential_dcoeff(
@@ -164,8 +162,8 @@ AMREX_GPU_DEVICE AMREX_INLINE void compute_potential_dcoeff(
     // Conduction coefficient = sum( conductivity_coefficient domain i * levelset i), with levelset i=1 if x within domain i, 0 otherwise
     dcoeff(i,j,k) = electrochem::Ks_bulk_anode(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,A_ID)
                          + electrochem::Ks_bulk_cathode(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,C_ID)
-                         + electrochem::Ke_bulk(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,E_ID);
-                         //+ electrochem::Ke_bulk(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,S_ID);
+                         + electrochem::Ke_bulk(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,E_ID)
+                         + electrochem::Ke_bulk(phi(i, j, k, CO_ID), prob_parm) / electrochem::MacMullinSeparator(prob_parm) * phi(i,j,k,S_ID);
 }
 
 }

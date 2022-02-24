@@ -20,11 +20,17 @@ namespace electrochem_reactions {
             const Real time,
             ProbParm const& prob_parm)
     {
+        for (int n = 0; n < reactsource.nComp(); ++n)
+        {
+            reactsource(i, j, k, n) = 0.0;
+        }        
+        /*
         reactsource(i, j, k, CO_ID) = 0.0;
         reactsource(i, j, k, A_ID) = 0.0;
         reactsource(i, j, k, C_ID) = 0.0;
         reactsource(i, j, k, E_ID) = 0.0;
         reactsource(i, j, k, LS_ID) = 0.0;
+        */
     }
 
     AMREX_GPU_DEVICE AMREX_INLINE void compute_potential_source(

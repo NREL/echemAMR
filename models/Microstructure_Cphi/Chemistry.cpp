@@ -10,6 +10,7 @@ namespace electrochem
         specnames[A_ID]  = "Anode";
         specnames[C_ID]  = "Cathode";
         specnames[E_ID]  = "Electrolyte";
+        specnames[S_ID]  = "Separator";
         specnames[LS_ID] ="levelset";
     }    
     void close()

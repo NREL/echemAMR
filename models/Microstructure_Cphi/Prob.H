@@ -37,6 +37,12 @@ void amrex_probinit (ProbParm & h_prob_parm, ProbParm & d_prob_parm)
     pp.query("mater_cathode", h_prob_parm.mater_cathode);
     pp.query("mater_anode", h_prob_parm.mater_anode);
     pp.query("mater_electrolyte", h_prob_parm.mater_electrolyte);
+    pp.query("mater_separator", h_prob_parm.mater_separator);  
+    //pp.query("mater_CBD_cathode", h_prob_parm.mater_CBD_cathode);  
+    //pp.query("mater_CBD_anode", h_prob_parm.mater_CBD_anode);  
+
+    
+      
     // 0D validation
     pp.query("zeroDmodel", h_prob_parm.zeroDmodel);
 
@@ -154,9 +160,9 @@ void initdomaindata(Box const& bx, Array4<Real> const& phi, GeometryData const& 
                     phi(i,j,k,LS_ID) = 1;
                     //std::cout << "i=" << i << " j=" << j << " k=" << k << " -> ELECTROLYTE" << std::endl;
                 } else if (geo1D[id] == 4) {
-                    phi(i,j,k,E_ID) = 1; // phi(i,j,k,S_ID) = 1;
-                    phi(i,j,k,LS_ID) = 1; // phi(i,j,k,LS_ID) = 1;
-                    //std::cout << "i=" << i << " j=" << j << " k=" << k << " -> ELECTROLYTE" << std::endl;
+                    phi(i,j,k,S_ID) = 1;
+                    phi(i,j,k,LS_ID) = 1;
+                    //std::cout << "i=" << i << " j=" << j << " k=" << k << " -> SEPARATOR" << std::endl;
                 } else if (geo1D[id] == 2) {
                     phi(i,j,k,C_ID) = 1;
                     //std::cout << "i=" << i << " j=" << j << " k=" << k << " -> CATHODE" << std::endl;
@@ -256,7 +262,7 @@ void initproblemdata(Box const& bx, Array4<Real> const& phi, GeometryData const&
                  } else if (phi(i,j,k,A_ID) == 1) { // Within anode
                      phi(i,j,k,CO_ID) = cs_a_to;
                      phi(i,j,k,POT_ID) = phis_a_to;
-                 } else if (phi(i,j,k,E_ID) == 1) { //} || (phi(i,j,k,S_ID) == 1)) { // Within electrolyte and separator
+                 } else if (phi(i,j,k,E_ID) == 1 || phi(i,j,k,S_ID) == 1) { // Within electrolyte and separator
                      phi(i,j,k,CO_ID) = ce_to;
                      phi(i,j,k,POT_ID) = phie_to;
                  }
@@ -299,8 +305,8 @@ void print_init_data(ProbParm* prob_parm)
     // echemAMR::host_global_storage->Applied_current = Applied_current;
 
     // Surface calculations
-    const amrex::Real surface_anodesolid_currentcollector = echemAMR::host_global_storage->anode_cc_SA; // [m2], temporary value pi*((5e-6)^2)
-    const amrex::Real surface_cathodsolid_currentcollector = echemAMR::host_global_storage->cathode_cc_SA; // [m2], temporary value pi*((5e-6)^2)
+    const amrex::Real surface_anodesolid_currentcollector = echemAMR::host_global_storage->anode_cc_SA; // [m2]
+    const amrex::Real surface_cathodsolid_currentcollector = echemAMR::host_global_storage->cathode_cc_SA; // [m2]
 
     // Applied current density at the interface active material - current collector, w/ sign
     // These are the two Neumann Boundary conditions value applies at the left and right extremities of the cell
@@ -309,8 +315,8 @@ void print_init_data(ProbParm* prob_parm)
     const amrex::Real Applied_current_density_cathode = Applied_current / surface_cathodsolid_currentcollector; // [A.m-2]
 
     // Surface calculations
-    const amrex::Real surface_anodesolid_electrolyte = echemAMR::host_global_storage->anode_ele_SA; // 4*pi*((5e-6)^2)
-    const amrex::Real surface_cathodesolid_electrolyte = echemAMR::host_global_storage->cathode_ele_SA; // 4*pi*((5e-6)^2)
+    const amrex::Real surface_anodesolid_electrolyte = echemAMR::host_global_storage->anode_ele_SA; 
+    const amrex::Real surface_cathodesolid_electrolyte = echemAMR::host_global_storage->cathode_ele_SA;
 
     // Initial current density at the interface active material - electrolyte
     // These are the two Neumann Boundary conditions value applied at the active interface.

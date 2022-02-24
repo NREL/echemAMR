@@ -30,6 +30,13 @@ struct ProbParm
     //    1=Gen2 with constand coefficient
     //....2=Gen2 with concentration dependent coefficients
     int mater_electrolyte = 1;
+    // Separator
+    //    0=constant coefficient
+    int mater_separator = 0;
+    // Electrolyte carbon-binder
+     //    0=constant coefficient
+    //int mater_CBD_cathode = 0;   
+    //int mater_CBD_anode = 0;   
 
     // Special case: 0D model comparison [0=false, 1=true]
     // If true, diffusivity and conductivity are set to un-realistic high values

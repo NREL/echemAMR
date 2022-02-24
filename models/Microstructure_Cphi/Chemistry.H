@@ -13,17 +13,17 @@
 #include <math.h>  // signbit, exp
 #include <cmath>   // pow
 
-#define NUM_SPECIES 5 // 6 with separator
+#define NUM_SPECIES 6 // 6 with separator
 #define CO_ID   0 //conc
 #define A_ID    1 //anode
 #define C_ID    2 //cathode
 #define E_ID    3 //electrolyte
-// #define S_ID    4 //separator. +1 for the other if added
-#define LS_ID   4
-#define EFX_ID  5
-#define EFY_ID  6
-#define EFZ_ID  7
-#define POT_ID  8 // Potential
+#define S_ID    4 //separator. +1 for the other if added
+#define LS_ID   5
+#define EFX_ID  6
+#define EFY_ID  7
+#define EFZ_ID  8
+#define POT_ID  9 // Potential
 #define NVAR NUM_SPECIES+4 
 
 namespace electrochem
@@ -548,6 +548,23 @@ namespace electrochem
         return Kd; 
     }
 
+    // ELECTROLYTE LOWER SCALE COEFFICIENTS
+    // A cell of electrolyte contain solid and electrolyte, therefore it is an effective medium
+
+    // Separator lower scale coefficinets
+    AMREX_GPU_HOST_DEVICE AMREX_FORCE_INLINE
+    amrex::Real MacMullinSeparator(const ProbParm& prob_parm)
+    {
+        if(prob_parm.mater_separator==0) {
+            amrex::Real Separator_nanoporosity = 0.4;
+            amrex::Real Separator_tortuosity = 3.6;
+            return Separator_tortuosity/Separator_nanoporosity;
+        } else {          
+            amrex::Abort("Incorrect user-parameter mater_separator in ProbParm.H");
+            return 0; 
+        }
+    }
+
     // ------------------
     // INITIAL POTENTIALS
     // ------------------
@@ -574,8 +591,6 @@ namespace electrochem
         amrex::Real eta = A*GASCONST*prob_parm.Temperature/(0.5*FARADCONST);
         return eta+phi_e+ocp;
     }
-
-
 
     // ------------------------------------------------------
     // ACTIVE MATERIAL - ELECTROLYTE ELECTROCHEMICAL REACTION
