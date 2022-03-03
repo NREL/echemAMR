@@ -1,0 +1,119 @@
+max_step  = 100000000
+stop_time = 4000.0
+
+#------------------------
+# PROBLEM SIZE & GEOMETRY
+#------------------------
+geometry.is_periodic =  0  0  0
+geometry.coord_sys   =  0       # 0 => cart
+geometry.prob_lo     =  0.0   0.0    0.0 
+
+prob.geometry_filename = "Periodic_spheres_withoutpad_withsep.txt"
+geometry.prob_hi     =  72.2e-6 21.1e-6  21.1e-6 # [m]
+amr.n_cell           =  163 47 47
+
+# VERBOSITY
+amr.v              = 1       # verbosity in Amr
+
+# REFINEMENT
+amr.max_level       = 0      # maximum level number allowed
+amr.blocking_factor = 1       # block factor in grid generation
+amr.max_grid_size   = 8
+
+amr.regrid_int      = 0       # how often to regrid
+
+amr.line_plot_int = 50 # Export each time step C and phi along a line
+amr.line_plot_dir = 0 # Along direction
+amr.line_plot_npoints = 10  # Number of point along the line
+
+# TIME STEP CONTROL
+echemamr.cfl            = 0.8 # 0.8   
+
+echemamr.do_reflux = 1
+echemamr.potential_solve = 1
+echemamr.potential_solve_int = 50 # default 100
+
+#periodic 0
+#extdir 3
+#foextrap 2 
+#highorderextrap 5
+echemamr.lo_bc_spec = 2 2 2
+echemamr.hi_bc_spec = 2 2 2
+
+#periodic 0
+#dirichlet 3
+#homogenous Neumann 2 
+#mixed (robin) 5
+#inhomogenous Neumann 6
+echemamr.lo_bc_pot = 6 2 2
+echemamr.hi_bc_pot = 5 2 2
+
+echemamr.dtmax=2000.0
+
+# Tagging
+echemamr.tagged_vars = levelset
+echemamr.levelset_refine = 1e20
+echemamr.levelset_refinegrad = 0.2
+
+#buttler vohlmer flux
+echemamr.buttler_vohlmer_flux=1
+echemamr.bv_species_id =0
+echemamr.bv_levelset_id=5 # 5 with separator
+echemamr.bv_nonlinear_iters=20 # 100
+
+echemamr.bv_nonlinear_reltol=1e-11
+echemamr.bv_nonlinear_abstol=1e-18
+echemamr.linsolve_maxiter=2000
+echemamr.linsolve_reltol=1e-8
+echemamr.linsolve_abstol=1e-9
+echemamr.linsolve_num_pre_smooth=10 
+echemamr.linsolve_num_post_smooth=10
+echemamr.linsolve_max_coarsening_level=0
+echemamr.use_hypre=1
+
+# PLOTFILES
+amr.plot_file  = Periodic_spheres_withoutpad_withsep/plt    # root name of plot file
+amr.plot_int   = 50   # number of timesteps between plot files
+
+# CHECKPOINT
+amr.chk_file = Periodic_spheres_withoutpad_withsep/chk      # root name of checkpoint file
+amr.chk_int  = -1       # number of timesteps between checkpoint files
+
+
+#----------
+# MATERIALS
+#----------
+# Mater_* = 0: simple test expression
+#         = 1: real expression simplified
+#         = 2: real expression
+prob.mater_cathode = 1
+prob.mater_anode = 1
+prob.mater_electrolyte = 1
+prob.mater_separator = 0
+#prob.mater_CBD_cathode = 0
+#prob.mater_CBD_anode = 0
+# Electrode materials (de)lithiation range does not go from SOC 0 to 1 due to crystallographic instability.
+# Therefore, we define a min-max range for SOC, which corresponds to the pratical range of the electrode.
+prob.cathode_soc_min = 0.4 # []
+prob.cathode_soc_max = 0.999 # []
+prob.anode_soc_min = 0.001 # []
+prob.anode_soc_max = 0.999 # []
+
+# Special case: 0D model comparison [0=false, 1=true]
+# If true, diffusivity and conductivity are set to un-realistic high values
+prob.zeroDmodel = 0
+
+#---------------
+# INITIALIZATION
+#---------------
+prob.ce_atrest=1200 # [mol.m-3] Electrolyte initial concentration in both separator and electrodes 
+prob.soc_anode_t0=0.001 # [] Initial state of charge for the solid anode (ratio of cs,max). Must be between anode_soc_min and anode_soc_max.
+prob.soc_cathode_t0=0.999 # [] Initial state of charge for the solid cathode (ratio of cs,max). Must be between cathode_soc_min and cathode_soc_max.
+prob.phi_reference=0.0 # [V] Arbitrary value
+
+# -------
+# LOADING
+# -------
+prob.Crate=6.0 # []
+prob.Temperature = 300.0 # [K]. Assumed uniform and constant.
+
