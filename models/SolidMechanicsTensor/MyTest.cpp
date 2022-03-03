@@ -234,10 +234,11 @@ MyTest::readParameters ()
 void
 MyTest::initGrids ()
 {
-    RealBox rb({AMREX_D_DECL(-5.,-1.,-5.)}, {AMREX_D_DECL(5.,1.,5.)});
+    const int n = 5;
+    RealBox rb({AMREX_D_DECL(-n*1.0,-1.0,-n*1.0)}, {AMREX_D_DECL(n*1.0,1.0,n*1.0)});
     std::array<int,AMREX_SPACEDIM> isperiodic{AMREX_D_DECL(0,0,0)};
     Geometry::Setup(&rb, 0, isperiodic.data());
-    Box domain(IntVect{AMREX_D_DECL(0,0,0)}, IntVect{AMREX_D_DECL(5*n_cell-1,n_cell-1,5*n_cell-1)});
+    Box domain(IntVect{AMREX_D_DECL(0,0,0)}, IntVect{AMREX_D_DECL(n*n_cell-1,n_cell-1,n*n_cell-1)});
     geom.define(domain, rb, CoordSys::cartesian, isperiodic);
 
     grids.define(domain);
