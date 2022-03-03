@@ -32,16 +32,16 @@ MyTest::solve ()
 
 
     // xsides
-    mlmg_lobc[0][0] =  LinOpBCType::Dirichlet;
-    mlmg_lobc[1][0] =  LinOpBCType::Dirichlet;
+    mlmg_lobc[0][0] =  LinOpBCType::Neumann;
+    mlmg_lobc[1][0] =  LinOpBCType::Neumann;
 #if(AMREX_SPACEDIM==3)
-    mlmg_lobc[2][0] =  LinOpBCType::Dirichlet;
+    mlmg_lobc[2][0] =  LinOpBCType::Neumann;
 #endif
 
-    mlmg_hibc[0][0] =  LinOpBCType::Dirichlet;
-    mlmg_hibc[1][0] =  LinOpBCType::Dirichlet;
+    mlmg_hibc[0][0] =  LinOpBCType::Neumann;
+    mlmg_hibc[1][0] =  LinOpBCType::Neumann;
 #if(AMREX_SPACEDIM==3)
-    mlmg_hibc[2][0] =  LinOpBCType::Dirichlet;
+    mlmg_hibc[2][0] =  LinOpBCType::Neumann;
 #endif
 
 
@@ -57,6 +57,8 @@ MyTest::solve ()
 #if(AMREX_SPACEDIM==3)
     mlmg_hibc[2][1] =  LinOpBCType::Dirichlet;
 #endif
+
+
 
 //    std::array<LinOpBCType,AMREX_SPACEDIM> mlmg_lobc;
 //    std::array<LinOpBCType,AMREX_SPACEDIM> mlmg_hibc;
@@ -80,22 +82,22 @@ MyTest::solve ()
     mltensor->setLevelBC(0, &exact);
 
     // random values
-    const Real beta = 1.2;
-    const Real E = 1.4;
-    const Real nu = 0.3;
-    const Real lambda = E * nu / (1.0 + nu) / (1.0 - nu);
-    const Real G = 0.5 * E / (1.0 + nu);
+//    const Real beta = 1.2;
+//    const Real E = 1.4;
+//    const Real nu = 0.3;
+//    const Real lambda = E * nu / (1.0 + nu) / (1.0 - nu);
+//    const Real G = 0.5 * E / (1.0 + nu);
 
-    // 2/2*G
-    eta.setVal(G);
-    // kappa - 2*eta/3 = lambda
-    // kappa = lambda + 2*eta/3
-    kappa.setVal(lambda);//
-    MultiFab::Saxpy(kappa, 2.0/3.0, eta, 0, 0, 1, 0);
+//    // 2/2*G
+//    eta.setVal(G);
+//    // kappa - 2*eta/3 = lambda
+//    // kappa = lambda + 2*eta/3
+//    kappa.setVal(lambda);//
+//    MultiFab::Saxpy(kappa, 2.0/3.0, eta, 0, 0, 1, 0);
 
 
     // delta c(x,y,z) = c(x,y,z) - c0(x,y,z)
-    concentration.mult(-(3*lambda+2*G)*beta);
+//    concentration.mult(-(3*lambda+2*G)*beta);
 
     // don't forget to set this!
     mltensor->setACoeffs(0, 0.0);
@@ -125,9 +127,48 @@ MyTest::solve ()
     MLMG mlmg(*mltensor);
     mlmg.setVerbose(verbose);
     mlmg.setBottomVerbose(bottom_verbose);
-//    Real mlmg_err = mlmg.solve({&solution}, {&rhs}, 1.e-11, 0.0);
-    Real mlmg_err = mlmg.solve({&solution}, {&concentration_gradient}, 1.e-11, 0.0);
+    Real mlmg_err = mlmg.solve({&solution}, {&rhs}, 1.e-11, 0.0);
+//    Real mlmg_err = mlmg.solve({&solution}, {&concentration_gradient}, 1.e-11, 0.0);
     amrex::Print() << "mlmg error: " << mlmg_err << std::endl;
+
+
+    amrex::Array<amrex::MultiFab, AMREX_SPACEDIM> fluxes;
+
+    const BoxArray& bax = amrex::convert(grids, IntVect::TheDimensionVector(0));
+    const BoxArray& bay = amrex::convert(grids, IntVect::TheDimensionVector(1));
+    fluxes[0].define(bax, dmap, AMREX_SPACEDIM, 0);
+    fluxes[1].define(bay, dmap, AMREX_SPACEDIM, 0);
+
+#if(AMREX_SPACEDIM==3)
+    const BoxArray& baz = amrex::convert(grids, IntVect::TheDimensionVector(2));
+    fluxes[2].define(baz, dmap, AMREX_SPACEDIM, 0);
+#endif
+
+    const int lev = 0;
+    mltensor->compFlux(lev, amrex::GetArrOfPtrs(fluxes), solution, amrex::MLMG::Location::FaceCenter);
+
+    Vector<std::string> varname_x = {"stress_xx","stress_xy"
+#if(AMREX_SPACEDIM==3)
+        ,"stress_xz"
+#endif
+    };
+
+    Vector<std::string> varname_y = {"stress_yx","stress_yy"
+#if(AMREX_SPACEDIM==3)
+        ,"stress_yz"
+#endif
+    };
+
+    WriteMultiLevelPlotfile("stress_x", 1, {&fluxes[0]},
+                                varname_x, {geom}, 0.0, {0}, {IntVect(2)});
+    WriteMultiLevelPlotfile("stress_y", 1, {&fluxes[1]},
+                                varname_y, {geom}, 0.0, {0}, {IntVect(2)});
+#if(AMREX_SPACEDIM==3)
+    Vector<std::string> varname_z = {"stress_zx","stress_zy","stress_zz"};
+    WriteMultiLevelPlotfile("stress_z", 1, {&fluxes[2]},
+                               varname_z, {geom}, 0.0, {0}, {IntVect(2)});
+#endif
+
 }
 
 void
@@ -193,10 +234,10 @@ MyTest::readParameters ()
 void
 MyTest::initGrids ()
 {
-    RealBox rb({AMREX_D_DECL(-1.,-1.,-1.)}, {AMREX_D_DECL(1.,1.,1.)});
+    RealBox rb({AMREX_D_DECL(-5.,-1.,-5.)}, {AMREX_D_DECL(5.,1.,5.)});
     std::array<int,AMREX_SPACEDIM> isperiodic{AMREX_D_DECL(0,0,0)};
     Geometry::Setup(&rb, 0, isperiodic.data());
-    Box domain(IntVect{AMREX_D_DECL(0,0,0)}, IntVect{AMREX_D_DECL(n_cell-1,n_cell-1,n_cell-1)});
+    Box domain(IntVect{AMREX_D_DECL(0,0,0)}, IntVect{AMREX_D_DECL(5*n_cell-1,n_cell-1,5*n_cell-1)});
     geom.define(domain, rb, CoordSys::cartesian, isperiodic);
 
     grids.define(domain);
@@ -231,6 +272,8 @@ MyTest::initData ()
         const Array4<Real> exactfab = exact.array(mfi);
         const Array4<Real> rhsfab = rhs.array(mfi);
         const Array4<Real> confab = concentration.array(mfi);
+        const Array4<Real> etafab = eta.array(mfi);
+        const Array4<Real> kappafab = kappa.array(mfi);
 
         amrex::ParallelFor(gbx, [=] AMREX_GPU_DEVICE (int i, int j, int k) noexcept
         {
@@ -245,8 +288,11 @@ MyTest::initData ()
             y = std::max(-1.0,std::min(1.0,y));
             z = std::max(-1.0,std::min(1.0,z));
 
-            Real u,v,w,urhs,vrhs,wrhs,con;
-            init(x,y,z,1.0,u,v,w,urhs,vrhs,wrhs,con);
+            Real u,v,w,urhs,vrhs,wrhs,con,eta_,kappa_;
+            init(x,y,z,1.0,u,v,w,urhs,vrhs,wrhs,con,eta_,kappa_);
+
+            etafab(i,j,k) = eta_;
+            kappafab(i,j,k) = kappa_;
 
             if(j> 2) {
                 exactfab(i,j,k,0) = 0.0;
