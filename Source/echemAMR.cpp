@@ -16,7 +16,7 @@ using namespace amrex;
 ProbParm* echemAMR::h_prob_parm = nullptr;
 ProbParm* echemAMR::d_prob_parm = nullptr;
 GlobalStorage* echemAMR::host_global_storage = nullptr;
-std::string echemAMR::output_folder = "output/";
+std::string echemAMR::output_folder = "";
 // constructor - reads in parameters from inputs file
 //             - sizes multilevel arrays and data structures
 //             - initializes BCRec boundary condition object
@@ -242,21 +242,28 @@ void echemAMR::ReadParameters()
         pp.query("output_folder", output_folder);
         pp.query("max_step", max_step);
         pp.query("stop_time", stop_time);
-
     }
 
     {
-        ParmParse pp("amr"); // Traditionally, these have prefix, amr.
+        //setup output folders
+        std::string plt_folder = "";
+        std::string chk_folder = "";
+        if (output_folder != "")
+        {
+            plt_folder = output_folder + "/plot_files/";
+            chk_folder = output_folder + "/checkpoints/";
+        }
 
+        ParmParse pp("amr"); // Traditionally, these have prefix, amr.
         pp.query("regrid_int", regrid_int);
         pp.query("plot_file", plot_file);
-        plot_file = output_folder + "plot_files/" + plot_file;
+        plot_file = plt_folder + plot_file;//blank if output folder ""
         pp.query("plot_int", plot_int);
         pp.query("line_plot_int", line_plot_int);
         pp.query("line_plot_dir", line_plot_dir);
         pp.query("line_plot_npoints", line_plot_npoints);
         pp.query("chk_file", chk_file);
-        chk_file = output_folder + "checkpoints/" + chk_file;
+        chk_file = chk_folder + chk_file;
         pp.query("chk_int", chk_int);
         pp.query("restart", restart_chkfile);
     }

@@ -1,4 +1,3 @@
-output_folder = output/
 max_step  = 1
 stop_time = 4000.0
 

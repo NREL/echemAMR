@@ -1,4 +1,3 @@
-output_folder = output/x-axis/
 max_step  = 7000
 stop_time = 1.0
 
