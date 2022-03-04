@@ -9,23 +9,27 @@
 #include <echemAMR.H>
 #include <Chemistry.H>
 #include <ProbParm.H>
+#include <stdio.h>
 
 using namespace amrex;
 
 ProbParm* echemAMR::h_prob_parm = nullptr;
 ProbParm* echemAMR::d_prob_parm = nullptr;
 GlobalStorage* echemAMR::host_global_storage = nullptr;
+std::string echemAMR::output_folder = "output/";
 // constructor - reads in parameters from inputs file
 //             - sizes multilevel arrays and data structures
 //             - initializes BCRec boundary condition object
 echemAMR::echemAMR()
 {
+    ReadParameters();
+    CreateDirectories();
+    // freopen("log.txt","w",stdout);
     h_prob_parm = new ProbParm{};
     d_prob_parm = (ProbParm*)The_Arena()->alloc(sizeof(ProbParm));
     host_global_storage = new GlobalStorage{};
     amrex_probinit(*h_prob_parm, *d_prob_parm);
 
-    ReadParameters();
 
     // Geometry on all levels has been defined already.
 
@@ -235,8 +239,10 @@ void echemAMR::ReadParameters()
 {
     {
         ParmParse pp; // Traditionally, max_step and stop_time do not have prefix.
+        pp.query("output_folder", output_folder);
         pp.query("max_step", max_step);
         pp.query("stop_time", stop_time);
+
     }
 
     {
@@ -244,11 +250,13 @@ void echemAMR::ReadParameters()
 
         pp.query("regrid_int", regrid_int);
         pp.query("plot_file", plot_file);
+        plot_file = output_folder + "plot_files/" + plot_file;
         pp.query("plot_int", plot_int);
         pp.query("line_plot_int", line_plot_int);
         pp.query("line_plot_dir", line_plot_dir);
         pp.query("line_plot_npoints", line_plot_npoints);
         pp.query("chk_file", chk_file);
+        chk_file = output_folder + "checkpoints/" + chk_file;
         pp.query("chk_int", chk_int);
         pp.query("restart", restart_chkfile);
     }
@@ -292,6 +300,15 @@ void echemAMR::ReadParameters()
 
         pp.queryarr("transported_species_list",transported_species_list);
     }
+}
+
+void echemAMR::CreateDirectories()
+{
+    amrex::UtilCreateDirectory(output_folder,0755);
+    amrex::UtilCreateDirectory(output_folder+"data/",0755);
+    amrex::UtilCreateDirectory(output_folder+"plot_files/",0755);
+    amrex::UtilCreateDirectory(output_folder+"line_plots/",0755);
+    amrex::UtilCreateDirectory(output_folder+"checkpoints/",0755);
 }
 
 // utility to copy in data from phi_old and/or phi_new into another multifab

@@ -102,6 +102,9 @@ private:
     // read in some parameters from inputs file
     void ReadParameters();
 
+    // create require directories for saving output data
+    void CreateDirectories();
+
     // set covered coarse cells to be the average of overlying fine cells
     void AverageDown();
 
@@ -185,8 +188,10 @@ private:
     int max_step = std::numeric_limits<int>::max();
     amrex::Real stop_time = std::numeric_limits<amrex::Real>::max();
 
+
     // if >= 0 we restart from a checkpoint
     std::string restart_chkfile = "";
+
 
     amrex::Vector<int> bc_lo_spec{BCType::foextrap, BCType::foextrap, BCType::foextrap};
     amrex::Vector<int> bc_hi_spec{BCType::foextrap, BCType::foextrap, BCType::foextrap};
@@ -271,6 +276,8 @@ public:
     static ProbParm* h_prob_parm;
     static ProbParm* d_prob_parm;
     static GlobalStorage* host_global_storage;
+    // set the default output folder
+    static std::string output_folder;
 };
 
 #endif
