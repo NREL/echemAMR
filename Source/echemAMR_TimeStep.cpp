@@ -138,6 +138,7 @@ Real echemAMR::EstTimeStep(int lev, bool local)
     for (int comp = 0; comp < NUM_SPECIES; comp++)
     {
         Real diffcomp = dcoeff.norm0(comp, 0, true);
+        ParallelDescriptor::ReduceRealMax(diffcomp);
         if (diffcomp > maxdcoeff)
         {
             maxdcoeff = diffcomp;
@@ -152,6 +153,7 @@ Real echemAMR::EstTimeStep(int lev, bool local)
     for (int comp = 0; comp < NUM_SPECIES; comp++)
     {
         Real velcomp = vel.norm0(comp, 0, true);
+        ParallelDescriptor::ReduceRealMax(velcomp);
         if (velcomp > maxvel)
         {
             maxvel = velcomp;
