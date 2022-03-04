@@ -55,22 +55,20 @@ MyTest::solve ()
     mlmg_hibc[0][1] =  LinOpBCType::Neumann;
     mlmg_hibc[1][1] =  LinOpBCType::Neumann;
 #if(AMREX_SPACEDIM==3)
-    mlmg_hibc[2][1] =  LinOpBCType::Dirichlet;
+    mlmg_hibc[2][1] =  LinOpBCType::Neumann;
 #endif
 
+#if(AMREX_SPACEDIM==3)
+    // zsides
+    mlmg_lobc[0][2] =  LinOpBCType::Neumann;
+    mlmg_lobc[1][2] =  LinOpBCType::Neumann;
+    mlmg_lobc[2][2] =  LinOpBCType::Neumann;
 
+    mlmg_hibc[0][2] =  LinOpBCType::Neumann;
+    mlmg_hibc[1][2] =  LinOpBCType::Neumann;
+    mlmg_hibc[2][2] =  LinOpBCType::Neumann;
+#endif
 
-//    std::array<LinOpBCType,AMREX_SPACEDIM> mlmg_lobc;
-//    std::array<LinOpBCType,AMREX_SPACEDIM> mlmg_hibc;
-//    for (int idim = 0; idim < AMREX_SPACEDIM; ++idim) {
-//        mlmg_lobc[idim] = LinOpBCType::Dirichlet;
-//        mlmg_hibc[idim] = LinOpBCType::Dirichlet;
-//    }
-//
-//    mlmg_lobc[0] = LinOpBCType::Dirichlet;
-//    mlmg_hibc[0] = LinOpBCType::Dirichlet;
-//    mlmg_lobc[1] = LinOpBCType::inhomogNeumann;
-//    mlmg_hibc[1] = LinOpBCType::inhomogNeumann;
 
     LPInfo info;
     info.setMaxCoarseningLevel(max_coarsening_level);
@@ -80,24 +78,6 @@ MyTest::solve ()
 
     mltensor->setDomainBC(mlmg_lobc, mlmg_hibc);
     mltensor->setLevelBC(0, &exact);
-
-    // random values
-//    const Real beta = 1.2;
-//    const Real E = 1.4;
-//    const Real nu = 0.3;
-//    const Real lambda = E * nu / (1.0 + nu) / (1.0 - nu);
-//    const Real G = 0.5 * E / (1.0 + nu);
-
-//    // 2/2*G
-//    eta.setVal(G);
-//    // kappa - 2*eta/3 = lambda
-//    // kappa = lambda + 2*eta/3
-//    kappa.setVal(lambda);//
-//    MultiFab::Saxpy(kappa, 2.0/3.0, eta, 0, 0, 1, 0);
-
-
-    // delta c(x,y,z) = c(x,y,z) - c0(x,y,z)
-//    concentration.mult(-(3*lambda+2*G)*beta);
 
     // don't forget to set this!
     mltensor->setACoeffs(0, 0.0);
@@ -127,12 +107,15 @@ MyTest::solve ()
     MLMG mlmg(*mltensor);
     mlmg.setVerbose(verbose);
     mlmg.setBottomVerbose(bottom_verbose);
-    Real mlmg_err = mlmg.solve({&solution}, {&rhs}, 1.e-11, 0.0);
-//    Real mlmg_err = mlmg.solve({&solution}, {&concentration_gradient}, 1.e-11, 0.0);
+//    Real mlmg_err = mlmg.solve({&solution}, {&rhs}, 1.e-11, 0.0);
+    Real mlmg_err = mlmg.solve({&solution}, {&concentration_gradient}, 1.e-11, 0.0);
     amrex::Print() << "mlmg error: " << mlmg_err << std::endl;
 
 
     amrex::Array<amrex::MultiFab, AMREX_SPACEDIM> fluxes;
+    amrex::MultiFab fluxes_cc;
+
+    fluxes_cc.define(grids,dmap,AMREX_SPACEDIM*AMREX_SPACEDIM,0);
 
     const BoxArray& bax = amrex::convert(grids, IntVect::TheDimensionVector(0));
     const BoxArray& bay = amrex::convert(grids, IntVect::TheDimensionVector(1));
@@ -147,27 +130,51 @@ MyTest::solve ()
     const int lev = 0;
     mltensor->compFlux(lev, amrex::GetArrOfPtrs(fluxes), solution, amrex::MLMG::Location::FaceCenter);
 
-    Vector<std::string> varname_x = {"stress_xx","stress_xy"
+#ifdef AMREX_USE_OMP
+#pragma omp parallel if (Gpu::notInLaunchRegion())
+#endif
+    for (MFIter mfi(fluxes_cc,TilingIfNotGPU()); mfi.isValid(); ++mfi)
+    {
+        const Box bx = mfi.tilebox();
+
+        AMREX_D_TERM(amrex::Array4<amrex::Real const> const& fx = fluxes[0].const_array(mfi);,
+                     amrex::Array4<amrex::Real const> const& fy = fluxes[1].const_array(mfi);,
+                     amrex::Array4<amrex::Real const> const& fz = fluxes[2].const_array(mfi););
+
+        amrex::Array4<amrex::Real> const& cc = fluxes_cc.array(mfi);
+        amrex::Array4<amrex::Real const> const& con = concentration.const_array(mfi);
+
+        AMREX_HOST_DEVICE_PARALLEL_FOR_3D( bx, i, j, k,
+        {
+            cc(i,j,k,0) = amrex::Real(0.5) * ( fx(i,j,k,0) + fx(i+1,j,k,0) ) - con(i,j,k);
+            cc(i,j,k,1) = amrex::Real(0.5) * ( fx(i,j,k,1) + fx(i+1,j,k,1) );
 #if(AMREX_SPACEDIM==3)
-        ,"stress_xz"
+            cc(i,j,k,2) = amrex::Real(0.5) * ( fx(i,j,k,2) + fx(i+1,j,k,2) );
+#endif
+            cc(i,j,k,AMREX_SPACEDIM+0)   = amrex::Real(0.5) * ( fy(i,j,k,0) + fy(i,j+1,k,0) );
+            cc(i,j,k,AMREX_SPACEDIM+1)   = amrex::Real(0.5) * ( fy(i,j,k,1) + fy(i,j+1,k,1) ) - con(i,j,k);
+#if(AMREX_SPACEDIM==3)
+            cc(i,j,k,AMREX_SPACEDIM+2)   = amrex::Real(0.5) * ( fy(i,j,k,2) + fy(i,j+1,k,2) );
+#endif
+            cc(i,j,k,2*AMREX_SPACEDIM+0) = amrex::Real(0.5) * ( fz(i,j,k,0) + fz(i,j,k+1,0) );
+            cc(i,j,k,2*AMREX_SPACEDIM+1) = amrex::Real(0.5) * ( fz(i,j,k,1) + fz(i,j,k+1,1) );
+#if(AMREX_SPACEDIM==3)
+            cc(i,j,k,2*AMREX_SPACEDIM+2) = amrex::Real(0.5) * ( fz(i,j,k,2) + fz(i,j,k+1,2) ) - con(i,j,k);
+#endif
+        });
+    }
+
+
+    Vector<std::string> varname = {AMREX_D_DECL("stress_xx","stress_xy","stress_xz"),
+                                   AMREX_D_DECL("stress_yx","stress_yy","stress_yz")
+#if(AMREX_SPACEDIM==3)
+                                  ,AMREX_D_DECL("stress_zx","stress_zy","stress_zz")
 #endif
     };
 
-    Vector<std::string> varname_y = {"stress_yx","stress_yy"
-#if(AMREX_SPACEDIM==3)
-        ,"stress_yz"
-#endif
-    };
+    WriteMultiLevelPlotfile("stress", 1, {&fluxes_cc},
+                                varname, {geom}, 0.0, {0}, {IntVect(2)});
 
-    WriteMultiLevelPlotfile("stress_x", 1, {&fluxes[0]},
-                                varname_x, {geom}, 0.0, {0}, {IntVect(2)});
-    WriteMultiLevelPlotfile("stress_y", 1, {&fluxes[1]},
-                                varname_y, {geom}, 0.0, {0}, {IntVect(2)});
-#if(AMREX_SPACEDIM==3)
-    Vector<std::string> varname_z = {"stress_zx","stress_zy","stress_zz"};
-    WriteMultiLevelPlotfile("stress_z", 1, {&fluxes[2]},
-                               varname_z, {geom}, 0.0, {0}, {IntVect(2)});
-#endif
 
 }
 
@@ -295,16 +302,10 @@ MyTest::initData ()
             etafab(i,j,k) = eta_;
             kappafab(i,j,k) = kappa_;
 
-            if(j> 2) {
-                exactfab(i,j,k,0) = 0.0;
-            }
-            else {
-                exactfab(i,j,k,0) = 0.0;
-            }
-
+            exactfab(i,j,k,0) = 0.0;
             exactfab(i,j,k,1) = 0.0;
 #if(AMREX_SPACEDIM==3)
-            exactfab(i,j,k,2) = w;
+            exactfab(i,j,k,2) = 0.0;
 #endif
             rhsfab(i,j,k,0) = urhs;
             rhsfab(i,j,k,1) = vrhs;
@@ -312,19 +313,12 @@ MyTest::initData ()
             rhsfab(i,j,k,2) = wrhs;
 #endif
             confab(i,j,k) = con;
-//            if (!vbx.contains(IntVect(AMREX_D_DECL(i,j,k)))) {
-                solnfab(i,j,k,0) = u;
-                solnfab(i,j,k,1) = v;
+            solnfab(i,j,k,0) = u;
+            solnfab(i,j,k,1) = v;
 #if(AMREX_SPACEDIM==3)
-                solnfab(i,j,k,2) = w;
+            solnfab(i,j,k,2) = w;
 #endif
-//            } else {
-//                solnfab(i,j,k,0) = 0;
-//                solnfab(i,j,k,1) = 0;
-#if(AMREX_SPACEDIM==3)
-//                solnfab(i,j,k,2) = 0;
-#endif
-//            }
+
 
         });
     }
