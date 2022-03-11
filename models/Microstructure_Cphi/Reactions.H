@@ -24,13 +24,6 @@ namespace electrochem_reactions {
         {
             reactsource(i, j, k, n) = 0.0;
         }        
-        /*
-        reactsource(i, j, k, CO_ID) = 0.0;
-        reactsource(i, j, k, A_ID) = 0.0;
-        reactsource(i, j, k, C_ID) = 0.0;
-        reactsource(i, j, k, E_ID) = 0.0;
-        reactsource(i, j, k, LS_ID) = 0.0;
-        */
     }
 
     AMREX_GPU_DEVICE AMREX_INLINE void compute_potential_source(
@@ -45,7 +38,44 @@ namespace electrochem_reactions {
             const Real time,
             ProbParm const& prob_parm)
     {
-        source(i, j, k) = 0.0;
+        // concentration
+        Real C = phi(i, j, k, CO_ID);
+
+        /*
+        // Intermediate coefficients
+        Real Ke  = electrochem::Ke_bulk(C, prob_parm);
+        Real Ac  = electrochem::A_c(C, prob_parm);
+        Real tplus  = electrochem::t_plus(C, prob_parm);
+        // Diffusional conductivity
+        Real KDe  = electrochem::Kd(Ke, Ac, tplus, prob_parm);
+        */
+
+        // Intermediate coefficients
+        Real Ke  =  electrochem::Ke_bulk(phi(i, j, k, CO_ID), prob_parm) * (phi(i,j,k,E_ID) + phi(i,j,k,S_ID)/electrochem::MacMullinSeparator(prob_parm) );
+        Real Ac  = electrochem::A_c(C, prob_parm) * (phi(i,j,k,E_ID) + phi(i,j,k,S_ID));
+        Real tplus  = electrochem::t_plus(C, prob_parm) * (phi(i,j,k,E_ID) + phi(i,j,k,S_ID));      
+        // Diffusional conductivity
+        Real KDe  = -1.0 * electrochem::Kd(Ke, Ac, tplus, prob_parm) * phi(i,j,k,LS_ID);
+
+        
+        Real KDl  = 0.5 * (phi(i-1,j,k,LS_ID)+phi(i,j,k,LS_ID)) * KDe;
+        Real KDr  = 0.5 * (phi(i+1,j,k,LS_ID)+phi(i,j,k,LS_ID)) * KDe;
+        
+        Real KDb  = 0.5 * (phi(i,j-1,k,LS_ID)+phi(i,j,k,LS_ID)) * KDe;
+        Real KDt  = 0.5 * (phi(i,j+1,k,LS_ID)+phi(i,j,k,LS_ID)) * KDe;
+        
+        Real KDk  = 0.5 * (phi(i,j,k-1,LS_ID)+phi(i,j,k,LS_ID)) * KDe;
+        Real KDf  = 0.5 * (phi(i,j,k+1,LS_ID)+phi(i,j,k,LS_ID)) * KDe;
+        
+        Real LSX = min(phi(i-1,j,k,LS_ID),min(phi(i,j,k,LS_ID),phi(i+1,j,k,LS_ID)));
+        Real LSY = min(phi(i,j-1,k,LS_ID),min(phi(i,j,k,LS_ID),phi(i,j+1,k,LS_ID)));
+        Real LSZ = min(phi(i,j,k-1,LS_ID),min(phi(i,j,k,LS_ID),phi(i,j,k+1,LS_ID)));
+
+        source(i,j,k) = -(1.0/C)*(LSX*(KDr*(phi(i+1,j,k,CO_ID)-phi(i,j,k,CO_ID)) - KDl*(phi(i,j,k,CO_ID)-phi(i-1,j,k,CO_ID)))/dx[0]/dx[0]
+                                +  LSY*(KDt*(phi(i,j+1,k,CO_ID)-phi(i,j,k,CO_ID)) - KDb*(phi(i,j,k,CO_ID)-phi(i,j-1,k,CO_ID)))/dx[1]/dx[1]
+                                +  LSZ*(KDf*(phi(i,j,k+1,CO_ID)-phi(i,j,k,CO_ID)) - KDk*(phi(i,j,k,CO_ID)-phi(i,j,k-1,CO_ID)))/dx[2]/dx[2]);
+        
+        source(i, j, k) = 0.0; // Overwritte for now
     }
 
     AMREX_GPU_DEVICE AMREX_INLINE void bvcurrent_and_der(int i,int j,int k,int normaldir,
@@ -98,6 +128,8 @@ namespace electrochem_reactions {
             }
         }
 
+        jbv = 0.0;
+        jbvder = 0.0;
         if(anodefrac > 0.0)
         {
             jbv  = electrochem::intercalation_reaction_anode(cs, ce, phi_jump, prob_parm);

@@ -247,7 +247,7 @@ namespace electrochem
                 return Dsbulkcathode; 
             } else if (prob_parm.mater_cathode==2) {
 
-                amrex::Real x = Cs; // So i can copy directly code from FEniCS
+                amrex::Real x = Cs/Cs_max_cathode(prob_parm); // So i can copy directly code from FEniCS
 
                 amrex::Real tolerance = 1e-9;
 
@@ -599,14 +599,15 @@ namespace electrochem
     AMREX_GPU_DEVICE AMREX_FORCE_INLINE
     amrex::Real intercalation_reaction_anode(amrex::Real Ca, amrex::Real Ce, amrex::Real Phi_jump, const ProbParm& prob_parm)
     {
-        Phi_jump = -Phi_jump; // In  source Phi_jump is noted phi e - phi s
+        //Phi_jump = -Phi_jump; // In  source Phi_jump is noted phi e - phi s
+        amrex::Real jumphi=-Phi_jump;
         const amrex::Real ioa = Io_a(Ca, Ce, prob_parm);
         const amrex::Real OCPa = OCP_a(Ca, prob_parm);
-        const amrex::Real eta = Phi_jump - OCPa; // Phi_jump = phi_a - phi_e
+        const amrex::Real eta = jumphi - OCPa; // Phi_jump = phi_a - phi_e
         const amrex::Real FRT = FARADCONST/(GASCONST * prob_parm.Temperature);
         bool use_sinh = true;
         if(use_sinh) {
-            //amrex::Print() << "- Anode. ioa=" << ioa << " OCPa=" << OCPa << " Phi_jump=" << Phi_jump << " eta=" << eta << " FRT=" << FRT << " jbv=" << 2.0 * ioa * std::sinh(0.5 * FRT * eta) << std::endl;
+            //amrex::Print() << "- Anode. ioa=" << ioa << " OCPa=" << OCPa << " Phi_jump=" << jumphi << " eta=" << eta << " FRT=" << FRT << " jbv=" << 2.0 * ioa * std::sinh(0.5 * FRT * eta) << std::endl;
             return 2.0 * ioa * std::sinh(0.5 * FRT * eta);
         } else {
             amrex::Real A = 0.5 * FRT * eta;
@@ -619,10 +620,11 @@ namespace electrochem
     AMREX_GPU_DEVICE AMREX_FORCE_INLINE
     amrex::Real intercalation_reaction_anode_derivative(amrex::Real Ca, amrex::Real Ce, amrex::Real Phi_jump, const ProbParm& prob_parm)
     {
-        Phi_jump = -Phi_jump; // In  source Phi_jump is noted phi e - phi s
+        //Phi_jump = -Phi_jump; // In  source Phi_jump is noted phi e - phi s
+        amrex::Real jumphi=-Phi_jump;
         const amrex::Real ioa = Io_a(Ca, Ce, prob_parm);
         const amrex::Real OCPa = OCP_a(Ca, prob_parm);
-        const amrex::Real eta = Phi_jump - OCPa; // Phi_jump = phi_a - phi_e
+        const amrex::Real eta = jumphi - OCPa; // Phi_jump = phi_a - phi_e
         const amrex::Real FRT = FARADCONST/(GASCONST * prob_parm.Temperature);
         return -2.0 * ioa * std::cosh(0.5 * FRT * eta) * 0.5*FRT; // chain rule of A*sinh(B*x) = A*cosh(Bx)*B
     }
@@ -630,14 +632,15 @@ namespace electrochem
     AMREX_GPU_DEVICE AMREX_FORCE_INLINE
     amrex::Real intercalation_reaction_cathode(amrex::Real Cc, amrex::Real Ce, amrex::Real Phi_jump, const ProbParm& prob_parm)
     {
-        Phi_jump = -Phi_jump; // In  source Phi_jump is noted phi e - phi s
+        //Phi_jump = -Phi_jump; // In  source Phi_jump is noted phi e - phi s
+        amrex::Real jumphi=-Phi_jump;
         const amrex::Real ioc = Io_c(Cc, Ce, prob_parm);
         const amrex::Real OCPc = OCP_c(Cc, prob_parm);
-        const amrex::Real eta = Phi_jump - OCPc; // Phi_jump = phi_c - phi_e
+        const amrex::Real eta = jumphi - OCPc; // Phi_jump = phi_c - phi_e
         const amrex::Real FRT = FARADCONST/(GASCONST * prob_parm.Temperature);
         bool use_sinh = true;
         if(use_sinh) {
-            //amrex::Print() << "- Cathode. ioc=" << ioc << " OCPc=" << OCPc << " Phi_jump=" << Phi_jump << " eta=" << eta << " FRT=" << FRT << " jbv=" << 2.0 * ioc * std::sinh(0.5 * FRT * eta) << std::endl;
+            //amrex::Print() << "- Cathode. ioc=" << ioc << " OCPc=" << OCPc << " Phi_jump=" << jumphi << " eta=" << eta << " FRT=" << FRT << " jbv=" << 2.0 * ioc * std::sinh(0.5 * FRT * eta) << std::endl;
             return 2.0 * ioc * std::sinh(0.5 * FRT * eta);
         } else {
             amrex::Real A = 0.5 * FRT * eta;
@@ -648,10 +651,11 @@ namespace electrochem
     AMREX_GPU_DEVICE AMREX_FORCE_INLINE
     amrex::Real intercalation_reaction_cathode_derivative(amrex::Real Ca, amrex::Real Ce, amrex::Real Phi_jump, const ProbParm& prob_parm)
     {
-        Phi_jump = -Phi_jump; // In  source Phi_jump is noted phi e - phi s
+        //Phi_jump = -Phi_jump; // In  source Phi_jump is noted phi e - phi s
+        amrex::Real jumphi=-Phi_jump;
         const amrex::Real ioc = Io_c(Ca, Ce, prob_parm);
         const amrex::Real OCPc = OCP_c(Ca, prob_parm);
-        const amrex::Real eta = Phi_jump - OCPc; // Phi_jump = phi_a - phi_e
+        const amrex::Real eta = jumphi - OCPc; // Phi_jump = phi_a - phi_e
         const amrex::Real FRT = FARADCONST/(GASCONST * prob_parm.Temperature);
         return -2.0 * ioc * std::cosh(0.5 * FRT * eta) * 0.5*FRT; // chain rule of A*sinh(B*x) = A*cosh(Bx)*B
     }
