@@ -65,7 +65,7 @@ echemamr.linsolve_max_coarsening_level=0
 echemamr.use_hypre=1
 
 # PLOTFILES
-amr.plot_file  = output/z-axis/plt    # root name of plot file
+amr.plot_file  = plt    # root name of plot file
 amr.plot_int   = 10000     # number of timesteps between plot files
 
 # CHECKPOINT
