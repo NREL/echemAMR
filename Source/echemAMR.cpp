@@ -112,7 +112,7 @@ echemAMR::~echemAMR()
 // initializes multilevel data
 void echemAMR::InitData()
 {
-    ProbParm* localprobparm = d_prob_parm;
+    // ProbParm* localprobparm = d_prob_parm;
 
     if (restart_chkfile == "")
     {
@@ -136,7 +136,7 @@ void echemAMR::InitData()
                 GeometryData geomData = geom[lev].data();
                 const Box& box = mfi.validbox();
 
-                amrex::launch(box, [=] AMREX_GPU_DEVICE(Box const& tbx) { initproblemdata(box, fab, geomData, localprobparm); });
+                amrex::launch(box, [=] AMREX_GPU_DEVICE(Box const& tbx) { initproblemdata(box, fab, geomData, d_prob_parm); });
             }
         }
 

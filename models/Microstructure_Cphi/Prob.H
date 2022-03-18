@@ -71,8 +71,6 @@ void amrex_probinit (ProbParm & h_prob_parm, ProbParm & d_prob_parm)
         inFile >> h_prob_parm.geo1D[i];
     }
 
-    // 3: save to probparm
-    // h_prob_parm.geo1D = geo1D;
 
 
 
