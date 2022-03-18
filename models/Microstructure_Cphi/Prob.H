@@ -45,45 +45,29 @@ void amrex_probinit (ProbParm & h_prob_parm, ProbParm & d_prob_parm)
     // 0D validation
     pp.query("zeroDmodel", h_prob_parm.zeroDmodel);
 
+
+
+
     // CREATE 3D ARRAY GEOMETRY READ FILE
     std::string inFileName = h_prob_parm.geometry_filename;
-    std::ifstream inFile;
+    Vector<char> fileCharPtr;
+    ParallelDescriptor::ReadAndBcastFile(inFileName, fileCharPtr);
+    std::string fileCharPtrString(fileCharPtr.dataPtr());
+    std::istringstream inFile(fileCharPtrString, std::istringstream::in);
 
     // 1: Get dimension: first 3 integers
-    inFile.open(inFileName.c_str());
-    if (inFile.is_open())
+    for (int i = 0; i < 3; i++)
     {
-        for (int i = 0; i < 3; i++)
-        {
-            inFile >> h_prob_parm.dimension_geometry[i];
-        }
-        inFile.close(); // Close input file
+        inFile >> h_prob_parm.dimension_geometry[i];
     }
-    else { //Error message
-        amrex::Print() << "Can't find input file " << inFileName << std::endl;
-    }
-
-    // 2: Get domain id
     int geo_N = h_prob_parm.dimension_geometry[0]*h_prob_parm.dimension_geometry[1]*h_prob_parm.dimension_geometry[2];
     std::vector<int> geo1D(geo_N);
-    inFile.open(inFileName.c_str());
-    if (inFile.is_open())
-    {
-        for (int i = 0; i < 3; i++)
-        {
-            inFile >> h_prob_parm.dimension_geometry[i];
-        }
-        for (int i = 0; i < geo_N ; i++)
-        {
-            inFile >> geo1D[i];
-        }
-        inFile.close(); // Close input file
-    }
-    else
-    { //Error message
-        amrex::Print() << "Can't find input file " << inFileName << std::endl;
-    }
 
+    // 2: Get domain id
+    for (int i = 0; i < geo_N ; i++)
+    {
+        inFile >> geo1D[i];
+    }
 
     // 3: save to probparm
     h_prob_parm.geo1D = geo1D;
@@ -177,7 +161,7 @@ void initdomaindata(Box const& bx, Array4<Real> const& phi, GeometryData const& 
                     phi(i,j,k,C_ID) = 1;
                     //std::cout << "i=" << i << " j=" << j << " k=" << k << " -> CATHODE" << std::endl;
                 } else {
-                    std::cout << "Error for idx= " << idx << " idy= " << idy << " idz= " << idz << " geo1D[id]= " << prob_parm->geo1D[id] << std::endl;
+                    //std::cout << "Error for idx= " << idx << " idy= " << idy << " idz= " << idz << " geo1D[id]= " << prob_parm->geo1D[id] << std::endl;
                     //phi(i,j,k,A_ID) = 1;
                 }
 
