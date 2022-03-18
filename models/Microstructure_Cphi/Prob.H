@@ -8,6 +8,7 @@
 #include <ProbParm.H>
 #include <echemAMR_constants.H>
 #include <echemAMR.H>
+#include <vector>
 
 using namespace amrex;
 
@@ -41,10 +42,57 @@ void amrex_probinit (ProbParm & h_prob_parm, ProbParm & d_prob_parm)
     //pp.query("mater_CBD_cathode", h_prob_parm.mater_CBD_cathode);  
     //pp.query("mater_CBD_anode", h_prob_parm.mater_CBD_anode);  
 
-    
-      
     // 0D validation
     pp.query("zeroDmodel", h_prob_parm.zeroDmodel);
+
+    // CREATE 3D ARRAY GEOMETRY READ FILE
+    std::string inFileName = h_prob_parm.geometry_filename;
+    std::ifstream inFile;
+
+    // 1: Get dimension: first 3 integers
+    inFile.open(inFileName.c_str());
+    if (inFile.is_open())
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            inFile >> h_prob_parm.dimension_geometry[i];
+        }
+        inFile.close(); // Close input file
+    }
+    else { //Error message
+        amrex::Print() << "Can't find input file " << inFileName << std::endl;
+    }
+
+    // 2: Get domain id
+    int geo_N = h_prob_parm.dimension_geometry[0]*h_prob_parm.dimension_geometry[1]*h_prob_parm.dimension_geometry[2];
+    std::vector<int> geo1D(geo_N);
+    inFile.open(inFileName.c_str());
+    if (inFile.is_open())
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            inFile >> h_prob_parm.dimension_geometry[i];
+        }
+        for (int i = 0; i < geo_N ; i++)
+        {
+            inFile >> geo1D[i];
+        }
+        inFile.close(); // Close input file
+    }
+    else
+    { //Error message
+        amrex::Print() << "Can't find input file " << inFileName << std::endl;
+    }
+
+
+    // 3: save to probparm
+    h_prob_parm.geo1D = geo1D;
+
+
+
+
+
+
 
 #ifdef AMREX_USE_GPU
     amrex::Gpu::htod_memcpy(&d_prob_parm, &h_prob_parm, sizeof(ProbParm));
@@ -59,44 +107,6 @@ AMREX_INLINE
 void initdomaindata(Box const& bx, Array4<Real> const& phi, GeometryData const& geomdata,
         ProbParm *prob_parm)
 {
-    // CREATE 3D ARRAY GEOMETRY READ FILE
-    std::string inFileName = prob_parm->geometry_filename;
-    std::ifstream inFile;
-
-    // 1: Get dimension: first 3 integers
-    int dimension_geometry[3];
-    inFile.open(inFileName.c_str());
-    if (inFile.is_open())
-    {
-        for (int i = 0; i < 3; i++)
-        {
-            inFile >> dimension_geometry[i];
-        }
-        inFile.close(); // Close input file
-    }
-    else { //Error message
-        amrex::Print() << "Can't find input file " << inFileName << std::endl;
-    }
-
-    // 2: Get domain id
-    int geo1D [dimension_geometry[0]*dimension_geometry[1]*dimension_geometry[2]];
-    inFile.open(inFileName.c_str());
-    if (inFile.is_open())
-    {
-        for (int i = 0; i < 3; i++)
-        {
-            inFile >> dimension_geometry[i];
-        }
-        for (int i = 0; i < dimension_geometry[0]*dimension_geometry[1]*dimension_geometry[2] ; i++)
-        {
-            inFile >> geo1D[i];
-        }
-        inFile.close(); // Close input file
-    }
-    else
-    { //Error message
-        amrex::Print() << "Can't find input file " << inFileName << std::endl;
-    }
 
     const auto lo = lbound(bx);
     const auto hi = ubound(bx);    
@@ -127,22 +137,22 @@ void initdomaindata(Box const& bx, Array4<Real> const& phi, GeometryData const& 
     for (int k = lo.z; k <= hi.z; ++k) 
     {
         const Real z = prob_lo[2] + (k+0.5)*dx[2];
-        int idz = std::round( (dimension_geometry[2]-1) / Lz * z + 1 ) -1; // Convert z in the index of imported geometry geo3D 
+        int idz = std::round( (prob_parm->dimension_geometry[2]-1) / Lz * z + 1 ) -1; // Convert z in the index of imported geometry geo3D 
         for (int j = lo.y; j <= hi.y; ++j)
         {
             const Real y = prob_lo[1] + (j+0.5)*dx[1];
-            int idy = std::round( (dimension_geometry[1]-1) / Ly * y +1) -1; // Convert y in the index of imported geometry geo3D 
+            int idy = std::round( (prob_parm->dimension_geometry[1]-1) / Ly * y +1) -1; // Convert y in the index of imported geometry geo3D 
             for (int i = lo.x; i <= hi.x; ++i) 
             {
                 const Real x = prob_lo[0] + (i+0.5)*dx[0];
-                int idx = std::round( (dimension_geometry[0]-1) / Lx * x +1 ) -1; // Convert x in the index of imported geometry geo3D 
+                int idx = std::round( (prob_parm->dimension_geometry[0]-1) / Lx * x +1 ) -1; // Convert x in the index of imported geometry geo3D 
                 AMREX_PRAGMA_SIMD
                 for (int n = 0; n < ncomp; ++n)
                 {
                     phi(i, j, k, n) = 0.0; // Initialize all composant to 0
                 }
 
-                int id = (idx+1 + (idy+1-1)*(dimension_geometry[0]) + (idz+1-1)*(dimension_geometry[1])*(dimension_geometry[0]))-1;
+                int id = (idx+1 + (idy+1-1)*(prob_parm->dimension_geometry[0]) + (idz+1-1)*(prob_parm->dimension_geometry[1])*(prob_parm->dimension_geometry[0]))-1;
                 
                 // You can not use amrex::Print(), as it will only show the print process
                 /*
@@ -152,22 +162,22 @@ void initdomaindata(Box const& bx, Array4<Real> const& phi, GeometryData const& 
                 std::cout << "id=" << id << " geo[id]=" << geo1D[id] << std::endl;
                 */
 
-                if (geo1D[id] == 1) {
+                if (prob_parm->geo1D[id] == 1) {
                     phi(i,j,k,A_ID) = 1;
                     //std::cout << "i=" << i << " j=" << j << " k=" << k << " -> ANODE" << std::endl;
-                } else if (geo1D[id] == 3) {
+                } else if (prob_parm->geo1D[id] == 3) {
                     phi(i,j,k,E_ID) = 1;
                     phi(i,j,k,LS_ID) = 1;
                     //std::cout << "i=" << i << " j=" << j << " k=" << k << " -> ELECTROLYTE" << std::endl;
-                } else if (geo1D[id] == 4) {
+                } else if (prob_parm->geo1D[id] == 4) {
                     phi(i,j,k,S_ID) = 1;
                     phi(i,j,k,LS_ID) = 1;
                     //std::cout << "i=" << i << " j=" << j << " k=" << k << " -> SEPARATOR" << std::endl;
-                } else if (geo1D[id] == 2) {
+                } else if (prob_parm->geo1D[id] == 2) {
                     phi(i,j,k,C_ID) = 1;
                     //std::cout << "i=" << i << " j=" << j << " k=" << k << " -> CATHODE" << std::endl;
                 } else {
-                    std::cout << "Error for idx= " << idx << " idy= " << idy << " idz= " << idz << " geo1D[id]= " << geo1D[id] << std::endl;
+                    std::cout << "Error for idx= " << idx << " idy= " << idy << " idz= " << idz << " geo1D[id]= " << prob_parm->geo1D[id] << std::endl;
                     //phi(i,j,k,A_ID) = 1;
                 }
 
@@ -177,30 +187,21 @@ void initdomaindata(Box const& bx, Array4<Real> const& phi, GeometryData const& 
     }
 }
 
-AMREX_GPU_DEVICE
-    AMREX_INLINE
-void initproblemdata(Box const& bx, Array4<Real> const& phi, GeometryData const& geomdata,
-        ProbParm* prob_parm)
+AMREX_INLINE
+void initialconditions(ProbParm & h_prob_parm, ProbParm & d_prob_parm)
 {
-    const auto lo = lbound(bx);
-    const auto hi = ubound(bx);    
-
-#ifdef _OPENMP
-#pragma omp parallel for collapse(2) if (GPU::notInLaunchRegion)
-#endif
-
-    // INITIAL POTENTIAL
+        // INITIAL POTENTIAL
     // Calculate active material volumes
     const amrex::Real volume_anode = echemAMR::host_global_storage->anode_volume; // [m3]
     const amrex::Real volume_cathode = echemAMR::host_global_storage->cathode_volume; // [m3]
 
-    const amrex::Real Csmax_anode = electrochem::Cs_max_anode(*prob_parm); // [mol.m-3]
-    const amrex::Real SOCrange_anode = prob_parm->anode_soc_max - prob_parm->anode_soc_min; // []
+    const amrex::Real Csmax_anode = electrochem::Cs_max_anode(h_prob_parm); // [mol.m-3]
+    const amrex::Real SOCrange_anode = h_prob_parm.anode_soc_max - h_prob_parm.anode_soc_min; // []
     const amrex::Real theoritical_capacity_anode = volume_anode * Csmax_anode * FARADCONST; // [C]
     const amrex::Real pratical_capacity_anode = theoritical_capacity_anode * SOCrange_anode; // [C] 
 
-    const amrex::Real Csmax_cathode = electrochem::Cs_max_cathode(*prob_parm); // [mol.m-3]
-    const amrex::Real SOCrange_cathode = prob_parm->cathode_soc_max - prob_parm->cathode_soc_min; // []
+    const amrex::Real Csmax_cathode = electrochem::Cs_max_cathode(h_prob_parm); // [mol.m-3]
+    const amrex::Real SOCrange_cathode = h_prob_parm.cathode_soc_max - h_prob_parm.cathode_soc_min; // []
     const amrex::Real theoritical_capacity_cathode = volume_cathode * Csmax_cathode * FARADCONST; // [C]
     const amrex::Real pratical_capacity_cathode = theoritical_capacity_cathode * SOCrange_cathode; // [C]
 
@@ -209,7 +210,7 @@ void initproblemdata(Box const& bx, Array4<Real> const& phi, GeometryData const&
     const amrex::Real Cell_NP_ratio = pratical_capacity_anode/pratical_capacity_cathode; // Not required, just FYI. Should be always >1 (if not, you can expect eartly degradation)
 
     // Applied current w/o sign
-    const amrex::Real Crate = prob_parm->Crate;
+    const amrex::Real Crate = h_prob_parm.Crate;
     const amrex::Real time_to_charge = (1/Crate)*3600; // [s] Time to charge or discharge the cell
     const amrex::Real Current1C = pratical_capacity_cell/3600; // [A=C.s-1] Current for 1C
     const amrex::Real Applied_current = Current1C * Crate; // [A] (but we need the applied current density in A.m-2)
@@ -226,7 +227,7 @@ void initproblemdata(Box const& bx, Array4<Real> const& phi, GeometryData const&
     amrex::Real Applied_current_density_anode = -Applied_current / surface_anodesolid_currentcollector; // [A.m-2]
     amrex::Real Applied_current_density_cathode = Applied_current / surface_cathodsolid_currentcollector; // [A.m-2]
     // Update potential BC
-    echemAMR::host_global_storage->pot_bc_lo[0]=-Applied_current_density_cathode/electrochem::Ks_bulk_cathode(1, *prob_parm);;
+    echemAMR::host_global_storage->pot_bc_lo[0]=-Applied_current_density_cathode/electrochem::Ks_bulk_cathode(1, h_prob_parm);;
 
     // Surface calculations // FIX ME: add surface calculations from Jeff post-processing
     const amrex::Real surface_anodesolid_electrolyte = echemAMR::host_global_storage->anode_ele_SA;
@@ -241,14 +242,45 @@ void initproblemdata(Box const& bx, Array4<Real> const& phi, GeometryData const&
     const amrex::Real Activeinterface_current_density_cathode = Applied_current / surface_cathodesolid_electrolyte; // [A.m-2]
 
     // Deduce potential values that verify this condition: Applied_current = integral(current density, ds active material-current collector) = integral(current density, ds active material-electrolyte) 
-    const amrex::Real phis_a_to = prob_parm->phi_reference;
-    const amrex::Real phie_to = electrochem::get_phie_initial_from_anode(Activeinterface_current_density_anode, phis_a_to, *prob_parm);
-    const amrex::Real phis_c_to = electrochem::get_phic_initial_from_electrolyte(Activeinterface_current_density_cathode, phie_to, *prob_parm);
+    const amrex::Real phis_a_to = h_prob_parm.phi_reference;
+    const amrex::Real phie_to = electrochem::get_phie_initial_from_anode(Activeinterface_current_density_anode, phis_a_to, h_prob_parm);
+    const amrex::Real phis_c_to = electrochem::get_phic_initial_from_electrolyte(Activeinterface_current_density_cathode, phie_to, h_prob_parm);
 
     // INITIAL CONCENTRATION
-    const amrex::Real cs_a_to = prob_parm->soc_anode_t0 * electrochem::Cs_max_anode(*prob_parm);
-    const amrex::Real cs_c_to = prob_parm->soc_cathode_t0 * electrochem::Cs_max_cathode(*prob_parm);
-    const amrex::Real ce_to = prob_parm->ce_atrest;
+    const amrex::Real cs_a_to = h_prob_parm.soc_anode_t0 * electrochem::Cs_max_anode(h_prob_parm);
+    const amrex::Real cs_c_to = h_prob_parm.soc_cathode_t0 * electrochem::Cs_max_cathode(h_prob_parm);
+    const amrex::Real ce_to = h_prob_parm.ce_atrest;
+
+    h_prob_parm.phis_a_to = phis_a_to;
+    h_prob_parm.phie_to   = phie_to;
+    h_prob_parm.phis_c_to = phis_c_to;
+    h_prob_parm.cs_a_to   = cs_a_to;
+    h_prob_parm.cs_c_to   = cs_c_to;
+    h_prob_parm.ce_to     = ce_to;
+
+
+#ifdef AMREX_USE_GPU
+    amrex::Gpu::htod_memcpy(&d_prob_parm, &h_prob_parm, sizeof(ProbParm));
+#else
+    std::memcpy(&d_prob_parm, &h_prob_parm, sizeof(ProbParm));
+#endif
+
+}
+
+
+AMREX_GPU_DEVICE
+    AMREX_INLINE
+void initproblemdata(Box const& bx, Array4<Real> const& phi, GeometryData const& geomdata,
+        ProbParm* prob_parm)
+{
+    const auto lo = lbound(bx);
+    const auto hi = ubound(bx);    
+
+#ifdef _OPENMP
+#pragma omp parallel for collapse(2) if (GPU::notInLaunchRegion)
+#endif
+
+
 
     for (int k = lo.z; k <= hi.z; ++k) 
     {
@@ -257,14 +289,14 @@ void initproblemdata(Box const& bx, Array4<Real> const& phi, GeometryData const&
             for (int i = lo.x; i <= hi.x; ++i) 
             {
                  if (phi(i,j,k,C_ID) == 1) { // Within cathode
-                     phi(i,j,k,CO_ID) = cs_c_to;
-                     phi(i,j,k,POT_ID) = phis_c_to;
+                     phi(i,j,k,CO_ID) = prob_parm->cs_c_to;
+                     phi(i,j,k,POT_ID) = prob_parm->phis_c_to;
                  } else if (phi(i,j,k,A_ID) == 1) { // Within anode
-                     phi(i,j,k,CO_ID) = cs_a_to;
-                     phi(i,j,k,POT_ID) = phis_a_to;
+                     phi(i,j,k,CO_ID) = prob_parm->cs_a_to;
+                     phi(i,j,k,POT_ID) = prob_parm->phis_a_to;
                  } else if (phi(i,j,k,E_ID) == 1 || phi(i,j,k,S_ID) == 1) { // Within electrolyte and separator
-                     phi(i,j,k,CO_ID) = ce_to;
-                     phi(i,j,k,POT_ID) = phie_to;
+                     phi(i,j,k,CO_ID) = prob_parm->ce_to;
+                     phi(i,j,k,POT_ID) = prob_parm->phie_to;
                  }
             }
         }

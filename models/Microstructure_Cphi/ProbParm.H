@@ -46,7 +46,9 @@ struct ProbParm
     // GEOMETRY
     // --------------
     std::string geometry_filename = "CEAtest.txt";
-
+    int dimension_geometry[3];
+    std::vector<int> geo1D;
+    
     // --------------
     // INITIAL CONDITIONS and APPLIED LOADING
     // --------------
@@ -81,6 +83,15 @@ struct ProbParm
     // - 0.5, 1C: slow charge rate
     // - up to 4C: intermediate charge rate
     // - >= 6C: fast charge (DOE's target is to charge in 10 minutes or less, that's our target).
+
+
+    amrex::Real phis_a_to;
+    amrex::Real phie_to;
+    amrex::Real phis_c_to;
+    amrex::Real cs_a_to;
+    amrex::Real cs_c_to;
+    amrex::Real ce_to;
+
 
 };
 struct GlobalStorage
