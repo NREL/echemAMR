@@ -61,16 +61,18 @@ void amrex_probinit (ProbParm & h_prob_parm, ProbParm & d_prob_parm)
         inFile >> h_prob_parm.dimension_geometry[i];
     }
     int geo_N = h_prob_parm.dimension_geometry[0]*h_prob_parm.dimension_geometry[1]*h_prob_parm.dimension_geometry[2];
-    std::vector<int> geo1D(geo_N);
+    // std::vector<int> geo1D(geo_N);
+    h_prob_parm.geo1D.resize(geo_N);
+
 
     // 2: Get domain id
     for (int i = 0; i < geo_N ; i++)
     {
-        inFile >> geo1D[i];
+        inFile >> h_prob_parm.geo1D[i];
     }
 
     // 3: save to probparm
-    h_prob_parm.geo1D = geo1D;
+    // h_prob_parm.geo1D = geo1D;
 
 
 

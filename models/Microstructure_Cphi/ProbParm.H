@@ -3,6 +3,7 @@
 
 #include <AMReX_REAL.H>
 #include <AMReX_GpuMemory.H>
+#include <AMReX_Vector.H>
 
 using namespace amrex::literals;
 
@@ -47,8 +48,8 @@ struct ProbParm
     // --------------
     std::string geometry_filename = "CEAtest.txt";
     int dimension_geometry[3];
-    std::vector<int> geo1D;
-    
+    // std::vector<int> geo1D;
+    amrex::Vector<int> geo1D;
     // --------------
     // INITIAL CONDITIONS and APPLIED LOADING
     // --------------
