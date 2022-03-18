@@ -48,10 +48,11 @@ struct ProbParm
     // --------------
     std::string geometry_filename = "CEAtest.txt";
     int dimension_geometry[3];
+    int geo1D[300];
     // std::vector<int> geo1D;
     // amrex::Vector<int> geo1D;
     // amrex::Gpu::PinnedVector<int> geo1D;
-    amrex::Gpu::ManagedVector<int> geo1D{0};
+    // amrex::Gpu::ManagedVector<int> geo1D{0};
     // --------------
     // INITIAL CONDITIONS and APPLIED LOADING
     // --------------
