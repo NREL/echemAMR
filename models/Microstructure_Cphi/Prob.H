@@ -62,6 +62,7 @@ void amrex_probinit (ProbParm & h_prob_parm, ProbParm & d_prob_parm)
     }
     int geo_N = h_prob_parm.dimension_geometry[0]*h_prob_parm.dimension_geometry[1]*h_prob_parm.dimension_geometry[2];
     // std::vector<int> geo1D(geo_N);
+    h_prob_parm.geo1D.clear();
     h_prob_parm.geo1D.resize(geo_N);
 
 
