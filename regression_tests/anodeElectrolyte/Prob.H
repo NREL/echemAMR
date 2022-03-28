@@ -72,6 +72,13 @@ void initdomaindata(Box const& bx, Array4<Real> const& phi, GeometryData const& 
     }
 }
 
+
+AMREX_INLINE
+void initialconditions(ProbParm & h_prob_parm, ProbParm & d_prob_parm)
+{
+
+}
+
 AMREX_GPU_DEVICE
 AMREX_INLINE
 void initproblemdata(Box const& bx, Array4<Real> const& phi, GeometryData const& geomdata,
