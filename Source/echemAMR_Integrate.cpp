@@ -75,8 +75,8 @@ Real echemAMR::SurfaceIntegral(int comp, int domain1, int domain2)
         const int* domlo_p = geom[lev].Domain().loVect();
         const int* domhi_p = geom[lev].Domain().hiVect();
 
-        int domlo[3] = {domlo_p[0], domlo_p[1], domlo_p[2]};
-        int domhi[3] = {domhi_p[0], domhi_p[1], domhi_p[2]};
+        GpuArray<int,AMREX_SPACEDIM> domlo={domlo_p[0], domlo_p[1], domlo_p[2]};
+        GpuArray<int,AMREX_SPACEDIM> domhi={domhi_p[0], domhi_p[1], domhi_p[2]};
 
         const Real cur_time = t_new[lev];
         MultiFab& S_new = phi_new[lev];
@@ -138,8 +138,8 @@ Real echemAMR::CurrentCollectorIntegral(int comp, int domain)
         const int* domlo_p = geom[lev].Domain().loVect();
         const int* domhi_p = geom[lev].Domain().hiVect();
 
-        int domlo[3] = {domlo_p[0], domlo_p[1], domlo_p[2]};
-        int domhi[3] = {domhi_p[0], domhi_p[1], domhi_p[2]};
+        GpuArray<int,AMREX_SPACEDIM> domlo={domlo_p[0], domlo_p[1], domlo_p[2]};
+        GpuArray<int,AMREX_SPACEDIM> domhi={domhi_p[0], domhi_p[1], domhi_p[2]};
 
         const Real cur_time = t_new[lev];
         MultiFab& S_new = phi_new[lev];
