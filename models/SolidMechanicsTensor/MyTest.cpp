@@ -32,16 +32,16 @@ MyTest::solve ()
 
 
     // xsides
-    mlmg_lobc[0][0] =  LinOpBCType::Dirichlet;
-    mlmg_lobc[1][0] =  LinOpBCType::Dirichlet;
+    mlmg_lobc[0][0] =  LinOpBCType::Neumann;
+    mlmg_lobc[1][0] =  LinOpBCType::Neumann;
 #if(AMREX_SPACEDIM==3)
-    mlmg_lobc[2][0] =  LinOpBCType::Dirichlet;
+    mlmg_lobc[2][0] =  LinOpBCType::Neumann;
 #endif
 
-    mlmg_hibc[0][0] =  LinOpBCType::Dirichlet;
-    mlmg_hibc[1][0] =  LinOpBCType::Dirichlet;
+    mlmg_hibc[0][0] =  LinOpBCType::Neumann;
+    mlmg_hibc[1][0] =  LinOpBCType::Neumann;
 #if(AMREX_SPACEDIM==3)
-    mlmg_hibc[2][0] =  LinOpBCType::Dirichlet;
+    mlmg_hibc[2][0] =  LinOpBCType::Neumann;
 #endif
 
 
@@ -55,20 +55,20 @@ MyTest::solve ()
     mlmg_hibc[0][1] =  LinOpBCType::Neumann;
     mlmg_hibc[1][1] =  LinOpBCType::Neumann;
 #if(AMREX_SPACEDIM==3)
-    mlmg_hibc[2][1] =  LinOpBCType::Dirichlet;
+    mlmg_hibc[2][1] =  LinOpBCType::Neumann;
 #endif
 
-//    std::array<LinOpBCType,AMREX_SPACEDIM> mlmg_lobc;
-//    std::array<LinOpBCType,AMREX_SPACEDIM> mlmg_hibc;
-//    for (int idim = 0; idim < AMREX_SPACEDIM; ++idim) {
-//        mlmg_lobc[idim] = LinOpBCType::Dirichlet;
-//        mlmg_hibc[idim] = LinOpBCType::Dirichlet;
-//    }
-//
-//    mlmg_lobc[0] = LinOpBCType::Dirichlet;
-//    mlmg_hibc[0] = LinOpBCType::Dirichlet;
-//    mlmg_lobc[1] = LinOpBCType::inhomogNeumann;
-//    mlmg_hibc[1] = LinOpBCType::inhomogNeumann;
+#if(AMREX_SPACEDIM==3)
+    // zsides
+    mlmg_lobc[0][2] =  LinOpBCType::Neumann;
+    mlmg_lobc[1][2] =  LinOpBCType::Neumann;
+    mlmg_lobc[2][2] =  LinOpBCType::Neumann;
+
+    mlmg_hibc[0][2] =  LinOpBCType::Neumann;
+    mlmg_hibc[1][2] =  LinOpBCType::Neumann;
+    mlmg_hibc[2][2] =  LinOpBCType::Neumann;
+#endif
+
 
     LPInfo info;
     info.setMaxCoarseningLevel(max_coarsening_level);
@@ -78,24 +78,6 @@ MyTest::solve ()
 
     mltensor->setDomainBC(mlmg_lobc, mlmg_hibc);
     mltensor->setLevelBC(0, &exact);
-
-    // random values
-    const Real beta = 1.2;
-    const Real E = 1.4;
-    const Real nu = 0.3;
-    const Real lambda = E * nu / (1.0 + nu) / (1.0 - nu);
-    const Real G = 0.5 * E / (1.0 + nu);
-
-    // 2/2*G
-    eta.setVal(G);
-    // kappa - 2*eta/3 = lambda
-    // kappa = lambda + 2*eta/3
-    kappa.setVal(lambda);//
-    MultiFab::Saxpy(kappa, 2.0/3.0, eta, 0, 0, 1, 0);
-
-
-    // delta c(x,y,z) = c(x,y,z) - c0(x,y,z)
-    concentration.mult(-(3*lambda+2*G)*beta);
 
     // don't forget to set this!
     mltensor->setACoeffs(0, 0.0);
@@ -128,6 +110,72 @@ MyTest::solve ()
 //    Real mlmg_err = mlmg.solve({&solution}, {&rhs}, 1.e-11, 0.0);
     Real mlmg_err = mlmg.solve({&solution}, {&concentration_gradient}, 1.e-11, 0.0);
     amrex::Print() << "mlmg error: " << mlmg_err << std::endl;
+
+
+    amrex::Array<amrex::MultiFab, AMREX_SPACEDIM> fluxes;
+    amrex::MultiFab fluxes_cc;
+
+    fluxes_cc.define(grids,dmap,AMREX_SPACEDIM*AMREX_SPACEDIM,0);
+
+    const BoxArray& bax = amrex::convert(grids, IntVect::TheDimensionVector(0));
+    const BoxArray& bay = amrex::convert(grids, IntVect::TheDimensionVector(1));
+    fluxes[0].define(bax, dmap, AMREX_SPACEDIM, 0);
+    fluxes[1].define(bay, dmap, AMREX_SPACEDIM, 0);
+
+#if(AMREX_SPACEDIM==3)
+    const BoxArray& baz = amrex::convert(grids, IntVect::TheDimensionVector(2));
+    fluxes[2].define(baz, dmap, AMREX_SPACEDIM, 0);
+#endif
+
+    const int lev = 0;
+    mltensor->compFlux(lev, amrex::GetArrOfPtrs(fluxes), solution, amrex::MLMG::Location::FaceCenter);
+
+#ifdef AMREX_USE_OMP
+#pragma omp parallel if (Gpu::notInLaunchRegion())
+#endif
+    for (MFIter mfi(fluxes_cc,TilingIfNotGPU()); mfi.isValid(); ++mfi)
+    {
+        const Box bx = mfi.tilebox();
+
+        AMREX_D_TERM(amrex::Array4<amrex::Real const> const& fx = fluxes[0].const_array(mfi);,
+                     amrex::Array4<amrex::Real const> const& fy = fluxes[1].const_array(mfi);,
+                     amrex::Array4<amrex::Real const> const& fz = fluxes[2].const_array(mfi););
+
+        amrex::Array4<amrex::Real> const& cc = fluxes_cc.array(mfi);
+        amrex::Array4<amrex::Real const> const& con = concentration.const_array(mfi);
+
+        AMREX_HOST_DEVICE_PARALLEL_FOR_3D( bx, i, j, k,
+        {
+            cc(i,j,k,0) = amrex::Real(0.5) * ( fx(i,j,k,0) + fx(i+1,j,k,0) ) - con(i,j,k);
+            cc(i,j,k,1) = amrex::Real(0.5) * ( fx(i,j,k,1) + fx(i+1,j,k,1) );
+#if(AMREX_SPACEDIM==3)
+            cc(i,j,k,2) = amrex::Real(0.5) * ( fx(i,j,k,2) + fx(i+1,j,k,2) );
+#endif
+            cc(i,j,k,AMREX_SPACEDIM+0)   = amrex::Real(0.5) * ( fy(i,j,k,0) + fy(i,j+1,k,0) );
+            cc(i,j,k,AMREX_SPACEDIM+1)   = amrex::Real(0.5) * ( fy(i,j,k,1) + fy(i,j+1,k,1) ) - con(i,j,k);
+#if(AMREX_SPACEDIM==3)
+            cc(i,j,k,AMREX_SPACEDIM+2)   = amrex::Real(0.5) * ( fy(i,j,k,2) + fy(i,j+1,k,2) );
+#endif
+            cc(i,j,k,2*AMREX_SPACEDIM+0) = amrex::Real(0.5) * ( fz(i,j,k,0) + fz(i,j,k+1,0) );
+            cc(i,j,k,2*AMREX_SPACEDIM+1) = amrex::Real(0.5) * ( fz(i,j,k,1) + fz(i,j,k+1,1) );
+#if(AMREX_SPACEDIM==3)
+            cc(i,j,k,2*AMREX_SPACEDIM+2) = amrex::Real(0.5) * ( fz(i,j,k,2) + fz(i,j,k+1,2) ) - con(i,j,k);
+#endif
+        });
+    }
+
+
+    Vector<std::string> varname = {AMREX_D_DECL("stress_xx","stress_xy","stress_xz"),
+                                   AMREX_D_DECL("stress_yx","stress_yy","stress_yz")
+#if(AMREX_SPACEDIM==3)
+                                  ,AMREX_D_DECL("stress_zx","stress_zy","stress_zz")
+#endif
+    };
+
+    WriteMultiLevelPlotfile("stress", 1, {&fluxes_cc},
+                                varname, {geom}, 0.0, {0}, {IntVect(2)});
+
+
 }
 
 void
@@ -193,10 +241,11 @@ MyTest::readParameters ()
 void
 MyTest::initGrids ()
 {
-    RealBox rb({AMREX_D_DECL(-1.,-1.,-1.)}, {AMREX_D_DECL(1.,1.,1.)});
+    const int n = 5;
+    RealBox rb({AMREX_D_DECL(-n*1.0,-1.0,-n*1.0)}, {AMREX_D_DECL(n*1.0,1.0,n*1.0)});
     std::array<int,AMREX_SPACEDIM> isperiodic{AMREX_D_DECL(0,0,0)};
     Geometry::Setup(&rb, 0, isperiodic.data());
-    Box domain(IntVect{AMREX_D_DECL(0,0,0)}, IntVect{AMREX_D_DECL(n_cell-1,n_cell-1,n_cell-1)});
+    Box domain(IntVect{AMREX_D_DECL(0,0,0)}, IntVect{AMREX_D_DECL(n*n_cell-1,n_cell-1,n*n_cell-1)});
     geom.define(domain, rb, CoordSys::cartesian, isperiodic);
 
     grids.define(domain);
@@ -231,6 +280,8 @@ MyTest::initData ()
         const Array4<Real> exactfab = exact.array(mfi);
         const Array4<Real> rhsfab = rhs.array(mfi);
         const Array4<Real> confab = concentration.array(mfi);
+        const Array4<Real> etafab = eta.array(mfi);
+        const Array4<Real> kappafab = kappa.array(mfi);
 
         amrex::ParallelFor(gbx, [=] AMREX_GPU_DEVICE (int i, int j, int k) noexcept
         {
@@ -245,19 +296,16 @@ MyTest::initData ()
             y = std::max(-1.0,std::min(1.0,y));
             z = std::max(-1.0,std::min(1.0,z));
 
-            Real u,v,w,urhs,vrhs,wrhs,con;
-            init(x,y,z,1.0,u,v,w,urhs,vrhs,wrhs,con);
+            Real u,v,w,urhs,vrhs,wrhs,con,eta_,kappa_;
+            init(x,y,z,1.0,u,v,w,urhs,vrhs,wrhs,con,eta_,kappa_);
 
-            if(j> 2) {
-                exactfab(i,j,k,0) = 0.0;
-            }
-            else {
-                exactfab(i,j,k,0) = 0.0;
-            }
+            etafab(i,j,k) = eta_;
+            kappafab(i,j,k) = kappa_;
 
+            exactfab(i,j,k,0) = 0.0;
             exactfab(i,j,k,1) = 0.0;
 #if(AMREX_SPACEDIM==3)
-            exactfab(i,j,k,2) = w;
+            exactfab(i,j,k,2) = 0.0;
 #endif
             rhsfab(i,j,k,0) = urhs;
             rhsfab(i,j,k,1) = vrhs;
@@ -265,19 +313,12 @@ MyTest::initData ()
             rhsfab(i,j,k,2) = wrhs;
 #endif
             confab(i,j,k) = con;
-//            if (!vbx.contains(IntVect(AMREX_D_DECL(i,j,k)))) {
-                solnfab(i,j,k,0) = u;
-                solnfab(i,j,k,1) = v;
+            solnfab(i,j,k,0) = u;
+            solnfab(i,j,k,1) = v;
 #if(AMREX_SPACEDIM==3)
-                solnfab(i,j,k,2) = w;
+            solnfab(i,j,k,2) = w;
 #endif
-//            } else {
-//                solnfab(i,j,k,0) = 0;
-//                solnfab(i,j,k,1) = 0;
-#if(AMREX_SPACEDIM==3)
-//                solnfab(i,j,k,2) = 0;
-#endif
-//            }
+
 
         });
     }
