@@ -167,7 +167,7 @@ void echemAMR::Evolve()
 
 void echemAMR::solve_potential(Real current_time)
 {
-    BL_PROFILE("echemAMR::solve_potential");
+    BL_PROFILE("echemAMR::solve_potential()");
     LPInfo info;
 
     // FIXME: add these as inputs
@@ -1010,7 +1010,7 @@ void echemAMR::compute_fluxes(int lev, const int num_grow, MultiFab& Sborder,
 void echemAMR::implicit_solve_species(Real current_time,Real dt,int spec_id, 
         Vector<MultiFab *> dsdt_expl)
 {
-    BL_PROFILE("echemAMR::implicit_solve_species_" + std::to_string( spec_id ));
+    BL_PROFILE("echemAMR::implicit_solve_species(" + std::to_string( spec_id ) + ")");
 
     //FIXME:create mlmg and mlabec objects outside this function
     LPInfo info;
