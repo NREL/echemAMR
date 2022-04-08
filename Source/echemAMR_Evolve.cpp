@@ -29,7 +29,9 @@ void echemAMR::Evolve()
     for (int step = istep[0]; step < max_step && cur_time < stop_time; ++step)
     {
         amrex::Print() << "\nCoarse STEP " << step + 1 << " starts ..." << std::endl;
-
+    
+        // BL_PROFILE_TINY_FLUSH()
+        
         ComputeDt();
 
         int lev = 0;
@@ -165,6 +167,7 @@ void echemAMR::Evolve()
 
 void echemAMR::solve_potential(Real current_time)
 {
+    BL_PROFILE("echemAMR::solve_potential");
     LPInfo info;
 
     // FIXME: add these as inputs
@@ -1007,6 +1010,8 @@ void echemAMR::compute_fluxes(int lev, const int num_grow, MultiFab& Sborder,
 void echemAMR::implicit_solve_species(Real current_time,Real dt,int spec_id, 
         Vector<MultiFab *> dsdt_expl)
 {
+    BL_PROFILE("echemAMR::implicit_solve_species_" + std::to_string( spec_id ));
+
     //FIXME:create mlmg and mlabec objects outside this function
     LPInfo info;
 
