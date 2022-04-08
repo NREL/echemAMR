@@ -1,5 +1,5 @@
 max_step  = 100000000
-stop_time = 100.0
+stop_time = 10.0
 
 #------------------------
 # PROBLEM SIZE & GEOMETRY
