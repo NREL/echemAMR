@@ -81,9 +81,9 @@ jobs:
           echo "deb https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64 /" | sudo tee /etc/apt/sources.list.d/nvidia-ml.list
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-          g++ gfortran libopenmpi-dev openmpi-bin cuda-command-line-tools-10-0 \
-          cuda-compiler-10-0 cuda-minimal-build-10-0 \
-          cuda-nvml-dev-10-0 cuda-nvtx-10-0 libcurand-dev-10-0 cuda-cupti-dev-10-0
+          g++ gfortran libopenmpi-dev openmpi-bin cuda-command-line-tools-10-2 \
+          cuda-compiler-10-2 cuda-minimal-build-10-2 \
+          cuda-nvml-dev-10-2 cuda-nvtx-10-2 libcurand-dev-10-2 cuda-cupti-dev-10-2
           echo "finding cuda"
           echo ""
           echo ""
@@ -94,13 +94,13 @@ jobs:
           echo ""
           git clone https://github.com/hypre-space/hypre.git
           cd hypre/src
-          ./configure --with-cuda --enable-unified-memory --with-cuda-home=/usr/local/cuda-10.0
+          ./configure --with-cuda --enable-unified-memory --with-cuda-home=/usr/local/cuda-10.2
           make install
     - name: Build Regression
       working-directory: ./regression_tests
       run: |
-        export PATH=/usr/local/nvidia/bin:/usr/local/cuda-10.0/bin:${PATH}
-        export LD_LIBRARY_PATH=/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda-10.0/lib:${LD_LIBRARY_PATH}
+        export PATH=/usr/local/nvidia/bin:/usr/local/cuda-10.2/bin:${PATH}
+        export LD_LIBRARY_PATH=/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda-10.2/lib:${LD_LIBRARY_PATH}
         cd DriftDiffuse1d
         make -j 2 COMP=gnu USE_CUDA=TRUE
         cd ..
@@ -115,7 +115,7 @@ jobs:
     - name: Build Model
       working-directory: ./models
       run: |
-        export PATH=/usr/local/nvidia/bin:/usr/local/cuda-10.0/bin:${PATH}
-        export LD_LIBRARY_PATH=/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda-10.0/lib:${LD_LIBRARY_PATH}
+        export PATH=/usr/local/nvidia/bin:/usr/local/cuda-10.2/bin:${PATH}
+        export LD_LIBRARY_PATH=/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda-10.2/lib:${LD_LIBRARY_PATH}
         cd Microstructure_Cphi
         make -j 2 COMP=gnu USE_CUDA=TRUE
