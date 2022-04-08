@@ -86,7 +86,7 @@ jobs:
           cuda-nvml-dev-11-1 cuda-nvtx-11-1 libcurand-dev-11-1 cuda-cupti-dev-11-1
           git clone https://github.com/hypre-space/hypre.git
           cd hypre/src
-          ./configure
+          ./configure --with-cuda --enable-unified-memory
           make install
     - name: Build Regression
       working-directory: ./regression_tests
