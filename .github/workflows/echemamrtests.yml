@@ -88,10 +88,6 @@ jobs:
           echo ""
           echo ""
           echo ""
-          locate nvcc
-          echo ""
-          echo ""
-          echo ""
           which nvcc
           echo ""
           echo ""
