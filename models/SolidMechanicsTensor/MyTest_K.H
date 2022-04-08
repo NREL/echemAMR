@@ -35,8 +35,8 @@ void init (amrex::Real x, amrex::Real y, amrex::Real z, amrex::Real R2,
 
     const amrex::Real L = 1.0e-5;
 
-    if(std::fabs(x) > L || std::fabs(z) > L || y > 2*L || y < -L) {
-        E = 20.0e4;
+    if(std::fabs(x) > 2*L || std::fabs(z) > 2*L || y > 2*L || y < -L) {
+        E = 20.0e6;
     }
 
     const amrex::Real deltaT = 10.0;

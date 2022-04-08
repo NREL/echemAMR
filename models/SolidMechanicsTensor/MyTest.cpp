@@ -250,13 +250,17 @@ MyTest::readParameters ()
 void
 MyTest::initGrids ()
 {
+    const int m = 12;
     const int n = 6;
     const Real L = 1.0e-5;
-    RealBox rb({AMREX_D_DECL(-n*L,-n*L,-n*L)}, {AMREX_D_DECL(n*L,(n+1)*L,n*L)});
+    RealBox rb({AMREX_D_DECL(-m*L,-n*L,-m*L)}, {AMREX_D_DECL(m*L,n*L,m*L)});
     std::array<int,AMREX_SPACEDIM> isperiodic{AMREX_D_DECL(0,0,0)};
     Geometry::Setup(&rb, 0, isperiodic.data());
-    Box domain(IntVect{AMREX_D_DECL(0,0,0)}, IntVect{AMREX_D_DECL(2*n*n_cell-1,3*n*n_cell-1,2*n*n_cell-1)});
+    Box domain(IntVect{AMREX_D_DECL(0,0,0)}, IntVect{AMREX_D_DECL(2*m*n_cell-1,2*n*n_cell-1,2*m*n_cell-1)});
     geom.define(domain, rb, CoordSys::cartesian, isperiodic);
+
+    const auto dx     = geom.CellSizeArray();
+    amrex::Print() << "dx: " << dx[0] << ' ' << dx[1] << ' ' << dx[2] << std::endl;
 
     grids.define(domain);
     grids.maxSize(max_grid_size);
