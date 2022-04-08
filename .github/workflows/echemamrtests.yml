@@ -84,16 +84,7 @@ jobs:
           g++ gfortran libopenmpi-dev openmpi-bin cuda-command-line-tools-11-1 \
           cuda-compiler-11-1 cuda-minimal-build-11-1 \
           cuda-nvml-dev-11-1 cuda-nvtx-11-1 libcurand-dev-11-1 cuda-cupti-dev-11-1
-          echo "finding cuda"
-          echo ""
-          echo ""
-          echo ""
-          find /usr/local/ -name cublas_v2.h
-          echo ""
-          echo ""
-          echo ""
-          ln -s /usr/include/cublas_v2.h /usr/local/cuda-11.1/targets/x86_64-linux/include/cublas_v2.h
-
+          sudo ln -s /usr/include/cublas_v2.h /usr/local/cuda-11.1/targets/x86_64-linux/include/cublas_v2.h
           git clone https://github.com/hypre-space/hypre.git
           cd hypre/src
           ./configure --with-cuda --enable-unified-memory --with-cuda-home=/usr/local/cuda-11.1
