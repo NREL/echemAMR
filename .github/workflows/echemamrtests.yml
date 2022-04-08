@@ -66,7 +66,7 @@ jobs:
       working-directory: ./models
       run: |
           cd Microstructure_Cphi
-          mpirun -n 2 ./echemAMR3d.gnu.DEBUG.MPI.ex inputs_CESEAtest
+          mpirun -n 2 ./echemAMR3d.gnu.TPROF.MPI.ex inputs_CESEAtest
   gputest:
     runs-on: ubuntu-latest
     steps:
