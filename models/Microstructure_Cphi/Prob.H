@@ -21,6 +21,10 @@ void amrex_probinit (ProbParm & h_prob_parm, ProbParm & d_prob_parm)
 
     // Geometry
     pp.query("geometry_filename", h_prob_parm.geometry_filename );
+    // Nanoporosity
+    pp.query("nanoporosity_filename", h_prob_parm.nanoporosity_filename );    
+    // Macmullin number
+    pp.query("macmullin_filename", h_prob_parm.macmullin_filename );        
     // Loading
     pp.query("Crate", h_prob_parm.Crate);
     pp.query("Temperature", h_prob_parm.Temperature);    
@@ -38,14 +42,12 @@ void amrex_probinit (ProbParm & h_prob_parm, ProbParm & d_prob_parm)
     pp.query("mater_cathode", h_prob_parm.mater_cathode);
     pp.query("mater_anode", h_prob_parm.mater_anode);
     pp.query("mater_electrolyte", h_prob_parm.mater_electrolyte);
-    pp.query("mater_separator", h_prob_parm.mater_separator);  
-    //pp.query("mater_CBD_cathode", h_prob_parm.mater_CBD_cathode);  
-    //pp.query("mater_CBD_anode", h_prob_parm.mater_CBD_anode);  
+    // Nanoscale 
+    pp.query("Nanoscale_CBD", h_prob_parm.Nanoscale_CBD);  
+    pp.query("Nanoscale_separator", h_prob_parm.Nanoscale_separator);  
 
     // 0D validation
     pp.query("zeroDmodel", h_prob_parm.zeroDmodel);
-
-
 
 
     // CREATE 3D ARRAY GEOMETRY READ FILE
@@ -72,11 +74,31 @@ void amrex_probinit (ProbParm & h_prob_parm, ProbParm & d_prob_parm)
         inFile >> h_prob_parm.geo1D[i];
     }
 
+    // CREATE 3D ARRAY NANOPOROSITY READ FILE
+    std::string inFileName_np = h_prob_parm.nanoporosity_filename;
+    Vector<char> fileCharPtr_np;
+    ParallelDescriptor::ReadAndBcastFile(inFileName_np, fileCharPtr_np);
+    std::string fileCharPtrString_np(fileCharPtr_np.dataPtr());
+    std::istringstream inFile_np(fileCharPtrString_np, std::istringstream::in);
 
+    // 3: Get nanoporosity
+    for (int i = 0; i < geo_N ; i++)
+    {
+        inFile_np >> h_prob_parm.Nanoporosity1D[i];
+    }    
 
+    // CREATE 3D ARRAY MACMULLIN READ FILE
+    std::string inFileName_mm = h_prob_parm.macmullin_filename;
+    Vector<char> fileCharPtr_mm;
+    ParallelDescriptor::ReadAndBcastFile(inFileName_mm, fileCharPtr_mm);
+    std::string fileCharPtrString_mm(fileCharPtr_mm.dataPtr());
+    std::istringstream inFile_mm(fileCharPtrString_mm, std::istringstream::in);
 
-
-
+    // 3: Get MacMullin number
+    for (int i = 0; i < geo_N ; i++)
+    {
+        inFile_mm >> h_prob_parm.MacMullin1D[i];
+    }    
 
 
 #ifdef AMREX_USE_GPU
@@ -162,9 +184,32 @@ void initdomaindata(Box const& bx, Array4<Real> const& phi, GeometryData const& 
                     phi(i,j,k,C_ID) = 1;
                     //std::cout << "i=" << i << " j=" << j << " k=" << k << " -> CATHODE" << std::endl;
                 } else {
-                    //std::cout << "Error for idx= " << idx << " idy= " << idy << " idz= " << idz << " geo1D[id]= " << prob_parm->geo1D[id] << std::endl;
+                    std::cout << "Error for idx= " << idx << " idy= " << idy << " idz= " << idz << " geo1D[id]= " << prob_parm->geo1D[id] << std::endl;
                     //phi(i,j,k,A_ID) = 1;
                 }
+
+                // Nanoporosity and MacMullin number 
+                if (phi(i,j,k,S_ID)==0) { // (electrodes)
+
+                    if (prob_parm->Nanoscale_CBD==1) {
+                        phi(i,j,k,NP_ID) = prob_parm->Nanoporosity1D[id];
+                        phi(i,j,k,MAC_ID) = prob_parm->MacMullin1D[id];
+                    } else {
+                        phi(i,j,k,NP_ID) = 1.0;
+                        phi(i,j,k,MAC_ID) = 1.0;
+                    }
+                    
+                } else { // Separator
+
+                    if (prob_parm->Nanoscale_separator==1) {
+                        phi(i,j,k,NP_ID) = prob_parm->Nanoporosity1D[id];
+                        phi(i,j,k,MAC_ID) = prob_parm->MacMullin1D[id];
+                    } else {
+                        phi(i,j,k,NP_ID) = 1.0;
+                        phi(i,j,k,MAC_ID) = 1.0;
+                    }
+
+                }            
 
 
             }

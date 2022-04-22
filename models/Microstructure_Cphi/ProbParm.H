@@ -20,24 +20,23 @@ struct ProbParm
     //    0=constant diffusion, conductivity, OCP, and io
     //    1=NMC532 with constant diffusion and conductivity, cubic polynomial OCP and symmetric io
     //    2=NMC532 with constant conductivity, actual diffusion, OCP and io
-    int mater_cathode = 1; 
+    int mater_cathode = 2; 
     // Anode
     //    0=constant diffusion, conductivity, OCP, and io
     //    1=graphite SLC1506T2 with constant diffusion and conductivity, 8-th order polynomial OCP, and symmetric io
     //    2=graphite SLC1506T2 with constant diffusion and conductivity, actual OCP, and symmetric io
-    int mater_anode = 1; 
+    int mater_anode = 2; 
     // Electrolyte
     //    0=constand coefficient
     //    1=Gen2 with constand coefficient
     //....2=Gen2 with concentration dependent coefficients
-    int mater_electrolyte = 1;
-    // Separator
-    //    0=constant coefficient
-    int mater_separator = 0;
-    // Electrolyte carbon-binder
-     //    0=constant coefficient
-    //int mater_CBD_cathode = 0;   
-    //int mater_CBD_anode = 0;   
+    int mater_electrolyte = 2;
+
+    // Nanoscale
+    // = 0: nanoporosity = 1 and MacMullin = 1 (overwritte nanoporosity_filename and macmullin_filename)
+    // = 1: use txt files
+    int Nanoscale_CBD = 1;
+    int Nanoscale_separator = 1;
 
     // Special case: 0D model comparison [0=false, 1=true]
     // If true, diffusivity and conductivity are set to un-realistic high values
@@ -47,8 +46,12 @@ struct ProbParm
     // GEOMETRY
     // --------------
     std::string geometry_filename = "CEAtest.txt";
+    std::string nanoporosity_filename = "CEAtest_nanoporosity.txt";
+    std::string macmullin_filename = "CEAtest_macmullin.txt";
     int dimension_geometry[3];
-    int geo1D[300];
+    int geo1D[1000000]; // initialize material location
+    float Nanoporosity1D[1000000]; // Initialize nanoporosity location
+    float MacMullin1D[1000000]; // Initialize MacMullin location
     // std::vector<int> geo1D;
     // amrex::Vector<int> geo1D;
     // amrex::Gpu::PinnedVector<int> geo1D;

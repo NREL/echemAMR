@@ -102,10 +102,9 @@ namespace electrochem_transport {
         ProbParm const& prob_parm)
     {
         // Diffusion coefficient = sum( diffusion_coefficient domain i * levelset i), with levelset i=1 if x within domain i, 0 otherwise
-        dcoeff(i,j,k,CO_ID) = electrochem::Ds_bulk_anode(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,A_ID)
+        dcoeff(i,j,k,CO_ID) = (electrochem::Ds_bulk_anode(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,A_ID)
         + electrochem::Ds_bulk_cathode(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,C_ID)
-        + electrochem::De_bulk(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,E_ID)
-        + electrochem::De_bulk(phi(i, j, k, CO_ID), prob_parm) / electrochem::MacMullinSeparator(prob_parm) * phi(i,j,k,S_ID);
+        + electrochem::De_bulk(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,LS_ID)) / phi(i,j,k,MAC_ID);
         dcoeff(i, j, k, A_ID) = 0.0;
         dcoeff(i, j, k, C_ID) = 0.0;
         dcoeff(i, j, k, E_ID) = 0.0;
@@ -180,10 +179,9 @@ namespace electrochem_transport {
     {
         //dcoeff(i, j, k) = 1.0;
         // Conduction coefficient = sum( conductivity_coefficient domain i * levelset i), with levelset i=1 if x within domain i, 0 otherwise
-        dcoeff(i,j,k) = electrochem::Ks_bulk_anode(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,A_ID)
+        dcoeff(i,j,k) = (electrochem::Ks_bulk_anode(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,A_ID)
         + electrochem::Ks_bulk_cathode(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,C_ID)
-        + electrochem::Ke_bulk(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,E_ID)
-        + electrochem::Ke_bulk(phi(i, j, k, CO_ID), prob_parm) / electrochem::MacMullinSeparator(prob_parm) * phi(i,j,k,S_ID);
+        + electrochem::Ke_bulk(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,LS_ID)) / phi(i,j,k,MAC_ID);
     }
 
 }

@@ -11,7 +11,9 @@ namespace electrochem
         specnames[C_ID]  = "Cathode";
         specnames[E_ID]  = "Electrolyte";
         specnames[S_ID]  = "Separator";
-        specnames[LS_ID] ="levelset";
+        specnames[NP_ID] = "Nanoporosity";         
+        specnames[MAC_ID] = "MacMullin_number";        
+        specnames[LS_ID] = "levelset";
     }    
     void close()
     {

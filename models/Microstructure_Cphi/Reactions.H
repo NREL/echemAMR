@@ -51,9 +51,9 @@ namespace electrochem_reactions {
         */
 
         // Intermediate coefficients
-        Real Ke  =  electrochem::Ke_bulk(phi(i, j, k, CO_ID), prob_parm) * (phi(i,j,k,E_ID) + phi(i,j,k,S_ID)/electrochem::MacMullinSeparator(prob_parm) );
-        Real Ac  = electrochem::A_c(C, prob_parm) * (phi(i,j,k,E_ID) + phi(i,j,k,S_ID));
-        Real tplus  = electrochem::t_plus(C, prob_parm) * (phi(i,j,k,E_ID) + phi(i,j,k,S_ID));      
+        Real Ke  =  electrochem::Ke_bulk(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,LS_ID) / phi(i,j,k,MAC_ID);
+        Real Ac  = electrochem::A_c(C, prob_parm) * phi(i,j,k,LS_ID);
+        Real tplus  = electrochem::t_plus(C, prob_parm) * phi(i,j,k,LS_ID);      
         // Diffusional conductivity
         Real KDe  = -1.0 * electrochem::Kd(Ke, Ac, tplus, prob_parm) * phi(i,j,k,LS_ID);
 

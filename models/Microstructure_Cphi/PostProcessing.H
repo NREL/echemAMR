@@ -440,10 +440,11 @@ void echemAMR::postprocess(Real time, int timestep, Real dt, GlobalStorage* glob
             {
                 outfile.open(filename.c_str(), std::ios_base::out);
                 outfile << "Time_step    Time[s]    Anode    Electrolyte    Cathode" << std::endl;
-            } else if (timestep == 0 || ((timestep + 1) % 25 == 0))
-            {
-                outfile.open(filename.c_str(), std::ios_base::out | std::ios_base::app);
-            }
+            } 
+            //else if (timestep == 0 || ((timestep + 1) % 1 == 0))
+            //{
+            outfile.open(filename.c_str(), std::ios_base::out | std::ios_base::app);
+            //}
             outfile.precision(16);
             outfile << timestep << ' ' << std::scientific << time << ' ' << anode_mass_error << ' ' << electrolyte_mass_error << ' ' << cathode_mass_error << std::endl;
     }    
