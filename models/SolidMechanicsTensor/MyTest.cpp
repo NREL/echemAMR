@@ -181,7 +181,7 @@ MyTest::solve ()
 #endif
     };
 
-    WriteMultiLevelPlotfile("stress", 1, {&fluxes_cc},
+    WriteMultiLevelPlotfile(plot_file_name+"_stress", 1, {&fluxes_cc},
                                 varname, {geom}, 0.0, {0}, {IntVect(2)});
 
 
@@ -223,7 +223,7 @@ MyTest::writePlotfile ()
     MultiFab::Copy(plotmf, lamG_deltaT  , 0, 4*AMREX_SPACEDIM+2, 1, 0);
     MultiFab::Copy(plotmf, lamG_deltaT_gradient  , 0, 4*AMREX_SPACEDIM+3, AMREX_SPACEDIM, 0);
     MultiFab::Subtract(plotmf, exact, 0, 2*AMREX_SPACEDIM, AMREX_SPACEDIM, 0);
-    WriteMultiLevelPlotfile("plot", 1, {&plotmf},
+    WriteMultiLevelPlotfile(plot_file_name, 1, {&plotmf},
                             varname, {geom}, 0.0, {0}, {IntVect(2)});
 //    for (int idim = 0; idim < AMREX_SPACEDIM; ++idim) {
 //        amrex::Print() << "\n";
@@ -238,6 +238,8 @@ MyTest::readParameters ()
 {
     ParmParse pp;
     pp.query("n_cell", n_cell);
+    pp.query("n_pad", n_pad);
+    pp.query("m_pad", m_pad);
     pp.query("max_grid_size", max_grid_size);
 
     pp.query("plot_file", plot_file_name);
@@ -250,14 +252,14 @@ MyTest::readParameters ()
 void
 MyTest::initGrids ()
 {
-    const int m = 12;
-    const int n = 6;
     const Real L = 1.0e-5;
-    RealBox rb({AMREX_D_DECL(-m*L,-n*L,-m*L)}, {AMREX_D_DECL(m*L,n*L,m*L)});
+    const Real h = (4*L)/(4*n_cell);
+    RealBox rb({AMREX_D_DECL(-(2*L+m_pad*h),-(L+n_pad*h),-(2*L+m_pad*h))}, {AMREX_D_DECL((2*L+m_pad*h),(2*L+n_pad*h),(2*L+m_pad*h))});
     std::array<int,AMREX_SPACEDIM> isperiodic{AMREX_D_DECL(0,0,0)};
     Geometry::Setup(&rb, 0, isperiodic.data());
-    Box domain(IntVect{AMREX_D_DECL(0,0,0)}, IntVect{AMREX_D_DECL(2*m*n_cell-1,2*n*n_cell-1,2*m*n_cell-1)});
+    Box domain(IntVect{AMREX_D_DECL(0,0,0)}, IntVect{AMREX_D_DECL(4*n_cell+2*m_pad-1,3*n_cell+2*n_pad-1,4*n_cell+2*m_pad-1)});
     geom.define(domain, rb, CoordSys::cartesian, isperiodic);
+
 
     const auto dx     = geom.CellSizeArray();
     amrex::Print() << "dx: " << dx[0] << ' ' << dx[1] << ' ' << dx[2] << std::endl;

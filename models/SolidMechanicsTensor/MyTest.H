@@ -19,6 +19,8 @@ private:
     void initGrids ();
 
     int n_cell = 32;
+    int n_pad = 8;
+    int m_pad = 8;
     int max_grid_size = 64;
 
     std::string plot_file_name{"plot"};
