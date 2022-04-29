@@ -42,9 +42,14 @@ void amrex_probinit (ProbParm & h_prob_parm, ProbParm & d_prob_parm)
     pp.query("mater_cathode", h_prob_parm.mater_cathode);
     pp.query("mater_anode", h_prob_parm.mater_anode);
     pp.query("mater_electrolyte", h_prob_parm.mater_electrolyte);
-    // Nanoscale 
-    pp.query("Nanoscale_CBD", h_prob_parm.Nanoscale_CBD);  
-    pp.query("Nanoscale_separator", h_prob_parm.Nanoscale_separator);  
+    pp.query("mater_CBD", h_prob_parm.mater_CBD);    
+    // Nanoscale coefficients modificators
+    pp.query("Nanoscale_coefficients_txtimport_CBD", h_prob_parm.Nanoscale_coefficients_txtimport_CBD);  
+    pp.query("Nanoscale_coefficients_txtimport_separator", h_prob_parm.Nanoscale_coefficients_txtimport_separator);  
+    // CBD transport behavior
+    pp.query("CBD_transport", h_prob_parm.CBD_transport);  
+    // Replace electrolyte with CBD
+    pp.query("ELEisCBD", h_prob_parm.ELEisCBD);      
 
     // 0D validation
     pp.query("zeroDmodel", h_prob_parm.zeroDmodel);
@@ -141,6 +146,15 @@ void initdomaindata(Box const& bx, Array4<Real> const& phi, GeometryData const& 
 
     // amrex::Print() << "Dimension [0]=" << dimension_geometry[0] << " [1]=" << dimension_geometry[1] << " [2]=" << dimension_geometry[2] << std::endl;
 
+    // Label from imported txt file
+    const int Anode_AM_ID = 1;
+    const int Anode_E_ID = 2;
+    const int Anode_CBD_ID = 3;
+    const int Sep_ID = 4;
+    const int Cathode_AM_ID = 5;
+    const int Cathode_E_ID = 6;
+    const int Cathode_CBD_ID = 7;
+
     for (int k = lo.z; k <= hi.z; ++k) 
     {
         const Real z = prob_lo[2] + (k+0.5)*dx[2];
@@ -159,6 +173,17 @@ void initdomaindata(Box const& bx, Array4<Real> const& phi, GeometryData const& 
                     phi(i, j, k, n) = 0.0; // Initialize all composant to 0
                 }
 
+                phi(i,j,k,A_AM_ID) = 0;
+                phi(i,j,k,A_E_ID) = 0;
+                phi(i,j,k,A_CBD_ID) = 0;
+                phi(i,j,k,S_ID) = 0;
+                phi(i,j,k,C_AM_ID) = 0;
+                phi(i,j,k,C_E_ID) = 0;
+                phi(i,j,k,C_CBD_ID) = 0;
+                phi(i,j,k,NP_ID) = 0;
+                phi(i,j,k,MAC_ID) = 0;
+                phi(i,j,k,LS_ID) = 0;
+
                 int id = (idx+1 + (idy+1-1)*(prob_parm->dimension_geometry[0]) + (idz+1-1)*(prob_parm->dimension_geometry[1])*(prob_parm->dimension_geometry[0]))-1;
                 
                 // You can not use amrex::Print(), as it will only show the print process
@@ -169,20 +194,40 @@ void initdomaindata(Box const& bx, Array4<Real> const& phi, GeometryData const& 
                 std::cout << "id=" << id << " geo[id]=" << geo1D[id] << std::endl;
                 */
 
-                if (prob_parm->geo1D[id] == 1) {
-                    phi(i,j,k,A_ID) = 1;
-                    //std::cout << "i=" << i << " j=" << j << " k=" << k << " -> ANODE" << std::endl;
-                } else if (prob_parm->geo1D[id] == 3) {
-                    phi(i,j,k,E_ID) = 1;
+                if (prob_parm->geo1D[id] == Anode_AM_ID) {
+                    phi(i,j,k,A_AM_ID) = 1;
+                    //std::cout << "i=" << i << " j=" << j << " k=" << k << " -> ANODE active material" << std::endl;
+                } else if (prob_parm->geo1D[id] == Cathode_AM_ID) {
+                    phi(i,j,k,C_AM_ID) = 1;
+                    //std::cout << "i=" << i << " j=" << j << " k=" << k << " -> CATHODE active material" << std::endl;                    
+                } else if (prob_parm->geo1D[id] == Anode_E_ID && prob_parm->ELEisCBD==0) {
+                    phi(i,j,k,A_E_ID) = 1;
                     phi(i,j,k,LS_ID) = 1;
-                    //std::cout << "i=" << i << " j=" << j << " k=" << k << " -> ELECTROLYTE" << std::endl;
-                } else if (prob_parm->geo1D[id] == 4) {
+                    //std::cout << "i=" << i << " j=" << j << " k=" << k << " -> ANODE electrolyte" << std::endl;
+                } else if (prob_parm->geo1D[id] == Cathode_E_ID && prob_parm->ELEisCBD==0) {
+                    phi(i,j,k,C_E_ID) = 1;
+                    phi(i,j,k,LS_ID) = 1;
+                    //std::cout << "i=" << i << " j=" << j << " k=" << k << " -> CATHODE electrolyte" << std::endl;                    
+                } else if (prob_parm->geo1D[id] == Sep_ID) {
                     phi(i,j,k,S_ID) = 1;
                     phi(i,j,k,LS_ID) = 1;
                     //std::cout << "i=" << i << " j=" << j << " k=" << k << " -> SEPARATOR" << std::endl;
-                } else if (prob_parm->geo1D[id] == 2) {
-                    phi(i,j,k,C_ID) = 1;
-                    //std::cout << "i=" << i << " j=" << j << " k=" << k << " -> CATHODE" << std::endl;
+                } else if (prob_parm->geo1D[id] == Anode_CBD_ID || (prob_parm->geo1D[id] == Anode_E_ID && prob_parm->ELEisCBD==1)) {
+                    phi(i,j,k,A_CBD_ID) = 1;
+                    if (prob_parm->CBD_transport==1) { // Mixed domain - Intercalation reaction between CBD and active material
+                        phi(i,j,k,LS_ID) = 1;
+                    } else { // Purely solid domain - no intercalation reaction between CBD and active material
+                        phi(i,j,k,LS_ID) = 0; 
+                    } 
+                    //std::cout << "i=" << i << " j=" << j << " k=" << k << " -> ANODE CBD" << std::endl;
+                } else if (prob_parm->geo1D[id] == Cathode_CBD_ID || (prob_parm->geo1D[id] == Cathode_E_ID && prob_parm->ELEisCBD==1)) {
+                    phi(i,j,k,C_CBD_ID) = 1;
+                    if (prob_parm->CBD_transport==1) { // Mixed domain - Intercalation reaction between CBD and active material
+                        phi(i,j,k,LS_ID) = 1;
+                    } else { // Purely solid domain - no intercalation reaction between CBD and active material
+                        phi(i,j,k,LS_ID) = 0;
+                    } 
+                    //std::cout << "i=" << i << " j=" << j << " k=" << k << " -> CATHODE CBD" << std::endl;                    
                 } else {
                     std::cout << "Error for idx= " << idx << " idy= " << idy << " idz= " << idz << " geo1D[id]= " << prob_parm->geo1D[id] << std::endl;
                     //phi(i,j,k,A_ID) = 1;
@@ -191,7 +236,7 @@ void initdomaindata(Box const& bx, Array4<Real> const& phi, GeometryData const& 
                 // Nanoporosity and MacMullin number 
                 if (phi(i,j,k,S_ID)==0) { // (electrodes)
 
-                    if (prob_parm->Nanoscale_CBD==1) {
+                    if (prob_parm->Nanoscale_coefficients_txtimport_CBD==1) {
                         phi(i,j,k,NP_ID) = prob_parm->Nanoporosity1D[id];
                         phi(i,j,k,MAC_ID) = prob_parm->MacMullin1D[id];
                     } else {
@@ -201,7 +246,7 @@ void initdomaindata(Box const& bx, Array4<Real> const& phi, GeometryData const& 
                     
                 } else { // Separator
 
-                    if (prob_parm->Nanoscale_separator==1) {
+                    if (prob_parm->Nanoscale_coefficients_txtimport_separator==1) {
                         phi(i,j,k,NP_ID) = prob_parm->Nanoporosity1D[id];
                         phi(i,j,k,MAC_ID) = prob_parm->MacMullin1D[id];
                     } else {
@@ -222,8 +267,8 @@ void initialconditions(ProbParm & h_prob_parm, ProbParm & d_prob_parm)
 {
         // INITIAL POTENTIAL
     // Calculate active material volumes
-    const amrex::Real volume_anode = echemAMR::host_global_storage->anode_volume; // [m3]
-    const amrex::Real volume_cathode = echemAMR::host_global_storage->cathode_volume; // [m3]
+    const amrex::Real volume_anode = echemAMR::host_global_storage->anode_AM_volume; // [m3]
+    const amrex::Real volume_cathode = echemAMR::host_global_storage->cathode_AM_volume; // [m3]
 
     const amrex::Real Csmax_anode = electrochem::Cs_max_anode(h_prob_parm); // [mol.m-3]
     const amrex::Real SOCrange_anode = h_prob_parm.anode_soc_max - h_prob_parm.anode_soc_min; // []
@@ -248,28 +293,52 @@ void initialconditions(ProbParm & h_prob_parm, ProbParm & d_prob_parm)
     // Copy current in echemAMR as it is needed for post-processing
     echemAMR::host_global_storage->Applied_current = Applied_current;
 
+    // SOLID-CURRENT COLLECTOR INTERFACE
     // Surface calculations
-    const amrex::Real surface_anodesolid_currentcollector = echemAMR::host_global_storage->anode_cc_SA; // [m2]
-    const amrex::Real surface_cathodsolid_currentcollector = echemAMR::host_global_storage->cathode_cc_SA; // [m2]
-    
+    const amrex::Real surfaceanodeside_currentcollector_activematerial = echemAMR::host_global_storage->anode_ccAM_SA; // [m2]
+    const amrex::Real surfacecathodeside_currentcollector_activematerial = echemAMR::host_global_storage->cathode_ccAM_SA; // [m2]
+    amrex::Real tmp1 = echemAMR::host_global_storage->anode_ccCBDs_SA; // [m2]
+    amrex::Real tmp2 = echemAMR::host_global_storage->cathode_ccCBDs_SA; // [m2]
+    if (h_prob_parm.CBD_transport==1) { // Modified with (1-nanoporosity) (hard-coded for now)
+        tmp1 = tmp1 * (1-0.47); // [m2]
+        tmp2 = tmp2 * (1-0.47); // [m2]        
+    }
+    echemAMR::host_global_storage->CBD_transport=h_prob_parm.CBD_transport; // requried for PostProcessing.H
+    echemAMR::host_global_storage->Nanoscale_coefficients_txtimport_CBD=h_prob_parm.Nanoscale_coefficients_txtimport_CBD;
+    echemAMR::host_global_storage->Nanoscale_coefficients_txtimport_separator=h_prob_parm.Nanoscale_coefficients_txtimport_separator;
+
+    const amrex::Real surfaceanodeside_currentcollector_CBDsolid = tmp1;
+    const amrex::Real surfacecathodeside_currentcollector_CBDsolid = tmp2;
+      
     // Applied current density at the interface active material - current collector, w/ sign
     // These are the two Neumann Boundary conditions value applies at the left and right extremities of the cell
-    amrex::Real Applied_current_density_anode = -Applied_current / surface_anodesolid_currentcollector; // [A.m-2]
-    amrex::Real Applied_current_density_cathode = Applied_current / surface_cathodsolid_currentcollector; // [A.m-2]
+    amrex::Real Applied_current_density_anode = -Applied_current / (surfaceanodeside_currentcollector_activematerial + surfaceanodeside_currentcollector_CBDsolid); // [A.m-2]
+    amrex::Real Applied_current_density_cathode = Applied_current / (surfacecathodeside_currentcollector_activematerial + surfacecathodeside_currentcollector_CBDsolid); // [A.m-2]
     // Update potential BC
-    echemAMR::host_global_storage->pot_bc_lo[0]=-Applied_current_density_cathode/electrochem::Ks_bulk_cathode(1, h_prob_parm);;
+    echemAMR::host_global_storage->pot_bc_lo[0]=-Applied_current_density_cathode/electrochem::Ks_bulk_cathode(1, h_prob_parm);
 
-    // Surface calculations // FIX ME: add surface calculations from Jeff post-processing
-    const amrex::Real surface_anodesolid_electrolyte = echemAMR::host_global_storage->anode_ele_SA;
-    const amrex::Real surface_cathodesolid_electrolyte = echemAMR::host_global_storage->cathode_ele_SA;
+    // ELECTROCHEMICAL ACTIVE INTERFACE
+    // Surface calculations
+    const amrex::Real surfaceanodeside_electrolyte_activematerial = echemAMR::host_global_storage->anode_eleAM_SA;
+    const amrex::Real surfacecathodeside_electrolyte_activematerial = echemAMR::host_global_storage->cathode_eleAM_SA;
+    const amrex::Real surfaceanodeside_separatorp_activematerial = echemAMR::host_global_storage->anode_seppAM_SA;
+    const amrex::Real surfacecathodeside_separatorp_activematerial = echemAMR::host_global_storage->cathode_seppAM_SA;    
+    tmp1 = 0; // [m2]
+    tmp2 = 0; // [m2]
+    if (h_prob_parm.CBD_transport==1) { // Modified with (1-nanoporosity) (hard-coded for now)
+        tmp1 = echemAMR::host_global_storage->anode_CBDpAM_SA * 0.47; // [m2]
+        tmp2 = echemAMR::host_global_storage->cathode_CBDpAM_SA * 0.47; // [m2]        
+    }
+    const amrex::Real surfaceanodeside_CBDpore_activematerial = tmp1;
+    const amrex::Real surfacecathodeside_CBDpore_activematerial = tmp2;
 
     // Initial current density at the interface active material - electrolyte
     // These are the two Neumann Boundary conditions value applied at the active interface.
     // At time=0s, value is uniform along the interface, then it will vary locally while the surface integral ([A]) will be constant and equal to "Applied_current"
     // Any deviation from the equality: Applied_current = integral(current density, ds active material-current collector) = integral(current density, ds active material-electrolyte)
     // will result in an error in mass conservation
-    const amrex::Real Activeinterface_current_density_anode = -Applied_current / surface_anodesolid_electrolyte; // [A.m-2]
-    const amrex::Real Activeinterface_current_density_cathode = Applied_current / surface_cathodesolid_electrolyte; // [A.m-2]
+    const amrex::Real Activeinterface_current_density_anode = -Applied_current / (surfaceanodeside_electrolyte_activematerial + surfaceanodeside_separatorp_activematerial + surfaceanodeside_CBDpore_activematerial); // [A.m-2]
+    const amrex::Real Activeinterface_current_density_cathode = Applied_current / (surfacecathodeside_electrolyte_activematerial + surfacecathodeside_separatorp_activematerial + surfacecathodeside_CBDpore_activematerial); // [A.m-2]
 
     // Deduce potential values that verify this condition: Applied_current = integral(current density, ds active material-current collector) = integral(current density, ds active material-electrolyte) 
     const amrex::Real phis_a_to = h_prob_parm.phi_reference;
@@ -318,16 +387,41 @@ void initproblemdata(Box const& bx, Array4<Real> const& phi, GeometryData const&
         {
             for (int i = lo.x; i <= hi.x; ++i) 
             {
-                 if (phi(i,j,k,C_ID) == 1) { // Within cathode
-                     phi(i,j,k,CO_ID) = prob_parm->cs_c_to;
-                     phi(i,j,k,POT_ID) = prob_parm->phis_c_to;
-                 } else if (phi(i,j,k,A_ID) == 1) { // Within anode
-                     phi(i,j,k,CO_ID) = prob_parm->cs_a_to;
-                     phi(i,j,k,POT_ID) = prob_parm->phis_a_to;
-                 } else if (phi(i,j,k,E_ID) == 1 || phi(i,j,k,S_ID) == 1) { // Within electrolyte and separator
-                     phi(i,j,k,CO_ID) = prob_parm->ce_to;
-                     phi(i,j,k,POT_ID) = prob_parm->phie_to;
-                 }
+                 
+                phi(i,j,k,CO_ID) = 0.0;
+                phi(i,j,k,POT_ID) = 0.0;
+                phi(i,j,k,POTs_ID) = 0.0;
+                
+                if (phi(i,j,k,C_AM_ID) == 1) { // Within cathode
+                    phi(i,j,k,CO_ID) = prob_parm->cs_c_to;
+                    phi(i,j,k,POT_ID) = prob_parm->phis_c_to;
+                } else if (phi(i,j,k,A_AM_ID) == 1) { // Within anode
+                    phi(i,j,k,CO_ID) = prob_parm->cs_a_to;
+                    phi(i,j,k,POT_ID) = prob_parm->phis_a_to;
+                } else if (phi(i,j,k,A_E_ID) == 1 || phi(i,j,k,C_E_ID) == 1 || phi(i,j,k,S_ID) == 1) { // Within electrolyte and separator
+                    phi(i,j,k,CO_ID) = prob_parm->ce_to;
+                    phi(i,j,k,POT_ID) = prob_parm->phie_to;
+                } else if (phi(i,j,k,A_CBD_ID) == 1) { // Within CBD (anode)
+                if (prob_parm->CBD_transport==1) { // Mixed domain
+                    phi(i,j,k,CO_ID) = prob_parm->ce_to; // electrolyte concentration
+                    phi(i,j,k,POT_ID) = prob_parm->phie_to; // electrolyte potential 
+                    phi(i,j,k,POTs_ID) = prob_parm->phis_a_to; // solid potential    
+                } else { // Purely solid domain
+                    phi(i,j,k,CO_ID) = 0.0;
+                    phi(i,j,k,POT_ID) = prob_parm->phis_a_to; // solid potential 
+                }       
+                } else if (phi(i,j,k,C_CBD_ID) == 1) { // Within CBD (cathode)
+                if (prob_parm->CBD_transport==1) { // Mixed domain
+                    phi(i,j,k,CO_ID) = prob_parm->ce_to;  // electrolyte concentration
+                    phi(i,j,k,POT_ID) = prob_parm->phie_to; // electrolyte potential
+                    phi(i,j,k,POTs_ID) = prob_parm->phis_c_to; // solid potential    
+                } else { // Purely solid domain
+                    phi(i,j,k,CO_ID) = 0.0;
+                    phi(i,j,k,POT_ID) = prob_parm->phis_c_to; // solid potential 
+                }                     
+                                        
+                }
+                 
             }
         }
     }
@@ -340,8 +434,8 @@ void print_init_data(ProbParm* prob_parm)
 
     // Calculate active material volumes
     // echemAMR::post_timestep(0, 0); // FIX ME: add volume calculation from Jeff post-processing
-    const amrex::Real volume_anode = echemAMR::host_global_storage->anode_volume; // [m3]
-    const amrex::Real volume_cathode = echemAMR::host_global_storage->cathode_volume; // [m3]
+    const amrex::Real volume_anode = echemAMR::host_global_storage->anode_AM_volume; // [m3]
+    const amrex::Real volume_cathode = echemAMR::host_global_storage->cathode_AM_volume; // [m3]
 
     const amrex::Real Csmax_anode = electrochem::Cs_max_anode(*prob_parm); // [mol.m-3]
     const amrex::Real SOCrange_anode = prob_parm->anode_soc_max - prob_parm->anode_soc_min; // []
@@ -363,30 +457,46 @@ void print_init_data(ProbParm* prob_parm)
     const amrex::Real Current1C = pratical_capacity_cell/3600; // [A=C.s-1] Current for 1C
     const amrex::Real Applied_current = Current1C * Crate; // [A] (but we need the applied current density in A.m-2)
 
-    // Copy current in echemAMR as it is needed for post-processing
-    // echemAMR::host_global_storage->Applied_current = Applied_current;
-
+    // SOLID-CURRENT COLLECTOR INTERFACE
     // Surface calculations
-    const amrex::Real surface_anodesolid_currentcollector = echemAMR::host_global_storage->anode_cc_SA; // [m2]
-    const amrex::Real surface_cathodsolid_currentcollector = echemAMR::host_global_storage->cathode_cc_SA; // [m2]
-
+    const amrex::Real surfaceanodeside_currentcollector_activematerial = echemAMR::host_global_storage->anode_ccAM_SA; // [m2]
+    const amrex::Real surfacecathodeside_currentcollector_activematerial = echemAMR::host_global_storage->cathode_ccAM_SA; // [m2]
+    amrex::Real tmp1 = echemAMR::host_global_storage->anode_ccCBDs_SA; // [m2]
+    amrex::Real tmp2 = echemAMR::host_global_storage->cathode_ccCBDs_SA; // [m2]
+    if (prob_parm->CBD_transport==1) { // Modified with (1-nanoporosity) (hard-coded for now)
+        tmp1 = tmp1 * (1-0.47); // [m2]
+        tmp2 = tmp2 * (1-0.47); // [m2]        
+    }
+    const amrex::Real surfaceanodeside_currentcollector_CBDsolid = tmp1;
+    const amrex::Real surfacecathodeside_currentcollector_CBDsolid = tmp2;
+      
     // Applied current density at the interface active material - current collector, w/ sign
     // These are the two Neumann Boundary conditions value applies at the left and right extremities of the cell
-    // FIX ME: MICHAEL/HARI: could you link g with these two values?
-    const amrex::Real Applied_current_density_anode = -Applied_current / surface_anodesolid_currentcollector; // [A.m-2]
-    const amrex::Real Applied_current_density_cathode = Applied_current / surface_cathodsolid_currentcollector; // [A.m-2]
+    amrex::Real Applied_current_density_anode = -Applied_current / (surfaceanodeside_currentcollector_activematerial + surfaceanodeside_currentcollector_CBDsolid); // [A.m-2]
+    amrex::Real Applied_current_density_cathode = Applied_current / (surfacecathodeside_currentcollector_activematerial + surfacecathodeside_currentcollector_CBDsolid); // [A.m-2]
 
+    // ELECTROCHEMICAL ACTIVE INTERFACE
     // Surface calculations
-    const amrex::Real surface_anodesolid_electrolyte = echemAMR::host_global_storage->anode_ele_SA; 
-    const amrex::Real surface_cathodesolid_electrolyte = echemAMR::host_global_storage->cathode_ele_SA;
+    const amrex::Real surfaceanodeside_electrolyte_activematerial = echemAMR::host_global_storage->anode_eleAM_SA;
+    const amrex::Real surfacecathodeside_electrolyte_activematerial = echemAMR::host_global_storage->cathode_eleAM_SA;
+    const amrex::Real surfaceanodeside_separatorp_activematerial = echemAMR::host_global_storage->anode_seppAM_SA;
+    const amrex::Real surfacecathodeside_separatorp_activematerial = echemAMR::host_global_storage->cathode_seppAM_SA;       
+    tmp1 = 0; // [m2]
+    tmp2 = 0; // [m2]
+    if (prob_parm->CBD_transport==1) { // Modified with (1-nanoporosity) (hard-coded for now)
+        tmp1 = echemAMR::host_global_storage->anode_CBDpAM_SA * 0.47; // [m2]
+        tmp2 = echemAMR::host_global_storage->cathode_CBDpAM_SA * 0.47; // [m2]        
+    }
+    const amrex::Real surfaceanodeside_CBDpore_activematerial = tmp1;
+    const amrex::Real surfacecathodeside_CBDpore_activematerial = tmp2;
 
     // Initial current density at the interface active material - electrolyte
     // These are the two Neumann Boundary conditions value applied at the active interface.
     // At time=0s, value is uniform along the interface, then it will vary locally while the surface integral ([A]) will be constant and equal to "Applied_current"
     // Any deviation from the equality: Applied_current = integral(current density, ds active material-current collector) = integral(current density, ds active material-electrolyte)
     // will result in an error in mass conservation
-    const amrex::Real Activeinterface_current_density_anode = -Applied_current / surface_anodesolid_electrolyte; // [A.m-2]
-    const amrex::Real Activeinterface_current_density_cathode = Applied_current / surface_cathodesolid_electrolyte; // [A.m-2]
+    const amrex::Real Activeinterface_current_density_anode = -Applied_current / (surfaceanodeside_electrolyte_activematerial + surfaceanodeside_separatorp_activematerial + surfaceanodeside_CBDpore_activematerial); // [A.m-2]
+    const amrex::Real Activeinterface_current_density_cathode = Applied_current / (surfacecathodeside_electrolyte_activematerial + surfacecathodeside_separatorp_activematerial + surfacecathodeside_CBDpore_activematerial); // [A.m-2]
 
     // Deduce potential values that verify this condition: Applied_current = integral(current density, ds active material-current collector) = integral(current density, ds active material-electrolyte) 
     const amrex::Real phie_to = electrochem::get_phie_initial_from_anode(Activeinterface_current_density_anode, prob_parm->phi_reference, *prob_parm);
@@ -415,14 +525,18 @@ void print_init_data(ProbParm* prob_parm)
     amrex::Print() << "- Time to (dis)charge within soc range : " << time_to_charge << " [s] " << std::endl;
     amrex::Print() << "- Applied current                      : " << Applied_current << " [A] " << std::endl;
     amrex::Print() << "Anode                     " << std::endl;
-    amrex::Print() << "- active material - current collector interface: " << surface_anodesolid_currentcollector << " [m2] " << std::endl;
+    amrex::Print() << "- active material - current collector interface: " << surfaceanodeside_currentcollector_activematerial << " [m2] " << std::endl;
+    amrex::Print() << "- CBD solid - current collector interface      : " << surfaceanodeside_currentcollector_CBDsolid << " [m2] " << std::endl;
     amrex::Print() << "- Applied current density                      : " << Applied_current_density_anode << " [A.m-2] " << std::endl;
-    amrex::Print() << "- active material - electrolyte interface      : " << surface_anodesolid_electrolyte << " [m2] " << std::endl;
+    amrex::Print() << "- active material - electrolyte interface      : " << surfaceanodeside_electrolyte_activematerial << " [m2] " << std::endl;
+    amrex::Print() << "- active material - CBD nanopore interface     : " << surfaceanodeside_CBDpore_activematerial << " [m2] " << std::endl;
     amrex::Print() << "- Current density at the active interface      : " << Activeinterface_current_density_anode << " [A.m-2] " << std::endl;
     amrex::Print() << "Cathode                     " << std::endl;
-    amrex::Print() << "- active material - current collector interface: " << surface_cathodsolid_currentcollector << " [m2] " << std::endl;
+    amrex::Print() << "- active material - current collector interface: " << surfacecathodeside_currentcollector_activematerial << " [m2] " << std::endl;
+    amrex::Print() << "- CBD solid - current collector interface      : " << surfacecathodeside_currentcollector_CBDsolid << " [m2] " << std::endl;
     amrex::Print() << "- Applied current density                      : " << Applied_current_density_cathode << " [A.m-2] " << std::endl;
-    amrex::Print() << "- active material - electrolyte interface      : " << surface_cathodesolid_electrolyte << " [m2] " << std::endl;
+    amrex::Print() << "- active material - electrolyte interface      : " << surfacecathodeside_electrolyte_activematerial << " [m2] " << std::endl;
+    amrex::Print() << "- active material - CBD nanopore interface     : " << surfacecathodeside_CBDpore_activematerial << " [m2] " << std::endl;
     amrex::Print() << "- Current density at the active interface      : " << Activeinterface_current_density_cathode << " [A.m-2] " << std::endl;
     amrex::Print() << std::endl;
     amrex::Print() << "POTENTIAL INITALIZATION" << std::endl;

@@ -102,13 +102,19 @@ namespace electrochem_transport {
         ProbParm const& prob_parm)
     {
         // Diffusion coefficient = sum( diffusion_coefficient domain i * levelset i), with levelset i=1 if x within domain i, 0 otherwise
-        dcoeff(i,j,k,CO_ID) = (electrochem::Ds_bulk_anode(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,A_ID)
-        + electrochem::Ds_bulk_cathode(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,C_ID)
+        dcoeff(i,j,k,CO_ID) = (electrochem::Ds_bulk_anode(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,A_AM_ID)
+        + electrochem::Ds_bulk_cathode(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,C_AM_ID)
+        + electrochem::Ds_bulk_CBD(prob_parm) * (phi(i,j,k,A_CBD_ID)+phi(i,j,k,C_CBD_ID))
         + electrochem::De_bulk(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,LS_ID)) / phi(i,j,k,MAC_ID);
-        dcoeff(i, j, k, A_ID) = 0.0;
-        dcoeff(i, j, k, C_ID) = 0.0;
-        dcoeff(i, j, k, E_ID) = 0.0;
+        dcoeff(i, j, k, A_AM_ID) = 0.0;
+        dcoeff(i, j, k, A_E_ID) = 0.0;
+        dcoeff(i, j, k, A_CBD_ID) = 0.0;
         dcoeff(i, j, k, S_ID) = 0.0;
+        dcoeff(i, j, k, C_AM_ID) = 0.0;
+        dcoeff(i, j, k, C_E_ID) = 0.0;
+        dcoeff(i, j, k, C_CBD_ID) = 0.0;        
+        dcoeff(i, j, k, NP_ID) = 0.0;
+        dcoeff(i, j, k, MAC_ID) = 0.0;  
         dcoeff(i, j, k, LS_ID) = 0.0;
     }
 
@@ -165,7 +171,8 @@ namespace electrochem_transport {
         }
     }
 
-    AMREX_GPU_DEVICE AMREX_INLINE void compute_potential_dcoeff(
+    
+    AMREX_GPU_DEVICE AMREX_INLINE void compute_potential_dcoeff( // Use if prob_parm.CBD_transport==0
         int i,
         int j,
         int k,
@@ -177,12 +184,47 @@ namespace electrochem_transport {
         const Real time,
         ProbParm const& prob_parm)
     {
-        //dcoeff(i, j, k) = 1.0;
         // Conduction coefficient = sum( conductivity_coefficient domain i * levelset i), with levelset i=1 if x within domain i, 0 otherwise
-        dcoeff(i,j,k) = (electrochem::Ks_bulk_anode(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,A_ID)
-        + electrochem::Ks_bulk_cathode(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,C_ID)
+        dcoeff(i,j,k) = (electrochem::Ks_bulk_anode(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,A_AM_ID)
+        + electrochem::Ks_bulk_cathode(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,C_AM_ID)
+        + electrochem::Ks_bulk_CBD(prob_parm) * (phi(i,j,k,A_CBD_ID)+phi(i,j,k,C_CBD_ID))
         + electrochem::Ke_bulk(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,LS_ID)) / phi(i,j,k,MAC_ID);
+    }    
+    
+    AMREX_GPU_DEVICE AMREX_INLINE void compute_electrolytepotential_dcoeff( // Use if prob_parm.CBD_transport==1
+        int i,
+        int j,
+        int k,
+        Array4<Real> const& phi,
+        Array4<Real> const& dcoeff,
+        GpuArray<Real, AMREX_SPACEDIM> prob_lo,
+        GpuArray<Real, AMREX_SPACEDIM> prob_hi,
+        GpuArray<Real, AMREX_SPACEDIM> dx,
+        const Real time,
+        ProbParm const& prob_parm)
+    {
+        // Conduction coefficient = sum( conductivity_coefficient domain i * levelset i), with levelset i=1 if x within domain i, 0 otherwise
+        dcoeff(i,j,k) = electrochem::Ke_bulk(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,LS_ID) / phi(i,j,k,MAC_ID);
     }
+
+    AMREX_GPU_DEVICE AMREX_INLINE void compute_solidpotential_dcoeff( // Use if prob_parm.CBD_transport==1
+        int i,
+        int j,
+        int k,
+        Array4<Real> const& phi,
+        Array4<Real> const& dcoeff,
+        GpuArray<Real, AMREX_SPACEDIM> prob_lo,
+        GpuArray<Real, AMREX_SPACEDIM> prob_hi,
+        GpuArray<Real, AMREX_SPACEDIM> dx,
+        const Real time,
+        ProbParm const& prob_parm)
+    {
+        // Conduction coefficient = sum( conductivity_coefficient domain i * levelset i), with levelset i=1 if x within domain i, 0 otherwise
+        dcoeff(i,j,k) = (electrochem::Ks_bulk_anode(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,A_AM_ID)
+        + electrochem::Ks_bulk_cathode(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,C_AM_ID)
+        + electrochem::Ks_bulk_CBD(prob_parm) * (phi(i,j,k,A_CBD_ID)+phi(i,j,k,C_CBD_ID))) / phi(i,j,k,MAC_ID);
+    }
+
 
 }
 #endif
