@@ -894,7 +894,7 @@ void echemAMR::compute_dsdt(int lev, const int num_grow, MultiFab& Sborder,
 
             // account for nanoporosity 
             FArrayBox ecoeff_fab(gbx, ncomp);
-            ecoeff_fab.setVal(1.0);
+            ecoeff_fab.setVal<RunOn::Device>(1.0);
             Elixir ecoeff_fab_eli = ecoeff_fab.elixir();
             Array4<Real> ecoeff_arr = ecoeff_fab.array();
             amrex::ParallelFor(bx, ncomp, [=] AMREX_GPU_DEVICE(int i, int j, int k, int n) {
@@ -1212,7 +1212,7 @@ void echemAMR::implicit_solve_species(Real current_time,Real dt,int spec_id,
             Array4<Real> dcoeff_arr = dcoeff_fab.array();
 
             FArrayBox ecoeff_fab(gbx, ncomp);
-            ecoeff_fab.setVal(1.0);
+            ecoeff_fab.setVal<RunOn::Device>(1.0);
             Elixir ecoeff_fab_eli = ecoeff_fab.elixir();
             Array4<Real> ecoeff_arr = ecoeff_fab.array();
 
