@@ -90,8 +90,8 @@ namespace electrochem_reactions {
         IntVect right(i, j, k);
         left[normaldir] -= 1;
 
-        Real anodefrac   = 0.5*(phi(left,A_ID) + phi(right,A_ID));
-        Real cathodefrac = 0.5*(phi(left,C_ID) + phi(right,C_ID));
+        Real anodefrac   = 0.5*(phi(left,A_AM_ID) + phi(right,A_AM_ID));
+        Real cathodefrac = 0.5*(phi(left,C_AM_ID) + phi(right,C_AM_ID));
         
         Real ls_left  = phi(left,LS_ID);
         Real ls_right = phi(right,LS_ID);

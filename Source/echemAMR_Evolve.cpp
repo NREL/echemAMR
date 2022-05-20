@@ -126,7 +126,7 @@ void echemAMR::Evolve()
 
         cur_time += dt[0];
 
-        postprocess(cur_time, step, dt[0], echemAMR::host_global_storage);
+        postprocess(cur_time, step+1, dt[0], echemAMR::host_global_storage);
 
         amrex::Print() << "Coarse STEP " << step + 1 << " ends."
                        << " TIME = " << cur_time << " DT = " << dt[0] << std::endl;
