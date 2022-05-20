@@ -106,16 +106,16 @@ namespace electrochem_transport {
         + electrochem::Ds_bulk_cathode(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,C_AM_ID)
         + electrochem::Ds_bulk_CBD(prob_parm) * (phi(i,j,k,A_CBD_ID)+phi(i,j,k,C_CBD_ID))
         + electrochem::De_bulk(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,LS_ID)) / phi(i,j,k,MAC_ID);
-        dcoeff(i, j, k, A_AM_ID) = 0.0;
-        dcoeff(i, j, k, A_E_ID) = 0.0;
+        dcoeff(i, j, k, A_AM_ID)  = 0.0;
+        dcoeff(i, j, k, A_E_ID)   = 0.0;
         dcoeff(i, j, k, A_CBD_ID) = 0.0;
-        dcoeff(i, j, k, S_ID) = 0.0;
-        dcoeff(i, j, k, C_AM_ID) = 0.0;
-        dcoeff(i, j, k, C_E_ID) = 0.0;
+        dcoeff(i, j, k, S_ID)     = 0.0;
+        dcoeff(i, j, k, C_AM_ID)  = 0.0;
+        dcoeff(i, j, k, C_E_ID)   = 0.0;
         dcoeff(i, j, k, C_CBD_ID) = 0.0;        
-        dcoeff(i, j, k, NP_ID) = 0.0;
-        dcoeff(i, j, k, MAC_ID) = 0.0;  
-        dcoeff(i, j, k, LS_ID) = 0.0;
+        dcoeff(i, j, k, NP_ID)    = 0.0;
+        dcoeff(i, j, k, MAC_ID)   = 0.0;  
+        dcoeff(i, j, k, LS_ID)    = 0.0;
     }
 
     AMREX_GPU_DEVICE AMREX_INLINE void compute_eps(
@@ -127,16 +127,14 @@ namespace electrochem_transport {
     {
         // set the nanoporosity per cell
         ecoeff(i, j, k, CO_ID) = (
-                phi(i,j,k,A_ID) * phi(i,j,k,NP_ID)
-              + phi(i,j,k,E_ID) * phi(i,j,k,NP_ID)
-              + phi(i,j,k,S_ID) * phi(i,j,k,NP_ID)
-              + phi(i,j,k,C_ID) * phi(i,j,k,NP_ID)
+                phi(i, j, k, A_AM_ID)  * phi(i,j,k,NP_ID)
+              + phi(i, j, k, A_E_ID)   * phi(i,j,k,NP_ID)
+              + phi(i, j, k, A_CBD_ID) * phi(i,j,k,NP_ID)
+              + phi(i, j, k, S_ID)     * phi(i,j,k,NP_ID)
+              + phi(i, j, k, C_AM_ID)  * phi(i,j,k,NP_ID)
+              + phi(i, j, k, C_E_ID)   * phi(i,j,k,NP_ID)
+              + phi(i, j, k, C_CBD_ID) * phi(i,j,k,NP_ID)
             );
-        ecoeff(i, j, k, A_ID)  = 1.0;
-        ecoeff(i, j, k, C_ID)  = 1.0;
-        ecoeff(i, j, k, E_ID)  = 1.0;
-        ecoeff(i, j, k, S_ID)  = 1.0;
-        ecoeff(i, j, k, LS_ID) = 1.0;
     }
 
     AMREX_GPU_DEVICE AMREX_INLINE void compute_velx(
