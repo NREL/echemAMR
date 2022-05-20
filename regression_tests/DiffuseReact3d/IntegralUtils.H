@@ -11,17 +11,19 @@ namespace electrochem_integral_utils
 //TODO: incorporate a level mask
 AMREX_GPU_HOST_DEVICE
 AMREX_FORCE_INLINE
-Real volume_value(int i, int j, int k, int comp, int domain,
-                    Array4<Real const> const& phi,
-                    Array4<int const> const& mask_arr,
-                    GpuArray<Real, AMREX_SPACEDIM> dx
-                    )
+Real volume_value(int i, int j, int k, int comp1, int comp2, int domain,
+        Array4<Real const> const& phi,
+        Array4<int const> const& mask_arr,
+        GpuArray<Real, AMREX_SPACEDIM> dx
+        )
 {
 
-    Real val = 1.0;
+    Real  val= 1.0;
 
-    if( comp > -1 )
-        val = phi(i,j,k,comp);
+    if( comp1 > -1 )
+        val = phi(i,j,k,comp1);
+        if ( comp2 > -1 )
+            val = val * phi(i,j,k,comp2);
 
     if( phi(i,j,k,domain) > 0 )
         return val*dx[0]*dx[1]*dx[2];
