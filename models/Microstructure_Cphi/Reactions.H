@@ -87,7 +87,7 @@ namespace electrochem_reactions {
         Real Actf =  1.0-bv_activation_function(0.5*(phi(i,j,k+1,LS_ID)+phi(i,j,k,LS_ID)),gradc_dummy,gradc_cutoff_dummy);
 
         source(i,j,k) = -(  (  Actr*KDr*std::log(phi(i+1,j,k,CO_ID)/phi(i,j,k,CO_ID)) - Actl*KDl*std::log(phi(i,j,k,CO_ID)/phi(i-1,j,k,CO_ID)) )/dx[0]/dx[0]
-                        +   (  Actt*KDb*std::log(phi(i,j+1,k,CO_ID)/phi(i,j,k,CO_ID)) - Actb*KDb*std::log(phi(i,j,k,CO_ID)/phi(i,j-1,k,CO_ID)) )/dx[1]/dx[1]
+                        +   (  Actt*KDb*std::log(phi(i,j+1,k,CO_ID)/phi(i,j,k,CO_ID)) - Actb*KDt*std::log(phi(i,j,k,CO_ID)/phi(i,j-1,k,CO_ID)) )/dx[1]/dx[1]
                         +   (  Actf*KDf*std::log(phi(i,j,k+1,CO_ID)/phi(i,j,k,CO_ID)) - Actk*KDk*std::log(phi(i,j,k,CO_ID)/phi(i,j,k-1,CO_ID)) )/dx[2]/dx[2] );
 
 
