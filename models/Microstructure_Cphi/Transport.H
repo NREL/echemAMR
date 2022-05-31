@@ -101,21 +101,31 @@ namespace electrochem_transport {
         const Real time,
         ProbParm const& prob_parm)
     {
+        
+        // Intermediate coefficients
+        Real C = phi(i, j, k, CO_ID);
+        Real Ke  =  electrochem::Ke_bulk(C, prob_parm) * phi(i,j,k,LS_ID) / phi(i,j,k,MAC_ID);
+        Real Ac  = electrochem::A_c(C, prob_parm) * phi(i,j,k,LS_ID);
+        Real tplus  = electrochem::t_plus(C, prob_parm) * phi(i,j,k,LS_ID);      
+        // Diffusional conductivity
+        Real KDe  = electrochem::Kd(Ke, Ac, tplus, prob_parm) * phi(i,j,k,LS_ID);        
+        
         // Diffusion coefficient = sum( diffusion_coefficient domain i * levelset i), with levelset i=1 if x within domain i, 0 otherwise
-        dcoeff(i,j,k,CO_ID) = (electrochem::Ds_bulk_anode(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,A_AM_ID)
-        + electrochem::Ds_bulk_cathode(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,C_AM_ID)
+        dcoeff(i,j,k,CO_ID) = (electrochem::Ds_bulk_anode(C, prob_parm) * phi(i,j,k,A_AM_ID)
+        + electrochem::Ds_bulk_cathode(C, prob_parm) * phi(i,j,k,C_AM_ID)
         + electrochem::Ds_bulk_CBD(prob_parm) * (phi(i,j,k,A_CBD_ID)+phi(i,j,k,C_CBD_ID))
-        + electrochem::De_bulk(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,LS_ID)) / phi(i,j,k,MAC_ID);
-        dcoeff(i, j, k, A_AM_ID)  = 0.0;
-        dcoeff(i, j, k, A_E_ID)   = 0.0;
+        + (electrochem::De_bulk(C, prob_parm)/phi(i,j,k,MAC_ID) - tplus/FARADCONST*KDe/C) * phi(i,j,k,LS_ID)) ;
+        // + (electrochem::De_bulk(C, prob_parm)/phi(i,j,k,MAC_ID)) * phi(i,j,k,LS_ID)) ;
+        dcoeff(i, j, k, A_AM_ID) = 0.0;
+        dcoeff(i, j, k, A_E_ID) = 0.0;
         dcoeff(i, j, k, A_CBD_ID) = 0.0;
-        dcoeff(i, j, k, S_ID)     = 0.0;
-        dcoeff(i, j, k, C_AM_ID)  = 0.0;
-        dcoeff(i, j, k, C_E_ID)   = 0.0;
+        dcoeff(i, j, k, S_ID) = 0.0;
+        dcoeff(i, j, k, C_AM_ID) = 0.0;
+        dcoeff(i, j, k, C_E_ID) = 0.0;
         dcoeff(i, j, k, C_CBD_ID) = 0.0;        
-        dcoeff(i, j, k, NP_ID)    = 0.0;
-        dcoeff(i, j, k, MAC_ID)   = 0.0;  
-        dcoeff(i, j, k, LS_ID)    = 0.0;
+        dcoeff(i, j, k, NP_ID) = 0.0;
+        dcoeff(i, j, k, MAC_ID) = 0.0;  
+        dcoeff(i, j, k, LS_ID) = 0.0;
     }
 
     AMREX_GPU_DEVICE AMREX_INLINE void compute_eps(

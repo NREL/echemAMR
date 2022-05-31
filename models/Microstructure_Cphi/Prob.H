@@ -173,17 +173,6 @@ void initdomaindata(Box const& bx, Array4<Real> const& phi, GeometryData const& 
                     phi(i, j, k, n) = 0.0; // Initialize all composant to 0
                 }
 
-                phi(i,j,k,A_AM_ID) = 0;
-                phi(i,j,k,A_E_ID) = 0;
-                phi(i,j,k,A_CBD_ID) = 0;
-                phi(i,j,k,S_ID) = 0;
-                phi(i,j,k,C_AM_ID) = 0;
-                phi(i,j,k,C_E_ID) = 0;
-                phi(i,j,k,C_CBD_ID) = 0;
-                phi(i,j,k,NP_ID) = 0;
-                phi(i,j,k,MAC_ID) = 0;
-                phi(i,j,k,LS_ID) = 0;
-
                 int id = (idx+1 + (idy+1-1)*(prob_parm->dimension_geometry[0]) + (idz+1-1)*(prob_parm->dimension_geometry[1])*(prob_parm->dimension_geometry[0]))-1;
                 
                 // You can not use amrex::Print(), as it will only show the print process
@@ -388,10 +377,6 @@ void initproblemdata(Box const& bx, Array4<Real> const& phi, GeometryData const&
             for (int i = lo.x; i <= hi.x; ++i) 
             {
                  
-                phi(i,j,k,CO_ID) = 0.0;
-                phi(i,j,k,POT_ID) = 0.0;
-                phi(i,j,k,POTs_ID) = 0.0;
-                
                 if (phi(i,j,k,C_AM_ID) == 1) { // Within cathode
                     phi(i,j,k,CO_ID) = prob_parm->cs_c_to;
                     phi(i,j,k,POT_ID) = prob_parm->phis_c_to;
