@@ -8,6 +8,10 @@ namespace electrochem
     {
         specnames[S1_ID]="S1";
         specnames[S2_ID]="S2";
+        specnames[EFX_ID] = "Efieldx";
+        specnames[EFY_ID] = "Efieldy";
+        specnames[EFZ_ID] = "Efieldz";
+        specnames[POT_ID] = "Potential";
     }    
     void close()
     {

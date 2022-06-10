@@ -11,6 +11,10 @@ namespace electrochem
         specnames[C_ID]  = "Cathode";
         specnames[E_ID]  = "Electrolyte";
         specnames[LS_ID] ="levelset";
+        specnames[EFX_ID] = "Efieldx";
+        specnames[EFY_ID] = "Efieldy";
+        specnames[EFZ_ID] = "Efieldz";
+        specnames[POT_ID] = "Potential";
     }    
     void close()
     {

@@ -217,10 +217,12 @@ void initdomaindata(Box const& bx, Array4<Real> const& phi, GeometryData const& 
                         phi(i,j,k,LS_ID) = 0;
                     } 
                     //std::cout << "i=" << i << " j=" << j << " k=" << k << " -> CATHODE CBD" << std::endl;                    
-                } else {
-                    std::cout << "Error for idx= " << idx << " idy= " << idy << " idz= " << idz << " geo1D[id]= " << prob_parm->geo1D[id] << std::endl;
-                    //phi(i,j,k,A_ID) = 1;
-                }
+                } 
+                // we cannot print on gpu
+                // else {
+                //     std::cout << "Error for idx= " << idx << " idy= " << idy << " idz= " << idz << " geo1D[id]= " << prob_parm->geo1D[id] << std::endl;
+                //     //phi(i,j,k,A_ID) = 1;
+                // }
 
                 // Nanoporosity and MacMullin number 
                 if (phi(i,j,k,S_ID)==0) { // (electrodes)
