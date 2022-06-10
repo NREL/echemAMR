@@ -3,6 +3,7 @@
 
 #include <AMReX_REAL.H>
 #include <AMReX_GpuMemory.H>
+#include <AMReX_Vector.H>
 
 using namespace amrex::literals;
 
@@ -46,7 +47,12 @@ struct ProbParm
     // GEOMETRY
     // --------------
     std::string geometry_filename = "CEAtest.txt";
-
+    int dimension_geometry[3];
+    int geo1D[300];
+    // std::vector<int> geo1D;
+    // amrex::Vector<int> geo1D;
+    // amrex::Gpu::PinnedVector<int> geo1D;
+    // amrex::Gpu::ManagedVector<int> geo1D{0};
     // --------------
     // INITIAL CONDITIONS and APPLIED LOADING
     // --------------
@@ -81,6 +87,15 @@ struct ProbParm
     // - 0.5, 1C: slow charge rate
     // - up to 4C: intermediate charge rate
     // - >= 6C: fast charge (DOE's target is to charge in 10 minutes or less, that's our target).
+
+
+    amrex::Real phis_a_to;
+    amrex::Real phie_to;
+    amrex::Real phis_c_to;
+    amrex::Real cs_a_to;
+    amrex::Real cs_c_to;
+    amrex::Real ce_to;
+
 
 };
 struct GlobalStorage

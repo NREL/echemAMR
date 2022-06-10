@@ -3,8 +3,8 @@ AMREX_HOME ?= ../../amrex
 PRECISION  = DOUBLE
 PROFILE    = FALSE
 
-DEBUG      = TRUE
-#DEBUG      = FALSE
+# DEBUG      = TRUE
+DEBUG      = FALSE
 
 #DIM        = 2
 DIM       = 3
@@ -15,6 +15,7 @@ USE_MPI    = TRUE
 USE_OMP    = FALSE 
 USE_CUDA   = FALSE
 USE_HYPRE  = TRUE
+TINY_PROFILE = TRUE
 
 Bpack   := ./Make.package 
 Blocs   := . 
