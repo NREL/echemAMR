@@ -2,7 +2,7 @@
 
 namespace electrochem
 {
-    amrex::Vector<std::string> specnames(NUM_SPECIES);
+    amrex::Vector<std::string> specnames(NVAR);
 
     void init()
     {
