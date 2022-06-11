@@ -48,7 +48,7 @@ struct ProbParm
     // --------------
     std::string geometry_filename = "CEAtest.txt";
     int dimension_geometry[3];
-    int geo1D[300];
+    int geo1D[380000];
     // std::vector<int> geo1D;
     // amrex::Vector<int> geo1D;
     // amrex::Gpu::PinnedVector<int> geo1D;

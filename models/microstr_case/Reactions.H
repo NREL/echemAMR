@@ -92,6 +92,8 @@ namespace electrochem_reactions {
             }
         }
 
+        jbv=0.0;
+        jbvder=0.0;
         if(anodefrac > 0.0)
         {
             jbv  = electrochem::intercalation_reaction_anode(cs, ce, phi_jump, prob_parm);
