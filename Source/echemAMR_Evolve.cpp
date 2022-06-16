@@ -1164,7 +1164,7 @@ void echemAMR::implicit_solve_species(Real current_time,Real dt,int spec_id,
     for (int ilev = 0; ilev <= finest_level; ilev++)
     {
         specdata[ilev].define(grids[ilev], dmap[ilev], 1, num_grow);
-        acoeff[ilev].define(grids[ilev], dmap[ilev], 1, 0);
+        acoeff[ilev].define(grids[ilev], dmap[ilev], 1, num_grow);
         bcoeff[ilev].define(grids[ilev], dmap[ilev], 1, num_grow);
         solution[ilev].define(grids[ilev], dmap[ilev], 1, num_grow);
         rhs[ilev].define(grids[ilev], dmap[ilev], 1, 0);
@@ -1224,8 +1224,8 @@ void echemAMR::implicit_solve_species(Real current_time,Real dt,int spec_id,
                     electrochem_transport::compute_eps(i, j, k, phi_arr, 
                             ecoeff_arr);
 
-                    acoeff_arr(i,j,k)=ecoeff_arr(i,j,k,spec_id);
                     bcoeff_arr(i,j,k)=dcoeff_arr(i,j,k,spec_id);
+                    acoeff_arr(i,j,k)=ecoeff_arr(i,j,k,spec_id);
                     });
         }
         
