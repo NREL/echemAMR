@@ -18,7 +18,9 @@ private:
     void readParameters ();
     void initGrids ();
 
-    int n_cell = 128;
+    int n_cell = 32;
+    int n_pad = 8;
+    int m_pad = 8;
     int max_grid_size = 64;
 
     std::string plot_file_name{"plot"};
@@ -37,8 +39,8 @@ private:
     amrex::MultiFab rhs;
     amrex::MultiFab eta;
     amrex::MultiFab kappa;
-    amrex::MultiFab concentration;
-    amrex::MultiFab concentration_gradient;
+    amrex::MultiFab lamG_deltaT;
+    amrex::MultiFab lamG_deltaT_gradient;
 
 };
 

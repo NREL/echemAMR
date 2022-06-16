@@ -17,7 +17,7 @@ namespace electrochem_reactions {
         // f=(gradc > gradc_cutoff)?1.0:0.0;
         f = (c * (1 - c) > tol * maxval) ? 1.0 : 0.0;
         return (f);
-    }    
+    }
     AMREX_GPU_DEVICE AMREX_INLINE void compute_react_source(
             int i,
             int j,
@@ -86,11 +86,11 @@ namespace electrochem_reactions {
         // Intermediate coefficients
         Real Ke  =  electrochem::Ke_bulk(C, prob_parm) * phi(i,j,k,LS_ID) / phi(i,j,k,MAC_ID);
         Real Ac  = electrochem::A_c(C, prob_parm) * phi(i,j,k,LS_ID);
-        Real tplus  = electrochem::t_plus(C, prob_parm) * phi(i,j,k,LS_ID);      
-        // Diffusional conductivity
+        Real tplus  = electrochem::t_plus(C, prob_parm) * phi(i,j,k,LS_ID);
+      
+        // Diffusional conductivit
         Real KDe  = electrochem::Kd(Ke, Ac, tplus, prob_parm) * phi(i,j,k,LS_ID);
-
-        
+              
         Real KDl  = 0.5 * (phi(i-1,j,k,LS_ID)+phi(i,j,k,LS_ID)) * KDe;
         Real KDr  = 0.5 * (phi(i+1,j,k,LS_ID)+phi(i,j,k,LS_ID)) * KDe;
         
@@ -108,22 +108,14 @@ namespace electrochem_reactions {
         
         Real Actk =  1.0-bv_activation_function(0.5*(phi(i,j,k-1,LS_ID)+phi(i,j,k,LS_ID)),gradc_dummy,gradc_cutoff_dummy);
         Real Actf =  1.0-bv_activation_function(0.5*(phi(i,j,k+1,LS_ID)+phi(i,j,k,LS_ID)),gradc_dummy,gradc_cutoff_dummy);
-
+      
+        // Enable for KD
         //source(i,j,k) = -(  (  Actr*KDr*std::log(phi(i+1,j,k,CO_ID)/phi(i,j,k,CO_ID)) - Actl*KDl*std::log(phi(i,j,k,CO_ID)/phi(i-1,j,k,CO_ID)) )/dx[0]/dx[0]
         //                +   (  Actt*KDt*std::log(phi(i,j+1,k,CO_ID)/phi(i,j,k,CO_ID)) - Actb*KDb*std::log(phi(i,j,k,CO_ID)/phi(i,j-1,k,CO_ID)) )/dx[1]/dx[1]
         //                +   (  Actf*KDf*std::log(phi(i,j,k+1,CO_ID)/phi(i,j,k,CO_ID)) - Actk*KDk*std::log(phi(i,j,k,CO_ID)/phi(i,j,k-1,CO_ID)) )/dx[2]/dx[2] );
 
         source(i, j, k) = 0.0; // No Kd
-        
-        // Before:
-        //Real LSX = min(phi(i-1,j,k,LS_ID),min(phi(i,j,k,LS_ID),phi(i+1,j,k,LS_ID)));
-        //Real LSY = min(phi(i,j-1,k,LS_ID),min(phi(i,j,k,LS_ID),phi(i,j+1,k,LS_ID)));
-        //Real LSZ = min(phi(i,j,k-1,LS_ID),min(phi(i,j,k,LS_ID),phi(i,j,k+1,LS_ID)));
 
-        //source(i,j,k) = -(1.0/C)*(LSX*(KDr*(phi(i+1,j,k,CO_ID)-phi(i,j,k,CO_ID)) - KDl*(phi(i,j,k,CO_ID)-phi(i-1,j,k,CO_ID)))/dx[0]/dx[0]
-        //                        +  LSY*(KDt*(phi(i,j+1,k,CO_ID)-phi(i,j,k,CO_ID)) - KDb*(phi(i,j,k,CO_ID)-phi(i,j-1,k,CO_ID)))/dx[1]/dx[1]
-        //                        +  LSZ*(KDf*(phi(i,j,k+1,CO_ID)-phi(i,j,k,CO_ID)) - KDk*(phi(i,j,k,CO_ID)-phi(i,j,k-1,CO_ID)))/dx[2]/dx[2]);
-        
     }
 
     AMREX_GPU_DEVICE AMREX_INLINE void bvcurrent_and_der(int i,int j,int k,int normaldir,
