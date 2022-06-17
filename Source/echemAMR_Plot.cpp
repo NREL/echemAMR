@@ -37,15 +37,15 @@ Vector<std::string> echemAMR::PlotFileVarNames() const
 
     allnames.resize(NVAR);
 
-    for (int i = 0; i < NUM_SPECIES; i++)
+    for (int i = 0; i < NVAR; i++)
     {
         allnames[i] = electrochem::specnames[i];
-    }
-    allnames[NVAR - 4] = "Efieldx";
-    allnames[NVAR - 3] = "Efieldy";
-    allnames[NVAR - 2] = "Efieldz";
-    allnames[NVAR - 1] = "Potential";
+        // amrex::Print() << "Writing allnames[i] " << allnames[i] << "\n";
 
+    }
+    //allnames[NVAR - 3] = "Efieldx";
+    //allnames[NVAR - 2] = "Efieldy";
+    //allnames[NVAR - 1] = "Efieldz";
     return {allnames};
 }
 

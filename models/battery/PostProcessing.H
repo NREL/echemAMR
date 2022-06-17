@@ -279,10 +279,10 @@ void line_plot(
         std::ofstream outfile[num_files];
         std::string filename[num_files];
 
-        filename[0] = "anode_" + filename_type + ".csv";
-        filename[1] = "cathode_" + filename_type + ".csv";
-        filename[2] = "electrolyte_" + filename_type + ".csv";
-        filename[3] = "separator_" + filename_type + ".csv";
+        filename[0] = echemAMR::output_folder + "line_plots/anode_" + filename_type + ".csv";
+        filename[1] = echemAMR::output_folder + "line_plots/cathode_" + filename_type + ".csv";
+        filename[2] = echemAMR::output_folder + "line_plots/electrolyte_" + filename_type + ".csv";
+        filename[3] = echemAMR::output_folder + "line_plots/separator_" + filename_type + ".csv";
 
         for (int f = 0; f < num_files; ++f)
         {

@@ -1,12 +1,20 @@
+output_folder = output/
 max_step  = 100000000
 stop_time = 4000.0
 
+#------------------------
 # PROBLEM SIZE & GEOMETRY
+#------------------------
 geometry.is_periodic =  0  0  0
 geometry.coord_sys   =  0       # 0 => cart
 geometry.prob_lo     =  0.0   0.0    0.0 
 geometry.prob_hi     =  150e-6 37.5e-6  37.5e-6
-amr.n_cell           =  512 128 128
+#amr.n_cell           =  512 128 128
+amr.n_cell           =  64  16 16
+#amr.n_cell           =  128  32 32
+
+prob.interface1=0.1 # Cathode from 0 to interface1*prob_hi[0]
+prob.interface2=0.9 # Anode from interface2*prob_hi[0] to 1*prob_hi[0]
 
 # VERBOSITY
 amr.v              = 1       # verbosity in Amr
@@ -18,12 +26,16 @@ amr.max_grid_size   = 32
 
 amr.regrid_int      = 1       # how often to regrid
 
+amr.line_plot_int = 50 # Export each time step C and phi along a line
+amr.line_plot_dir = 0 # Along direction
+amr.line_plot_npoints = 10  # Number of point along the line
+
 # TIME STEP CONTROL
-echemamr.cfl            = 0.8    
+echemamr.cfl            = 0.8    # 0.8 Defautl
 
 echemamr.do_reflux = 1
 echemamr.potential_solve = 1
-echemamr.potential_solve_int = 10000
+echemamr.potential_solve_int = 100
 
 #periodic 0
 #extdir 3
@@ -65,10 +77,43 @@ echemamr.use_hypre=1
 
 # PLOTFILES
 amr.plot_file  = plt    # root name of plot file
-amr.plot_int   = 2000   # number of timesteps between plot files
+amr.plot_int   = 200   # number of timesteps between plot files
 
 # CHECKPOINT
 amr.chk_file = chk      # root name of checkpoint file
 amr.chk_int  = -1       # number of timesteps between checkpoint files
 
-prob.crate=1.0
+
+#----------
+# MATERIALS
+#----------
+# Mater_* = 0: simple test expression
+#         = 1: real expression simplified
+#         = 2: real expression
+prob.mater_cathode = 1
+prob.mater_anode = 1
+prob.mater_electrolyte = 1
+# Electrode materials (de)lithiation range does not go from SOC 0 to 1 due to crystallographic instability.
+# Therefore, we define a min-max range for SOC, which corresponds to the pratical range of the electrode.
+prob.cathode_soc_min = 0.4 # []
+prob.cathode_soc_max = 0.999 # []
+prob.anode_soc_min = 0.001 # []
+prob.anode_soc_max = 0.999 # []
+
+# Special case: 0D model comparison [0=false, 1=true]
+# If true, diffusivity and conductivity are set to un-realistic high values
+prob.zeroDmodel = 0
+
+#---------------
+# INITIALIZATION
+#---------------
+prob.ce_atrest=1200 # [mol.m-3] Electrolyte initial concentration in both separator and electrodes 
+prob.soc_anode_t0=0.001 # [] Initial state of charge for the solid anode (ratio of cs,max). Must be between anode_soc_min and anode_soc_max.
+prob.soc_cathode_t0=0.999 # [] Initial state of charge for the solid cathode (ratio of cs,max). Must be between cathode_soc_min and cathode_soc_max.
+prob.phi_reference=0.0 # [V] Arbitrary value
+
+# -------
+# LOADING
+# -------
+prob.Crate=0.1 # []
+prob.Temperature = 300.0 # [K]. Assumed uniform and constant.

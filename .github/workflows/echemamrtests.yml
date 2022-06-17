@@ -17,7 +17,11 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y --no-install-recommends \
         build-essential g++ gfortran libopenmpi-dev openmpi-bin
-    - name: Build
+        git clone https://github.com/hypre-space/hypre.git
+        cd hypre/src
+        ./configure
+        make install
+    - name: Build Regression
       working-directory: ./regression_tests
       run: |
         cd DriftDiffuse1d
@@ -31,7 +35,12 @@ jobs:
         cd ..
         cd CEA
         make -j 2 COMP=gnu
-    - name: Run
+    - name: Build Models
+      working-directory: ./models
+      run: |
+        cd Microstructure_Cphi
+        make -j 2 COMP=gnu DEBUG=FALSE
+    - name: Run Regression
       working-directory: ./regression_tests
       run: |
           cd DriftDiffuse1d
@@ -53,6 +62,11 @@ jobs:
           mpirun -n 2 ./echemAMR3d.gnu.MPI.ex inputs_x
           mpirun -n 2 ./echemAMR3d.gnu.MPI.ex inputs_y
           mpirun -n 2 ./echemAMR3d.gnu.MPI.ex inputs_z
+    - name: Run Model
+      working-directory: ./models
+      run: |
+          cd Microstructure_Cphi
+          mpirun -n 2 ./echemAMR3d.gnu.TPROF.MPI.ex inputs_CESEA_case1
   gputest:
     runs-on: ubuntu-latest
     steps:
@@ -65,12 +79,17 @@ jobs:
           wget -q -O - https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub | sudo apt-key add -
           echo "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64 /" | sudo tee /etc/apt/sources.list.d/cuda.list
           echo "deb https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64 /" | sudo tee /etc/apt/sources.list.d/nvidia-ml.list
+          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A4B469963BF863CC
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
           g++ gfortran libopenmpi-dev openmpi-bin cuda-command-line-tools-11-1 \
           cuda-compiler-11-1 cuda-minimal-build-11-1 \
           cuda-nvml-dev-11-1 cuda-nvtx-11-1 libcurand-dev-11-1 cuda-cupti-dev-11-1
-    - name: Build
+          git clone https://github.com/hypre-space/hypre.git
+          cd hypre/src
+          ./configure
+          make install
+    - name: Build Regression
       working-directory: ./regression_tests
       run: |
         export PATH=/usr/local/nvidia/bin:/usr/local/cuda-11.1/bin:${PATH}
@@ -86,3 +105,10 @@ jobs:
         cd ..
         cd CEA
         make -j 2 COMP=gnu USE_CUDA=TRUE
+    - name: Build Model
+      working-directory: ./models
+      run: |
+        export PATH=/usr/local/nvidia/bin:/usr/local/cuda-11.1/bin:${PATH}
+        export LD_LIBRARY_PATH=/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda-11.1/lib:${LD_LIBRARY_PATH}
+        cd Microstructure_Cphi
+        make -j 2 COMP=gnu USE_CUDA=TRUE USE_HYPRE=FALSE

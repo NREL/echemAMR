@@ -5,12 +5,18 @@
 #include <Chemistry.H>
 #include <IntegralUtils.H>
 
-// Returns the volume integral of the state variable <comp> on <domain>
+// Returns the volume integral of the state variable <comp1*comp2> on <domain>
+// comp1=-1 : integral(1*dx*dy*dz) over domain
+// comp1=ID1 and comp2=-1: integral(comp1*dx*dy*dz) over domain
+// comp1=ID1 and comp2=ID2: integral(comp1*comp2*dx*dy*dz) over domain
+// Last case is useful for electrolyte mol: concentration*nanoporosity
+// To get volume average, you would need to also divide by volume
 // TODO: incorperate a level mask
-Real echemAMR::VolumeIntegral(int comp, int domain)
+Real echemAMR::VolumeIntegral(int comp1, int comp2, int domain)
 {
     Real exact_con;
-    int captured_comp = comp;
+    int captured_comp1 = comp1;
+    int captured_comp2 = comp2;    
     int captured_dm = domain;
     Real vol = 0.0;
     for (int lev = 0; lev <= finest_level; ++lev)
@@ -43,7 +49,7 @@ Real echemAMR::VolumeIntegral(int comp, int domain)
 
                     Real vol_part = 0.0;
                     amrex::Loop(bx, [=, &vol_part](int i, int j, int k) noexcept {
-                        vol_part += electrochem_integral_utils::volume_value(i, j, k, captured_comp, captured_dm, fab, mask_arr, dx);
+                        vol_part += electrochem_integral_utils::volume_value(i, j, k, captured_comp1, captured_comp2, captured_dm, fab, mask_arr, dx);
                     });
 
             return vol_part;
@@ -72,8 +78,11 @@ Real echemAMR::SurfaceIntegral(int comp, int domain1, int domain2)
         const auto dx = geom[lev].CellSizeArray();
 
         // Get the boundary ids
-        const int* domlo = geom[lev].Domain().loVect();
-        const int* domhi = geom[lev].Domain().hiVect();
+        const int* domlo_p = geom[lev].Domain().loVect();
+        const int* domhi_p = geom[lev].Domain().hiVect();
+
+        GpuArray<int,AMREX_SPACEDIM> domlo={domlo_p[0], domlo_p[1], domlo_p[2]};
+        GpuArray<int,AMREX_SPACEDIM> domhi={domhi_p[0], domhi_p[1], domhi_p[2]};
 
         const Real cur_time = t_new[lev];
         MultiFab& S_new = phi_new[lev];
@@ -132,8 +141,11 @@ Real echemAMR::CurrentCollectorIntegral(int comp, int domain)
         const auto dx = geom[lev].CellSizeArray();
 
         // Get the boundary ids
-        const int* domlo = geom[lev].Domain().loVect();
-        const int* domhi = geom[lev].Domain().hiVect();
+        const int* domlo_p = geom[lev].Domain().loVect();
+        const int* domhi_p = geom[lev].Domain().hiVect();
+
+        GpuArray<int,AMREX_SPACEDIM> domlo={domlo_p[0], domlo_p[1], domlo_p[2]};
+        GpuArray<int,AMREX_SPACEDIM> domhi={domhi_p[0], domhi_p[1], domhi_p[2]};
 
         const Real cur_time = t_new[lev];
         MultiFab& S_new = phi_new[lev];

@@ -29,7 +29,9 @@ void echemAMR::Evolve()
     for (int step = istep[0]; step < max_step && cur_time < stop_time; ++step)
     {
         amrex::Print() << "\nCoarse STEP " << step + 1 << " starts ..." << std::endl;
-
+    
+        // BL_PROFILE_TINY_FLUSH()
+        
         ComputeDt();
 
         int lev = 0;
@@ -124,7 +126,7 @@ void echemAMR::Evolve()
 
         cur_time += dt[0];
 
-        postprocess(cur_time, step, dt[0], echemAMR::host_global_storage);
+        postprocess(cur_time, step+1, dt[0], echemAMR::host_global_storage);
 
         amrex::Print() << "Coarse STEP " << step + 1 << " ends."
                        << " TIME = " << cur_time << " DT = " << dt[0] << std::endl;
@@ -189,6 +191,7 @@ void echemAMR::Evolve()
 
 void echemAMR::solve_potential(Real current_time)
 {
+    BL_PROFILE("echemAMR::solve_potential()");
     LPInfo info;
 
     // FIXME: add these as inputs
@@ -867,6 +870,9 @@ void echemAMR::Advance(int lev, Real time, Real dt_lev, int iteration, int ncycl
     MultiFab::LinComb(S_new, 1.0, S_old, 0, dt_lev, dsdt, 0, 0, S_new.nComp(), 0);
 }
 
+
+
+// to account for nano divide dsdt by NP_ID
 void echemAMR::compute_dsdt(int lev, const int num_grow, MultiFab& Sborder, 
         Array<MultiFab,AMREX_SPACEDIM>& flux, MultiFab& dsdt,
         Real time, Real dt, bool reflux_this_stage)
@@ -908,6 +914,18 @@ void echemAMR::compute_dsdt(int lev, const int num_grow, MultiFab& Sborder,
             amrex::ParallelFor(bx, ncomp, [=] AMREX_GPU_DEVICE(int i, int j, int k, int n) {
                     update_residual(i, j, k, n, dsdt_arr, reactsource_arr, 
                             AMREX_D_DECL(flux_arr[0], flux_arr[1], flux_arr[2]), dx);
+                    });
+
+            // account for nanoporosity 
+            FArrayBox ecoeff_fab(gbx, ncomp);
+            ecoeff_fab.setVal<RunOn::Device>(1.0);
+            Elixir ecoeff_fab_eli = ecoeff_fab.elixir();
+            Array4<Real> ecoeff_arr = ecoeff_fab.array();
+            amrex::ParallelFor(bx, ncomp, [=] AMREX_GPU_DEVICE(int i, int j, int k, int n) {
+                    
+                    electrochem_transport::compute_eps(i, j, k, sborder_arr, ecoeff_arr);
+
+                    dsdt_arr(i,j,k)=dsdt_arr(i,j,k) / ecoeff_arr(i,j,k,n);
                     });
         }
     }
@@ -1036,6 +1054,8 @@ void echemAMR::compute_fluxes(int lev, const int num_grow, MultiFab& Sborder,
 void echemAMR::implicit_solve_species(Real current_time,Real dt,int spec_id, 
         Vector<MultiFab *> dsdt_expl)
 {
+    BL_PROFILE("echemAMR::implicit_solve_species(" + std::to_string( spec_id ) + ")");
+
     //FIXME:create mlmg and mlabec objects outside this function
     LPInfo info;
 
@@ -1179,7 +1199,7 @@ void echemAMR::implicit_solve_species(Real current_time,Real dt,int spec_id,
     for (int ilev = 0; ilev <= finest_level; ilev++)
     {
         specdata[ilev].define(grids[ilev], dmap[ilev], 1, num_grow);
-        acoeff[ilev].define(grids[ilev], dmap[ilev], 1, 0);
+        acoeff[ilev].define(grids[ilev], dmap[ilev], 1, num_grow);
         bcoeff[ilev].define(grids[ilev], dmap[ilev], 1, num_grow);
         solution[ilev].define(grids[ilev], dmap[ilev], 1, num_grow);
         rhs[ilev].define(grids[ilev], dmap[ilev], 1, 0);
@@ -1195,10 +1215,8 @@ void echemAMR::implicit_solve_species(Real current_time,Real dt,int spec_id,
         
         specdata[ilev].setVal(0.0);
         amrex::Copy(specdata[ilev], Sborder, spec_id, 0, 1, num_grow);
-        
-        acoeff[ilev].setVal(1.0); //will be scaled by ascalar
-        mlabec.setACoeffs(ilev, acoeff[ilev]);
 
+        acoeff[ilev].setVal(1.0);
         bcoeff[ilev].setVal(1.0);
 
         rhs[ilev].setVal(0.0);
@@ -1222,21 +1240,33 @@ void echemAMR::implicit_solve_species(Real current_time,Real dt,int spec_id,
             Real time = current_time; // for GPU capture
 
             Array4<Real> phi_arr = Sborder.array(mfi);
+            Array4<Real> acoeff_arr = acoeff[ilev].array(mfi);
             Array4<Real> bcoeff_arr = bcoeff[ilev].array(mfi);
             
             FArrayBox dcoeff_fab(gbx, ncomp);
             Elixir dcoeff_fab_eli = dcoeff_fab.elixir();
             Array4<Real> dcoeff_arr = dcoeff_fab.array();
 
+            FArrayBox ecoeff_fab(gbx, ncomp);
+            ecoeff_fab.setVal<RunOn::Device>(1.0);
+            Elixir ecoeff_fab_eli = ecoeff_fab.elixir();
+            Array4<Real> ecoeff_arr = ecoeff_fab.array();
+
             amrex::ParallelFor(gbx, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
                     //FIXME: use component wise call
                     electrochem_transport::compute_dcoeff(i, j, k, phi_arr, 
                             dcoeff_arr, prob_lo, 
                             prob_hi, dx, time, *localprobparm);
+                    electrochem_transport::compute_eps(i, j, k, phi_arr, 
+                            ecoeff_arr);
+
                     bcoeff_arr(i,j,k)=dcoeff_arr(i,j,k,spec_id);
+                    acoeff_arr(i,j,k)=ecoeff_arr(i,j,k,spec_id);
                     });
         }
         
+
+
         // average cell coefficients to faces, this includes boundary faces
         Array<MultiFab, AMREX_SPACEDIM> face_bcoeff;
         for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
@@ -1329,6 +1359,7 @@ void echemAMR::implicit_solve_species(Real current_time,Real dt,int spec_id,
         }
 
         // set b with diffusivities
+        mlabec.setACoeffs(ilev, acoeff[ilev]);
         mlabec.setBCoeffs(ilev, amrex::GetArrOfConstPtrs(face_bcoeff));
 
         // bc's are stored in the ghost cells

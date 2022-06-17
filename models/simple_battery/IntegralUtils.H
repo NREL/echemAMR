@@ -22,10 +22,13 @@ namespace electrochem_integral_utils
             if( comp > -1 )
                 val = phi(i,j,k,comp);
 
-            if( phi(i,j,k,domain) > 0 )
-                return val*dx[0]*dx[1]*dx[2]*mask_arr(i,j,k);
-            else
-                return 0.0;
+            // if( phi(i,j,k,domain) > 0 )
+            //     return val*dx[0]*dx[1]*dx[2]*mask_arr(i,j,k);
+            // else
+            //     return 0.0;
+
+            return val*dx[0]*dx[1]*dx[2]*mask_arr(i,j,k)*phi(i,j,k,domain);
+
 
         }
 
@@ -104,14 +107,20 @@ namespace electrochem_integral_utils
             if( comp > -1 )
                 val = phi(i,j,k,comp);
 
-            // Check if we are in the right domain and at one of the x extremes
-            if( (phi(i,j,k,domain) > 0) )
-            {
-                if (i-1 < domlo[0]) out += val*dx[1]*dx[2];
-                if (i+1 > domhi[0]) out += val*dx[1]*dx[2];
-            }
+            // // Check if we are in the right domain and at one of the x extremes
+            // if( (phi(i,j,k,domain) > 0) )
+            // {
+            //     if (i-1 < domlo[0]) out += val*dx[1]*dx[2];
+            //     if (i+1 > domhi[0]) out += val*dx[1]*dx[2];
+            // }
 
-            return out*mask_arr(i,j,k);
+            // return out*mask_arr(i,j,k);
+
+            // Check if we are in the right domain and at one of the x extremes
+            if (i-1 < domlo[0]) out += val*dx[1]*dx[2]*mask_arr(i,j,k)*phi(i,j,k,domain);
+            if (i+1 > domhi[0]) out += val*dx[1]*dx[2]*mask_arr(i,j,k)*phi(i,j,k,domain);
+
+            return out;
         }
 }
 
