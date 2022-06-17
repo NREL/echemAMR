@@ -27,7 +27,7 @@ struct ProbParm
     //    2=graphite SLC1506T2 with constant diffusion and conductivity, actual OCP, and symmetric io
     int mater_anode = 2; 
     // Electrolyte
-    //    0=constand coefficient
+    //    0=constant coefficient
     //    1=Gen2 with constand coefficient
     //....2=Gen2 with concentration dependent coefficients
     int mater_electrolyte = 2;
@@ -66,9 +66,10 @@ struct ProbParm
     std::string nanoporosity_filename = "CEAtest_nanoporosity.txt";
     std::string macmullin_filename = "CEAtest_macmullin.txt";
     int dimension_geometry[3];
-    int geo1D[1000000]; // initialize material location
-    float Nanoporosity1D[1000000]; // Initialize nanoporosity location
-    float MacMullin1D[1000000]; // Initialize MacMullin location
+    int* geo1D = new int[150000000]();
+    amrex::Real* Nanoporosity1D = new amrex::Real[150000000]();
+    amrex::Real* MacMullin1D = new amrex::Real[150000000]();
+
     // std::vector<int> geo1D;
     // amrex::Vector<int> geo1D;
     // amrex::Gpu::PinnedVector<int> geo1D;
