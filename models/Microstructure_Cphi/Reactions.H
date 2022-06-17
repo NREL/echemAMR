@@ -34,6 +34,36 @@ namespace electrochem_reactions {
         {
             reactsource(i, j, k, n) = 0.0;
         }        
+
+        Real C = phi(i, j, k, CO_ID);
+        Real gradc_dummy=0.1;
+        Real gradc_cutoff_dummy=1e-10;
+        Real Ke  =  electrochem::Ke_bulk(C, prob_parm) * phi(i,j,k,LS_ID) / phi(i,j,k,MAC_ID);
+        Real tplus  = electrochem::t_plus(C, prob_parm) * phi(i,j,k,LS_ID);
+        Real TFKe  = tplus/FARADCONST * Ke;
+        
+        Real Kl  = 0.5 * (phi(i-1,j,k,LS_ID)+phi(i,j,k,LS_ID)) * TFKe;
+        Real Kr  = 0.5 * (phi(i+1,j,k,LS_ID)+phi(i,j,k,LS_ID)) * TFKe;
+        
+        Real Kb  = 0.5 * (phi(i,j-1,k,LS_ID)+phi(i,j,k,LS_ID)) * TFKe;
+        Real Kt  = 0.5 * (phi(i,j+1,k,LS_ID)+phi(i,j,k,LS_ID)) * TFKe;
+        
+        Real Kk  = 0.5 * (phi(i,j,k-1,LS_ID)+phi(i,j,k,LS_ID)) * TFKe;
+        Real Kf  = 0.5 * (phi(i,j,k+1,LS_ID)+phi(i,j,k,LS_ID)) * TFKe;
+        
+        Real Actl =  1.0-bv_activation_function(0.5*(phi(i-1,j,k,LS_ID)+phi(i,j,k,LS_ID)),gradc_dummy,gradc_cutoff_dummy);
+        Real Actr =  1.0-bv_activation_function(0.5*(phi(i+1,j,k,LS_ID)+phi(i,j,k,LS_ID)),gradc_dummy,gradc_cutoff_dummy);
+        
+        Real Actb =  1.0-bv_activation_function(0.5*(phi(i,j-1,k,LS_ID)+phi(i,j,k,LS_ID)),gradc_dummy,gradc_cutoff_dummy);
+        Real Actt =  1.0-bv_activation_function(0.5*(phi(i,j+1,k,LS_ID)+phi(i,j,k,LS_ID)),gradc_dummy,gradc_cutoff_dummy);
+        
+        Real Actk =  1.0-bv_activation_function(0.5*(phi(i,j,k-1,LS_ID)+phi(i,j,k,LS_ID)),gradc_dummy,gradc_cutoff_dummy);
+        Real Actf =  1.0-bv_activation_function(0.5*(phi(i,j,k+1,LS_ID)+phi(i,j,k,LS_ID)),gradc_dummy,gradc_cutoff_dummy);
+
+        //reactsource(i,j,k,CO_ID) +=  (( Actr*Kr*(phi(i+1,j,k,POT_ID)-phi(i,j,k,POT_ID)) - Actl*Kl*(phi(i,j,k,POT_ID)-phi(i-1,j,k,POT_ID)) )/dx[0]/dx[0]
+        //                            +( Actt*Kt*(phi(i,j+1,k,POT_ID)-phi(i,j,k,POT_ID)) - Actb*Kb*(phi(i,j,k,POT_ID)-phi(i,j-1,k,POT_ID)) )/dx[1]/dx[1]
+        //                            +( Actf*Kf*(phi(i,j,k+1,POT_ID)-phi(i,j,k,POT_ID)) - Actk*Kk*(phi(i,j,k,POT_ID)-phi(i,j,k-1,POT_ID)) )/dx[2]/dx[2]); 
+
     }
 
     AMREX_GPU_DEVICE AMREX_INLINE void compute_potential_source(
@@ -48,26 +78,19 @@ namespace electrochem_reactions {
             const Real time,
             ProbParm const& prob_parm)
     {
-        // concentration
+       // concentration
         Real C = phi(i, j, k, CO_ID);
         Real gradc_dummy=0.1;
         Real gradc_cutoff_dummy=1e-10;
 
         // Intermediate coefficients
-        //Real Ke  = electrochem::Ke_bulk(C, prob_parm);
-        //Real Ac  = electrochem::A_c(C, prob_parm);
-        // Real tplus  = electrochem::t_plus(C, prob_parm);
-        // Diffusional conductivity
-        //Real KDe  = electrochem::Kd(Ke, Ac, tplus, prob_parm);
-
-        // Intermediate coefficients
-        Real Ke  =  electrochem::Ke_bulk(phi(i, j, k, CO_ID), prob_parm) * (phi(i,j,k,E_ID) + phi(i,j,k,S_ID)/electrochem::MacMullinSeparator(prob_parm) );
-        Real Ac  = electrochem::A_c(C, prob_parm) * (phi(i,j,k,E_ID) + phi(i,j,k,S_ID));
-        Real tplus  = electrochem::t_plus(C, prob_parm) * (phi(i,j,k,E_ID) + phi(i,j,k,S_ID));      
-        // Diffusional conductivity
+        Real Ke  =  electrochem::Ke_bulk(C, prob_parm) * phi(i,j,k,LS_ID) / phi(i,j,k,MAC_ID);
+        Real Ac  = electrochem::A_c(C, prob_parm) * phi(i,j,k,LS_ID);
+        Real tplus  = electrochem::t_plus(C, prob_parm) * phi(i,j,k,LS_ID);
+      
+        // Diffusional conductivit
         Real KDe  = electrochem::Kd(Ke, Ac, tplus, prob_parm) * phi(i,j,k,LS_ID);
-
-        
+              
         Real KDl  = 0.5 * (phi(i-1,j,k,LS_ID)+phi(i,j,k,LS_ID)) * KDe;
         Real KDr  = 0.5 * (phi(i+1,j,k,LS_ID)+phi(i,j,k,LS_ID)) * KDe;
         
@@ -85,19 +108,14 @@ namespace electrochem_reactions {
         
         Real Actk =  1.0-bv_activation_function(0.5*(phi(i,j,k-1,LS_ID)+phi(i,j,k,LS_ID)),gradc_dummy,gradc_cutoff_dummy);
         Real Actf =  1.0-bv_activation_function(0.5*(phi(i,j,k+1,LS_ID)+phi(i,j,k,LS_ID)),gradc_dummy,gradc_cutoff_dummy);
+      
+        // Enable for KD
+        //source(i,j,k) = -(  (  Actr*KDr*std::log(phi(i+1,j,k,CO_ID)/phi(i,j,k,CO_ID)) - Actl*KDl*std::log(phi(i,j,k,CO_ID)/phi(i-1,j,k,CO_ID)) )/dx[0]/dx[0]
+        //                +   (  Actt*KDt*std::log(phi(i,j+1,k,CO_ID)/phi(i,j,k,CO_ID)) - Actb*KDb*std::log(phi(i,j,k,CO_ID)/phi(i,j-1,k,CO_ID)) )/dx[1]/dx[1]
+        //                +   (  Actf*KDf*std::log(phi(i,j,k+1,CO_ID)/phi(i,j,k,CO_ID)) - Actk*KDk*std::log(phi(i,j,k,CO_ID)/phi(i,j,k-1,CO_ID)) )/dx[2]/dx[2] );
 
-        source(i,j,k) = -(  (  Actr*KDr*std::log(phi(i+1,j,k,CO_ID)/phi(i,j,k,CO_ID)) - Actl*KDl*std::log(phi(i,j,k,CO_ID)/phi(i-1,j,k,CO_ID)) )/dx[0]/dx[0]
-                        +   (  Actt*KDb*std::log(phi(i,j+1,k,CO_ID)/phi(i,j,k,CO_ID)) - Actb*KDt*std::log(phi(i,j,k,CO_ID)/phi(i,j-1,k,CO_ID)) )/dx[1]/dx[1]
-                        +   (  Actf*KDf*std::log(phi(i,j,k+1,CO_ID)/phi(i,j,k,CO_ID)) - Actk*KDk*std::log(phi(i,j,k,CO_ID)/phi(i,j,k-1,CO_ID)) )/dx[2]/dx[2] );
+        source(i, j, k) = 0.0; // No Kd
 
-
-        //in case interfaces are causing problems
-        //if((Actl+Actr+Actb+Actt+Actk+Actf)<6.0)
-        //{
-        //    source(i,j,k)=0.0;
-        //}
-        
-        //source(i, j, k) = 0.0; // in case Kd term is not working
     }
 
     AMREX_GPU_DEVICE AMREX_INLINE void bvcurrent_and_der(int i,int j,int k,int normaldir,
@@ -112,8 +130,8 @@ namespace electrochem_reactions {
         IntVect right(i, j, k);
         left[normaldir] -= 1;
 
-        Real anodefrac   = 0.5*(phi(left,A_ID) + phi(right,A_ID));
-        Real cathodefrac = 0.5*(phi(left,C_ID) + phi(right,C_ID));
+        Real anodefrac   = 0.5*(phi(left,A_AM_ID) + phi(right,A_AM_ID));
+        Real cathodefrac = 0.5*(phi(left,C_AM_ID) + phi(right,C_AM_ID));
         
         Real ls_left  = phi(left,LS_ID);
         Real ls_right = phi(right,LS_ID);

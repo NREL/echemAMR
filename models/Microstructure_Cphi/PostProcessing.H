@@ -333,101 +333,342 @@ void echemAMR::postprocess(Real time, int timestep, Real dt, GlobalStorage* glob
         }
     }
 
+    // // VOLUMES
+    // Calculate domain apparent volume
+    Real anode_AM_volume = VolumeIntegral(-1, -1, A_AM_ID);
+    Real anode_electrolyte_volume = VolumeIntegral(-1, -1, A_E_ID);
+    Real anode_CBD_volume = VolumeIntegral(-1, -1, A_CBD_ID);
+    Real separator_volume = VolumeIntegral(-1, -1, S_ID);
+    Real cathode_AM_volume = VolumeIntegral(-1, -1, C_AM_ID);
+    Real cathode_electrolyte_volume = VolumeIntegral(-1, -1, C_E_ID);
+    Real cathode_CBD_volume = VolumeIntegral(-1, -1, C_CBD_ID);    
+    Real total_electrolyte_volume = anode_electrolyte_volume + separator_volume + cathode_electrolyte_volume;
+    Real total_active_material_volume = anode_AM_volume + cathode_AM_volume;
+    Real totalCBD_volume = anode_CBD_volume + cathode_CBD_volume;
+    Real total_anode_volume = anode_AM_volume + anode_electrolyte_volume + anode_CBD_volume;
+    Real total_cathode_volume = cathode_AM_volume + cathode_electrolyte_volume + cathode_CBD_volume; 
+    Real total_volume = total_electrolyte_volume + total_active_material_volume + totalCBD_volume;
 
-    // Calculate domain volume
-    Real anode_volume = VolumeIntegral(-1, A_ID);
-    Real cathode_volume = VolumeIntegral(-1, C_ID);
-    Real electrolyte_volume = VolumeIntegral(-1, E_ID);
-    Real separator_volume = VolumeIntegral(-1, S_ID);
-    Real total_volume = anode_volume+cathode_volume+electrolyte_volume+separator_volume;
+    Real case_CBD=0;
+    Real Case_SEP=0;
+    if (totalCBD_volume==0 && globalstorage->CBD_transport==0 && globalstorage->Nanoscale_coefficients_txtimport_CBD==0) {
+        case_CBD = 1;
+    } else if (totalCBD_volume==0 && globalstorage->CBD_transport==0 && globalstorage->Nanoscale_coefficients_txtimport_CBD==1) {
+        case_CBD = 2;
+    } else if (totalCBD_volume>0 && anode_electrolyte_volume==0 && cathode_electrolyte_volume==0 && globalstorage->CBD_transport==1 && globalstorage->Nanoscale_coefficients_txtimport_CBD==1) {
+        case_CBD = 3;
+    } else if (totalCBD_volume>0 && anode_electrolyte_volume>0 && cathode_electrolyte_volume>0 && globalstorage->CBD_transport==0 && globalstorage->Nanoscale_coefficients_txtimport_CBD==0) {
+        case_CBD = 4;
+    } else if (totalCBD_volume>0 && anode_electrolyte_volume>0 && cathode_electrolyte_volume>0 && globalstorage->CBD_transport==1 && globalstorage->Nanoscale_coefficients_txtimport_CBD==1) {
+        case_CBD = 5;        
+    } else {
+        amrex::Print() << " >>> WARNING !!! INCOHERENT PARAMETERS FOR CBD." << std::endl;
+    }
+    if (globalstorage->Nanoscale_coefficients_txtimport_separator==0) {
+        Case_SEP = 1;
+    } else if (globalstorage->Nanoscale_coefficients_txtimport_separator==1) {
+        Case_SEP = 2;
+    } else {
+        amrex::Print() << " >>> WARNING !!! INCORRECT PARAMETER FOR SEPARATOR." << std::endl;
+    }
 
-    // Calculate mol per domain (current value)
-    Real anode_current_mol = VolumeIntegral(CO_ID, A_ID);
-    Real cathode_current_mol = VolumeIntegral(CO_ID, C_ID);
-    Real electrolyte_current_mol = VolumeIntegral(CO_ID, E_ID);
-    Real separator_current_mol = VolumeIntegral(CO_ID, S_ID);
-    Real total_current_mol = anode_current_mol+cathode_current_mol+electrolyte_current_mol+separator_current_mol;
+    // True electrolyte volume
+    Real anode_electrolyte_true_volume, cathode_electrolyte_true_volume;
+    if (case_CBD==2) {
+        anode_electrolyte_true_volume = anode_electrolyte_volume;
+        cathode_electrolyte_true_volume = cathode_electrolyte_volume;
+    } else { 
+        anode_electrolyte_true_volume = VolumeIntegral(NP_ID, -1, A_E_ID);
+        cathode_electrolyte_true_volume = VolumeIntegral(NP_ID, -1, C_E_ID);
+    }
+    Real separator_electrolyte_true_volume = VolumeIntegral(NP_ID, -1, S_ID);
 
+    // True electrolyte and solid volumes for CBD
+    Real anode_CBDe_true_volume, cathode_CBDe_true_volume;
+    if (case_CBD==1 || case_CBD==2 || case_CBD==4) {
+        anode_CBDe_true_volume = 0.0;
+        cathode_CBDe_true_volume = 0.0;
+    } else if (case_CBD==3 || case_CBD==5) {
+        anode_CBDe_true_volume = VolumeIntegral(NP_ID, -1, A_CBD_ID);
+        cathode_CBDe_true_volume = VolumeIntegral(NP_ID, -1, C_CBD_ID);
+    }
+    Real anode_CBDs_true_volume = anode_CBD_volume-anode_CBDe_true_volume;
+    Real cathode_CBDs_true_volume = cathode_CBD_volume-cathode_CBDe_true_volume;
+
+    // True electrolyte volume (sum of domains)
+    Real anode_CBDelectrolyte_true_volume = anode_electrolyte_true_volume + anode_CBDe_true_volume;
+    Real cathode_CBDelectrolyte_true_volume = cathode_electrolyte_true_volume + cathode_CBDe_true_volume;
+    Real total_electrolyte_true_volume = anode_CBDelectrolyte_true_volume + separator_electrolyte_true_volume + cathode_CBDelectrolyte_true_volume;
+
+    // True SOLID volume for CBD and separator
+    Real totalCBD_solid_volume = anode_CBDs_true_volume + cathode_CBDs_true_volume;
+    Real Separator_solid_volume = separator_volume-separator_electrolyte_true_volume;   
+
+    // // VOLUME FRACTIONS AND POROSITY
+    // From apparent volume
+    Real anode_AM_vf = anode_AM_volume/total_anode_volume;
+    Real anode_electrolyte_vf = anode_electrolyte_volume/total_anode_volume;
+    Real anode_CBD_vf = anode_CBD_volume/total_anode_volume;
+    Real separator_electrolyte_vf = 1.0;
+    Real cathode_AM_vf = cathode_AM_volume/total_cathode_volume;
+    Real cathode_electrolyte_vf = cathode_electrolyte_volume/total_cathode_volume;
+    Real cathode_CBD_vf = cathode_CBD_volume/total_cathode_volume;
+    // From true volume
+    Real anode_electrolyte_true_vf = anode_CBDelectrolyte_true_volume/total_anode_volume;
+    Real anode_CBDsolid_true_vf = anode_CBDs_true_volume/total_anode_volume;
+    Real separator_electrolyte_true_vf = separator_electrolyte_true_volume/separator_volume;
+    Real separator_solid_true_vf = Separator_solid_volume/separator_volume;
+    Real cathode_electrolyte_true_vf = cathode_CBDelectrolyte_true_volume/total_cathode_volume;
+    Real cathode_CBDsolid_true_vf = cathode_CBDs_true_volume/total_cathode_volume;
+
+    // // MASS
+    // From apparent volume
+    Real anode_electrolyte_current_mol = VolumeIntegral(CO_ID, -1, A_E_ID);
+    Real separator_current_mol = VolumeIntegral(CO_ID, -1, S_ID);
+    Real cathode_electrolyte_current_mol = VolumeIntegral(CO_ID, -1, C_E_ID);
+
+    Real anode_CBD_current_mol, cathode_CBD_current_mol;
+    if (case_CBD==1 || case_CBD==2 || case_CBD==4) {
+        anode_CBD_current_mol = 0.0;
+        cathode_CBD_current_mol = 0.0;
+    } else if (case_CBD==3 || case_CBD==5) {
+        anode_CBD_current_mol = VolumeIntegral(CO_ID, -1, A_CBD_ID);
+        cathode_CBD_current_mol = VolumeIntegral(CO_ID, -1, C_CBD_ID);
+    }
+
+    // From true volume
+    Real anode_AM_current_true_mol = VolumeIntegral(CO_ID, -1, A_AM_ID);
+    Real separator_current_true_mol = VolumeIntegral(CO_ID, NP_ID, S_ID);
+    Real cathode_AM_current_true_mol = VolumeIntegral(CO_ID, -1, C_AM_ID);
+    Real anode_electrolyte_current_true_mol,cathode_electrolyte_current_true_mol;
+    if (case_CBD==2) {
+        anode_electrolyte_current_true_mol = VolumeIntegral(CO_ID, -1, A_E_ID);
+        cathode_electrolyte_current_true_mol = VolumeIntegral(CO_ID, -1, C_E_ID);
+    } else {
+        anode_electrolyte_current_true_mol = VolumeIntegral(CO_ID, NP_ID, A_E_ID);
+        cathode_electrolyte_current_true_mol = VolumeIntegral(CO_ID, NP_ID, C_E_ID);        
+    }
+
+    Real anode_CBD_current_true_mol, cathode_CBD_current_true_mol = 0;
+    if (case_CBD==1 || case_CBD==2 || case_CBD==4) {
+        anode_CBD_current_true_mol = 0.0;
+        cathode_CBD_current_true_mol = 0.0;
+    } else if (case_CBD==3 || case_CBD==5) {
+        anode_CBD_current_true_mol = VolumeIntegral(CO_ID, NP_ID, A_CBD_ID);
+        cathode_CBD_current_true_mol = VolumeIntegral(CO_ID, NP_ID, C_CBD_ID);
+    }    
+    
+    // Total mol in electrolyte (apparent)
+    Real anode_CBDelectrolyte_current_mol = anode_electrolyte_current_mol + anode_CBD_current_mol;
+    Real cathode_CBDelectrolyte_current_mol = cathode_electrolyte_current_mol + cathode_CBD_current_mol;
+    Real total_CBDelectrolyte_current_mol = anode_CBDelectrolyte_current_mol+separator_current_mol+cathode_CBDelectrolyte_current_mol;
+     // Total mol in electrolyte (true)
+    Real anode_CBDelectrolyte_current_true_mol = anode_electrolyte_current_true_mol + anode_CBD_current_true_mol;
+    Real cathode_CBDelectrolyte_current_true_mol = cathode_electrolyte_current_true_mol + cathode_CBD_current_true_mol;
+    Real total_CBDelectrolyte_current_true_mol = anode_CBDelectrolyte_current_true_mol+separator_current_true_mol+cathode_CBDelectrolyte_current_true_mol;
+    // Total mol in solid
+    Real total_solid_current_true_mol = anode_AM_current_true_mol + cathode_AM_current_true_mol;
+    // Total mol in domain
+    Real total_current_true_mol = total_CBDelectrolyte_current_true_mol + total_solid_current_true_mol;
+
+    // // MASS CONSERVATION ERROR
     // Expected mol per domain (target value)
-    Real anode_target_dmol = globalstorage->charging * globalstorage->Applied_current*dt/FARADCONST; // [mol]
-    Real cathode_target_dmol = -1 * globalstorage->charging * globalstorage->Applied_current*dt/FARADCONST; // [mol]
-    Real electrolyte_target_dmol = 0; // [mol]
+    Real anode_AM_target_dmol = globalstorage->charging * globalstorage->Applied_current*dt/FARADCONST; // [mol]
+    Real cathode_AM_target_dmol = -1 * globalstorage->charging * globalstorage->Applied_current*dt/FARADCONST; // [mol]
+    Real total_CBDelectrolyte_target_dmol = 0; // [mol]
     // Real anode_target_dSOC = dt/3600 * Crate; // [] Alternative method, FYI
     //Real anode_target_dC = anode_target_dSOC * Csmax; // [mol.m-3]
-    //Real anode_target_dmol = anode_target_dC * anode_volume; // [mol]
-    //Real cathode_target_dmol = dt/3600 * Crate * anode_target_dSOC * Csmax * anode_volume; // [mol]
-    //Real electrolyte_target_dmol = 0; // [mol]
+    //Real anode_AM_target_dmol = anode_target_dC * anode_AM_volume; // [mol]
+    //Real cathode_AM_target_dmol = dt/3600 * Crate * anode_target_dSOC * Csmax * anode_AM_volume; // [mol]
+    //Real total_CBDelectrolyte_target_dmol = 0; // [mol]
 
     // Update mass error array
-    Real anode_target_mol, electrolyte_target_mol, cathode_target_mol; // Initialization
+    Real anode_AM_target_mol, total_CBDelectrolyte_target_mol, cathode_AM_target_mol; // Initialization
     if (timestep == 0){
-        anode_target_mol = anode_current_mol; // [mol]
-        electrolyte_target_mol = electrolyte_current_mol; // [mol]
-        cathode_target_mol = cathode_current_mol; // [mol]
+        anode_AM_target_mol = anode_AM_current_true_mol; // [mol]
+        total_CBDelectrolyte_target_mol = total_CBDelectrolyte_current_true_mol; // [mol]
+        cathode_AM_target_mol = cathode_AM_current_true_mol; // [mol]
 
     } else {
-        anode_target_mol = globalstorage->Mass_error[4] + anode_target_dmol; // [mol] Theortical value
-        electrolyte_target_mol = globalstorage->Mass_error[5] + electrolyte_target_dmol; // [mol] Theortical value
-        cathode_target_mol = globalstorage->Mass_error[6] + cathode_target_dmol; // [mol] Theortical value
+        anode_AM_target_mol = globalstorage->Mass_error[4] + anode_AM_target_dmol; // [mol] Theortical value
+        total_CBDelectrolyte_target_mol = globalstorage->Mass_error[5] + total_CBDelectrolyte_target_dmol; // [mol] Theortical value
+        cathode_AM_target_mol = globalstorage->Mass_error[6] + cathode_AM_target_dmol; // [mol] Theortical value
     }
 
     // Mass error
-    Real anode_mass_error = 100*(anode_target_mol-anode_current_mol)/anode_target_mol;
-    Real electrolyte_mass_error = 100*(electrolyte_target_mol-electrolyte_current_mol)/electrolyte_target_mol;
-    Real cathode_mass_error = 100*(cathode_target_mol-cathode_current_mol)/cathode_target_mol;
+    Real anode_mass_error = 100*(anode_AM_target_mol-anode_AM_current_true_mol)/anode_AM_target_mol;
+    Real electrolyte_mass_error = 100*(total_CBDelectrolyte_target_mol-total_CBDelectrolyte_current_true_mol)/total_CBDelectrolyte_target_mol;
+    Real cathode_mass_error = 100*(cathode_AM_target_mol-cathode_AM_current_true_mol)/cathode_AM_target_mol;
 
-    // Calculate potential per domain (current value)
-    Real anode_current_potential = VolumeIntegral(POT_ID, A_ID)/anode_volume;
-    Real cathode_current_potential = VolumeIntegral(POT_ID, C_ID)/cathode_volume;
-    Real electrolyte_current_potential = VolumeIntegral(POT_ID, E_ID)/electrolyte_volume;
-    Real separator_current_potential = VolumeIntegral(POT_ID, S_ID)/separator_volume;
-    
     // Overwritte
     globalstorage->Mass_error[0]=time;
-    globalstorage->Mass_error[1]=anode_current_mol; globalstorage->Mass_error[2]=electrolyte_current_mol; globalstorage->Mass_error[3]=cathode_current_mol; 
-    globalstorage->Mass_error[4]=anode_target_mol; globalstorage->Mass_error[5]=electrolyte_target_mol; globalstorage->Mass_error[6]=cathode_target_mol; 
+    globalstorage->Mass_error[1]=anode_AM_current_true_mol; globalstorage->Mass_error[2]=total_CBDelectrolyte_current_true_mol; globalstorage->Mass_error[3]=cathode_AM_current_true_mol; 
+    globalstorage->Mass_error[4]=anode_AM_target_mol; globalstorage->Mass_error[5]=total_CBDelectrolyte_target_mol; globalstorage->Mass_error[6]=cathode_AM_target_mol; 
 
+    // // POTENTIAL
+    // Calculate potential per domain (current value)
+    Real anode_CBDsolid_current_potential, cathode_CBDsolid_current_potential, anode_CBDelectrolyte_current_potential, cathode_CBDelectrolyte_current_potential;
+
+    // Solid potential
+    Real anode_AM_current_potential = VolumeIntegral(POT_ID, -1, A_AM_ID)/anode_AM_volume;
+    Real cathode_AM_current_potential = VolumeIntegral(POT_ID, -1, C_AM_ID)/cathode_AM_volume;
+    if (case_CBD==1 || case_CBD==2) {
+        anode_CBDsolid_current_potential = 0.0;
+        cathode_CBDsolid_current_potential = 0.0;
+    } else {
+        anode_CBDsolid_current_potential = VolumeIntegral(POTs_ID, -1, A_CBD_ID)/anode_CBD_volume;
+        cathode_CBDsolid_current_potential = VolumeIntegral(POTs_ID, -1, C_CBD_ID)/cathode_CBD_volume;        
+    } 
+
+    // Electrolyte potential
+    Real anode_electrolyte_current_potential = VolumeIntegral(POT_ID, -1, A_E_ID)/anode_electrolyte_volume;
+    Real separator_current_potential = VolumeIntegral(POT_ID, -1, S_ID)/separator_volume;
+    Real cathode_electrolyte_current_potential = VolumeIntegral(POT_ID, -1, C_E_ID)/cathode_electrolyte_volume;
+    if (case_CBD==1 || case_CBD==2 || case_CBD==4) {
+        anode_CBDelectrolyte_current_potential = 0.0;
+        cathode_CBDelectrolyte_current_potential = 0.0;
+    } else {
+        anode_CBDelectrolyte_current_potential = VolumeIntegral(POT_ID, -1, A_CBD_ID)/anode_CBD_volume;
+        cathode_CBDelectrolyte_current_potential = VolumeIntegral(POT_ID, -1, C_CBD_ID)/cathode_CBD_volume;
+    } 
+ 
     // PRINT STATMENT
     amrex::Print() << std::endl;
 
     if (timestep == 0){ // Print static information
-        amrex::Print() << " VOLUMES:" << std::endl;
-        amrex::Print() << "    Anode Volume:       " << anode_volume << " m3"<< std::endl;
-        amrex::Print() << "    Cathode Volume:     " << cathode_volume << " m3"<< std::endl;
-        amrex::Print() << "    Electrolyte Volume: " << electrolyte_volume << " m3"<< std::endl;
-        amrex::Print() << "    Separator Volume:   " << separator_volume << " m3"<< std::endl;
-        amrex::Print() << "    Total Volume:       " << total_volume << " m3"<< std::endl;
+        amrex::Print() << " NANOSCALE:" << std::endl;
+        if (case_CBD==1) {
+            amrex::Print() << " - Case 1: CBD is not meshed and there is no nanoporosity (oversimplification!)." << std::endl;
+        } else if (case_CBD==2) {
+            amrex::Print() << " - Case 2: CBD is not meshed and only impact electrolyte effective transport." << std::endl;
+        } else if (case_CBD==3) {
+            amrex::Print() << " - Case 3: CBD replaces electrolyte... with nanoporosity (mixed domain)." << std::endl;
+        } else if (case_CBD==4) {
+            amrex::Print() << " - Case 4: CBD is meshed... without nanoporosity (solid domain)." << std::endl;
+        } else if (case_CBD==5) {
+            amrex::Print() << " - Case 5: CBD is meshed... with nanoporosity (mixed domain)." << std::endl;
+        } else {
+            amrex::Print() << " >>> WARNING !!! INCOHERENT PARAMETERS FOR CBD." << std::endl;
+        }
+        if (Case_SEP==1) {
+            amrex::Print() << " - Separator has no nanoporosity (oversimplification!)." << std::endl;
+        } else if (Case_SEP==2) {
+            amrex::Print() << " - Separator has nanoporosity." << std::endl;
+        } else {
+            amrex::Print() << " >>> WARNING !!! INCORRECT PARAMETER FOR SEPARATOR." << std::endl;
+        }
+        amrex::Print() << std::endl;
+        amrex::Print() << " APPARENT (MESH, w/o nanoporosity) VOLUMES:" << std::endl;
+        amrex::Print() << "    Anode side:  " << std::endl;
+        amrex::Print() << "    - Active material volume      : " << anode_AM_volume << " m3"<< std::endl;
+        amrex::Print() << "    - Electrolyte w/o CBD volume  : " << anode_electrolyte_volume << " m3"<< std::endl;
+        amrex::Print() << "    - CBD volume                  : " << anode_CBD_volume << " m3"<< std::endl;
+        amrex::Print() << "    - Total volume                : " << total_anode_volume << " m3"<< std::endl;
+        amrex::Print() << "    Separator volume  : " << separator_volume << " m3"<< std::endl;
+        amrex::Print() << "    Cathode side:  " << std::endl;
+        amrex::Print() << "    - Active material volume      : " << cathode_AM_volume << " m3"<< std::endl;
+        amrex::Print() << "    - Electrolyte w/o CBD volume  : " << cathode_electrolyte_volume << " m3"<< std::endl;
+        amrex::Print() << "    - CBD volume                  : " << cathode_CBD_volume << " m3"<< std::endl;    
+        amrex::Print() << "    - Total volume                : " << total_cathode_volume << " m3"<< std::endl;     
+        amrex::Print() << "    Total active material volume : " << total_active_material_volume << " m3"<< std::endl;   
+        amrex::Print() << "    Total electrolyte volume     : " << total_electrolyte_volume << " m3"<< std::endl;
+        amrex::Print() << "    Total CBD volume             : " << totalCBD_volume << " m3"<< std::endl;
+        amrex::Print() << "    Total volume                 : " << total_volume << " m3"<< std::endl;
+        amrex::Print() << std::endl;
+        amrex::Print() << " TRUE (w/ nanoporosity) VOLUMES:" << std::endl;
+        amrex::Print() << "    Anode side:  " << std::endl;
+        amrex::Print() << "    - Electrolyte w/o CBD volume : " << anode_electrolyte_true_volume << " m3"<< std::endl;
+        amrex::Print() << "    - Electrolyte volume in CBD  : " << anode_CBDe_true_volume << " m3"<< std::endl;
+        amrex::Print() << "    Separator true electrolyte volume : " << separator_electrolyte_true_volume << " m3"<< std::endl;
+        amrex::Print() << "    Cathode side:  " << std::endl;
+        amrex::Print() << "    - Electrolyte w/o CBD volume : " << cathode_electrolyte_true_volume << " m3"<< std::endl;
+        amrex::Print() << "    - Electrolyte volume in CBD  : " << cathode_CBDe_true_volume << " m3"<< std::endl;
+        amrex::Print() << "    Total active material volume : " << total_active_material_volume << " m3"<< std::endl;   
+        amrex::Print() << "    Total electrolyte volume     : " << total_electrolyte_true_volume << " m3"<< std::endl;
+        amrex::Print() << "    Total CBD solid volume       : " << totalCBD_solid_volume << " m3"<< std::endl;
+        amrex::Print() << "    Separator solid volume       : " << Separator_solid_volume << " m3"<< std::endl;
+        // Total volume sanity check
+        amrex::Print() << "    Total volume                 : " << total_active_material_volume + total_electrolyte_true_volume + totalCBD_solid_volume + Separator_solid_volume << " m3"<< std::endl;        
+        amrex::Print() << std::endl;
+        amrex::Print() << " APPARENT (MESH, w/o nanoporosity) VOLUME FRACTIONS:" << std::endl;
+        amrex::Print() << "    Anode    : electrolyte | active material | CBD       : " << anode_electrolyte_vf << " | "<< anode_AM_vf << " | "<< anode_CBD_vf << std::endl;
+        amrex::Print() << "    Separator: electrolyte | solid                       : " << separator_electrolyte_vf << " | "<< 0.0 << std::endl;
+        amrex::Print() << "    Cathode  : electrolyte | active material | CBD       : " << cathode_electrolyte_vf << " | "<< cathode_AM_vf << " | "<< cathode_CBD_vf << std::endl;
+        amrex::Print() << " TRUE (w/ nanoporosity) VOLUME FRACTIONS:" << std::endl;
+        amrex::Print() << "    Anode    : electrolyte | active material | CBD solid : " << anode_electrolyte_true_vf << " | "<< anode_AM_vf << " | "<< anode_CBDsolid_true_vf << std::endl;
+        amrex::Print() << "    Separator: electrolyte | solid                       : " << separator_electrolyte_true_vf << " | "<< separator_solid_true_vf << std::endl;
+        amrex::Print() << "    Cathode  : electrolyte | active material | CBD solid : " << cathode_electrolyte_true_vf << " | "<< cathode_AM_vf << " | "<< cathode_CBDsolid_true_vf << std::endl;
+
+        amrex::Print() << std::endl;
+        amrex::Print() << "----------------------" << std::endl;
+        amrex::Print() << "INITIALIZATION " << std::endl;
+        amrex::Print() << "----------------------" << std::endl;
+        amrex::Print() << std::endl;
+
+    } else {
+        amrex::Print() << std::endl;
+        amrex::Print() << "----------------------" << std::endl;
+        amrex::Print() << "ITERATION NO: " << timestep << ", (dis)charging time " << time << " s " << std::endl;
+        amrex::Print() << "----------------------" << std::endl;
         amrex::Print() << std::endl;
     }
-
-    amrex::Print() << std::endl;
-    amrex::Print() << "----------------------" << std::endl;
-    amrex::Print() << "ITERATION NO: " << timestep << ", (dis)charging time " << time << " s " << std::endl;
-    amrex::Print() << "----------------------" << std::endl;
-    amrex::Print() << std::endl;
 
     amrex::Print() << "APPLIED LOADING:" << std::endl;
     amrex::Print() << "    Applied_current " << globalstorage->Applied_current << " A" << " for duration " << dt << " s" << std::endl;
     amrex::Print() << std::endl;
 
     amrex::Print() << "MOL AND CONCENTRATIONS:       " << std::endl;
-    amrex::Print() << "    Anode:       " << anode_current_mol << " mol / " << anode_current_mol/anode_volume << " mol.m-3" << std::endl;
-    amrex::Print() << "    Cathode:     " << cathode_current_mol << " mol / " << cathode_current_mol/cathode_volume << " mol.m-3" << std::endl;
-    amrex::Print() << "    Electrolyte: " << electrolyte_current_mol << " mol / " << electrolyte_current_mol/electrolyte_volume << " mol.m-3" << std::endl;
-    amrex::Print() << "    Separator:   " << separator_current_mol << " mol / " << separator_current_mol/separator_volume << " mol.m-3" << std::endl;
+    amrex::Print() << "     Anode side:  " << std::endl;
+    amrex::Print() << "    - active material (cs)    : " << anode_AM_current_true_mol << " mol (true) | " << anode_AM_current_true_mol/anode_AM_volume << " mol.m-3 (true)" << std::endl;
+    amrex::Print() << "    - electrolyte w/o CBD (ce): " << anode_electrolyte_current_mol << " mol (apparent) | " << anode_electrolyte_current_true_mol << " mol (true) | " << anode_electrolyte_current_mol/anode_electrolyte_volume << " mol.m-3 (apparent) | " << anode_electrolyte_current_true_mol/anode_electrolyte_true_volume << " mol.m-3 (true)" << std::endl;
+    if (case_CBD==3 || case_CBD==5) {
+    amrex::Print() << "    - CBD (ce)                : " << anode_CBD_current_mol << " mol (apparent) | " << anode_CBD_current_true_mol << " mol (true) | " << anode_CBD_current_mol/anode_CBD_volume << " mol.m-3 (apparent) | " << anode_CBD_current_true_mol/anode_CBDe_true_volume << " mol.m-3 (true)" << std::endl;
+    amrex::Print() << "    - total electrolyte (ce)  : " << anode_CBDelectrolyte_current_mol << " mol (apparent) | " << anode_CBDelectrolyte_current_true_mol << " mol (true) | " << anode_CBDelectrolyte_current_mol/(anode_electrolyte_volume+anode_CBD_volume) << " mol.m-3 (apparent) | " << anode_CBDelectrolyte_current_true_mol/anode_CBDelectrolyte_true_volume << " mol.m-3 (true)" << std::endl;
+    }
+    amrex::Print() << "    Separator (ce)            : " << separator_current_mol << " mol (apparent) | " << separator_current_true_mol << " mol (true) | " << separator_current_mol/separator_volume << " mol.m-3 (apparent) | " << separator_current_true_mol/separator_electrolyte_true_volume << " mol.m-3 (true)" << std::endl;
+    amrex::Print() << "     Cathode side:  " << std::endl;
+    amrex::Print() << "    - active material (cs)    : " << cathode_AM_current_true_mol << " mol (true) | " << cathode_AM_current_true_mol/cathode_AM_volume << " mol.m-3 (true)" << std::endl;
+    amrex::Print() << "    - electrolyte w/o CBD (ce): " << cathode_electrolyte_current_mol << " mol (apparent) | "  << cathode_electrolyte_current_true_mol << " mol (true) | " << cathode_electrolyte_current_mol/cathode_electrolyte_volume << " mol.m-3 (apparent) | " << cathode_electrolyte_current_true_mol/cathode_electrolyte_true_volume << " mol.m-3 (true)" << std::endl;
+    if (case_CBD==3 || case_CBD==5) {
+    amrex::Print() << "    - CBD (ce)                : " << cathode_CBD_current_mol << " mol (apparent) | " << cathode_CBD_current_true_mol << " mol (true) | " << cathode_CBD_current_mol/cathode_CBD_volume << " mol.m-3 (apparent) | " << cathode_CBD_current_true_mol/cathode_CBDe_true_volume << " mol.m-3 (true)" << std::endl;
+    amrex::Print() << "    - total electrolyte (ce)  : " << cathode_CBDelectrolyte_current_mol << " mol (apparent) | " << cathode_CBDelectrolyte_current_true_mol << " mol (true) | " << cathode_CBDelectrolyte_current_mol/(cathode_electrolyte_volume+cathode_CBD_volume) << " mol.m-3 (apparent) | " << cathode_CBDelectrolyte_current_true_mol/cathode_CBDelectrolyte_true_volume << " mol.m-3 (true)" << std::endl;
+    }
+    if (case_CBD==3) {    
+    amrex::Print() << "    Ce (total): " << total_CBDelectrolyte_current_mol << " mol (apparent) | " << total_CBDelectrolyte_current_true_mol << " mol (true) | " << total_CBDelectrolyte_current_mol/(total_electrolyte_volume+totalCBD_volume) << " mol.m-3 (apparent) | " << total_CBDelectrolyte_current_true_mol/total_electrolyte_true_volume << " mol.m-3 (true)" << std::endl;
+    } else {
+    amrex::Print() << "    Ce (total): " << total_CBDelectrolyte_current_mol << " mol (apparent) | " << total_CBDelectrolyte_current_true_mol << " mol (true) | " << total_CBDelectrolyte_current_mol/total_electrolyte_volume << " mol.m-3 (apparent) | " << total_CBDelectrolyte_current_true_mol/total_electrolyte_true_volume << " mol.m-3 (true)" << std::endl;
+    }
+    amrex::Print() << "    Cs (total): " << total_solid_current_true_mol << " mol (true)" << std::endl;
     amrex::Print() << std::endl;
 
     amrex::Print() << "MASS ERROR:" << std::endl;
-    amrex::Print() << "    Anode      : current = " << anode_current_mol << " mol , target = " << anode_target_mol << " mol , error = " << anode_mass_error << " % " << std::endl;
-    amrex::Print() << "    Cathode    : current = " << cathode_current_mol << " mol , target = " << cathode_target_mol << " mol , error = " << cathode_mass_error << " % " << std::endl;
-    amrex::Print() << "    Electrolyte: current = " << electrolyte_current_mol << " mol , target = " << electrolyte_target_mol << " mol , error = " << electrolyte_mass_error << " % " << std::endl;
+    amrex::Print() << "    Anode      : current = " << anode_AM_current_true_mol << " mol | target = " << anode_AM_target_mol << " mol | error = " << anode_mass_error << " % " << std::endl;
+    amrex::Print() << "    Cathode    : current = " << cathode_AM_current_true_mol << " mol | target = " << cathode_AM_target_mol << " mol | error = " << cathode_mass_error << " % " << std::endl;
+    amrex::Print() << "    Electrolyte: current = " << total_CBDelectrolyte_current_true_mol << " mol | target = " << total_CBDelectrolyte_target_mol << " mol | error = " << electrolyte_mass_error << " % " << std::endl;
     amrex::Print() << std::endl;
 
     amrex::Print() << "POTENTIAL:       " << std::endl;
-    amrex::Print() << "    Anode:       " << anode_current_potential << " V" << std::endl;
-    amrex::Print() << "    Cathode:     " << cathode_current_potential << " V" << std::endl;
-    amrex::Print() << "    Electrolyte: " << electrolyte_current_potential << " V" << std::endl;
-    amrex::Print() << "    Separator:   " << separator_current_potential << " V" << std::endl;
+    if (case_CBD==1 || case_CBD==2) {
+        amrex::Print() << "      Anode | Separator | Cathode" << std::endl;
+        amrex::Print() << "phis: " << anode_AM_current_potential << " | " << "n/a" << " | "  << cathode_AM_current_potential << " V" << std::endl;
+        amrex::Print() << "phie: " << anode_electrolyte_current_potential << " | " << separator_current_potential << " | "  << cathode_electrolyte_current_potential << " V" << std::endl;
+    } else if (case_CBD==3 ){
+        amrex::Print() << "      Anode | Anode (CBD) | Separator | Cathode | Cathode (CBD)" << std::endl;
+        amrex::Print() << "phis: " << anode_AM_current_potential << " | " << anode_CBDsolid_current_potential << " | " << "n/a" << " | "  << cathode_AM_current_potential << " | "  << cathode_CBDsolid_current_potential << " V" << std::endl;
+        amrex::Print() << "phie: " << "n/a" << " | " << anode_CBDelectrolyte_current_potential << " | " << separator_current_potential << " | "  << "n/a" << " | "  << cathode_CBDelectrolyte_current_potential << " V" << std::endl;
+    } else if (case_CBD==4 ){
+        amrex::Print() << "      Anode | Anode (CBD) | Separator | Cathode | Cathode (CBD)" << std::endl;
+        amrex::Print() << "phis: " << anode_AM_current_potential << " | " << anode_CBDsolid_current_potential << " | " << "n/a" << " | "  << cathode_AM_current_potential << " | "  << cathode_CBDsolid_current_potential << " V" << std::endl;
+        amrex::Print() << "phie: " << anode_electrolyte_current_potential << " | " << "n/a" << " | " << separator_current_potential << " | "  << cathode_electrolyte_current_potential << " | "  << "n/a" << " V" << std::endl;
+    } else {
+      amrex::Print() << "      Anode | Anode (CBD) | Separator | Cathode | Cathode (CBD)" << std::endl;
+        amrex::Print() << "phis: " << anode_AM_current_potential << " | " << anode_CBDsolid_current_potential << " | " << "n/a" << " | "  << cathode_AM_current_potential << " | "  << cathode_CBDsolid_current_potential << " V" << std::endl;
+        amrex::Print() << "phie: " << anode_electrolyte_current_potential << " | " << anode_CBDelectrolyte_current_potential << " | " << separator_current_potential << " | "  << cathode_electrolyte_current_potential << " | "  << cathode_CBDelectrolyte_current_potential << " V" << std::endl;
+    }
+
+    //amrex::Print() << "     Anode  : active material (phis) | CBD (phis) | electrolyte (phie): " << anode_AM_current_potential << " / " << anode_CBDsolid_current_potential << " / "  << anode_electrolyte_current_potential << " V" << std::endl;
+    //amrex::Print() << "     Separator (phie) : " << separator_current_potential << " V" << std::endl;
+    //amrex::Print() << "     Cathode: active material (phis) | CBD (phis) | electrolyte (phie): " << cathode_AM_current_potential << " / " << cathode_CBDsolid_current_potential << " / "  << cathode_electrolyte_current_potential << " V" << std::endl;
     amrex::Print() << std::endl;
 
     // SAVE MASS ERROR IN % IN CSV FILE
@@ -440,10 +681,8 @@ void echemAMR::postprocess(Real time, int timestep, Real dt, GlobalStorage* glob
             {
                 outfile.open(filename.c_str(), std::ios_base::out);
                 outfile << "Time_step    Time[s]    Anode    Electrolyte    Cathode" << std::endl;
-            } else if (timestep == 0 || ((timestep + 1) % 25 == 0))
-            {
-                outfile.open(filename.c_str(), std::ios_base::out | std::ios_base::app);
-            }
+            } 
+            outfile.open(filename.c_str(), std::ios_base::out | std::ios_base::app);
             outfile.precision(16);
             outfile << timestep << ' ' << std::scientific << time << ' ' << anode_mass_error << ' ' << electrolyte_mass_error << ' ' << cathode_mass_error << std::endl;
     }    

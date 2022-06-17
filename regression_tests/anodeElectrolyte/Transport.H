@@ -91,6 +91,16 @@ namespace electrochem_transport {
             dcoeff(i,j,k,LS_ID)   = 0.0;
         }
 
+    AMREX_GPU_DEVICE AMREX_INLINE void compute_eps(
+        int i,
+        int j,
+        int k,
+        Array4<Real> const& phi,
+        Array4<Real> const& ecoeff)
+    {
+        
+    }
+
     AMREX_GPU_DEVICE AMREX_INLINE
         void compute_velx(int i, int j, int k,
                 Array4<Real> const& phi,

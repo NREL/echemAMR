@@ -20,35 +20,55 @@ struct ProbParm
     //    0=constant diffusion, conductivity, OCP, and io
     //    1=NMC532 with constant diffusion and conductivity, cubic polynomial OCP and symmetric io
     //    2=NMC532 with constant conductivity, actual diffusion, OCP and io
-    int mater_cathode = 1; 
+    int mater_cathode = 2; 
     // Anode
     //    0=constant diffusion, conductivity, OCP, and io
     //    1=graphite SLC1506T2 with constant diffusion and conductivity, 8-th order polynomial OCP, and symmetric io
     //    2=graphite SLC1506T2 with constant diffusion and conductivity, actual OCP, and symmetric io
-    int mater_anode = 1; 
+    int mater_anode = 2; 
     // Electrolyte
     //    0=constand coefficient
     //    1=Gen2 with constand coefficient
     //....2=Gen2 with concentration dependent coefficients
-    int mater_electrolyte = 1;
-    // Separator
-    //    0=constant coefficient
-    int mater_separator = 0;
-    // Electrolyte carbon-binder
-     //    0=constant coefficient
-    //int mater_CBD_cathode = 0;   
-    //int mater_CBD_anode = 0;   
+    int mater_electrolyte = 2;
+    // Carbon black binder
+    int mater_CBD = 1;
+
+    // Nanoscale
+    // = 0: nanoporosity = 1 and MacMullin = 1 (overwritte nanoporosity_filename and macmullin_filename)
+    // = 1: use txt files
+    int Nanoscale_coefficients_txtimport_CBD = 1;
+    int Nanoscale_coefficients_txtimport_separator = 1;
+    // CBD_transport = 0: only transport e- (solid potential), i.e., pure solid phase.
+    //                 BC: same as active material but only for applied loading
+    //                = 1: transport e- (solid potential) and Li+ (electrolyte concentration), i.e., a mixed phase with nanoporosity
+    //                 BC: same as active material
+    int CBD_transport = 1;
+
+    // Replace electrolyte with CBD
+    int ELEisCBD = 0;
+    // Possible combinations:
+    // 1) no CBD mesh + CBD_transport=0 + Nanoscale_coefficients_txtimport_CBD=0 + ELEisCBD=0: no nanporosity (oversimplication)
+    // 2) no CBD mesh + CBD_transport=0 + Nanoscale_coefficients_txtimport_CBD=1 + ELEisCBD=0: nanoporosity impact on ionic diffusion
+    // 3) no CBD mesh + CBD_transport=1 + Nanoscale_coefficients_txtimport_CBD=1 + ELEisCBD=1: nanoporosity, mixed CBD
+    // 4) CBD mesh + CBD_transport=0 + Nanoscale_coefficients_txtimport_CBD=0 + ELEisCBD=0: no nanoporosity, solid CBD
+    // 5) CBD mesh + CBD_transport=1 + Nanoscale_coefficients_txtimport_CBD=1 + ELEisCBD=0: nanoporosity, mixed CBD
+
 
     // Special case: 0D model comparison [0=false, 1=true]
     // If true, diffusivity and conductivity are set to un-realistic high values
-    int zeroDmodel = 1;
+    int zeroDmodel = 0;
 
     // --------------
     // GEOMETRY
     // --------------
     std::string geometry_filename = "CEAtest.txt";
+    std::string nanoporosity_filename = "CEAtest_nanoporosity.txt";
+    std::string macmullin_filename = "CEAtest_macmullin.txt";
     int dimension_geometry[3];
-    int geo1D[380000];
+    int geo1D[1000000]; // initialize material location
+    float Nanoporosity1D[1000000]; // Initialize nanoporosity location
+    float MacMullin1D[1000000]; // Initialize MacMullin location
     // std::vector<int> geo1D;
     // amrex::Vector<int> geo1D;
     // amrex::Gpu::PinnedVector<int> geo1D;
@@ -104,20 +124,29 @@ struct GlobalStorage
     amrex::Vector<amrex::Real> pot_bc_lo{-1.0, 0.0, 0.0};
     amrex::Vector<amrex::Real> pot_bc_hi{ 0.0, 0.0, 0.0};
 
-    // Volumes
-    amrex::Real anode_volume = 0.0;
-    amrex::Real ele_sep_volume = 0.0;
-    amrex::Real cathode_volume = 0.0;
+    // Volumes for capacity calculation
+    amrex::Real anode_AM_volume = 0.0;
+    amrex::Real cathode_AM_volume = 0.0;
 
     // Surface Areas
-    amrex::Real anode_SA = 0.0;
-    amrex::Real electrolyte_SA = 0.0;
-    amrex::Real sepatator_SA = 0.0;
-    amrex::Real cathode_SA = 0.0;
-    amrex::Real anode_ele_SA = 0.0;
-    amrex::Real cathode_ele_SA = 0.0;
-    amrex::Real anode_cc_SA = 0.0;
-    amrex::Real cathode_cc_SA = 0.0;
+    // Current collector - solid e- conductor (Applied loading)
+    amrex::Real anode_ccAM_SA = 0.0;
+    amrex::Real cathode_ccAM_SA = 0.0;
+    amrex::Real anode_ccCBDs_SA = 0.0;
+    amrex::Real cathode_ccCBDs_SA = 0.0;
+
+    // Electrolyte - active material (Intercalation reaction)
+    amrex::Real anode_eleAM_SA = 0.0;
+    amrex::Real cathode_eleAM_SA = 0.0;
+    amrex::Real anode_seppAM_SA = 0.0;
+    amrex::Real cathode_seppAM_SA = 0.0;
+    amrex::Real anode_CBDpAM_SA = 0.0;
+    amrex::Real cathode_CBDpAM_SA = 0.0;
+
+    // Carbon binder and separator representation
+    amrex::Real CBD_transport = -1;
+    amrex::Real Nanoscale_coefficients_txtimport_CBD = -1;
+    amrex::Real Nanoscale_coefficients_txtimport_separator = -1;
 
     // Applied current
     amrex::Real Applied_current = 0.0; // [A] Initialization

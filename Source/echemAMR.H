@@ -83,7 +83,7 @@ public:
     Real EstTimeStep(int lev, bool local = false);
 
     // a wrapper for computing integrals
-    Real VolumeIntegral(int comp, int domain);
+    Real VolumeIntegral(int comp1, int comp2, int domain);
 
     // a wrapper for computing integrals
     Real SurfaceIntegral(int comp, int domain1, int domain2);

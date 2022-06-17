@@ -39,7 +39,7 @@ jobs:
       working-directory: ./models
       run: |
         cd Microstructure_Cphi
-        make -j 2 COMP=gnu
+        make -j 2 COMP=gnu DEBUG=FALSE
     - name: Run Regression
       working-directory: ./regression_tests
       run: |
@@ -66,7 +66,7 @@ jobs:
       working-directory: ./models
       run: |
           cd Microstructure_Cphi
-          mpirun -n 2 ./echemAMR3d.gnu.TPROF.MPI.ex inputs_CESEAtest
+          mpirun -n 2 ./echemAMR3d.gnu.TPROF.MPI.ex inputs_CESEA_case1
   gputest:
     runs-on: ubuntu-latest
     steps:

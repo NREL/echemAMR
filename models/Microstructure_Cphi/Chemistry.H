@@ -13,17 +13,23 @@
 #include <math.h>  // signbit, exp
 #include <cmath>   // pow
 
-#define NUM_SPECIES 6 // 6 with separator
-#define CO_ID   0 //conc
-#define A_ID    1 //anode
-#define C_ID    2 //cathode
-#define E_ID    3 //electrolyte
-#define S_ID    4 //separator. +1 for the other if added
-#define LS_ID   5
-#define EFX_ID  6
-#define EFY_ID  7
-#define EFZ_ID  8
-#define POT_ID  9 // Potential
+#define NUM_SPECIES 12
+#define CO_ID    0 //concentration
+#define POTs_ID  1 // solid potential (Used only if CBD mixed domain (prob.CBD_transport = 1)
+#define A_AM_ID  2 //anode active material
+#define A_E_ID   3 // anode electrolyte
+#define A_CBD_ID 4 // anode carbon black binder
+#define S_ID     5 //separator
+#define C_AM_ID  6 // cathode active material
+#define C_E_ID   7 // cathode electrolyte 
+#define C_CBD_ID 8 // cathode carbon black binder
+#define NP_ID    9 //Nanoporosity
+#define MAC_ID   10 //MacMullin_number
+#define LS_ID    11 //levelset
+#define EFX_ID   12
+#define EFY_ID   13
+#define EFZ_ID   14
+#define POT_ID   15 // potential
 #define NVAR NUM_SPECIES+4 
 
 namespace electrochem
@@ -548,22 +554,50 @@ namespace electrochem
         return Kd; 
     }
 
-    // ELECTROLYTE LOWER SCALE COEFFICIENTS
-    // A cell of electrolyte contain solid and electrolyte, therefore it is an effective medium
+    // Carbon-black binder (CBD) MATERIAL COEFFICIENTS
 
-    // Separator lower scale coefficinets
+    // CBD diffusion coefficient [m2.s-1]
     AMREX_GPU_HOST_DEVICE AMREX_FORCE_INLINE
-    amrex::Real MacMullinSeparator(const ProbParm& prob_parm)
+    amrex::Real Ds_bulk_CBD(const ProbParm& prob_parm)
     {
-        if(prob_parm.mater_separator==0) {
-            amrex::Real Separator_nanoporosity = 0.4;
-            amrex::Real Separator_tortuosity = 3.6;
-            return Separator_tortuosity/Separator_nanoporosity;
+        if(prob_parm.zeroDmodel==1) {
+            amrex::Real DsbulkCBD = 1.0e-16;
+            return DsbulkCBD;
         } else {          
-            amrex::Abort("Incorrect user-parameter mater_separator in ProbParm.H");
-            return 0; 
+            if(prob_parm.mater_CBD==0) {
+                amrex::Real DsbulkCBD = 1.0e-16;
+                return DsbulkCBD; 
+            } else if (prob_parm.mater_CBD==1) {
+                amrex::Real DsbulkCBD = 3.0e-16;
+                return DsbulkCBD; 
+            } else {
+                amrex::Abort("Incorrect user-parameter mater_CBD in ProbParm.H");
+                return 0; 
+            }
         }
     }
+
+    // CBD conductivity coefficient [S.m-1]
+    AMREX_GPU_HOST_DEVICE AMREX_FORCE_INLINE
+    amrex::Real Ks_bulk_CBD(const ProbParm& prob_parm)
+    {
+        if(prob_parm.zeroDmodel==1) {
+            amrex::Real KsbulkCBD = 100;
+            return KsbulkCBD;
+        } else {          
+            if(prob_parm.mater_CBD==0) {
+                amrex::Real KsbulkCBD = 100;
+                return KsbulkCBD; 
+            } else if (prob_parm.mater_CBD==1) {
+                amrex::Real KsbulkCBD = 100;
+                return KsbulkCBD; 
+            } else {
+                amrex::Abort("Incorrect user-parameter mater_CBD in ProbParm.H");
+                return 0; 
+            }
+        }
+    }
+
 
     // ------------------
     // INITIAL POTENTIALS
