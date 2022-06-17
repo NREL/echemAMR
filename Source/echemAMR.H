@@ -232,6 +232,7 @@ private:
     int pot_initial_guess = 0;
 
     int species_implicit_solve=0;
+    int reset_species_in_solid=0;
     Real species_implicit_solve_dt=0.01; //sec
 
     Vector<int> transported_species_list{0}; 

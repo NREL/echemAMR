@@ -289,6 +289,7 @@ void echemAMR::ReadParameters()
         pp.query("linsolve_max_coarsening_level",linsolve_max_coarsening_level);
         pp.query("lsgrad_tol",lsgrad_tolerance);
         pp.query("species_implicit_solve",species_implicit_solve);
+        pp.query("reset_species_in_solid",reset_species_in_solid);
 
         pp.queryarr("transported_species_list",transported_species_list);
     }

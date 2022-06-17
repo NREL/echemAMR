@@ -135,6 +135,30 @@ void echemAMR::Evolve()
             t_new[lev] = cur_time;
         }
 
+        if(reset_species_in_solid)
+        {
+            for(int ilev=0;ilev<=finest_level;ilev++)
+            {
+
+                for (MFIter mfi(phi_new[ilev], TilingIfNotGPU()); mfi.isValid(); ++mfi)
+                {
+                    const Box& bx = mfi.tilebox();
+                    Array4<Real> phi_arr = phi_new[ilev].array(mfi);
+                    int *species_list=transported_species_list.data();
+                    unsigned int nspec_list=transported_species_list.size();
+                    int lset_id=bv_levset_id;
+
+                    amrex::ParallelFor(bx, [=] AMREX_GPU_DEVICE(int i, int j, int k) 
+                    {
+                        for(int sp=0;sp<nspec_list;sp++)
+                        {
+                           phi_arr(i,j,k,sp)*=phi_arr(i,j,k,lset_id);
+                        }
+                    });
+                }
+            }
+        }
+
         if (plot_int > 0 && (step + 1) % plot_int == 0)
         {
             last_plot_file_step = step + 1;
