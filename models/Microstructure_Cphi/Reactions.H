@@ -182,6 +182,15 @@ namespace electrochem_reactions {
         }
  
     }
+    
+    AMREX_GPU_DEVICE AMREX_INLINE void species_bvflux(int i,int j,int k,int n,int normaldir,Real phi_jump,
+            Array4<Real> const& phi,ProbParm const& prob_parm,Real &jbv)
+    {
+        Real jbvder=0.0;
+        jbv=0.0;
+        bvcurrent_and_der(i,j,k,normaldir,phi_jump,phi,prob_parm,jbv,jbvder);
+        jbv=jbv/FARADCONST;
+    }
 
 }
 #endif
