@@ -78,6 +78,16 @@ AMREX_GPU_DEVICE AMREX_INLINE void bvcurrent_and_der(int i,int j,int k,int norma
     // jbvder=-(j0/phi0);
 }
 
+AMREX_GPU_DEVICE AMREX_INLINE void species_bvflux(int i,int j,int k,int n,int normaldir,
+        Real phi_jump,Array4<Real> const& phi,ProbParm const& prob_parm,Real &jbv)
+{
+        Real jbvder=0.0;
+        jbv=0.0;
+        bvcurrent_and_der(i,j,k,normaldir,phi_jump,phi,prob_parm,jbv,jbvder);
+        jbv=jbv/FARADCONST;
+
+}
+
 AMREX_GPU_DEVICE AMREX_INLINE Real bv_activation_function(Real c, Real gradc, Real gradc_cutoff)
 {
     Real f;

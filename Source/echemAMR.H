@@ -237,6 +237,7 @@ private:
     int pot_initial_guess = 0;
 
     int species_implicit_solve=0;
+    int reset_species_in_solid=0;
     Real species_implicit_solve_dt=0.01; //sec
 
     Vector<int> transported_species_list{0}; 
@@ -245,7 +246,7 @@ private:
     int buttler_vohlmer_flux = 0;
     // level-set id for buttler-vohlmer
     int bv_levset_id = 0;
-    int bv_spec_id = 0;
+    Vector<int> bv_specid_list{0};
 
     int bv_nonlinear_iters = 1;
     Real bv_nonlinear_reltol = 1e-8;
