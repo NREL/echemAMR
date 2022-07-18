@@ -23,8 +23,13 @@ void line_plot(
 
     const int axis = idxOp.dir;
     const int index_in = index;
-    // this is hard coded for the 4 level sets
-    const int num_comps = 4;
+    
+    // this is hard coded for the 7 level sets
+    const int num_comps = 7;
+
+    // this is hard coded for the offset for the first field that is a domain level set
+    const int domain_offset = 2;
+
 
     AMREX_ALWAYS_ASSERT(num_points > 0);
 
@@ -142,7 +147,7 @@ void line_plot(
                                         {
 
                                             const amrex::Real field = phi_arr(i, j, k, index_in);
-                                            const amrex::Real lvlset = amrex::max(phi_arr(i, j, k, n + 1), 0.0);
+                                            const amrex::Real lvlset = amrex::max(phi_arr(i, j, k, n + domain_offset), 0.0);
                                             const amrex::Real vol = dx * dy * dz;
 
                                             // min is annoying can't use level set here
@@ -251,7 +256,7 @@ void line_plot(
                                         {
                                             const amrex::Real field = phi_arr(i, j, k, index_in);
                                             // this assumes level sets are stacked after concentration
-                                            const amrex::Real lvlset = amrex::max(phi_arr(i, j, k, n + 1), 0.0);
+                                            const amrex::Real lvlset = amrex::max(phi_arr(i, j, k, n + domain_offset), 0.0);
                                             const amrex::Real vol = dx * dy * dz;
                                             const amrex::Real mean = line_avg[num_comps * ind + n] / line_vol[num_comps * ind + n];
                                             const amrex::Real stddev = std::pow(field - mean, 2.0) * lvlset * vol;
@@ -275,24 +280,27 @@ void line_plot(
     // only IO Processor outputs file
     if (amrex::ParallelDescriptor::IOProcessor())
     {
-        const int num_files = 4;
+        const int num_comps = 7;
 
-        AMREX_ALWAYS_ASSERT(num_files == num_comps);
+        AMREX_ALWAYS_ASSERT(num_comps == num_comps);
 
-        std::ofstream outfile[num_files];
-        std::string filename[num_files];
+        std::ofstream outfile[num_comps];
+        std::string filename[num_comps];
 
-        filename[0] = echemAMR::output_folder + "line_plots/anode_" + filename_type + ".csv";
-        filename[1] = echemAMR::output_folder + "line_plots/cathode_" + filename_type + ".csv";
-        filename[2] = echemAMR::output_folder + "line_plots/electrolyte_" + filename_type + ".csv";
-        filename[3] = echemAMR::output_folder + "line_plots/separator_" + filename_type + ".csv";
+        for (int f = 0; f < num_comps; ++f)
+        {
+            filename[f] = echemAMR::output_folder + "line_plots/" + electrochem::specnames[f+domain_offset] + "_" + filename_type + ".csv";
+        }
+        // filename[1] = echemAMR::output_folder + "line_plots/cathode_" + filename_type + ".csv";
+        // filename[2] = echemAMR::output_folder + "line_plots/electrolyte_" + filename_type + ".csv";
+        // filename[3] = echemAMR::output_folder + "line_plots/separator_" + filename_type + ".csv";
 
-        for (int f = 0; f < num_files; ++f)
+        for (int f = 0; f < num_comps; ++f)
         {
             if (timestep == 0)
             {
                 outfile[f].open(filename[f].c_str(), std::ios_base::out);
-                outfile[f] << "Time_step    Time[s]    Position[m]    Min    Mean    Max    Std" << std::endl;
+                outfile[f] << "Time_step,    Time[s],    Position[m],    Min,    Mean,    Max,    Std" << std::endl;
             } else
             {
                 outfile[f].open(filename[f].c_str(), std::ios_base::out | std::ios_base::app);
@@ -302,8 +310,8 @@ void line_plot(
 
             for (int i = 0; i < num_points; ++i)
             {
-                outfile[f] << timestep << ' ' << std::scientific << time << ' ' << line_location[i] << ' ' << line_minimum[num_comps * i + f] << ' '
-                           << line_average[num_comps * i + f] / line_volume[num_comps * i + f] << ' ' << line_maximum[num_comps * i + f] << ' '
+                outfile[f] << timestep << ',' << ' ' << std::scientific << time << ',' << ' ' << line_location[i] << ',' << ' ' << line_minimum[num_comps * i + f] << ',' << ' '
+                           << line_average[num_comps * i + f] / line_volume[num_comps * i + f] << ',' << ' ' << line_maximum[num_comps * i + f] << ',' << ' '
                            << std::sqrt(line_stddev[num_comps * i + f] / line_volume[num_comps * i + f]) << std::endl;
             }
         }
