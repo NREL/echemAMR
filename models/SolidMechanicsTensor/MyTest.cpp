@@ -34,40 +34,40 @@ MyTest::solve ()
 //    // xsides
 //    mlmg_lobc[0][0] =  LinOpBCType::Neumann;
 //    mlmg_lobc[1][0] =  LinOpBCType::Neumann;
-//#if(AMREX_SPACEDIM==3)
+// #if(AMREX_SPACEDIM==3)
 //    mlmg_lobc[2][0] =  LinOpBCType::Neumann;
-//#endif
-//
+// #endif
+
 //    mlmg_hibc[0][0] =  LinOpBCType::Neumann;
 //    mlmg_hibc[1][0] =  LinOpBCType::Neumann;
-//#if(AMREX_SPACEDIM==3)
+// #if(AMREX_SPACEDIM==3)
 //    mlmg_hibc[2][0] =  LinOpBCType::Neumann;
-//#endif
-//
-//
+// #endif
+
+
 //    // ysides
 //    mlmg_lobc[0][1] =  LinOpBCType::Neumann;
 //    mlmg_lobc[1][1] =  LinOpBCType::Dirichlet;
-//#if(AMREX_SPACEDIM==3)
+// #if(AMREX_SPACEDIM==3)
 //    mlmg_lobc[2][1] =  LinOpBCType::Neumann;
-//#endif
-//
+// #endif
+
 //    mlmg_hibc[0][1] =  LinOpBCType::Neumann;
 //    mlmg_hibc[1][1] =  LinOpBCType::Neumann;
-//#if(AMREX_SPACEDIM==3)
+// #if(AMREX_SPACEDIM==3)
 //    mlmg_hibc[2][1] =  LinOpBCType::Neumann;
-//#endif
-//
-//#if(AMREX_SPACEDIM==3)
+// #endif
+
+// #if(AMREX_SPACEDIM==3)
 //    // zsides
 //    mlmg_lobc[0][2] =  LinOpBCType::Neumann;
 //    mlmg_lobc[1][2] =  LinOpBCType::Neumann;
 //    mlmg_lobc[2][2] =  LinOpBCType::Neumann;
-//
+
 //    mlmg_hibc[0][2] =  LinOpBCType::Neumann;
 //    mlmg_hibc[1][2] =  LinOpBCType::Neumann;
 //    mlmg_hibc[2][2] =  LinOpBCType::Neumann;
-//#endif
+// #endif
 
 
     LPInfo info;
@@ -97,8 +97,41 @@ MyTest::solve ()
         amrex::average_cellcenter_to_face(amrex::GetArrOfPtrs(face_eta_coef), eta, geom);
         amrex::average_cellcenter_to_face(amrex::GetArrOfPtrs(face_kappa_coef), kappa, geom);
         amrex::average_cellcenter_to_face(amrex::GetArrOfPtrs(face_lamG_deltaT), lamG_deltaT, geom);
-        amrex::computeGradient(lamG_deltaT_gradient,amrex::GetArrOfConstPtrs(face_lamG_deltaT), geom);
 
+
+        // Here is where I need to iterate over all faces and set the correct boundary faces to zero
+        // for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
+        // {
+            for (MFIter mfi(solution, TilingIfNotGPU()); mfi.isValid(); ++mfi)
+            {
+
+                const Box& bx = mfi.tilebox();
+                Box fbox = convert(bx, IntVect::TheDimensionVector(1));
+                Array4<Real> face_eta_coef_arr = face_eta_coef[1].array(mfi);
+                // Array4<Real> face_lamG_deltaT_arr = face_lamG_deltaT[1].array(mfi);
+
+                // Get the boundary ids
+                const int* domlo_p = geom.Domain().loVect();
+                const int* domhi_p = geom.Domain().hiVect();
+
+                GpuArray<int,AMREX_SPACEDIM> domlo={domlo_p[0], domlo_p[1]};
+                GpuArray<int,AMREX_SPACEDIM> domhi={domhi_p[0], domhi_p[1]};
+
+
+                amrex::ParallelFor(fbox, [=] AMREX_GPU_DEVICE(int i, int j, int k) 
+                {
+
+                    if (j == domlo[1] || j == domhi[1]+1) 
+                    {
+                        face_eta_coef_arr(i, j, k) = 0.0;
+                        // face_lamG_deltaT_arr(i, j, k) = 0.0;
+                    }
+
+                });
+            }
+        // }
+
+        amrex::computeGradient(lamG_deltaT_gradient,amrex::GetArrOfConstPtrs(face_lamG_deltaT), geom);
         mltensor->setShearViscosity(lev, amrex::GetArrOfConstPtrs(face_eta_coef));
         mltensor->setBulkViscosity(lev, amrex::GetArrOfConstPtrs(face_kappa_coef));
     }
