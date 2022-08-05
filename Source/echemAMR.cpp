@@ -48,6 +48,14 @@ echemAMR::echemAMR()
     t_new.resize(nlevs_max, 0.0);
     t_old.resize(nlevs_max, -1.e100);
     dt.resize(nlevs_max, 1.e100);
+    
+    if(fixed_timestep)
+    {
+        for(int lev=0;lev<nlevs_max;lev++)
+        {
+            dt[lev]=dtmin;
+        }
+    }
 
     phi_new.resize(nlevs_max);
     phi_old.resize(nlevs_max);
@@ -59,9 +67,9 @@ echemAMR::echemAMR()
     pp.queryarr("hi_bc_pot", bc_hi_pot, 0, AMREX_SPACEDIM);
 
     /*
-        // walls (Neumann)
-        int bc_lo[] = {FOEXTRAP, FOEXTRAP, FOEXTRAP};
-        int bc_hi[] = {FOEXTRAP, FOEXTRAP, FOEXTRAP};
+    // walls (Neumann)
+    int bc_lo[] = {FOEXTRAP, FOEXTRAP, FOEXTRAP};
+    int bc_hi[] = {FOEXTRAP, FOEXTRAP, FOEXTRAP};
     */
     bcspec.resize(NVAR);
     for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
@@ -137,7 +145,7 @@ void echemAMR::InitData()
                 const Box& box = mfi.validbox();
 
                 amrex::launch(box, [=] AMREX_GPU_DEVICE(Box const& tbx) 
-                { initproblemdata(box, fab, geomData, localprobparm); });
+                              { initproblemdata(box, fab, geomData, localprobparm); });
             }
         }
 
@@ -276,6 +284,8 @@ void echemAMR::ReadParameters()
         pp.query("cfl", cfl);
         pp.query("dtmin", dtmin);
         pp.query("dtmax", dtmax);
+        pp.query("dtgpfactor",dtgpfactor);
+        pp.query("fixed_timestep",fixed_timestep);
         pp.query("do_reflux", do_reflux);
         pp.query("potential_solve", potential_solve);
         pp.query("potential_solve_int", pot_solve_int);
@@ -309,6 +319,10 @@ void echemAMR::ReadParameters()
         pp.query("reset_species_in_solid",reset_species_in_solid);
 
         pp.queryarr("transported_species_list",transported_species_list);
+        if(fixed_timestep && !species_implicit_solve)
+        {
+            amrex::Abort("Cannot use fixed timestep with explicit subcycled solve\n");
+        }
     }
 }
 
