@@ -80,7 +80,7 @@ public:
             Vector<MultiFab *> dsdt_expl);
 
     // compute dt from CFL considerations
-    Real EstTimeStep(int lev, bool local = false);
+    Real EstTimeStep(int lev);
 
     // a wrapper for computing integrals
     Real VolumeIntegral(int comp1, int comp2, int domain);
@@ -204,6 +204,9 @@ private:
 
     amrex::Real dtmin = 1e-20;
     amrex::Real dtmax = 1e10;
+    amrex::Real dtgpfactor=1.0;
+
+    int fixed_timestep=0;
 
     // by default no relaxation for
     // BV poisson solves
