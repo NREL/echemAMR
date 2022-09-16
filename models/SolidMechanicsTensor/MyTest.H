@@ -19,11 +19,11 @@ private:
     void initGrids ();
 
     int n_cell = 32;
-    int n_pad = 8;
-    int m_pad = 8;
+    int x_pad = 0;
+    int y_pad = 0;
     int max_grid_size = 64;
 
-    std::string plot_file_name{"plot"};
+    std::string plot_file_name{"output/the_reality/plot"};
 
     // For MLMG solver
     int verbose = 2;

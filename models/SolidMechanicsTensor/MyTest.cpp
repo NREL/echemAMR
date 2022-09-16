@@ -34,40 +34,40 @@ MyTest::solve ()
 //    // xsides
 //    mlmg_lobc[0][0] =  LinOpBCType::Neumann;
 //    mlmg_lobc[1][0] =  LinOpBCType::Neumann;
-//#if(AMREX_SPACEDIM==3)
+// #if(AMREX_SPACEDIM==3)
 //    mlmg_lobc[2][0] =  LinOpBCType::Neumann;
-//#endif
-//
+// #endif
+
 //    mlmg_hibc[0][0] =  LinOpBCType::Neumann;
 //    mlmg_hibc[1][0] =  LinOpBCType::Neumann;
-//#if(AMREX_SPACEDIM==3)
+// #if(AMREX_SPACEDIM==3)
 //    mlmg_hibc[2][0] =  LinOpBCType::Neumann;
-//#endif
-//
-//
+// #endif
+
+
 //    // ysides
 //    mlmg_lobc[0][1] =  LinOpBCType::Neumann;
 //    mlmg_lobc[1][1] =  LinOpBCType::Dirichlet;
-//#if(AMREX_SPACEDIM==3)
+// #if(AMREX_SPACEDIM==3)
 //    mlmg_lobc[2][1] =  LinOpBCType::Neumann;
-//#endif
-//
+// #endif
+
 //    mlmg_hibc[0][1] =  LinOpBCType::Neumann;
 //    mlmg_hibc[1][1] =  LinOpBCType::Neumann;
-//#if(AMREX_SPACEDIM==3)
+// #if(AMREX_SPACEDIM==3)
 //    mlmg_hibc[2][1] =  LinOpBCType::Neumann;
-//#endif
-//
-//#if(AMREX_SPACEDIM==3)
+// #endif
+
+// #if(AMREX_SPACEDIM==3)
 //    // zsides
 //    mlmg_lobc[0][2] =  LinOpBCType::Neumann;
 //    mlmg_lobc[1][2] =  LinOpBCType::Neumann;
 //    mlmg_lobc[2][2] =  LinOpBCType::Neumann;
-//
+
 //    mlmg_hibc[0][2] =  LinOpBCType::Neumann;
 //    mlmg_hibc[1][2] =  LinOpBCType::Neumann;
 //    mlmg_hibc[2][2] =  LinOpBCType::Neumann;
-//#endif
+// #endif
 
 
     LPInfo info;
@@ -97,8 +97,48 @@ MyTest::solve ()
         amrex::average_cellcenter_to_face(amrex::GetArrOfPtrs(face_eta_coef), eta, geom);
         amrex::average_cellcenter_to_face(amrex::GetArrOfPtrs(face_kappa_coef), kappa, geom);
         amrex::average_cellcenter_to_face(amrex::GetArrOfPtrs(face_lamG_deltaT), lamG_deltaT, geom);
-        amrex::computeGradient(lamG_deltaT_gradient,amrex::GetArrOfConstPtrs(face_lamG_deltaT), geom);
 
+
+        // Here is where I need to iterate over all faces and set the correct boundary faces to zero
+
+        // if there is no padding in the y direction, try to set the stresses to zero
+        if (y_pad == 0)
+        {
+            // for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
+            // {
+                for (MFIter mfi(solution, TilingIfNotGPU()); mfi.isValid(); ++mfi)
+                {
+                    // make an box for the facets
+                    const Box& bx = mfi.tilebox();
+                    Box fbox = convert(bx, IntVect::TheDimensionVector(1));
+
+                    // Grab the y direction facets
+                    Array4<Real> face_eta_coef_arr = face_eta_coef[1].array(mfi);
+                    // Array4<Real> face_lamG_deltaT_arr = face_lamG_deltaT[1].array(mfi);
+
+                    // Get the boundary ids
+                    const int* domlo_p = geom.Domain().loVect();
+                    const int* domhi_p = geom.Domain().hiVect();
+
+                    GpuArray<int,AMREX_SPACEDIM> domlo={domlo_p[0], domlo_p[1]};
+                    GpuArray<int,AMREX_SPACEDIM> domhi={domhi_p[0], domhi_p[1]};
+
+
+                    amrex::ParallelFor(fbox, [=] AMREX_GPU_DEVICE(int i, int j, int k) 
+                    {
+                        // Set eta to zero on top and bottom
+                        if (j == domlo[1] || j == domhi[1]+1) 
+                        {
+                            face_eta_coef_arr(i, j, k) = 0.0;
+                            // face_lamG_deltaT_arr(i, j, k) = 0.0;
+                        }
+
+                    });
+                }
+            // }
+        }
+
+        amrex::computeGradient(lamG_deltaT_gradient,amrex::GetArrOfConstPtrs(face_lamG_deltaT), geom);
         mltensor->setShearViscosity(lev, amrex::GetArrOfConstPtrs(face_eta_coef));
         mltensor->setBulkViscosity(lev, amrex::GetArrOfConstPtrs(face_kappa_coef));
     }
@@ -238,8 +278,8 @@ MyTest::readParameters ()
 {
     ParmParse pp;
     pp.query("n_cell", n_cell);
-    pp.query("n_pad", n_pad);
-    pp.query("m_pad", m_pad);
+    pp.query("x_pad", x_pad); // padding in the x direction
+    pp.query("y_pad", y_pad); // padding in the y direction
     pp.query("max_grid_size", max_grid_size);
 
     pp.query("plot_file", plot_file_name);
@@ -254,10 +294,10 @@ MyTest::initGrids ()
 {
     const Real L = 1.0e-5;
     const Real h = (4*L)/(4*n_cell);
-    RealBox rb({AMREX_D_DECL(-(2*L+m_pad*h),-(L+n_pad*h),-(2*L+m_pad*h))}, {AMREX_D_DECL((2*L+m_pad*h),(2*L+n_pad*h),(2*L+m_pad*h))});
+    RealBox rb({AMREX_D_DECL(-(2*L+x_pad*h),-(L+y_pad*h),-(2*L+x_pad*h))}, {AMREX_D_DECL((2*L+x_pad*h),(2*L+y_pad*h),(2*L+x_pad*h))});
     std::array<int,AMREX_SPACEDIM> isperiodic{AMREX_D_DECL(0,0,0)};
     Geometry::Setup(&rb, 0, isperiodic.data());
-    Box domain(IntVect{AMREX_D_DECL(0,0,0)}, IntVect{AMREX_D_DECL(4*n_cell+2*m_pad-1,3*n_cell+2*n_pad-1,4*n_cell+2*m_pad-1)});
+    Box domain(IntVect{AMREX_D_DECL(0,0,0)}, IntVect{AMREX_D_DECL(4*n_cell+2*x_pad-1,3*n_cell+2*y_pad-1,4*n_cell+2*x_pad-1)});
     geom.define(domain, rb, CoordSys::cartesian, isperiodic);
 
 

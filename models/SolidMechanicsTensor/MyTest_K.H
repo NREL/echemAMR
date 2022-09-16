@@ -14,9 +14,9 @@ void init (amrex::Real x, amrex::Real y, amrex::Real z, amrex::Real R2,
     u = 0.0;
     v = 0.0;
 
-    if(y > 0.0) {
-//        v = 5.0e-9;
-    }
+//     if(y > 0.0) {
+// //        v = 5.0e-9;
+//     }
 
     w = 0.0;
 
@@ -28,7 +28,7 @@ void init (amrex::Real x, amrex::Real y, amrex::Real z, amrex::Real R2,
     amrex::Real beta = 10.0e-6;
     amrex::Real E = 10.0e9;
 
-    if(y > 0.0) {
+    if(x > 4e-6) {
         beta = 20.0e-6;
         E = 20.0e9;
     }
