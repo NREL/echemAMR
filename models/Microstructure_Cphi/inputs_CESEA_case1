@@ -36,6 +36,7 @@ echemamr.do_reflux = 1
 echemamr.potential_solve = 1
 echemamr.potential_solve_int = 1
 echemamr.species_implicit_solve=1
+echemamr.mechanics_solve = 1
 echemamr.dtmin=5.0
 
 #periodic 0

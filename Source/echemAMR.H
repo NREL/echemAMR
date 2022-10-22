@@ -79,6 +79,8 @@ public:
     void implicit_solve_species(Real current_time,Real dt,int spec_id,
             Vector<MultiFab *> dsdt_expl);
 
+    void solve_mechanics(Real current_time);   
+
     // compute dt from CFL considerations
     Real EstTimeStep(int lev);
 
@@ -242,6 +244,8 @@ private:
     int species_implicit_solve=0;
     int reset_species_in_solid=0;
     Real species_implicit_solve_dt=0.01; //sec
+
+    int mechanics_solve = 0;
 
     Vector<int> transported_species_list{0}; 
 

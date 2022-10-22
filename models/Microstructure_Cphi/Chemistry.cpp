@@ -29,6 +29,10 @@ namespace electrochem
         specnames[EFY_ID] = "Efieldy";
         specnames[EFZ_ID] = "Efieldz";
         specnames[POT_ID] = "Potential";
+        specnames[DIS_U_ID] = "Displacement_u";
+        specnames[DIS_V_ID] = "Displacement_v";
+        specnames[DIS_W_ID] = "Displacement_w";
+        specnames[VON_M_ID] = "von_Mises";
     }    
     void close()
     {

@@ -30,7 +30,11 @@
 #define EFY_ID   13
 #define EFZ_ID   14
 #define POT_ID   15 // potential
-#define NVAR NUM_SPECIES+4 
+#define DIS_U_ID 16 // displacement in the x
+#define DIS_V_ID 17 // displacement in the y
+#define DIS_W_ID 18 // displacement in the z
+#define VON_M_ID 19 // storage for the von mises
+#define NVAR NUM_SPECIES+8 
 
 namespace electrochem
 {
