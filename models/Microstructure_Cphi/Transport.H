@@ -102,20 +102,24 @@ namespace electrochem_transport {
         ProbParm const& prob_parm)
     {
         
-        // Intermediate coefficients
+        // Concentration
         Real C = phi(i, j, k, CO_ID);
-        Real Ke  =  electrochem::Ke_bulk(C, prob_parm) * phi(i,j,k,LS_ID) / phi(i,j,k,MAC_ID);
-        Real Ac  = electrochem::A_c(C, prob_parm) * phi(i,j,k,LS_ID);
-        Real tplus  = electrochem::t_plus(C, prob_parm) * phi(i,j,k,LS_ID);      
-        // Diffusional conductivity
-        Real KDe  = electrochem::Kd(Ke, Ac, tplus, prob_parm) * phi(i,j,k,LS_ID);        
-        
         // Diffusion coefficient = sum( diffusion_coefficient domain i * levelset i), with levelset i=1 if x within domain i, 0 otherwise
-        dcoeff(i,j,k,CO_ID) = (electrochem::Ds_bulk_anode(C, prob_parm) * phi(i,j,k,A_AM_ID)
+        dcoeff(i,j,k,CO_ID) = electrochem::Ds_bulk_anode(C, prob_parm) * phi(i,j,k,A_AM_ID)
         + electrochem::Ds_bulk_cathode(C, prob_parm) * phi(i,j,k,C_AM_ID)
-        + electrochem::Ds_bulk_CBD(prob_parm) * (phi(i,j,k,A_CBD_ID)+phi(i,j,k,C_CBD_ID))
-        + (electrochem::De_bulk(C, prob_parm)/phi(i,j,k,MAC_ID) - tplus/FARADCONST*KDe/C) * phi(i,j,k,LS_ID)) ;
-        // + (electrochem::De_bulk(C, prob_parm)/phi(i,j,k,MAC_ID)) * phi(i,j,k,LS_ID)) ;
+        + electrochem::Ds_bulk_CBD(prob_parm) * (phi(i,j,k,A_CBD_ID)+phi(i,j,k,C_CBD_ID));
+        if (electrochem::Cphi_ele_coupling(prob_parm)==1) {
+            // Intermediate coefficient
+            Real Ke  =  electrochem::Ke_bulk(C, prob_parm) * phi(i,j,k,LS_ID) / phi(i,j,k,MAC_ID);
+            Real Ac  = electrochem::A_c(C, prob_parm) * phi(i,j,k,LS_ID);
+            Real tplus  = electrochem::t_plus(C, prob_parm) * phi(i,j,k,LS_ID);      
+            // Diffusional conductivity
+            Real KDe  = electrochem::Kd(Ke, Ac, tplus, prob_parm) * phi(i,j,k,LS_ID);  
+            dcoeff(i,j,k,CO_ID) = dcoeff(i,j,k,CO_ID) + (electrochem::De_bulk(C, prob_parm)/phi(i,j,k,MAC_ID) - tplus/FARADCONST*KDe/C) * phi(i,j,k,LS_ID);
+        } else {
+            dcoeff(i,j,k,CO_ID) = dcoeff(i,j,k,CO_ID) + (electrochem::De_bulk(C, prob_parm)/phi(i,j,k,MAC_ID)) * phi(i,j,k,LS_ID);
+        }        
+        
         dcoeff(i, j, k, A_AM_ID) = 0.0;
         dcoeff(i, j, k, A_E_ID) = 0.0;
         dcoeff(i, j, k, A_CBD_ID) = 0.0;

@@ -33,6 +33,12 @@ namespace electrochem
         specnames[DIS_V_ID] = "Displacement_v";
         specnames[DIS_W_ID] = "Displacement_w";
         specnames[VON_M_ID] = "von_Mises";
+        specnames[Sigma11_ID] = "Sigma11";
+        specnames[Sigma22_ID] = "Sigma22";
+        specnames[Sigma33_ID] = "Sigma33";
+        specnames[Sigma12_ID] = "Sigma12";
+        specnames[Sigma13_ID] = "Sigma13";
+        specnames[Sigma23_ID] = "Sigma23";                                                
     }    
     void close()
     {

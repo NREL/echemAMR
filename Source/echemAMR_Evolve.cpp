@@ -1485,8 +1485,8 @@ void echemAMR::solve_mechanics(Real current_time)
             amrex::ParallelFor(gbx, [=] AMREX_GPU_DEVICE(int i, int j, int k) 
             {
                     //FIXME: use component wise call
-                    electrochem_mechanics::compute_eta(i, j, k, phi_arr, eta_arr);
-                    electrochem_mechanics::compute_kappa(i, j, k, phi_arr, eta_arr, kappa_arr);
+                    electrochem_mechanics::compute_shear_modulus(i, j, k, phi_arr, eta_arr);
+                    electrochem_mechanics::compute_bulk_modulus(i, j, k, phi_arr, eta_arr, kappa_arr);
                     electrochem_mechanics::compute_lamG_deltaT(i, j, k, phi_arr, lamG_deltaT_arr);
             });
         }
@@ -1570,22 +1570,252 @@ void echemAMR::solve_mechanics(Real current_time)
 
             AMREX_HOST_DEVICE_PARALLEL_FOR_3D( bx, i, j, k,
             {
-                amrex::Real s11 = amrex::Real(0.5) * ( fx(i,j,k,0) + fx(i+1,j,k,0) ) - lamG_deltaT_arr(i,j,k);
-                amrex::Real s12 = amrex::Real(0.5) * ( fx(i,j,k,1) + fx(i+1,j,k,1) );
-                amrex::Real s13 = amrex::Real(0.5) * ( fx(i,j,k,2) + fx(i+1,j,k,2) );
+                amrex::Real s11 = amrex::Real(0.5) * -( fx(i,j,k,0) + fx(i+1,j,k,0) ) + lamG_deltaT_arr(i,j,k);
+                amrex::Real s12 = amrex::Real(0.5) * -( fx(i,j,k,1) + fx(i+1,j,k,1) );
+                amrex::Real s13 = amrex::Real(0.5) * -( fx(i,j,k,2) + fx(i+1,j,k,2) );
 
-                amrex::Real s21 = amrex::Real(0.5) * ( fy(i,j,k,0) + fy(i,j+1,k,0) );
-                amrex::Real s22 = amrex::Real(0.5) * ( fy(i,j,k,1) + fy(i,j+1,k,1) ) - lamG_deltaT_arr(i,j,k);
-                amrex::Real s23 = amrex::Real(0.5) * ( fy(i,j,k,2) + fy(i,j+1,k,2) );
+                amrex::Real s21 = amrex::Real(0.5) * -( fy(i,j,k,0) + fy(i,j+1,k,0) );
+                amrex::Real s22 = amrex::Real(0.5) * -( fy(i,j,k,1) + fy(i,j+1,k,1) ) + lamG_deltaT_arr(i,j,k);
+                amrex::Real s23 = amrex::Real(0.5) * -( fy(i,j,k,2) + fy(i,j+1,k,2) );
 
-                amrex::Real s31 = amrex::Real(0.5) * ( fz(i,j,k,0) + fz(i,j,k+1,0) );
-                amrex::Real s32 = amrex::Real(0.5) * ( fz(i,j,k,1) + fz(i,j,k+1,1) );
-                amrex::Real s33 = amrex::Real(0.5) * ( fz(i,j,k,2) + fz(i,j,k+1,2) ) - lamG_deltaT_arr(i,j,k);
+                amrex::Real s31 = amrex::Real(0.5) * -( fz(i,j,k,0) + fz(i,j,k+1,0) );
+                amrex::Real s32 = amrex::Real(0.5) * -( fz(i,j,k,1) + fz(i,j,k+1,1) );
+                amrex::Real s33 = amrex::Real(0.5) * -( fz(i,j,k,2) + fz(i,j,k+1,2) ) + lamG_deltaT_arr(i,j,k);
 
                 von(i,j,k) = sqrt( 0.5*( (s11-s22)*(s11-s22)+(s22-s33)*(s22-s33)+(s33-s11)*(s33-s11) + 6.0*(s23*s23+s31*s31+s12*s12) ) );
             });
         }
     }
+
+    // compute stress tensor (sigma 11)
+    Vector<MultiFab> sigma11;  
+    sigma11.resize(finest_level + 1);
+
+    for (int ilev = 0; ilev <= finest_level; ilev++)
+    {
+        sigma11[ilev].define(grids[ilev],dmap[ilev],1,0);
+        amrex::Array<amrex::MultiFab, AMREX_SPACEDIM> fluxes;
+
+        for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
+        {
+            const BoxArray& ba = amrex::convert(grids[ilev], IntVect::TheDimensionVector(idim));
+            fluxes[idim].define(ba, sigma11[ilev].DistributionMap(), AMREX_SPACEDIM, 0);
+        }
+        mltensor.compFlux(ilev, amrex::GetArrOfPtrs(fluxes), solution[ilev], amrex::MLMG::Location::FaceCenter);
+
+#ifdef AMREX_USE_OMP
+#pragma omp parallel if (Gpu::notInLaunchRegion())
+#endif
+
+        for (MFIter mfi(sigma11[ilev],TilingIfNotGPU()); mfi.isValid(); ++mfi)
+        {
+            const Box bx = mfi.tilebox();
+
+            AMREX_D_TERM(amrex::Array4<amrex::Real const> const& fx = fluxes[0].const_array(mfi);,
+                         amrex::Array4<amrex::Real const> const& fy = fluxes[1].const_array(mfi);,
+                         amrex::Array4<amrex::Real const> const& fz = fluxes[2].const_array(mfi););
+
+            amrex::Array4<amrex::Real> const& s11 = sigma11[ilev].array(mfi);
+            amrex::Array4<amrex::Real const> const& lamG_deltaT_arr = lamG_deltaT[ilev].const_array(mfi);
+
+            AMREX_HOST_DEVICE_PARALLEL_FOR_3D( bx, i, j, k,
+            {
+                amrex::Real s11_value = amrex::Real(0.5) * -( fx(i,j,k,0) + fx(i+1,j,k,0) ) + lamG_deltaT_arr(i,j,k);
+                s11(i,j,k) = s11_value;
+            });
+        }
+    }
+    // compute stress tensor (sigma 22)
+    Vector<MultiFab> sigma22;  
+    sigma22.resize(finest_level + 1);
+
+    for (int ilev = 0; ilev <= finest_level; ilev++)
+    {
+        sigma22[ilev].define(grids[ilev],dmap[ilev],1,0);
+        amrex::Array<amrex::MultiFab, AMREX_SPACEDIM> fluxes;
+
+        for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
+        {
+            const BoxArray& ba = amrex::convert(grids[ilev], IntVect::TheDimensionVector(idim));
+            fluxes[idim].define(ba, sigma22[ilev].DistributionMap(), AMREX_SPACEDIM, 0);
+        }
+        mltensor.compFlux(ilev, amrex::GetArrOfPtrs(fluxes), solution[ilev], amrex::MLMG::Location::FaceCenter);
+
+#ifdef AMREX_USE_OMP
+#pragma omp parallel if (Gpu::notInLaunchRegion())
+#endif
+
+        for (MFIter mfi(sigma22[ilev],TilingIfNotGPU()); mfi.isValid(); ++mfi)
+        {
+            const Box bx = mfi.tilebox();
+
+            AMREX_D_TERM(amrex::Array4<amrex::Real const> const& fx = fluxes[0].const_array(mfi);,
+                         amrex::Array4<amrex::Real const> const& fy = fluxes[1].const_array(mfi);,
+                         amrex::Array4<amrex::Real const> const& fz = fluxes[2].const_array(mfi););
+
+            amrex::Array4<amrex::Real> const& s22 = sigma22[ilev].array(mfi);
+            amrex::Array4<amrex::Real const> const& lamG_deltaT_arr = lamG_deltaT[ilev].const_array(mfi);
+
+            AMREX_HOST_DEVICE_PARALLEL_FOR_3D( bx, i, j, k,
+            {
+                amrex::Real s22_value = amrex::Real(0.5) * -( fy(i,j,k,1) + fy(i,j+1,k,1) ) + lamG_deltaT_arr(i,j,k);
+                s22(i,j,k) = s22_value;
+            });
+        }
+    }    
+    // compute stress tensor (sigma 33)
+    Vector<MultiFab> sigma33;  
+    sigma33.resize(finest_level + 1);
+
+    for (int ilev = 0; ilev <= finest_level; ilev++)
+    {
+        sigma33[ilev].define(grids[ilev],dmap[ilev],1,0);
+        amrex::Array<amrex::MultiFab, AMREX_SPACEDIM> fluxes;
+
+        for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
+        {
+            const BoxArray& ba = amrex::convert(grids[ilev], IntVect::TheDimensionVector(idim));
+            fluxes[idim].define(ba, sigma33[ilev].DistributionMap(), AMREX_SPACEDIM, 0);
+        }
+        mltensor.compFlux(ilev, amrex::GetArrOfPtrs(fluxes), solution[ilev], amrex::MLMG::Location::FaceCenter);
+
+#ifdef AMREX_USE_OMP
+#pragma omp parallel if (Gpu::notInLaunchRegion())
+#endif
+
+        for (MFIter mfi(sigma33[ilev],TilingIfNotGPU()); mfi.isValid(); ++mfi)
+        {
+            const Box bx = mfi.tilebox();
+
+            AMREX_D_TERM(amrex::Array4<amrex::Real const> const& fx = fluxes[0].const_array(mfi);,
+                         amrex::Array4<amrex::Real const> const& fy = fluxes[1].const_array(mfi);,
+                         amrex::Array4<amrex::Real const> const& fz = fluxes[2].const_array(mfi););
+
+            amrex::Array4<amrex::Real> const& s33 = sigma33[ilev].array(mfi);
+            amrex::Array4<amrex::Real const> const& lamG_deltaT_arr = lamG_deltaT[ilev].const_array(mfi);
+
+            AMREX_HOST_DEVICE_PARALLEL_FOR_3D( bx, i, j, k,
+            {
+                amrex::Real s33_value = amrex::Real(0.5) * -( fz(i,j,k,2) + fz(i,j,k+1,2) ) + lamG_deltaT_arr(i,j,k);
+                s33(i,j,k) = s33_value;
+            });
+        }
+    }
+    // compute stress tensor (sigma 12)
+    Vector<MultiFab> sigma12;  
+    sigma12.resize(finest_level + 1);
+
+    for (int ilev = 0; ilev <= finest_level; ilev++)
+    {
+        sigma12[ilev].define(grids[ilev],dmap[ilev],1,0);
+        amrex::Array<amrex::MultiFab, AMREX_SPACEDIM> fluxes;
+
+        for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
+        {
+            const BoxArray& ba = amrex::convert(grids[ilev], IntVect::TheDimensionVector(idim));
+            fluxes[idim].define(ba, sigma12[ilev].DistributionMap(), AMREX_SPACEDIM, 0);
+        }
+        mltensor.compFlux(ilev, amrex::GetArrOfPtrs(fluxes), solution[ilev], amrex::MLMG::Location::FaceCenter);
+
+#ifdef AMREX_USE_OMP
+#pragma omp parallel if (Gpu::notInLaunchRegion())
+#endif
+
+        for (MFIter mfi(sigma12[ilev],TilingIfNotGPU()); mfi.isValid(); ++mfi)
+        {
+            const Box bx = mfi.tilebox();
+
+            AMREX_D_TERM(amrex::Array4<amrex::Real const> const& fx = fluxes[0].const_array(mfi);,
+                         amrex::Array4<amrex::Real const> const& fy = fluxes[1].const_array(mfi);,
+                         amrex::Array4<amrex::Real const> const& fz = fluxes[2].const_array(mfi););
+
+            amrex::Array4<amrex::Real> const& s12 = sigma12[ilev].array(mfi);
+            amrex::Array4<amrex::Real const> const& lamG_deltaT_arr = lamG_deltaT[ilev].const_array(mfi);
+
+            AMREX_HOST_DEVICE_PARALLEL_FOR_3D( bx, i, j, k,
+            {
+                amrex::Real s12_value = amrex::Real(0.5) * -( fx(i,j,k,1) + fx(i+1,j,k,1) );
+                s12(i,j,k) = s12_value;
+            });
+        }
+    }         
+   // compute stress tensor (sigma 13)
+    Vector<MultiFab> sigma13;  
+    sigma13.resize(finest_level + 1);
+
+    for (int ilev = 0; ilev <= finest_level; ilev++)
+    {
+        sigma13[ilev].define(grids[ilev],dmap[ilev],1,0);
+        amrex::Array<amrex::MultiFab, AMREX_SPACEDIM> fluxes;
+
+        for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
+        {
+            const BoxArray& ba = amrex::convert(grids[ilev], IntVect::TheDimensionVector(idim));
+            fluxes[idim].define(ba, sigma13[ilev].DistributionMap(), AMREX_SPACEDIM, 0);
+        }
+        mltensor.compFlux(ilev, amrex::GetArrOfPtrs(fluxes), solution[ilev], amrex::MLMG::Location::FaceCenter);
+
+#ifdef AMREX_USE_OMP
+#pragma omp parallel if (Gpu::notInLaunchRegion())
+#endif
+
+        for (MFIter mfi(sigma13[ilev],TilingIfNotGPU()); mfi.isValid(); ++mfi)
+        {
+            const Box bx = mfi.tilebox();
+
+            AMREX_D_TERM(amrex::Array4<amrex::Real const> const& fx = fluxes[0].const_array(mfi);,
+                         amrex::Array4<amrex::Real const> const& fy = fluxes[1].const_array(mfi);,
+                         amrex::Array4<amrex::Real const> const& fz = fluxes[2].const_array(mfi););
+
+            amrex::Array4<amrex::Real> const& s13 = sigma13[ilev].array(mfi);
+            amrex::Array4<amrex::Real const> const& lamG_deltaT_arr = lamG_deltaT[ilev].const_array(mfi);
+
+            AMREX_HOST_DEVICE_PARALLEL_FOR_3D( bx, i, j, k,
+            {
+                amrex::Real s13_value = amrex::Real(0.5) * -( fx(i,j,k,2) + fx(i+1,j,k,2) );
+                s13(i,j,k) = s13_value;
+            });
+        }
+    }         
+    // compute stress tensor (sigma 23)
+    Vector<MultiFab> sigma23;  
+    sigma23.resize(finest_level + 1);
+
+    for (int ilev = 0; ilev <= finest_level; ilev++)
+    {
+        sigma23[ilev].define(grids[ilev],dmap[ilev],1,0);
+        amrex::Array<amrex::MultiFab, AMREX_SPACEDIM> fluxes;
+
+        for (int idim = 0; idim < AMREX_SPACEDIM; ++idim)
+        {
+            const BoxArray& ba = amrex::convert(grids[ilev], IntVect::TheDimensionVector(idim));
+            fluxes[idim].define(ba, sigma23[ilev].DistributionMap(), AMREX_SPACEDIM, 0);
+        }
+        mltensor.compFlux(ilev, amrex::GetArrOfPtrs(fluxes), solution[ilev], amrex::MLMG::Location::FaceCenter);
+
+#ifdef AMREX_USE_OMP
+#pragma omp parallel if (Gpu::notInLaunchRegion())
+#endif
+
+        for (MFIter mfi(sigma23[ilev],TilingIfNotGPU()); mfi.isValid(); ++mfi)
+        {
+            const Box bx = mfi.tilebox();
+
+            AMREX_D_TERM(amrex::Array4<amrex::Real const> const& fx = fluxes[0].const_array(mfi);,
+                         amrex::Array4<amrex::Real const> const& fy = fluxes[1].const_array(mfi);,
+                         amrex::Array4<amrex::Real const> const& fz = fluxes[2].const_array(mfi););
+
+            amrex::Array4<amrex::Real> const& s23 = sigma23[ilev].array(mfi);
+            amrex::Array4<amrex::Real const> const& lamG_deltaT_arr = lamG_deltaT[ilev].const_array(mfi);
+
+            AMREX_HOST_DEVICE_PARALLEL_FOR_3D( bx, i, j, k,
+            {
+                amrex::Real s23_value = amrex::Real(0.5) * -( fx(i,j,k,2) + fx(i+1,j,k,2) );
+                s23(i,j,k) = s23_value;
+            });
+        }
+    }  
+
 
     // copy solution back to phi_new
     for (int ilev = 0; ilev <= finest_level; ilev++)
@@ -1598,6 +1828,12 @@ void echemAMR::solve_mechanics(Real current_time)
         Print()<<"min of lamG_deltaT:"<<lamG_deltaT[ilev].min(0)<<"\n";
         amrex::MultiFab::Copy(phi_new[ilev], solution[ilev], 0, DIS_U_ID, AMREX_SPACEDIM, 0);
         amrex::MultiFab::Copy(phi_new[ilev], von_Mises[ilev], 0, VON_M_ID, 1, 0);
+        amrex::MultiFab::Copy(phi_new[ilev], sigma11[ilev], 0, Sigma11_ID, 1, 0);
+        amrex::MultiFab::Copy(phi_new[ilev], sigma22[ilev], 0, Sigma22_ID, 1, 0);
+        amrex::MultiFab::Copy(phi_new[ilev], sigma33[ilev], 0, Sigma33_ID, 1, 0);
+        amrex::MultiFab::Copy(phi_new[ilev], sigma12[ilev], 0, Sigma12_ID, 1, 0);
+        amrex::MultiFab::Copy(phi_new[ilev], sigma13[ilev], 0, Sigma13_ID, 1, 0);                
+        amrex::MultiFab::Copy(phi_new[ilev], sigma23[ilev], 0, Sigma23_ID, 1, 0); 
     }
 
 }
