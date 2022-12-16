@@ -14,28 +14,37 @@ namespace electrochem_mechanics {
     int j,
     int k,
     Array4<Real> const& phi,
-    Array4<Real> const& out_arr)
+    Array4<Real> const& out_arr,
+    ProbParm const& prob_parm)
     {
+        // Get current concentration value
+        Real C = phi(i, j, k, CO_ID);
+
         // Define domain specific Young's modulus
-        const amrex::Real anode_E       = 32.0e9; // Pa
-        const amrex::Real cathode_E     = 120.0e9; // Pa // 120.0e9 Peter document (cathode cracking literature review)
-        const amrex::Real separator_E = 500.0e6; // Pa
-        const amrex::Real electrolyte_E = 10.0e3; // Pa
-        const amrex::Real CBD_E = 10.0e3; // Pa
+        const amrex::Real anode_E       = electrochem::E_anode(C, prob_parm);
+        const amrex::Real cathode_E     = electrochem::E_cathode(C, prob_parm);
+        const amrex::Real separator_E   = electrochem::E_separator(C, prob_parm);
+        const amrex::Real electrolyte_E = electrochem::E_electrolyte(C, prob_parm);
+        const amrex::Real CBD_E         = electrochem::E_CBD(C, prob_parm);
 
         const amrex::Real E = anode_E * phi(i,j,k,A_AM_ID) 
                             + cathode_E * phi(i,j,k,C_AM_ID) 
                             + separator_E * phi(i,j,k,S_ID)
-                            + CBD_E * (phi(i,j,k,A_CBD_ID) + phi(i,j,k,C_CBD_ID))
-                            + electrolyte_E * (phi(i,j,k,A_E_ID) + phi(i,j,k,C_E_ID));
+                            + electrolyte_E * (phi(i,j,k,A_E_ID) + phi(i,j,k,C_E_ID))
+                            + CBD_E * (phi(i,j,k,A_CBD_ID) + phi(i,j,k,C_CBD_ID));
 
         // Define domain specific Poisson ratio []
-        const amrex::Real anode_nu       = 0.3;
-        const amrex::Real cathode_nu     = 0.3;
-        const amrex::Real electrolyte_nu = 0.3;
-        const amrex::Real nu = anode_nu       * (phi(i,j,k,A_AM_ID) + phi(i,j,k,A_CBD_ID))
-                            + cathode_nu     * (phi(i,j,k,C_AM_ID) + phi(i,j,k,C_CBD_ID))
-                            + electrolyte_nu * (phi(i,j,k,A_E_ID) + phi(i,j,k,S_ID) + phi(i,j,k,C_E_ID));
+        const amrex::Real anode_nu       = electrochem::nu_anode(C, prob_parm);
+        const amrex::Real cathode_nu     = electrochem::nu_cathode(C, prob_parm);
+        const amrex::Real separator_nu   = electrochem::nu_separator(C, prob_parm);
+        const amrex::Real electrolyte_nu = electrochem::nu_electrolyte(C, prob_parm);
+        const amrex::Real CBD_nu         = electrochem::nu_CBD(C, prob_parm);
+
+        const amrex::Real nu = anode_nu * phi(i,j,k,A_AM_ID) 
+                            + cathode_nu * phi(i,j,k,C_AM_ID) 
+                            + separator_nu * phi(i,j,k,S_ID)
+                            + electrolyte_nu * (phi(i,j,k,A_E_ID) + phi(i,j,k,C_E_ID))
+                            + CBD_nu * (phi(i,j,k,A_CBD_ID) + phi(i,j,k,C_CBD_ID));
 
         // 2nd Lame coefficient (Shear modulus) (Pa)
         out_arr(i, j, k) = 0.5 * E / (1.0 + nu);
@@ -47,28 +56,37 @@ namespace electrochem_mechanics {
     int k,
     Array4<Real> const& phi,
     Array4<Real> const& eta,
-    Array4<Real> const& out_arr)
+    Array4<Real> const& out_arr,
+    ProbParm const& prob_parm)
     {
+        // Get current concentration value
+        Real C = phi(i, j, k, CO_ID);
+
         // Define domain specific Young's modulus
-        const amrex::Real anode_E       = 32.0e9; // Pa
-        const amrex::Real cathode_E     = 120.0e9; // Pa // 120.0e9 Peter document (cathode cracking literature review)
-        const amrex::Real separator_E = 500.0e6; // Pa
-        const amrex::Real electrolyte_E = 10.0e3; // Pa
-        const amrex::Real CBD_E = 10.0e3; // Pa
+        const amrex::Real anode_E       = electrochem::E_anode(C, prob_parm);
+        const amrex::Real cathode_E     = electrochem::E_cathode(C, prob_parm);
+        const amrex::Real separator_E   = electrochem::E_separator(C, prob_parm);
+        const amrex::Real electrolyte_E = electrochem::E_electrolyte(C, prob_parm);
+        const amrex::Real CBD_E         = electrochem::E_CBD(C, prob_parm);
 
         const amrex::Real E = anode_E * phi(i,j,k,A_AM_ID) 
                             + cathode_E * phi(i,j,k,C_AM_ID) 
                             + separator_E * phi(i,j,k,S_ID)
-                            + CBD_E * (phi(i,j,k,A_CBD_ID) + phi(i,j,k,C_CBD_ID))
-                            + electrolyte_E * (phi(i,j,k,A_E_ID) + phi(i,j,k,C_E_ID));
+                            + electrolyte_E * (phi(i,j,k,A_E_ID) + phi(i,j,k,C_E_ID))
+                            + CBD_E * (phi(i,j,k,A_CBD_ID) + phi(i,j,k,C_CBD_ID));
 
         // Define domain specific Poisson ratio
-        const amrex::Real anode_nu       = 0.3;
-        const amrex::Real cathode_nu     = 0.3;
-        const amrex::Real electrolyte_nu = 0.3;
-        const amrex::Real nu = anode_nu       * (phi(i,j,k,A_AM_ID) + phi(i,j,k,A_CBD_ID))
-                            + cathode_nu     * (phi(i,j,k,C_AM_ID) + phi(i,j,k,C_CBD_ID))
-                            + electrolyte_nu * (phi(i,j,k,A_E_ID) + phi(i,j,k,S_ID) + phi(i,j,k,C_E_ID));        
+        const amrex::Real anode_nu       = electrochem::nu_anode(C, prob_parm);
+        const amrex::Real cathode_nu     = electrochem::nu_cathode(C, prob_parm);
+        const amrex::Real separator_nu   = electrochem::nu_separator(C, prob_parm);
+        const amrex::Real electrolyte_nu = electrochem::nu_electrolyte(C, prob_parm);
+        const amrex::Real CBD_nu         = electrochem::nu_CBD(C, prob_parm);
+        
+        const amrex::Real nu = anode_nu * phi(i,j,k,A_AM_ID) 
+                            + cathode_nu * phi(i,j,k,C_AM_ID) 
+                            + separator_nu * phi(i,j,k,S_ID)
+                            + electrolyte_nu * (phi(i,j,k,A_E_ID) + phi(i,j,k,C_E_ID))      
+                            + CBD_nu * (phi(i,j,k,A_CBD_ID) + phi(i,j,k,C_CBD_ID));
         
         
         // 1st Lame coefficient (Pa)
@@ -83,48 +101,60 @@ namespace electrochem_mechanics {
     int j,
     int k,
     Array4<Real> const& phi,
-    Array4<Real> const& out_arr)
+    Array4<Real> const& out_arr,
+    ProbParm const& prob_parm)
     {
+        // Get current concentration value
+        Real C = phi(i, j, k, CO_ID);
+
         // Define domain specific Young's modulus
-        const amrex::Real anode_E       = 32.0e9; // Pa
-        const amrex::Real cathode_E     = 120.0e9; // Pa // 120.0e9 Peter document (cathode cracking literature review)
-        const amrex::Real separator_E = 500.0e6; // Pa
-        const amrex::Real electrolyte_E = 10.0e3; // Pa
-        const amrex::Real CBD_E = 10.0e3; // Pa
+        const amrex::Real anode_E       = electrochem::E_anode(C, prob_parm);
+        const amrex::Real cathode_E     = electrochem::E_cathode(C, prob_parm);
+        const amrex::Real separator_E   = electrochem::E_separator(C, prob_parm);
+        const amrex::Real electrolyte_E = electrochem::E_electrolyte(C, prob_parm);
+        const amrex::Real CBD_E         = electrochem::E_CBD(C, prob_parm);
 
         const amrex::Real E = anode_E * phi(i,j,k,A_AM_ID) 
                             + cathode_E * phi(i,j,k,C_AM_ID) 
                             + separator_E * phi(i,j,k,S_ID)
-                            + CBD_E * (phi(i,j,k,A_CBD_ID) + phi(i,j,k,C_CBD_ID))
-                            + electrolyte_E * (phi(i,j,k,A_E_ID) + phi(i,j,k,C_E_ID));
+                            + electrolyte_E * (phi(i,j,k,A_E_ID) + phi(i,j,k,C_E_ID))
+                            + CBD_E * (phi(i,j,k,A_CBD_ID) + phi(i,j,k,C_CBD_ID));
 
         // Define domain specific Poisson ratio
-        const amrex::Real anode_nu       = 0.3;
-        const amrex::Real cathode_nu     = 0.3;
-        const amrex::Real electrolyte_nu = 0.3;
-        const amrex::Real nu = anode_nu       * (phi(i,j,k,A_AM_ID) + phi(i,j,k,A_CBD_ID))
-                            + cathode_nu     * (phi(i,j,k,C_AM_ID) + phi(i,j,k,C_CBD_ID))
-                            + electrolyte_nu * (phi(i,j,k,A_E_ID) + phi(i,j,k,S_ID) + phi(i,j,k,C_E_ID));                             
+        const amrex::Real anode_nu       = electrochem::nu_anode(C, prob_parm);
+        const amrex::Real cathode_nu     = electrochem::nu_cathode(C, prob_parm);
+        const amrex::Real separator_nu   = electrochem::nu_separator(C, prob_parm);
+        const amrex::Real electrolyte_nu = electrochem::nu_electrolyte(C, prob_parm);
+        const amrex::Real CBD_nu         = electrochem::nu_CBD(C, prob_parm);
+        
+        const amrex::Real nu = anode_nu * phi(i,j,k,A_AM_ID) 
+                            + cathode_nu * phi(i,j,k,C_AM_ID) 
+                            + separator_nu * phi(i,j,k,S_ID)
+                            + electrolyte_nu * (phi(i,j,k,A_E_ID) + phi(i,j,k,C_E_ID))                          
+                            + CBD_nu * (phi(i,j,k,A_CBD_ID) + phi(i,j,k,C_CBD_ID));
 
         // Define domain specific chemical expansion
-	// equation: https://orcid.org/0000-0002-3924-3769 : (volvar/100) / ((x_max-x_min)*csmax) with volvar=13.2%
-	// graphite: https://doi.org/10.1021/acs.jpcc.8b01873 : graphite
-        const amrex::Real anode_CCE       = 4.714e-6; // with volvar=13.2% and soc range = 1.0
-        const amrex::Real cathode_CCE     = 1.344e-6; // //  1.344e-6 with volvar=4% and soc range = 0.6
-        const amrex::Real CBD_CCE = 0.0;        
-        const amrex::Real electrolyte_CCE = 0.0;
+        const amrex::Real anode_CCE       = electrochem::CCE_anode(C, prob_parm);
+        const amrex::Real cathode_CCE     = electrochem::CCE_cathode(C, prob_parm);
+        const amrex::Real separator_CCE   = electrochem::CCE_separator(C, prob_parm);
+        const amrex::Real electrolyte_CCE = electrochem::CCE_electrolyte(C, prob_parm);
+        const amrex::Real CBD_CCE         = electrochem::CCE_CBD(C, prob_parm);
+
         const amrex::Real CCE = anode_CCE * phi(i,j,k,A_AM_ID)
-                            + cathode_CCE * phi(i,j,k,C_AM_ID)
-                            + CBD_CCE * (phi(i,j,k,A_CBD_ID) + phi(i,j,k,C_CBD_ID)) 
-                            + electrolyte_CCE * (phi(i,j,k,A_E_ID) + phi(i,j,k,S_ID) + phi(i,j,k,C_E_ID));
+                              + cathode_CCE * phi(i,j,k,C_AM_ID)
+                              + separator_CCE * phi(i,j,k,S_ID)
+                              + electrolyte_CCE * (phi(i,j,k,A_E_ID) + phi(i,j,k,C_E_ID))
+                              + CBD_CCE * (phi(i,j,k,A_CBD_ID) + phi(i,j,k,C_CBD_ID));
 
         // Define change in concentration
-        const amrex::Real anode_init       = 0.1*28000.0; // Stress-free concentration
-        const amrex::Real cathode_init     = 0.9*49600.0; // Stress-free concentration
-        const amrex::Real electrolyte_init = 1200.0; // Stress-free concentration
+        const amrex::Real anode_init       = prob_parm.soc_anode_t0*electrochem::Cs_max_anode(prob_parm); // Stress-free concentration
+        const amrex::Real cathode_init     = prob_parm.soc_cathode_t0*electrochem::Cs_max_cathode(prob_parm); // Stress-free concentration
+        const amrex::Real electrolyte_init = prob_parm.ce_atrest; // Stress-free concentration
+
         const amrex::Real C_Init = anode_init       * (phi(i,j,k,A_AM_ID) + phi(i,j,k,A_CBD_ID))
                                  + cathode_init     * (phi(i,j,k,C_AM_ID) + phi(i,j,k,C_CBD_ID))
                                  + electrolyte_init * (phi(i,j,k,A_E_ID) + phi(i,j,k,S_ID) + phi(i,j,k,C_E_ID));                            
+
         const amrex::Real deltaC = phi(i,j,k,CO_ID)-C_Init;
 
         // Define remaining constants

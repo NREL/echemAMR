@@ -783,5 +783,369 @@ namespace electrochem
         return -2.0 * Spc * ioc * std::cosh(0.5 * FRT * eta) * 0.5*FRT; // chain rule of A*sinh(B*x) = A*cosh(Bx)*B
     }
 
+
+
+
+
+
+
+
+
+    // ------------------------------------------------------
+    //                 MECHANICAL PROPERTIES
+    // ------------------------------------------------------
+
+    // ANODE MATERIAL COEFFICIENTS
+
+    // Anode Young's Modulus [Pa]
+    // Cs in mol.m-3
+    AMREX_GPU_HOST_DEVICE AMREX_FORCE_INLINE
+    amrex::Real E_anode(amrex::Real Cs, const ProbParm& prob_parm)
+    {
+        if(prob_parm.mater_mech_anode==0) {
+            amrex::Real out = 32.0e9;
+            return out; 
+        } else if (prob_parm.mater_mech_anode==1) {
+            amrex::Real out = 32.0e9;
+            return out; 
+        } else if (prob_parm.mater_mech_anode==2) {
+            amrex::Real out = 32.0e9;
+            return out;              
+        } else {
+            amrex::Abort("Incorrect user-parameter mater_mech_anode in ProbParm.H");
+            return 0; 
+        }
+    }
+
+    // Anode Poisson Ratio [-]
+    // Cs in mol.m-3
+    AMREX_GPU_HOST_DEVICE AMREX_FORCE_INLINE
+    amrex::Real nu_anode(amrex::Real Cs, const ProbParm& prob_parm)
+    {
+        if(prob_parm.mater_mech_anode==0) {
+            amrex::Real out = 0.3;
+            return out; 
+        } else if (prob_parm.mater_mech_anode==1) {
+            amrex::Real out = 0.3;
+            return out; 
+        } else if (prob_parm.mater_mech_anode==2) {
+            amrex::Real out = 0.3;
+            return out;              
+        } else {
+            amrex::Abort("Incorrect user-parameter mater_mech_anode in ProbParm.H");
+            return 0; 
+        }
+    }
+
+    // Anode Chemical Expansion Coeff [-]
+    // Cs in mol.m-3
+    // equation: https://orcid.org/0000-0002-3924-3769 : (volvar/100) / ((x_max-x_min)*csmax) with volvar=13.2%
+    // graphite: https://doi.org/10.1021/acs.jpcc.8b01873 : graphite
+    AMREX_GPU_HOST_DEVICE AMREX_FORCE_INLINE
+    amrex::Real CCE_anode(amrex::Real Cs, const ProbParm& prob_parm)
+    {
+        if(prob_parm.mater_mech_anode==0) {
+            amrex::Real out = 4.714e-6; // with volvar=13.2% and soc range = 1.0
+            return out; 
+        } else if (prob_parm.mater_mech_anode==1) {
+            amrex::Real out = 4.714e-6; // with volvar=13.2% and soc range = 1.0
+            return out; 
+        } else if (prob_parm.mater_mech_anode==2) {
+            amrex::Real out = 4.714e-6; // with volvar=13.2% and soc range = 1.0
+            return out;              
+        } else {
+            amrex::Abort("Incorrect user-parameter mater_mech_anode in ProbParm.H");
+            return 0; 
+        }
+    }
+
+
+
+
+    // CATHODE MATERIAL COEFFICIENTS
+
+    // Cathode Young's Modulus [Pa]
+    // Cs in mol.m-3
+    AMREX_GPU_HOST_DEVICE AMREX_FORCE_INLINE
+    amrex::Real E_cathode(amrex::Real Cs, const ProbParm& prob_parm)
+    {
+        if(prob_parm.mater_mech_cathode==0) {
+            amrex::Real out = 120.0e9; // Pa // 120.0e9 Peter document (cathode cracking literature review)
+            return out; 
+        } else if (prob_parm.mater_mech_cathode==1) {
+            amrex::Real out = 120.0e9; // Pa // 120.0e9 Peter document (cathode cracking literature review)
+            return out; 
+        } else if (prob_parm.mater_mech_cathode==2) {
+            amrex::Real out = 120.0e9; // Pa // 120.0e9 Peter document (cathode cracking literature review)
+            return out;              
+        } else {
+            amrex::Abort("Incorrect user-parameter mater_mech_cathode in ProbParm.H");
+            return 0; 
+        }
+    }
+
+    // Cathode Poisson Ratio [-]
+    // Cs in mol.m-3
+    AMREX_GPU_HOST_DEVICE AMREX_FORCE_INLINE
+    amrex::Real nu_cathode(amrex::Real Cs, const ProbParm& prob_parm)
+    {
+        if(prob_parm.mater_mech_cathode==0) {
+            amrex::Real out = 0.3;
+            return out; 
+        } else if (prob_parm.mater_mech_cathode==1) {
+            amrex::Real out = 0.3;
+            return out; 
+        } else if (prob_parm.mater_mech_cathode==2) {
+            amrex::Real out = 0.3;
+            return out;              
+        } else {
+            amrex::Abort("Incorrect user-parameter mater_mech_cathode in ProbParm.H");
+            return 0; 
+        }
+    }
+
+    // Cathode Chemical Expansion Coeff [-]
+    // Cs in mol.m-3
+    // equation: https://orcid.org/0000-0002-3924-3769 : (volvar/100) / ((x_max-x_min)*csmax) with volvar=13.2%
+    // graphite: https://doi.org/10.1021/acs.jpcc.8b01873 : graphite
+    AMREX_GPU_HOST_DEVICE AMREX_FORCE_INLINE
+    amrex::Real CCE_cathode(amrex::Real Cs, const ProbParm& prob_parm)
+    {
+        if(prob_parm.mater_mech_cathode==0) {
+            amrex::Real out = 1.344e-6; // //  1.344e-6 with volvar=4% and soc range = 0.6
+            return out; 
+        } else if (prob_parm.mater_mech_cathode==1) {
+            amrex::Real out = 1.344e-6; // //  1.344e-6 with volvar=4% and soc range = 0.6
+            return out; 
+        } else if (prob_parm.mater_mech_cathode==2) {
+            amrex::Real out = 1.344e-6; // //  1.344e-6 with volvar=4% and soc range = 0.6
+            return out;              
+        } else {
+            amrex::Abort("Incorrect user-parameter mater_mech_cathode in ProbParm.H");
+            return 0; 
+        }
+    }
+
+
+
+
+    // ELECTROLYTE MATERIAL COEFFICIENTS
+
+    // Electrolyte Young's Modulus [Pa]
+    // Cs in mol.m-3
+    AMREX_GPU_HOST_DEVICE AMREX_FORCE_INLINE
+    amrex::Real E_electrolyte(amrex::Real Cs, const ProbParm& prob_parm)
+    {
+        if(prob_parm.mater_mech_electrolyte==0) {
+            amrex::Real out = 10.0e3;
+            return out; 
+        } else if (prob_parm.mater_mech_electrolyte==1) {
+            amrex::Real out = 10.0e3;
+            return out; 
+        } else if (prob_parm.mater_mech_electrolyte==2) {
+            amrex::Real out = 10.0e3;
+            return out;              
+        } else {
+            amrex::Abort("Incorrect user-parameter mater_mech_electrolyte in ProbParm.H");
+            return 0; 
+        }
+    }
+
+    // Electrolyte Poisson Ratio [-]
+    // Cs in mol.m-3
+    AMREX_GPU_HOST_DEVICE AMREX_FORCE_INLINE
+    amrex::Real nu_electrolyte(amrex::Real Cs, const ProbParm& prob_parm)
+    {
+        if(prob_parm.mater_mech_electrolyte==0) {
+            amrex::Real out = 0.3;
+            return out; 
+        } else if (prob_parm.mater_mech_electrolyte==1) {
+            amrex::Real out = 0.3;
+            return out; 
+        } else if (prob_parm.mater_mech_electrolyte==2) {
+            amrex::Real out = 0.3;
+            return out;              
+        } else {
+            amrex::Abort("Incorrect user-parameter mater_mech_electrolyte in ProbParm.H");
+            return 0; 
+        }
+    }
+
+    // Electrolyte Chemical Expansion Coeff [-]
+    // Cs in mol.m-3
+    AMREX_GPU_HOST_DEVICE AMREX_FORCE_INLINE
+    amrex::Real CCE_electrolyte(amrex::Real Cs, const ProbParm& prob_parm)
+    {
+        if(prob_parm.mater_mech_electrolyte==0) {
+            amrex::Real out = 0.0; 
+            return out; 
+        } else if (prob_parm.mater_mech_electrolyte==1) {
+            amrex::Real out = 0.0; 
+            return out; 
+        } else if (prob_parm.mater_mech_electrolyte==2) {
+            amrex::Real out = 0.0; 
+            return out;              
+        } else {
+            amrex::Abort("Incorrect user-parameter mater_mech_electrolyte in ProbParm.H");
+            return 0; 
+        }
+    }
+
+
+
+
+
+
+
+    // SEPARATOR MATERIAL COEFFICIENTS
+
+    // Separator Young's Modulus [Pa]
+    // Cs in mol.m-3
+    AMREX_GPU_HOST_DEVICE AMREX_FORCE_INLINE
+    amrex::Real E_separator(amrex::Real Cs, const ProbParm& prob_parm)
+    {
+        if(prob_parm.mater_mech_separator==0) {
+            amrex::Real out = 500.0e6;
+            return out; 
+        } else if (prob_parm.mater_mech_separator==1) {
+            amrex::Real out = 500.0e6;
+            return out; 
+        } else if (prob_parm.mater_mech_separator==2) {
+            amrex::Real out = 500.0e6;
+            return out;              
+        } else {
+            amrex::Abort("Incorrect user-parameter mater_mech_separator in ProbParm.H");
+            return 0; 
+        }
+    }
+
+    // Separator Poisson Ratio [-]
+    // Cs in mol.m-3
+    AMREX_GPU_HOST_DEVICE AMREX_FORCE_INLINE
+    amrex::Real nu_separator(amrex::Real Cs, const ProbParm& prob_parm)
+    {
+        if(prob_parm.mater_mech_separator==0) {
+            amrex::Real out = 0.3;
+            return out; 
+        } else if (prob_parm.mater_mech_separator==1) {
+            amrex::Real out = 0.3;
+            return out; 
+        } else if (prob_parm.mater_mech_separator==2) {
+            amrex::Real out = 0.3;
+            return out;              
+        } else {
+            amrex::Abort("Incorrect user-parameter mater_mech_separator in ProbParm.H");
+            return 0; 
+        }
+    }
+
+    // Separator Chemical Expansion Coeff [-]
+    // Cs in mol.m-3
+    AMREX_GPU_HOST_DEVICE AMREX_FORCE_INLINE
+    amrex::Real CCE_separator(amrex::Real Cs, const ProbParm& prob_parm)
+    {
+        if(prob_parm.mater_mech_separator==0) {
+            amrex::Real out = 0.0; 
+            return out; 
+        } else if (prob_parm.mater_mech_separator==1) {
+            amrex::Real out = 0.0; 
+            return out; 
+        } else if (prob_parm.mater_mech_separator==2) {
+            amrex::Real out = 0.0; 
+            return out;              
+        } else {
+            amrex::Abort("Incorrect user-parameter mater_mech_separator in ProbParm.H");
+            return 0; 
+        }
+    }
+
+
+
+
+
+
+
+
+    // CARBON BINDER MATERIAL COEFFICIENTS
+
+    // CBD Young's Modulus [Pa]
+    // Cs in mol.m-3
+    AMREX_GPU_HOST_DEVICE AMREX_FORCE_INLINE
+    amrex::Real E_CBD(amrex::Real Cs, const ProbParm& prob_parm)
+    {
+        if(prob_parm.mater_mech_CBD==0) {
+            amrex::Real out = 10.0e3;
+            return out; 
+        } else if (prob_parm.mater_mech_CBD==1) {
+            amrex::Real out = 10.0e3;
+            return out; 
+        } else if (prob_parm.mater_mech_CBD==2) {
+            amrex::Real out = 10.0e3;
+            return out;              
+        } else {
+            amrex::Abort("Incorrect user-parameter mater_mech_CBD in ProbParm.H");
+            return 0; 
+        }
+    }
+
+    // CBD Poisson Ratio [-]
+    // Cs in mol.m-3
+    AMREX_GPU_HOST_DEVICE AMREX_FORCE_INLINE
+    amrex::Real nu_CBD(amrex::Real Cs, const ProbParm& prob_parm)
+    {
+        if(prob_parm.mater_mech_CBD==0) {
+            amrex::Real out = 0.3;
+            return out; 
+        } else if (prob_parm.mater_mech_CBD==1) {
+            amrex::Real out = 0.3;
+            return out; 
+        } else if (prob_parm.mater_mech_CBD==2) {
+            amrex::Real out = 0.3;
+            return out;              
+        } else {
+            amrex::Abort("Incorrect user-parameter mater_mech_CBD in ProbParm.H");
+            return 0; 
+        }
+    }
+
+    // CBD Chemical Expansion Coeff [-]
+    // Cs in mol.m-3
+    AMREX_GPU_HOST_DEVICE AMREX_FORCE_INLINE
+    amrex::Real CCE_CBD(amrex::Real Cs, const ProbParm& prob_parm)
+    {
+        if(prob_parm.mater_mech_CBD==0) {
+            amrex::Real out = 0.0; 
+            return out; 
+        } else if (prob_parm.mater_mech_CBD==1) {
+            amrex::Real out = 0.0; 
+            return out; 
+        } else if (prob_parm.mater_mech_CBD==2) {
+            amrex::Real out = 0.0; 
+            return out;              
+        } else {
+            amrex::Abort("Incorrect user-parameter mater_mech_CBD in ProbParm.H");
+            return 0; 
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
 #endif

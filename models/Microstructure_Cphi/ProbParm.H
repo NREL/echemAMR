@@ -22,6 +22,7 @@ struct ProbParm
     //    1=NMC532 with constant diffusion and conductivity, cubic polynomial OCP and symmetric io
     //    2=NMC532 with constant conductivity, actual diffusion, OCP and io
     int mater_cathode = 2; 
+    int mater_mech_cathode = 0;
     // Specific surface area correction
     amrex::Real Sp_corr_cathode = 1.0;    
     
@@ -30,6 +31,7 @@ struct ProbParm
     //    1=graphite SLC1506T2 with constant diffusion and conductivity, 8-th order polynomial OCP, and symmetric io
     //    2=graphite SLC1506T2 with constant diffusion and conductivity, actual OCP, and symmetric io
     int mater_anode = 2; 
+    int mater_mech_anode = 0;
     // Specific surface area correction
     amrex::Real Sp_corr_anode = 1.0;    
     
@@ -38,6 +40,8 @@ struct ProbParm
     //    1=Gen2 with constant coefficient
     //....2=Gen2 with concentration dependent coefficients
     int mater_electrolyte = 2;
+    int mater_mech_electrolyte = 0;
+    int mater_mech_separator = 0;
 
     // Electrolyte transference number, Activity coefficient
     //    0=constant coefficient
@@ -47,6 +51,7 @@ struct ProbParm
 
     // Carbon black binder
     int mater_CBD = 1;
+    int mater_mech_CBD = 0;
 
     // Nanoscale
     // = 0: nanoporosity = 1 and MacMullin = 1 (overwritte nanoporosity_filename and macmullin_filename)

@@ -1400,7 +1400,8 @@ void echemAMR::solve_mechanics(Real current_time)
     int max_coarsening_level = 30;//linsolve_max_coarsening_level;
     int verbose = 2;
     int bottom_verbose = 2;
-
+    ProbParm const* localprobparm = d_prob_parm;
+    
     // initialize solver
     LPInfo info;
     info.setMaxCoarseningLevel(max_coarsening_level);
@@ -1485,9 +1486,9 @@ void echemAMR::solve_mechanics(Real current_time)
             amrex::ParallelFor(gbx, [=] AMREX_GPU_DEVICE(int i, int j, int k) 
             {
                     //FIXME: use component wise call
-                    electrochem_mechanics::compute_shear_modulus(i, j, k, phi_arr, eta_arr);
-                    electrochem_mechanics::compute_bulk_modulus(i, j, k, phi_arr, eta_arr, kappa_arr);
-                    electrochem_mechanics::compute_lamG_deltaT(i, j, k, phi_arr, lamG_deltaT_arr);
+                    electrochem_mechanics::compute_shear_modulus(i, j, k, phi_arr, eta_arr, *localprobparm);
+                    electrochem_mechanics::compute_bulk_modulus(i, j, k, phi_arr, eta_arr, kappa_arr, *localprobparm);
+                    electrochem_mechanics::compute_lamG_deltaT(i, j, k, phi_arr, lamG_deltaT_arr, *localprobparm);
             });
         }
 

@@ -45,7 +45,13 @@ void amrex_probinit (ProbParm & h_prob_parm, ProbParm & d_prob_parm)
     pp.query("Sp_corr_anode", h_prob_parm.Sp_corr_anode);
     pp.query("mater_electrolyte", h_prob_parm.mater_electrolyte);
     pp.query("mater_electrolyte_tpAc", h_prob_parm.mater_electrolyte_tpAc);
-    pp.query("mater_CBD", h_prob_parm.mater_CBD);    
+    pp.query("mater_CBD", h_prob_parm.mater_CBD); 
+    // Mechanics parameters
+    pp.query("mater_mech_anode", h_prob_parm.mater_mech_anode);
+    pp.query("mater_mech_cathode", h_prob_parm.mater_mech_cathode);
+    pp.query("mater_mech_separator", h_prob_parm.mater_mech_separator);
+    pp.query("mater_mech_electrolyte", h_prob_parm.mater_mech_electrolyte);
+    pp.query("mater_mech_CBD", h_prob_parm.mater_mech_CBD);
     // Nanoscale coefficients modificators
     pp.query("Nanoscale_coefficients_txtimport_CBD", h_prob_parm.Nanoscale_coefficients_txtimport_CBD);  
     pp.query("Nanoscale_coefficients_txtimport_separator", h_prob_parm.Nanoscale_coefficients_txtimport_separator);  
