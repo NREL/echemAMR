@@ -164,6 +164,13 @@ namespace electrochem_mechanics {
         out_arr(i, j, k) = -(3.0*lambda + 2.0*G)*CCE*deltaC;
     }
 
+    AMREX_GPU_DEVICE AMREX_INLINE std::array<int, 8>  get_solution_ids()
+    {
+        std::array<int, 8> sln_list = {DIS_U_ID, VON_M_ID, Sigma11_ID, Sigma22_ID, Sigma33_ID, Sigma12_ID, Sigma13_ID, Sigma23_ID};
+        return sln_list;
+    }
+
+
 
 }
 #endif

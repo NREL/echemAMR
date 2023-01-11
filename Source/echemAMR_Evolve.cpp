@@ -1430,6 +1430,9 @@ void echemAMR::solve_mechanics(Real current_time)
     Vector<MultiFab> lamG_deltaT;
     Vector<MultiFab> lamG_deltaT_gradient;
 
+    // Get Solution ID 
+    std::array<int, 8> sln_list = electrochem_mechanics::get_solution_ids();
+
     // Resize for level
     displacement.resize(finest_level + 1);
     solution.resize(finest_level + 1);
@@ -1465,7 +1468,7 @@ void echemAMR::solve_mechanics(Real current_time)
         FillPatch(ilev, current_time, Sborder, 0, Sborder.nComp());
 
         // Extract current displacement
-        amrex::Copy(displacement[ilev], Sborder, DIS_U_ID, 0, AMREX_SPACEDIM, num_grow);
+        amrex::Copy(displacement[ilev], Sborder, sln_list[0], 0, AMREX_SPACEDIM, num_grow);
 
         // // Set initial guess from displacement
         // amrex::MultiFab::Copy(solution[ilev], displacement[ilev], 0, 0, AMREX_SPACEDIM, 0);
@@ -1817,7 +1820,6 @@ void echemAMR::solve_mechanics(Real current_time)
         }
     }  
 
-
     // copy solution back to phi_new
     for (int ilev = 0; ilev <= finest_level; ilev++)
     {   
@@ -1827,14 +1829,14 @@ void echemAMR::solve_mechanics(Real current_time)
         Print()<<"min of eta:"<<eta[ilev].min(0)<<"\n";
         Print()<<"max of lamG_deltaT:"<<lamG_deltaT[ilev].max(0)<<"\n";
         Print()<<"min of lamG_deltaT:"<<lamG_deltaT[ilev].min(0)<<"\n";
-        amrex::MultiFab::Copy(phi_new[ilev], solution[ilev], 0, DIS_U_ID, AMREX_SPACEDIM, 0);
-        amrex::MultiFab::Copy(phi_new[ilev], von_Mises[ilev], 0, VON_M_ID, 1, 0);
-        amrex::MultiFab::Copy(phi_new[ilev], sigma11[ilev], 0, Sigma11_ID, 1, 0);
-        amrex::MultiFab::Copy(phi_new[ilev], sigma22[ilev], 0, Sigma22_ID, 1, 0);
-        amrex::MultiFab::Copy(phi_new[ilev], sigma33[ilev], 0, Sigma33_ID, 1, 0);
-        amrex::MultiFab::Copy(phi_new[ilev], sigma12[ilev], 0, Sigma12_ID, 1, 0);
-        amrex::MultiFab::Copy(phi_new[ilev], sigma13[ilev], 0, Sigma13_ID, 1, 0);                
-        amrex::MultiFab::Copy(phi_new[ilev], sigma23[ilev], 0, Sigma23_ID, 1, 0); 
+        amrex::MultiFab::Copy(phi_new[ilev], solution[ilev], 0,  sln_list[0], AMREX_SPACEDIM, 0);
+        amrex::MultiFab::Copy(phi_new[ilev], von_Mises[ilev], 0, sln_list[1], 1, 0);
+        amrex::MultiFab::Copy(phi_new[ilev], sigma11[ilev], 0,   sln_list[2], 1, 0);
+        amrex::MultiFab::Copy(phi_new[ilev], sigma22[ilev], 0,   sln_list[3], 1, 0);
+        amrex::MultiFab::Copy(phi_new[ilev], sigma33[ilev], 0,   sln_list[4], 1, 0);
+        amrex::MultiFab::Copy(phi_new[ilev], sigma12[ilev], 0,   sln_list[5], 1, 0);
+        amrex::MultiFab::Copy(phi_new[ilev], sigma13[ilev], 0,   sln_list[6], 1, 0);                
+        amrex::MultiFab::Copy(phi_new[ilev], sigma23[ilev], 0,   sln_list[7], 1, 0); 
     }
 
 }
