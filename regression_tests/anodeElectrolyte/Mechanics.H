@@ -43,7 +43,7 @@ namespace electrochem_mechanics {
 
     }
 
-    AMREX_GPU_DEVICE AMREX_INLINE std::array<int, 8>  get_solution_ids()
+    AMREX_INLINE std::array<int, 8>  get_solution_ids()
     {
         std::array<int, 8> sln_list = {0, 0, 0, 0, 0, 0, 0, 0};
         return sln_list;

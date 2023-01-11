@@ -82,7 +82,7 @@ jobs:
           sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A4B469963BF863CC
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-          g++ gfortran libopenmpi-dev openmpi-bin cuda-command-line-tools-11-1 \
+          g++-9 gfortran-9 libopenmpi-dev openmpi-bin cuda-command-line-tools-11-1 \
           cuda-compiler-11-1 cuda-minimal-build-11-1 \
           cuda-nvml-dev-11-1 cuda-nvtx-11-1 libcurand-dev-11-1 cuda-cupti-dev-11-1
           git clone https://github.com/hypre-space/hypre.git
