@@ -1,0 +1,13 @@
+# Mesh Info
+n_cell = 32
+x_pad = 0
+y_pad = 8
+max_grid_size = 64
+
+# Output Info
+plot_file = output/the_hope/plot
+
+# MGML Info
+verbose = 2
+bottom_verbose = 2
+max_coarsening_level = 30

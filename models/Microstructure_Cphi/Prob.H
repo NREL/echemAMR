@@ -40,9 +40,18 @@ void amrex_probinit (ProbParm & h_prob_parm, ProbParm & d_prob_parm)
     pp.query("anode_soc_max", h_prob_parm.anode_soc_max);  
     // Materials
     pp.query("mater_cathode", h_prob_parm.mater_cathode);
+    pp.query("Sp_corr_cathode", h_prob_parm.Sp_corr_cathode);
     pp.query("mater_anode", h_prob_parm.mater_anode);
+    pp.query("Sp_corr_anode", h_prob_parm.Sp_corr_anode);
     pp.query("mater_electrolyte", h_prob_parm.mater_electrolyte);
-    pp.query("mater_CBD", h_prob_parm.mater_CBD);    
+    pp.query("mater_electrolyte_tpAc", h_prob_parm.mater_electrolyte_tpAc);
+    pp.query("mater_CBD", h_prob_parm.mater_CBD); 
+    // Mechanics parameters
+    pp.query("mater_mech_anode", h_prob_parm.mater_mech_anode);
+    pp.query("mater_mech_cathode", h_prob_parm.mater_mech_cathode);
+    pp.query("mater_mech_separator", h_prob_parm.mater_mech_separator);
+    pp.query("mater_mech_electrolyte", h_prob_parm.mater_mech_electrolyte);
+    pp.query("mater_mech_CBD", h_prob_parm.mater_mech_CBD);
     // Nanoscale coefficients modificators
     pp.query("Nanoscale_coefficients_txtimport_CBD", h_prob_parm.Nanoscale_coefficients_txtimport_CBD);  
     pp.query("Nanoscale_coefficients_txtimport_separator", h_prob_parm.Nanoscale_coefficients_txtimport_separator);  
@@ -51,6 +60,12 @@ void amrex_probinit (ProbParm & h_prob_parm, ProbParm & d_prob_parm)
     // Replace electrolyte with CBD
     pp.query("ELEisCBD", h_prob_parm.ELEisCBD);      
 
+    // Full cell or half-cell
+    pp.query("halfcell_case", h_prob_parm.halfcell_case);
+   
+    // Physics
+    pp.query("Cphi_electrolyte_coupling", h_prob_parm.Cphi_electrolyte_coupling);   
+    
     // 0D validation
     pp.query("zeroDmodel", h_prob_parm.zeroDmodel);
 
@@ -394,7 +409,7 @@ void initproblemdata(Box const& bx, Array4<Real> const& phi, GeometryData const&
                     phi(i,j,k,POT_ID) = prob_parm->phie_to; // electrolyte potential 
                     phi(i,j,k,POTs_ID) = prob_parm->phis_a_to; // solid potential    
                 } else { // Purely solid domain
-                    phi(i,j,k,CO_ID) = 0.0;
+                    phi(i,j,k,CO_ID) = prob_parm->cs_a_to;
                     phi(i,j,k,POT_ID) = prob_parm->phis_a_to; // solid potential 
                 }       
                 } else if (phi(i,j,k,C_CBD_ID) == 1) { // Within CBD (cathode)
@@ -403,7 +418,7 @@ void initproblemdata(Box const& bx, Array4<Real> const& phi, GeometryData const&
                     phi(i,j,k,POT_ID) = prob_parm->phie_to; // electrolyte potential
                     phi(i,j,k,POTs_ID) = prob_parm->phis_c_to; // solid potential    
                 } else { // Purely solid domain
-                    phi(i,j,k,CO_ID) = 0.0;
+                    phi(i,j,k,CO_ID) = prob_parm->cs_c_to;
                     phi(i,j,k,POT_ID) = prob_parm->phis_c_to; // solid potential 
                 }                     
                                         

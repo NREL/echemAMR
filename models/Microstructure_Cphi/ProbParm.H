@@ -13,26 +13,45 @@ struct ProbParm
     // --------------
     // MATERIAL SELECTION
     // --------------
-    // Mater_* = 0: simple test expression
-    //         = 1: real expression simplified
-    //         = 2: real expression
+    // Mater_* = 0: test expression
+    //         = 1: constant (except for OCP and io: variable with a simple expression)
+    //         = 2: variable, real (i.e., complicated) expression  
+    
     // Cathode
     //    0=constant diffusion, conductivity, OCP, and io
     //    1=NMC532 with constant diffusion and conductivity, cubic polynomial OCP and symmetric io
     //    2=NMC532 with constant conductivity, actual diffusion, OCP and io
     int mater_cathode = 2; 
+    int mater_mech_cathode = 0;
+    // Specific surface area correction
+    amrex::Real Sp_corr_cathode = 1.0;    
+    
     // Anode
     //    0=constant diffusion, conductivity, OCP, and io
     //    1=graphite SLC1506T2 with constant diffusion and conductivity, 8-th order polynomial OCP, and symmetric io
     //    2=graphite SLC1506T2 with constant diffusion and conductivity, actual OCP, and symmetric io
     int mater_anode = 2; 
-    // Electrolyte
+    int mater_mech_anode = 0;
+    // Specific surface area correction
+    amrex::Real Sp_corr_anode = 1.0;    
+    
+    // Electrolyte (diffusivity, conductivity)
     //    0=constant coefficient
-    //    1=Gen2 with constand coefficient
+    //    1=Gen2 with constant coefficient
     //....2=Gen2 with concentration dependent coefficients
     int mater_electrolyte = 2;
+    int mater_mech_electrolyte = 0;
+    int mater_mech_separator = 0;
+
+    // Electrolyte transference number, Activity coefficient
+    //    0=constant coefficient
+    //    1=Gen2 with constant coefficient
+    //....2=Gen2 with concentration dependent coefficients
+    int mater_electrolyte_tpAc = 1;
+
     // Carbon black binder
     int mater_CBD = 1;
+    int mater_mech_CBD = 0;
 
     // Nanoscale
     // = 0: nanoporosity = 1 and MacMullin = 1 (overwritte nanoporosity_filename and macmullin_filename)
@@ -58,6 +77,16 @@ struct ProbParm
     // Special case: 0D model comparison [0=false, 1=true]
     // If true, diffusivity and conductivity are set to un-realistic high values
     int zeroDmodel = 0;
+
+    // Full cell (=0), or half cell, anode is Li-reference (=1) or cathode is Li-reference (=2)
+    // If 1 or 2, overwritte coefficients from prob.mater_*
+    int halfcell_case = 0;
+
+    // PHYSICS
+    // Electrolyte concentration-potential coupling
+    //    0=no
+    //    1=yes (transference number, activity coefficient)
+    int Cphi_electrolyte_coupling = 0;    
 
     // --------------
     // GEOMETRY
