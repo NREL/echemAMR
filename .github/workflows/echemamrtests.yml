@@ -82,12 +82,12 @@ jobs:
           sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A4B469963BF863CC
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-          g++-9 gfortran-9 libopenmpi-dev openmpi-bin cuda-command-line-tools-11-1 \
+          gcc-9 g++-9 gfortran-9 libopenmpi-dev openmpi-bin cuda-command-line-tools-11-1 \
           cuda-compiler-11-1 cuda-minimal-build-11-1 \
           cuda-nvml-dev-11-1 cuda-nvtx-11-1 libcurand-dev-11-1 cuda-cupti-dev-11-1
 
-          update-alternatives --set g++ "/usr/bin/g++-9"
-          update-alternatives --set gfortran "/usr/bin/gfortran-9"
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 100 --slave /usr/bin/g++ g++ /usr/bin/g++-9 --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-9
+          sudo update-alternatives --set gcc /usr/bin/gcc-9
 
           git clone https://github.com/hypre-space/hypre.git
           cd hypre/src
