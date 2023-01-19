@@ -101,6 +101,11 @@ void print_init_data(ProbParm* prob_parm)
 {
 
 }
+AMREX_INLINE
+void initialconditions(ProbParm & h_prob_parm, ProbParm & d_prob_parm)
+{
+
+}
 
 AMREX_GPU_DEVICE
 AMREX_FORCE_INLINE

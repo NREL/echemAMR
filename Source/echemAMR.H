@@ -254,6 +254,7 @@ private:
     // level-set id for buttler-vohlmer
     int bv_levset_id = 0;
     Vector<int> bv_specid_list{0};
+    int kd_conc_id=0;
 
     int bv_nonlinear_iters = 1;
     Real bv_nonlinear_reltol = 1e-8;
