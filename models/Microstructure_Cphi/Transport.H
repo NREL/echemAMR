@@ -257,7 +257,45 @@ namespace electrochem_transport {
         + electrochem::Ks_bulk_cathode(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,C_AM_ID)
         + electrochem::Ks_bulk_CBD(prob_parm) * (phi(i,j,k,A_CBD_ID)+phi(i,j,k,C_CBD_ID))) / phi(i,j,k,MAC_ID);
     }
+    
+    AMREX_GPU_DEVICE AMREX_INLINE
+    amrex::Real compute_kdstar_atface(int i, int j, int k, int idim,
+                                      Array4<Real> const &phi, 
+                                      GpuArray<Real, AMREX_SPACEDIM> prob_lo,
+                                      GpuArray<Real, AMREX_SPACEDIM> prob_hi, 
+                                      GpuArray<Real, AMREX_SPACEDIM> dx, 
+                                      const Real time, 
+                                      ProbParm const& prob_parm)
+    {
+        IntVect left(i, j, k);
+        IntVect right(i, j, k);
+        left[idim] -= 1;
+        amrex::Real kdstar=0.0;
+        
+        Real Cleft = phi(left, CO_ID);
+        Real Cright = phi(right, CO_ID);
+        Real ls_face = 0.5*(phi(left,LS_ID) + phi(right,LS_ID));
 
+        //has electrolyte
+        if(ls_face > 0.0)
+        {
+            Real Cface=Cleft*phi(left,LS_ID)+Cright*phi(right,LS_ID);
 
+            // Intermediate coefficients
+            Real Ke_left     = electrochem::Ke_bulk(Cleft, prob_parm) * phi(left,LS_ID) / phi(left,MAC_ID);
+            Real Ac_left     = electrochem::A_c(Cleft, prob_parm) * phi(left,LS_ID);
+            Real tplus_left  = electrochem::t_plus(Cleft, prob_parm) * phi(left,LS_ID);
+            Real KD_left     = electrochem::Kd(Ke_left, Ac_left, tplus_left, prob_parm) * phi(left,LS_ID);
+
+            Real Ke_right     = electrochem::Ke_bulk(Cright, prob_parm) * phi(right,LS_ID) / phi(right,MAC_ID);
+            Real Ac_right     = electrochem::A_c(Cright, prob_parm) * phi(right,LS_ID);
+            Real tplus_right  = electrochem::t_plus(Cright, prob_parm) * phi(right,LS_ID);
+            Real KD_right     = electrochem::Kd(Ke_right, Ac_right, tplus_right, prob_parm) * phi(right,LS_ID);
+
+            kdstar=0.5*(KD_left+KD_right)/Cface;
+        }
+
+        return(kdstar);
+    }
 }
 #endif
