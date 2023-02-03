@@ -657,6 +657,8 @@ void echemAMR::solve_potential(Real current_time)
 
                         rhs_arr(i, j, k) += phi_arr(i, j, k, POT_ID) * relax_fac;
 
+                        //this term is -del.(kdstar grad c) which goes on the RHS
+                        //ie del.(-k grad(phi))=-del.(kdstar grad c)
                         rhs_arr(i, j, k) += (kdterm_x(i, j, k) - kdterm_x(i + 1, j, k)) / dx[0] + (kdterm_y(i, j, k) - kdterm_y(i, j + 1, k)) / dx[1] +
                         (kdterm_z(i, j, k) - kdterm_z(i, j, k + 1)) / dx[2];
 

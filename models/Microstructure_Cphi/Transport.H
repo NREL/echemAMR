@@ -108,18 +108,16 @@ namespace electrochem_transport {
         dcoeff(i,j,k,CO_ID) = electrochem::Ds_bulk_anode(C, prob_parm) * phi(i,j,k,A_AM_ID)
         + electrochem::Ds_bulk_cathode(C, prob_parm) * phi(i,j,k,C_AM_ID)
         + electrochem::Ds_bulk_CBD(prob_parm) * (phi(i,j,k,A_CBD_ID)+phi(i,j,k,C_CBD_ID));
-        if (electrochem::Cphi_ele_coupling(prob_parm)==1) {
-            // Intermediate coefficient
-            Real Ke  =  electrochem::Ke_bulk(C, prob_parm) * phi(i,j,k,LS_ID) / phi(i,j,k,MAC_ID);
-            Real Ac  = electrochem::A_c(C, prob_parm) * phi(i,j,k,LS_ID);
-            Real tplus  = electrochem::t_plus(C, prob_parm) * phi(i,j,k,LS_ID);      
-            // Diffusional conductivity
-            Real KDe  = electrochem::Kd(Ke, Ac, tplus, prob_parm) * phi(i,j,k,LS_ID);  
-            dcoeff(i,j,k,CO_ID) = dcoeff(i,j,k,CO_ID) + (electrochem::De_bulk(C, prob_parm)/phi(i,j,k,MAC_ID) - tplus/FARADCONST*KDe/C) * phi(i,j,k,LS_ID);
-        } else {
-            dcoeff(i,j,k,CO_ID) = dcoeff(i,j,k,CO_ID) + (electrochem::De_bulk(C, prob_parm)/phi(i,j,k,MAC_ID)) * phi(i,j,k,LS_ID);
-        }        
-        
+        dcoeff(i,j,k,CO_ID) = dcoeff(i,j,k,CO_ID) + electrochem::De_bulk(C, prob_parm)/phi(i,j,k,MAC_ID) * phi(i,j,k,LS_ID);
+
+        // Intermediate coefficient
+        Real Ke  =  electrochem::Ke_bulk(C, prob_parm) * phi(i,j,k,LS_ID) / phi(i,j,k,MAC_ID);
+        Real Ac  = electrochem::A_c(C, prob_parm) * phi(i,j,k,LS_ID);
+        Real tplus  = electrochem::t_plus(C, prob_parm) * phi(i,j,k,LS_ID);      
+        // Diffusional conductivity
+        Real KDe  = electrochem::Kd(Ke, Ac, tplus, prob_parm) * phi(i,j,k,LS_ID);  
+        dcoeff(i,j,k,CO_ID) = dcoeff(i,j,k,CO_ID) - tplus/FARADCONST*KDe/C * phi(i,j,k,LS_ID);
+
         dcoeff(i, j, k, A_AM_ID) = 0.0;
         dcoeff(i, j, k, A_E_ID) = 0.0;
         dcoeff(i, j, k, A_CBD_ID) = 0.0;
@@ -141,13 +139,13 @@ namespace electrochem_transport {
     {
         // set the nanoporosity per cell
         ecoeff(i, j, k, CO_ID) = (
-                phi(i, j, k, A_AM_ID)  * phi(i,j,k,NP_ID)
-              + phi(i, j, k, A_E_ID)   * phi(i,j,k,NP_ID)
-              + phi(i, j, k, A_CBD_ID) * phi(i,j,k,NP_ID)
-              + phi(i, j, k, S_ID)     * phi(i,j,k,NP_ID)
-              + phi(i, j, k, C_AM_ID)  * phi(i,j,k,NP_ID)
-              + phi(i, j, k, C_E_ID)   * phi(i,j,k,NP_ID)
-              + phi(i, j, k, C_CBD_ID) * phi(i,j,k,NP_ID)
+            phi(i, j, k, A_AM_ID)  * phi(i,j,k,NP_ID)
+            + phi(i, j, k, A_E_ID)   * phi(i,j,k,NP_ID)
+            + phi(i, j, k, A_CBD_ID) * phi(i,j,k,NP_ID)
+            + phi(i, j, k, S_ID)     * phi(i,j,k,NP_ID)
+            + phi(i, j, k, C_AM_ID)  * phi(i,j,k,NP_ID)
+            + phi(i, j, k, C_E_ID)   * phi(i,j,k,NP_ID)
+            + phi(i, j, k, C_CBD_ID) * phi(i,j,k,NP_ID)
             );
     }
 
@@ -167,6 +165,35 @@ namespace electrochem_transport {
         {
             velx(i, j, k, n) = 0.0;
         }
+
+        int dir=0;
+        IntVect left(i, j, k);
+        IntVect right(i, j, k);
+        left[dir] -= 1;;
+
+        Real Cleft   = phi(left, CO_ID);
+        Real Cright  = phi(right, CO_ID);
+        Real ls_face = 0.5*(phi(left,LS_ID) + phi(right,LS_ID));
+
+        //has electrolyte
+        if(ls_face > 0.0)
+        {
+            Real Cface  = Cleft*phi(left,LS_ID)+Cright*phi(right,LS_ID);
+            Real efield = -(phi(right,POT_ID)-phi(left,POT_ID))/dx[dir];
+
+            // Intermediate coefficients
+            Real Ke_left     = electrochem::Ke_bulk(Cleft, prob_parm) * phi(left,LS_ID) / phi(left,MAC_ID);
+            Real tplus_left  = electrochem::t_plus(Cleft, prob_parm) * phi(left,LS_ID);
+
+            Real Ke_right     = electrochem::Ke_bulk(Cright, prob_parm) * phi(right,LS_ID) / phi(right,MAC_ID);
+            Real tplus_right  = electrochem::t_plus(Cright, prob_parm) * phi(right,LS_ID);
+
+            Real tplus_face=0.5*(tplus_left+tplus_right);
+            Real Ke_face=0.5*(Ke_left+Ke_right);
+
+            velx(i,j,k,CO_ID) = tplus_face*Ke_face*efield/Cface/FARADCONST;
+        }
+
     }
     AMREX_GPU_DEVICE AMREX_INLINE void compute_vely(
         int i,
@@ -183,6 +210,34 @@ namespace electrochem_transport {
         for (int n = 0; n < phi.nComp(); ++n)
         {
             vely(i, j, k, n) = 0.0;
+        }
+        
+        int dir=1;
+        IntVect left(i, j, k);
+        IntVect right(i, j, k);
+        left[dir] -= 1;
+        
+        Real Cleft   = phi(left, CO_ID);
+        Real Cright  = phi(right, CO_ID);
+        Real ls_face = 0.5*(phi(left,LS_ID) + phi(right,LS_ID));
+        
+        //has electrolyte
+        if(ls_face > 0.0)
+        {
+            Real Cface  = Cleft*phi(left,LS_ID)+Cright*phi(right,LS_ID);
+            Real efield = -(phi(right,POT_ID)-phi(left,POT_ID))/dx[dir];
+
+            // Intermediate coefficients
+            Real Ke_left     = electrochem::Ke_bulk(Cleft, prob_parm) * phi(left,LS_ID) / phi(left,MAC_ID);
+            Real tplus_left  = electrochem::t_plus(Cleft, prob_parm) * phi(left,LS_ID);
+
+            Real Ke_right     = electrochem::Ke_bulk(Cright, prob_parm) * phi(right,LS_ID) / phi(right,MAC_ID);
+            Real tplus_right  = electrochem::t_plus(Cright, prob_parm) * phi(right,LS_ID);
+
+            Real tplus_face=0.5*(tplus_left+tplus_right);
+            Real Ke_face=0.5*(Ke_left+Ke_right);
+
+            vely(i,j,k,CO_ID) = tplus_face*Ke_face*efield/Cface/FARADCONST;
         }
     }
 
@@ -201,6 +256,34 @@ namespace electrochem_transport {
         for (int n = 0; n < phi.nComp(); ++n)
         {
             velz(i, j, k, n) = 0.0;
+        }
+
+        int dir=2;
+        IntVect left(i, j, k);
+        IntVect right(i, j, k);
+        left[dir] -= 1;
+        
+        Real Cleft   = phi(left, CO_ID);
+        Real Cright  = phi(right, CO_ID);
+        Real ls_face = 0.5*(phi(left,LS_ID) + phi(right,LS_ID));
+        
+        //has electrolyte
+        if(ls_face > 0.0)
+        {
+            Real Cface  = Cleft*phi(left,LS_ID)+Cright*phi(right,LS_ID);
+            Real efield = -(phi(right,POT_ID)-phi(left,POT_ID))/dx[dir];
+
+            // Intermediate coefficients
+            Real Ke_left     = electrochem::Ke_bulk(Cleft, prob_parm) * phi(left,LS_ID) / phi(left,MAC_ID);
+            Real tplus_left  = electrochem::t_plus(Cleft, prob_parm) * phi(left,LS_ID);
+
+            Real Ke_right     = electrochem::Ke_bulk(Cright, prob_parm) * phi(right,LS_ID) / phi(right,MAC_ID);
+            Real tplus_right  = electrochem::t_plus(Cright, prob_parm) * phi(right,LS_ID);
+
+            Real tplus_face=0.5*(tplus_left+tplus_right);
+            Real Ke_face=0.5*(Ke_left+Ke_right);
+
+            velz(i,j,k,CO_ID) = tplus_face*Ke_face*efield/Cface/FARADCONST;
         }
     }
 

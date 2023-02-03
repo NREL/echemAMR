@@ -633,7 +633,8 @@ namespace electrochem
     AMREX_GPU_HOST_DEVICE AMREX_FORCE_INLINE
     amrex::Real Kd(amrex::Real Ke, amrex::Real Ac, amrex::Real tplus, const ProbParm& prob_parm)
     {
-        amrex::Real Kd = (2.0 * Ke * GASCONST * prob_parm.Temperature/FARADCONST)*(1.0-tplus)*(1+Ac) ; // Kd is positive
+        // This is the negative version of Kd
+        amrex::Real Kd = -(2.0 * Ke * GASCONST * prob_parm.Temperature/FARADCONST)*(1.0-tplus)*(1+Ac) ; 
         return Kd; 
     }
 
