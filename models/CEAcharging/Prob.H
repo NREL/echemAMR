@@ -10,6 +10,11 @@
 #include <echemAMR.H>
 
 using namespace amrex;
+AMREX_INLINE
+void initialconditions(ProbParm & h_prob_parm, ProbParm & d_prob_parm)
+{
+
+}
 
 AMREX_INLINE
 void amrex_probinit (ProbParm & h_prob_parm, ProbParm & d_prob_parm)

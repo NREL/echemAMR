@@ -11,17 +11,19 @@ namespace electrochem_integral_utils
     //TODO: incorporate a level mask
     AMREX_GPU_HOST_DEVICE
         AMREX_FORCE_INLINE
-        Real volume_value(int i, int j, int k, int comp, int domain,
+        Real volume_value(int i, int j, int k, int comp1, int comp2, int domain,
                 Array4<Real const> const& phi,
                 Array4<int const> const& mask_arr,
                 GpuArray<Real, AMREX_SPACEDIM> dx
                 )
         {
 
-            Real val = 1.0;
+            Real  val= 1.0;
 
-            if( comp > -1 )
-                val = phi(i,j,k,comp);
+            if( comp1 > -1 )
+                val = phi(i,j,k,comp1);
+                if ( comp2 > -1 )
+                    val = val * phi(i,j,k,comp2);
 
             if( phi(i,j,k,domain) > 0 )
                 return val*dx[0]*dx[1]*dx[2];
@@ -37,7 +39,7 @@ namespace electrochem_integral_utils
         Real surface_value(int i, int j, int k, int comp, int domain1, int domain2,
                 Array4<Real const> const& phi,
                 Array4<int const> const& mask_arr,
-                const int* domlo,const int *domhi,
+                const GpuArray<int, 3> domlo,const GpuArray<int, 3> domhi,
                 const GpuArray<Real, AMREX_SPACEDIM>& dx)
         {
 
@@ -46,9 +48,7 @@ namespace electrochem_integral_utils
             Real out = 0.0;
             int same_domain = 1;
 
-            // Check if we are trying to find the total surface 
-            // area of domain1 (a -1 means we are looking for 
-            // the neighboring cell to be different)
+            // Check if we are trying to find the total surface area of domain1 (a -1 means we are looking for the neighboring cell to be different)
             if (domain1 == domain2)
                 same_domain = -1;
 
@@ -64,8 +64,7 @@ namespace electrochem_integral_utils
             Real z_prev = phi(i,j,k-1,domain2);
             Real z_next = phi(i,j,k+1,domain2);
 
-            // Check if any of the adjacent cells is 
-            // OOB (a -1 means the neighboring cell is different)
+            // Check if any of the adjacent cells is OOB (a -1 means the neighboring cell is different)
             if (i-1 < domlo[0]) x_prev = -1;
             if (i+1 > domhi[0]) x_next = -1;
             if (j-1 < domlo[1]) y_prev = -1;
@@ -73,8 +72,7 @@ namespace electrochem_integral_utils
             if (k-1 < domlo[2]) z_prev = -1;
             if (k+1 > domhi[2]) z_next = -1;
 
-            // Check if we are in domain1 and the 
-            // adjacent cell is domain2 or boundary
+            // Check if we are in domain1 and the adjacent cell is domain2 or boundary
             if( (phi(i,j,k,domain1) > 0) )
             {
                 if ( same_domain*x_prev > 0) out += val*dx[1]*dx[2];
@@ -88,15 +86,14 @@ namespace electrochem_integral_utils
             return out;
         }
 
-    //Returns the state value of <comp> if on the current 
-    //collectors located at +/- x
+    //Returns the state value of <comp> if on the current collectors located at +/- x
     //TODO: incorporate a level mask
     AMREX_GPU_HOST_DEVICE
         AMREX_FORCE_INLINE
         Real current_collector_value(int i, int j, int k, int comp, int domain,
                 Array4<Real const> const& phi,
                 Array4<int const> const& mask_arr,
-                const int* domlo,const int *domhi,
+                const GpuArray<int, 3> domlo,const GpuArray<int, 3> domhi,
                 const GpuArray<Real, AMREX_SPACEDIM>& dx)
         {
             // Init some values
@@ -120,22 +117,6 @@ namespace electrochem_integral_utils
 
 void echemAMR::init_volumes()
 {
-
-    // Volumes
-    host_global_storage->anode_volume =   VolumeIntegral(-1, A_ID);
-    host_global_storage->ele_sep_volume = VolumeIntegral(-1, E_ID); // + VolumeIntegral(-1, S_ID);
-    host_global_storage->cathode_volume = VolumeIntegral(-1, C_ID);
-
-    // Surface Areas
-    host_global_storage->anode_SA =       SurfaceIntegral(-1, A_ID, A_ID);
-    host_global_storage->electrolyte_SA = SurfaceIntegral(-1, E_ID, E_ID);
-    host_global_storage->sepatator_SA =   0;
-    //host_global_storage->sepatator_SA =   SurfaceIntegral(-1, S_ID, S_ID);
-    host_global_storage->cathode_SA =     SurfaceIntegral(-1, C_ID, C_ID);
-    host_global_storage->anode_ele_SA =   SurfaceIntegral(-1, A_ID, E_ID);
-    host_global_storage->cathode_ele_SA = SurfaceIntegral(-1, C_ID, E_ID);
-    host_global_storage->anode_cc_SA =    CurrentCollectorIntegral(-1, A_ID);
-    host_global_storage->cathode_cc_SA =  CurrentCollectorIntegral(-1, C_ID);
 
 }
 

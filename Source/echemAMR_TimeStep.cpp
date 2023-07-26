@@ -120,15 +120,15 @@ Real echemAMR::EstTimeStep(int lev)
             });
 
             amrex::ParallelFor(bx_x, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
-                electrochem_transport::compute_velx(i, j, k, statearray, velxarray, prob_lo, prob_hi, dx, cur_time, *localprobparm);
+                electrochem_transport::compute_vel(i, j, k, 0, statearray, velxarray, prob_lo, prob_hi, dx, cur_time, *localprobparm);
             });
 
             amrex::ParallelFor(bx_y, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
-                electrochem_transport::compute_vely(i, j, k, statearray, velyarray, prob_lo, prob_hi, dx, cur_time, *localprobparm);
+                electrochem_transport::compute_vel(i, j, k, 1, statearray, velyarray, prob_lo, prob_hi, dx, cur_time, *localprobparm);
             });
 
             amrex::ParallelFor(bx_z, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
-                electrochem_transport::compute_velz(i, j, k, statearray, velzarray, prob_lo, prob_hi, dx, cur_time, *localprobparm);
+                electrochem_transport::compute_vel(i, j, k, 2, statearray, velzarray, prob_lo, prob_hi, dx, cur_time, *localprobparm);
             });
 
             amrex::ParallelFor(bx, [=] AMREX_GPU_DEVICE(int i, int j, int k) {

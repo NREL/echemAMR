@@ -370,8 +370,10 @@ void echemAMR::solve_potential(Real current_time)
 
     Real errnorm_1st_iter;
     
-    MLABecLaplacian mlabec(geom, grids, dmap, info);
-    MLABecLaplacian mlabec_res(geom, grids, dmap, info);
+    MLABecLaplacian mlabec(Geom(0, finest_level), boxArray(0, finest_level), 
+                           DistributionMap(0, finest_level), info);
+    MLABecLaplacian mlabec_res(Geom(0,finest_level), boxArray(0,finest_level), 
+                               DistributionMap(0, finest_level), info);
 
     mlabec.setMaxOrder(linop_maxorder);
     mlabec_res.setMaxOrder(linop_maxorder);
@@ -1088,15 +1090,15 @@ void echemAMR::compute_fluxes(int lev, const int num_grow, MultiFab& Sborder,
             velz_fab.setVal<RunOn::Device>(0.0);
 
             amrex::ParallelFor(bx_x, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
-                electrochem_transport::compute_velx(i, j, k, sborder_arr, velx_arr, prob_lo, prob_hi, dx, time, *localprobparm);
+                electrochem_transport::compute_vel(i, j, k, 0, sborder_arr, velx_arr, prob_lo, prob_hi, dx, time, *localprobparm);
             });
 
             amrex::ParallelFor(bx_y, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
-                electrochem_transport::compute_vely(i, j, k, sborder_arr, vely_arr, prob_lo, prob_hi, dx, time, *localprobparm);
+                electrochem_transport::compute_vel(i, j, k, 1, sborder_arr, vely_arr, prob_lo, prob_hi, dx, time, *localprobparm);
             });
 
             amrex::ParallelFor(bx_z, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
-                electrochem_transport::compute_velz(i, j, k, sborder_arr, velz_arr, prob_lo, prob_hi, dx, time, *localprobparm);
+                electrochem_transport::compute_vel(i, j, k, 2, sborder_arr, velz_arr, prob_lo, prob_hi, dx, time, *localprobparm);
             });
 
             if(!implicit_diffusion)
@@ -1180,7 +1182,8 @@ void echemAMR::implicit_solve_species(Real current_time,Real dt,int spec_id,
     info.setMaxCoarseningLevel(max_coarsening_level);
     info.setMaxSemicoarseningLevel(max_semicoarsening_level);
 
-    MLABecLaplacian mlabec(geom, grids, dmap, info);
+    MLABecLaplacian mlabec(Geom(0,finest_level), boxArray(0,finest_level), 
+                           DistributionMap(0,finest_level), info);
     mlabec.setMaxOrder(linop_maxorder);
 
     // set A and B, A=1/dt, B=1
