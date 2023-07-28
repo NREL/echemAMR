@@ -48,7 +48,7 @@ echemamr.levelset_refinegrad = 0.2
 
 #buttler vohlmer flux
 echemamr.buttler_vohlmer_flux=1
-echemamr.bv_species_id =0
+echemamr.bv_species_ids =0
 echemamr.bv_levelset_id=1
 echemamr.bv_nonlinear_iters=40
 echemamr.dtmax=1e-3
