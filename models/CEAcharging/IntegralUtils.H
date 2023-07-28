@@ -48,7 +48,9 @@ namespace electrochem_integral_utils
             Real out = 0.0;
             int same_domain = 1;
 
-            // Check if we are trying to find the total surface area of domain1 (a -1 means we are looking for the neighboring cell to be different)
+            // Check if we are trying to find the total surface 
+            // area of domain1 (a -1 means we are looking for 
+            // the neighboring cell to be different)
             if (domain1 == domain2)
                 same_domain = -1;
 
@@ -64,7 +66,8 @@ namespace electrochem_integral_utils
             Real z_prev = phi(i,j,k-1,domain2);
             Real z_next = phi(i,j,k+1,domain2);
 
-            // Check if any of the adjacent cells is OOB (a -1 means the neighboring cell is different)
+            // Check if any of the adjacent cells is 
+            // OOB (a -1 means the neighboring cell is different)
             if (i-1 < domlo[0]) x_prev = -1;
             if (i+1 > domhi[0]) x_next = -1;
             if (j-1 < domlo[1]) y_prev = -1;
@@ -72,7 +75,8 @@ namespace electrochem_integral_utils
             if (k-1 < domlo[2]) z_prev = -1;
             if (k+1 > domhi[2]) z_next = -1;
 
-            // Check if we are in domain1 and the adjacent cell is domain2 or boundary
+            // Check if we are in domain1 and the 
+            // adjacent cell is domain2 or boundary
             if( (phi(i,j,k,domain1) > 0) )
             {
                 if ( same_domain*x_prev > 0) out += val*dx[1]*dx[2];
@@ -86,7 +90,8 @@ namespace electrochem_integral_utils
             return out;
         }
 
-    //Returns the state value of <comp> if on the current collectors located at +/- x
+    //Returns the state value of <comp> if on the current 
+    //collectors located at +/- x
     //TODO: incorporate a level mask
     AMREX_GPU_HOST_DEVICE
         AMREX_FORCE_INLINE
@@ -117,6 +122,24 @@ namespace electrochem_integral_utils
 
 void echemAMR::init_volumes()
 {
+
+    // Volumes
+    host_global_storage->anode_volume =   VolumeIntegral(-1, -1, A_ID);
+    host_global_storage->cathode_volume = VolumeIntegral(-1, -1, C_ID);
+
+    // Surface Areas
+    // Current collector - solid e- conductor (Applied loading)
+    host_global_storage->anode_ccAM_SA     = CurrentCollectorIntegral(-1, A_AM_ID);
+    host_global_storage->anode_ccCBDs_SA   = CurrentCollectorIntegral(-1, A_CBD_ID);
+    host_global_storage->cathode_ccAM_SA   = CurrentCollectorIntegral(-1, C_AM_ID);
+    host_global_storage->cathode_ccCBDs_SA = CurrentCollectorIntegral(-1, C_CBD_ID);
+    // Electrolyte - active material (Intercalation reaction)
+    host_global_storage->anode_eleAM_SA    = SurfaceIntegral(-1, A_E_ID, A_AM_ID);
+    host_global_storage->anode_seppAM_SA  = SurfaceIntegral(-1, S_ID, A_AM_ID);
+    host_global_storage->anode_CBDpAM_SA = SurfaceIntegral(-1, A_CBD_ID, A_AM_ID); 
+    host_global_storage->cathode_eleAM_SA  = SurfaceIntegral(-1, C_E_ID, C_AM_ID);
+    host_global_storage->cathode_seppAM_SA   = SurfaceIntegral(-1, S_ID, C_AM_ID);
+    host_global_storage->cathode_CBDpAM_SA = SurfaceIntegral(-1, C_CBD_ID, C_AM_ID);
 
 }
 

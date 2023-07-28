@@ -100,62 +100,25 @@ namespace electrochem_transport {
 
     }
 
-    AMREX_GPU_DEVICE AMREX_INLINE void compute_velx(
+    AMREX_GPU_DEVICE AMREX_INLINE void compute_vel(
         int i,
         int j,
         int k,
+        int dir,
         Array4<Real> const& phi,
-        Array4<Real> const& velx,
+        Array4<Real> const& vel,
         GpuArray<Real, AMREX_SPACEDIM> prob_lo,
         GpuArray<Real, AMREX_SPACEDIM> prob_hi,
         GpuArray<Real, AMREX_SPACEDIM> dx,
         const Real time,
         ProbParm const& prob_parm)
     {
-        velx(i, j, k, CO_ID) = 0.0;
-        velx(i, j, k, A_ID) = 0.0;
-        velx(i, j, k, C_ID) = 0.0;
-        velx(i, j, k, E_ID) = 0.0;
-        velx(i, j, k, LS_ID) = 0.0;
+        vel(i, j, k, CO_ID) = 0.0;
+        vel(i, j, k, A_ID) = 0.0;
+        vel(i, j, k, C_ID) = 0.0;
+        vel(i, j, k, E_ID) = 0.0;
+        vel(i, j, k, LS_ID) = 0.0;
     }
-    AMREX_GPU_DEVICE AMREX_INLINE void compute_vely(
-        int i,
-        int j,
-        int k,
-        Array4<Real> const& phi,
-        Array4<Real> const& vely,
-        GpuArray<Real, AMREX_SPACEDIM> prob_lo,
-        GpuArray<Real, AMREX_SPACEDIM> prob_hi,
-        GpuArray<Real, AMREX_SPACEDIM> dx,
-        const Real time,
-        ProbParm const& prob_parm)
-    {
-        vely(i, j, k, CO_ID) = 0.0;
-        vely(i, j, k, A_ID) = 0.0;
-        vely(i, j, k, C_ID) = 0.0;
-        vely(i, j, k, E_ID) = 0.0;
-        vely(i, j, k, LS_ID) = 0.0;
-    }
-
-    AMREX_GPU_DEVICE AMREX_INLINE void compute_velz(
-        int i,
-        int j,
-        int k,
-        Array4<Real> const& phi,
-        Array4<Real> const& velz,
-        GpuArray<Real, AMREX_SPACEDIM> prob_lo,
-        GpuArray<Real, AMREX_SPACEDIM> prob_hi,
-        GpuArray<Real, AMREX_SPACEDIM> dx,
-        const Real time,
-        ProbParm const& prob_parm)
-    {
-        velz(i, j, k, CO_ID) = 0.0;
-        velz(i, j, k, A_ID) = 0.0;
-        velz(i, j, k, C_ID) = 0.0;
-        velz(i, j, k, E_ID) = 0.0;
-        velz(i, j, k, LS_ID) = 0.0;
-    }
-
     AMREX_GPU_DEVICE AMREX_INLINE void compute_potential_dcoeff(
         int i,
         int j,

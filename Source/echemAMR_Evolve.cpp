@@ -1476,7 +1476,8 @@ void echemAMR::solve_mechanics(Real current_time)
     info.setMaxCoarseningLevel(max_coarsening_level);
     // std::unique_ptr<MLTensorOp> mltensor;
     // mltensor = std::unique_ptr<MLTensorOp>(new MLTensorOp({geom}, {grids}, {dmap}, info));
-    MLTensorOp mltensor(geom, grids, dmap, info);
+    MLTensorOp mltensor(Geom(0,finest_level), boxArray(0,finest_level), 
+                        DistributionMap(0,finest_level), info);
 
     // Setup Dirichlet BC for all sides and components 
     Vector<Array<LinOpBCType,AMREX_SPACEDIM>> mlmg_lobc(AMREX_SPACEDIM);

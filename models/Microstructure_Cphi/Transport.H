@@ -151,12 +151,13 @@ namespace electrochem_transport {
             );
     }
 
-    AMREX_GPU_DEVICE AMREX_INLINE void compute_velx(
+    AMREX_GPU_DEVICE AMREX_INLINE void compute_vel(
         int i,
         int j,
         int k,
+        int dir,
         Array4<Real> const& phi,
-        Array4<Real> const& velx,
+        Array4<Real> const& vel,
         GpuArray<Real, AMREX_SPACEDIM> prob_lo,
         GpuArray<Real, AMREX_SPACEDIM> prob_hi,
         GpuArray<Real, AMREX_SPACEDIM> dx,
@@ -165,45 +166,9 @@ namespace electrochem_transport {
     {
         for (int n = 0; n < phi.nComp(); ++n)
         {
-            velx(i, j, k, n) = 0.0;
+            vel(i, j, k, n) = 0.0;
         }
     }
-    AMREX_GPU_DEVICE AMREX_INLINE void compute_vely(
-        int i,
-        int j,
-        int k,
-        Array4<Real> const& phi,
-        Array4<Real> const& vely,
-        GpuArray<Real, AMREX_SPACEDIM> prob_lo,
-        GpuArray<Real, AMREX_SPACEDIM> prob_hi,
-        GpuArray<Real, AMREX_SPACEDIM> dx,
-        const Real time,
-        ProbParm const& prob_parm)
-    {
-        for (int n = 0; n < phi.nComp(); ++n)
-        {
-            vely(i, j, k, n) = 0.0;
-        }
-    }
-
-    AMREX_GPU_DEVICE AMREX_INLINE void compute_velz(
-        int i,
-        int j,
-        int k,
-        Array4<Real> const& phi,
-        Array4<Real> const& velz,
-        GpuArray<Real, AMREX_SPACEDIM> prob_lo,
-        GpuArray<Real, AMREX_SPACEDIM> prob_hi,
-        GpuArray<Real, AMREX_SPACEDIM> dx,
-        const Real time,
-        ProbParm const& prob_parm)
-    {
-        for (int n = 0; n < phi.nComp(); ++n)
-        {
-            velz(i, j, k, n) = 0.0;
-        }
-    }
-
     
     AMREX_GPU_DEVICE AMREX_INLINE void compute_potential_dcoeff( // Use if prob_parm.CBD_transport==0
         int i,

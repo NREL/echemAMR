@@ -102,44 +102,17 @@ namespace electrochem_transport {
     }
 
     AMREX_GPU_DEVICE AMREX_INLINE
-    void compute_velx(int i, int j, int k,
+    void compute_vel(int i, int j, int k, int dir,
                       Array4<Real> const& phi,
-                      Array4<Real> const& velx,
+                      Array4<Real> const& vel,
                       GpuArray<Real, AMREX_SPACEDIM> prob_lo,
                       GpuArray<Real, AMREX_SPACEDIM> prob_hi,
                       GpuArray<Real, AMREX_SPACEDIM> dx,
                       const Real time,
                       ProbParm const& prob_parm)
     {
-        velx(i,j,k,S1_ID)=0.0;
-        velx(i,j,k,LS_ID)=0.0;
-    }
-    AMREX_GPU_DEVICE AMREX_INLINE
-    void compute_vely(int i, int j, int k,
-                      Array4<Real> const& phi,
-                      Array4<Real> const& vely,
-                      GpuArray<Real, AMREX_SPACEDIM> prob_lo,
-                      GpuArray<Real, AMREX_SPACEDIM> prob_hi,
-                      GpuArray<Real, AMREX_SPACEDIM> dx,
-                      const Real time,
-                      ProbParm const& prob_parm)
-    {
-        vely(i,j,k,S1_ID)=0.0;
-        vely(i,j,k,LS_ID)=0.0;
-    }
-
-    AMREX_GPU_DEVICE AMREX_INLINE
-    void compute_velz(int i, int j, int k,
-                      Array4<Real> const& phi,
-                      Array4<Real> const& velz,
-                      GpuArray<Real, AMREX_SPACEDIM> prob_lo,
-                      GpuArray<Real, AMREX_SPACEDIM> prob_hi,
-                      GpuArray<Real, AMREX_SPACEDIM> dx,
-                      const Real time,
-                      ProbParm const& prob_parm)
-    {
-        velz(i,j,k,S1_ID)=0.0;
-        velz(i,j,k,LS_ID)=0.0;
+        vel(i,j,k,S1_ID)=0.0;
+        vel(i,j,k,LS_ID)=0.0;
     }
 
     AMREX_GPU_DEVICE AMREX_INLINE
@@ -153,7 +126,8 @@ namespace electrochem_transport {
                                   ProbParm const& prob_parm)
     {
         const amrex::Real ls = phi(i,j,k,LS_ID);
-        dcoeff(i,j,k) = (1.0-ls)*prob_parm.electrode_dcoeff + prob_parm.electrolyte_dcoeff*ls;
+        dcoeff(i,j,k) = (1.0-ls)*prob_parm.electrode_dcoeff 
+        + prob_parm.electrolyte_dcoeff*ls;
     }
 
     AMREX_GPU_DEVICE AMREX_INLINE
