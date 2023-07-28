@@ -38,7 +38,7 @@ jobs:
     - name: Build Models
       working-directory: ./models
       run: |
-        cd Microstructure_Cphi
+        cd Microstructure
         make -j 2 COMP=gnu DEBUG=FALSE
     - name: Run Regression
       working-directory: ./regression_tests
