@@ -65,7 +65,7 @@ jobs:
     - name: Run Model
       working-directory: ./models
       run: |
-          cd Microstructure_Cphi
+          cd Microstructure
           mpirun -n 2 ./echemAMR3d.gnu.TPROF.MPI.ex inputs_CESEA_case1
   gputest:
     runs-on: ubuntu-latest
@@ -116,5 +116,5 @@ jobs:
       run: |
         export PATH=/usr/local/nvidia/bin:/usr/local/cuda-11.1/bin:${PATH}
         export LD_LIBRARY_PATH=/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda-11.1/lib:${LD_LIBRARY_PATH}
-        cd Microstructure_Cphi
+        cd Microstructure
         make -j 2 COMP=gnu USE_CUDA=TRUE USE_HYPRE=FALSE
