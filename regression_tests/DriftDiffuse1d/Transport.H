@@ -123,9 +123,9 @@ namespace electrochem_transport
     }
 
     AMREX_GPU_DEVICE AMREX_INLINE
-    void compute_velx(int i, int j, int k,
+    void compute_vel(int i, int j, int k, int dir,
                       Array4<Real> const& phi,
-                      Array4<Real> const& velx,
+                      Array4<Real> const& vel,
                       GpuArray<Real, AMREX_SPACEDIM> prob_lo,
                       GpuArray<Real, AMREX_SPACEDIM> prob_hi,
                       GpuArray<Real, AMREX_SPACEDIM> dx,
@@ -133,7 +133,7 @@ namespace electrochem_transport
                       ProbParm const& prob_parm)
     {
         Real xlen,ylen,zlen,maxlen;
-        int dir=0;
+        int flowdir=0;
 
         xlen=prob_hi[0]-prob_lo[0];
         ylen=prob_hi[1]-prob_lo[1];
@@ -141,85 +141,19 @@ namespace electrochem_transport
 
         maxlen=std::max(xlen,std::max(ylen,zlen));
 
-        if(maxlen==xlen) dir=0;
-        if(maxlen==ylen) dir=1;
-        if(maxlen==zlen) dir=2;
+        if(maxlen==xlen) flowdir=0;
+        if(maxlen==ylen) flowdir=1;
+        if(maxlen==zlen) flowdir=2;
 
-        velx(i,j,k,S1_ID)=0.0;
-        velx(i,j,k,S2_ID)=0.0;
+        vel(i,j,k,S1_ID)=0.0;
+        vel(i,j,k,S2_ID)=0.0;
 
-        if(dir==0)
+        if(flowdir==dir)
         {
-            velx(i,j,k,S1_ID)
-            =0.5*(phi(i-1,j,k,EFX_ID)+phi(i,j,k,EFX_ID));
+            vel(i,j,k,S1_ID)
+            =0.5*(phi(i-1,j,k,EFX_ID+dir)+phi(i,j,k,EFX_ID+dir));
         }
     }
-    AMREX_GPU_DEVICE AMREX_INLINE
-    void compute_vely(int i, int j, int k,
-                      Array4<Real> const& phi,
-                      Array4<Real> const& vely,
-                      GpuArray<Real, AMREX_SPACEDIM> prob_lo,
-                      GpuArray<Real, AMREX_SPACEDIM> prob_hi,
-                      GpuArray<Real, AMREX_SPACEDIM> dx,
-                      const Real time,
-                      ProbParm const& prob_parm)
-    {
-        Real xlen,ylen,zlen,maxlen;
-        int dir=0;
-
-        xlen=prob_hi[0]-prob_lo[0];
-        ylen=prob_hi[1]-prob_lo[1];
-        zlen=prob_hi[2]-prob_lo[2];
-
-        maxlen=std::max(xlen,std::max(ylen,zlen));
-
-        if(maxlen==xlen) dir=0;
-        if(maxlen==ylen) dir=1;
-        if(maxlen==zlen) dir=2;
-
-        vely(i,j,k,S1_ID)=0.0;
-        vely(i,j,k,S2_ID)=0.0;
-
-        if(dir==1)
-        {
-            vely(i,j,k,S1_ID)
-            =0.5*(phi(i,j-1,k,EFY_ID)+phi(i,j,k,EFY_ID));
-        }
-    }
-
-    AMREX_GPU_DEVICE AMREX_INLINE
-    void compute_velz(int i, int j, int k,
-                      Array4<Real> const& phi,
-                      Array4<Real> const& velz,
-                      GpuArray<Real, AMREX_SPACEDIM> prob_lo,
-                      GpuArray<Real, AMREX_SPACEDIM> prob_hi,
-                      GpuArray<Real, AMREX_SPACEDIM> dx,
-                      const Real time,
-                      ProbParm const& prob_parm)
-    {
-        Real xlen,ylen,zlen,maxlen;
-        int dir=0;
-
-        xlen=prob_hi[0]-prob_lo[0];
-        ylen=prob_hi[1]-prob_lo[1];
-        zlen=prob_hi[2]-prob_lo[2];
-
-        maxlen=std::max(xlen,std::max(ylen,zlen));
-
-        if(maxlen==xlen) dir=0;
-        if(maxlen==ylen) dir=1;
-        if(maxlen==zlen) dir=2;
-
-        velz(i,j,k,S1_ID)=0.0;
-        velz(i,j,k,S2_ID)=0.0;
-
-        if(dir==2)
-        {
-            velz(i,j,k,S1_ID)
-            =0.5*(phi(i,j,k-1,EFZ_ID)+phi(i,j,k,EFZ_ID));
-        }
-    }
-
     AMREX_GPU_DEVICE AMREX_INLINE
     void compute_potential_dcoeff(int i, int j, int k,
                                   Array4<Real> const& phi,

@@ -129,7 +129,7 @@ namespace electrochem_transport {
         vel(i, j, k, E_ID) = 0.0;
         vel(i, j, k, LS_ID) = 0.0;
     }
-
+    
     AMREX_GPU_DEVICE AMREX_INLINE void compute_potential_dcoeff(
         int i,
         int j,
@@ -158,6 +158,17 @@ namespace electrochem_transport {
                                       ProbParm const& prob_parm)
     {
         amrex::Real kdstar=0.0;
+        
+        IntVect left(i, j, k);
+        IntVect right(i, j, k);
+        left[idim] -= 1;
+        Real ls_face = 0.5*(phi(left,LS_ID) + phi(right,LS_ID));
+        
+        if(ls_face > 0.0)
+        {
+            kdstar=3.0;   
+        }
+       
         return(kdstar);
     }
 
