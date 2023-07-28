@@ -244,7 +244,7 @@ namespace electrochem_transport {
         //has electrolyte
         if(ls_face > 0.0)
         {
-            Real Cface=0.5*(Cleft*phi(left,LS_ID)+*Cright*phi(right,LS_ID));
+            Real Cface=0.5*(Cleft*phi(left,LS_ID)+Cright*phi(right,LS_ID));
 
             // Intermediate coefficients
             Real Ke_left     = electrochem::Ke_bulk(Cleft, prob_parm) * phi(left,LS_ID) / phi(left,MAC_ID);
