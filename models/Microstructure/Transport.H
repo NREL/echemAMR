@@ -75,7 +75,7 @@ namespace electrochem_transport {
         const int im1 = (dir == 0) ? i - 1 : i;
         const int jm1 = (dir == 1) ? j - 1 : j;
         const int km1 = (dir == 2) ? k - 1 : k;
-        
+
         if (sgn == -1)
         { 
             // lo sides
@@ -101,14 +101,30 @@ namespace electrochem_transport {
         const Real time,
         ProbParm const& prob_parm)
     {
-        
+
         // Concentration
         Real C = phi(i, j, k, CO_ID);
         // Diffusion coefficient = sum( diffusion_coefficient domain i * levelset i), with levelset i=1 if x within domain i, 0 otherwise
         dcoeff(i,j,k,CO_ID) = electrochem::Ds_bulk_anode(C, prob_parm) * phi(i,j,k,A_AM_ID)
         + electrochem::Ds_bulk_cathode(C, prob_parm) * phi(i,j,k,C_AM_ID)
         + electrochem::Ds_bulk_CBD(prob_parm) * (phi(i,j,k,A_CBD_ID)+phi(i,j,k,C_CBD_ID));
-        if (electrochem::Cphi_ele_coupling(prob_parm)==1) {
+
+        if (electrochem::Cphi_ele_coupling(prob_parm)==1) 
+        {
+            //species flux Ne = -De grad(c) + t+/F je
+            //je=(-Ke grad(phi) + Kd grad(lnc))
+            //Electric field E = -grad(phi)
+            //Kdstar = Kd/c
+
+            //species flux Ne = -De grad(c) + t+/F (Ke*E + Kdstar grad(c))
+            //species flux Ne = -(De - (t+/F) Kdstar) grad(c) + t+/F Ke*E
+            //conservation equation is dce/dt + del.Ne = 0
+            //substituting..
+            //dce/dt + del.(t+/F Ke E) = del.((De - (t+/F) Kdstar) grad(c))
+            //compare to dce/dt + del. (v C) = del.(Deff grad(c))
+            //v = (t+/F)(Ke/C)E
+            //Deff = (De - (t+/F) Kdstar)
+
             // Intermediate coefficient
             Real Ke  =  electrochem::Ke_bulk(C, prob_parm) * phi(i,j,k,LS_ID) / phi(i,j,k,MAC_ID);
             Real Ac  = electrochem::A_c(C, prob_parm) * phi(i,j,k,LS_ID);
@@ -116,10 +132,12 @@ namespace electrochem_transport {
             // Diffusional conductivity
             Real KDe  = electrochem::Kd(Ke, Ac, tplus, prob_parm) * phi(i,j,k,LS_ID);  
             dcoeff(i,j,k,CO_ID) = dcoeff(i,j,k,CO_ID) + (electrochem::De_bulk(C, prob_parm)/phi(i,j,k,MAC_ID) - tplus/FARADCONST*KDe/C) * phi(i,j,k,LS_ID);
-        } else {
+        } 
+        else 
+        {
             dcoeff(i,j,k,CO_ID) = dcoeff(i,j,k,CO_ID) + (electrochem::De_bulk(C, prob_parm)/phi(i,j,k,MAC_ID)) * phi(i,j,k,LS_ID);
         }        
-        
+
         dcoeff(i, j, k, A_AM_ID) = 0.0;
         dcoeff(i, j, k, A_E_ID) = 0.0;
         dcoeff(i, j, k, A_CBD_ID) = 0.0;
@@ -141,13 +159,13 @@ namespace electrochem_transport {
     {
         // set the nanoporosity per cell
         ecoeff(i, j, k, CO_ID) = (
-                phi(i, j, k, A_AM_ID)  * phi(i,j,k,NP_ID)
-              + phi(i, j, k, A_E_ID)   * phi(i,j,k,NP_ID)
-              + phi(i, j, k, A_CBD_ID) * phi(i,j,k,NP_ID)
-              + phi(i, j, k, S_ID)     * phi(i,j,k,NP_ID)
-              + phi(i, j, k, C_AM_ID)  * phi(i,j,k,NP_ID)
-              + phi(i, j, k, C_E_ID)   * phi(i,j,k,NP_ID)
-              + phi(i, j, k, C_CBD_ID) * phi(i,j,k,NP_ID)
+            phi(i, j, k, A_AM_ID)  * phi(i,j,k,NP_ID)
+            + phi(i, j, k, A_E_ID)   * phi(i,j,k,NP_ID)
+            + phi(i, j, k, A_CBD_ID) * phi(i,j,k,NP_ID)
+            + phi(i, j, k, S_ID)     * phi(i,j,k,NP_ID)
+            + phi(i, j, k, C_AM_ID)  * phi(i,j,k,NP_ID)
+            + phi(i, j, k, C_E_ID)   * phi(i,j,k,NP_ID)
+            + phi(i, j, k, C_CBD_ID) * phi(i,j,k,NP_ID)
             );
     }
 
@@ -168,8 +186,46 @@ namespace electrochem_transport {
         {
             vel(i, j, k, n) = 0.0;
         }
+
+        if (electrochem::Cphi_ele_coupling(prob_parm)==1) 
+        {
+            // Intermediate coefficient
+            IntVect left(i, j, k);
+            IntVect right(i, j, k);
+            left[dir] -= 1;
+
+            Real Cleft = phi(left, CO_ID);
+            Real Cright = phi(right, CO_ID);
+            Real ls_face = 0.5*(phi(left,LS_ID) + phi(right,LS_ID));
+
+            //has electrolyte
+            if(ls_face > 0.0)
+            {
+                Real C=0.5*(Cleft*phi(left,LS_ID)+Cright*phi(right,LS_ID));
+                Real Ke  =  electrochem::Ke_bulk(C, prob_parm) * phi(i,j,k,LS_ID) / phi(i,j,k,MAC_ID);
+                Real Ac  = electrochem::A_c(C, prob_parm) * phi(i,j,k,LS_ID);
+                Real tplus  = electrochem::t_plus(C, prob_parm) * phi(i,j,k,LS_ID);
+                Real efield = -(phi(right,POT_ID)-phi(left,POT_ID))/dx[dir];
+            
+                //species flux Ne = -De grad(c) + t+/F je
+                //je=(-Ke grad(phi) + Kd grad(lnc))
+                //Electric field E = -grad(phi)
+                //Kdstar = Kd/c
+
+                //species flux Ne = -De grad(c) + t+/F (Ke*E + Kdstar grad(c))
+                //species flux Ne = -(De - (t+/F) Kdstar) grad(c) + t+/F Ke*E
+                //conservation equation is dce/dt + del.Ne = 0
+                //substituting..
+                //dce/dt + del.(t+/F Ke E) = del.((De - (t+/F) Kdstar) grad(c))
+                //compare to dce/dt + del. (v C) = del.(Deff grad(c))
+                //v = (t+/F)(Ke/C)E
+                //Deff = (De - (t+/F) Kdstar)
+
+                vel(i,j,k,CO_ID) = tplus/FARADCONST*Ke/C * efield;
+            } 
+        }
     }
-    
+
     AMREX_GPU_DEVICE AMREX_INLINE void compute_potential_dcoeff( // Use if prob_parm.CBD_transport==0
         int i,
         int j,
@@ -184,11 +240,11 @@ namespace electrochem_transport {
     {
         // Conduction coefficient = sum( conductivity_coefficient domain i * levelset i), with levelset i=1 if x within domain i, 0 otherwise
         dcoeff(i,j,k) = (electrochem::Ks_bulk_anode(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,A_AM_ID)
-        + electrochem::Ks_bulk_cathode(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,C_AM_ID)
-        + electrochem::Ks_bulk_CBD(prob_parm) * (phi(i,j,k,A_CBD_ID)+phi(i,j,k,C_CBD_ID))
-        + electrochem::Ke_bulk(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,LS_ID)) / phi(i,j,k,MAC_ID);
+                         + electrochem::Ks_bulk_cathode(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,C_AM_ID)
+                         + electrochem::Ks_bulk_CBD(prob_parm) * (phi(i,j,k,A_CBD_ID)+phi(i,j,k,C_CBD_ID))
+                         + electrochem::Ke_bulk(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,LS_ID)) / phi(i,j,k,MAC_ID);
     }    
-    
+
     AMREX_GPU_DEVICE AMREX_INLINE void compute_electrolytepotential_dcoeff( // Use if prob_parm.CBD_transport==1
         int i,
         int j,
@@ -219,10 +275,10 @@ namespace electrochem_transport {
     {
         // Conduction coefficient = sum( conductivity_coefficient domain i * levelset i), with levelset i=1 if x within domain i, 0 otherwise
         dcoeff(i,j,k) = (electrochem::Ks_bulk_anode(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,A_AM_ID)
-        + electrochem::Ks_bulk_cathode(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,C_AM_ID)
-        + electrochem::Ks_bulk_CBD(prob_parm) * (phi(i,j,k,A_CBD_ID)+phi(i,j,k,C_CBD_ID))) / phi(i,j,k,MAC_ID);
+                         + electrochem::Ks_bulk_cathode(phi(i, j, k, CO_ID), prob_parm) * phi(i,j,k,C_AM_ID)
+                         + electrochem::Ks_bulk_CBD(prob_parm) * (phi(i,j,k,A_CBD_ID)+phi(i,j,k,C_CBD_ID))) / phi(i,j,k,MAC_ID);
     }
-    
+
     AMREX_GPU_DEVICE AMREX_INLINE
     amrex::Real compute_kdstar_atface(int i, int j, int k, int idim,
                                       Array4<Real> const &phi, 
@@ -236,7 +292,7 @@ namespace electrochem_transport {
         IntVect right(i, j, k);
         left[idim] -= 1;
         amrex::Real kdstar=0.0;
-        
+
         Real Cleft = phi(left, CO_ID);
         Real Cright = phi(right, CO_ID);
         Real ls_face = 0.5*(phi(left,LS_ID) + phi(right,LS_ID));
