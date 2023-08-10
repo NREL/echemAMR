@@ -77,7 +77,7 @@ public:
     
     //void implicit_solve_species(Real current_time,Real dt,int spec_id);
     void implicit_solve_species(Real current_time,Real dt,int spec_id,
-            Vector<MultiFab *> dsdt_expl);
+            Vector<MultiFab>& dsdt_expl);
 
     void solve_mechanics(Real current_time);   
 
