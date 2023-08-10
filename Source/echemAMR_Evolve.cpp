@@ -76,7 +76,7 @@ void echemAMR::Evolve()
                 }
             }
             
-            Vector<MultiFab *> expl_src(finest_level+1);
+            Vector<MultiFab> expl_src(finest_level+1);
             for(int lev=0;lev<=finest_level;lev++)
             {
                 amrex::MultiFab::Copy(phi_old[lev], phi_new[lev], 0, 0, phi_new[lev].nComp(), 0);
@@ -101,12 +101,12 @@ void echemAMR::Evolve()
             {
                 int num_grow=2;
                 MultiFab Sborder(grids[lev], dmap[lev], phi_new[lev].nComp(), num_grow);
-                expl_src[lev]=new MultiFab(grids[lev], dmap[lev], phi_new[lev].nComp(), 0);
-                expl_src[lev]->setVal(0.0);
+                expl_src[lev].define(grids[lev], dmap[lev], phi_new[lev].nComp(), 0);
+                expl_src[lev].setVal(0.0);
 
                 //FIXME: need to avoid this fillpatch
                 FillPatch(lev, cur_time, Sborder, 0, Sborder.nComp());
-                compute_dsdt(lev, num_grow, Sborder,flux[lev], *expl_src[lev], 
+                compute_dsdt(lev, num_grow, Sborder,flux[lev], expl_src[lev], 
                         cur_time, dt[0], false);
             }
 
@@ -314,38 +314,21 @@ void echemAMR::solve_potential(Real current_time)
     }
 
 
-    Vector<MultiFab> potential;
-    Vector<MultiFab> acoeff;
-    Vector<MultiFab> bcoeff;
-    Vector<Array<MultiFab*, AMREX_SPACEDIM>> gradsoln;
-    Vector<MultiFab> solution;
-    Vector<MultiFab> residual;
-    Vector<MultiFab> rhs;
-    Vector<MultiFab> err;
-    Vector<MultiFab> rhs_res;
+    Vector<MultiFab> potential(finest_level+1);
+    Vector<MultiFab> acoeff(finest_level+1);
+    Vector<MultiFab> bcoeff(finest_level+1);
+    Vector<Array<MultiFab, AMREX_SPACEDIM>> gradsoln(finest_level+1);
+    Vector<MultiFab> solution(finest_level+1);
+    Vector<MultiFab> residual(finest_level+1);
+    Vector<MultiFab> rhs(finest_level+1);
+    Vector<MultiFab> err(finest_level+1);
+    Vector<MultiFab> rhs_res(finest_level+1);
 
-    Vector<MultiFab> robin_a;
-    Vector<MultiFab> robin_b;
-    Vector<MultiFab> robin_f;
-
-    acoeff.resize(finest_level + 1);
-    bcoeff.resize(finest_level + 1);
-    gradsoln.resize(finest_level + 1);
-    potential.resize(finest_level + 1);
-    solution.resize(finest_level + 1);
-    residual.resize(finest_level + 1);
-    rhs.resize(finest_level + 1);
-    err.resize(finest_level + 1);
-    rhs_res.resize(finest_level + 1);
-
-    //FIXME: find a way to not allocate when not using mixedbc
-    robin_a.resize(finest_level+1);
-    robin_b.resize(finest_level+1);
-    robin_f.resize(finest_level+1);
+    Vector<MultiFab> robin_a(finest_level+1);
+    Vector<MultiFab> robin_b(finest_level+1);
+    Vector<MultiFab> robin_f(finest_level+1);
 
     const int num_grow = 1;
-
-
     for (int ilev = 0; ilev <= finest_level; ilev++)
     {
         potential[ilev].define(grids[ilev], dmap[ilev], 1, num_grow);
@@ -360,7 +343,7 @@ void echemAMR::solve_potential(Real current_time)
         {
             const BoxArray& faceba = amrex::convert(grids[ilev], 
                     IntVect::TheDimensionVector(idim));
-            gradsoln[ilev][idim] = new MultiFab(faceba, dmap[ilev], 1, 0);
+            gradsoln[ilev][idim].define(faceba, dmap[ilev], 1, 0);
         }
 
         robin_a[ilev].define(grids[ilev], dmap[ilev], 1, 1);
@@ -806,13 +789,13 @@ void echemAMR::solve_potential(Real current_time)
         {
             amrex::Print()<<"Converged with final rel,abs error: "<< total_nl_res/errnorm_1st_iter
             <<"\t"<< total_nl_res <<"\n";
-            mlmg.getGradSolution(gradsoln);
+            mlmg.getGradSolution(GetVecOfArrOfPtrs(gradsoln));
             break;
         }
 
         if(nl_it==num_nonlinear_iters-1)
         {
-            mlmg.getGradSolution(gradsoln);
+            mlmg.getGradSolution(GetVecOfArrOfPtrs(gradsoln));
         }
     }
 
@@ -822,10 +805,26 @@ void echemAMR::solve_potential(Real current_time)
     {
         amrex::MultiFab::Copy(phi_new[ilev], solution[ilev], 0, POT_ID, 1, 0);
         //phi_new[ilev].copy(solution[ilev], 0, NVAR-1, 1);
-        const Array<const MultiFab*, AMREX_SPACEDIM> allgrad = {gradsoln[ilev][0], gradsoln[ilev][1], gradsoln[ilev][2]};
+        const Array<const MultiFab*, AMREX_SPACEDIM> allgrad = {&gradsoln[ilev][0], 
+            &gradsoln[ilev][1], &gradsoln[ilev][2]};
         average_face_to_cellcenter(phi_new[ilev], EFX_ID, allgrad);
         phi_new[ilev].mult(-1.0, EFX_ID, 3);
     }
+
+    //clear
+    potential.clear();
+    acoeff.clear();
+    bcoeff.clear();
+    gradsoln.clear();
+    solution.clear();
+    residual.clear();
+    rhs.clear();
+    err.clear();
+    rhs_res.clear();
+
+    robin_a.clear();
+    robin_b.clear();
+    robin_f.clear();
 }
 
 // advance a level by dt
@@ -1127,7 +1126,7 @@ void echemAMR::compute_fluxes(int lev, const int num_grow, MultiFab& Sborder,
     }
 }
 void echemAMR::implicit_solve_species(Real current_time,Real dt,int spec_id, 
-                                      Vector<MultiFab *> dsdt_expl)
+                                      Vector<MultiFab>& dsdt_expl)
 {
     BL_PROFILE("echemAMR::implicit_solve_species(" + std::to_string( spec_id ) + ")");
 
@@ -1297,7 +1296,7 @@ void echemAMR::implicit_solve_species(Real current_time,Real dt,int spec_id,
 
         rhs[ilev].setVal(0.0);
         MultiFab::LinComb(rhs[ilev], 1.0/dt, specdata[ilev], 0, 1.0, 
-                          *(dsdt_expl[ilev]), spec_id, 0, 1, 0);
+                          dsdt_expl[ilev], spec_id, 0, 1, 0);
 
         solution[ilev].setVal(0.0);
         amrex::MultiFab::Copy(solution[ilev], specdata[ilev], 0, 0, 1, 0);
