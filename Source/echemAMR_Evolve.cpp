@@ -1066,9 +1066,9 @@ void echemAMR::compute_fluxes(int lev, const int num_grow, MultiFab& Sborder,
             Box bx_z = convert(bx, {0, 0, 1});
 
             FArrayBox dcoeff_fab(gbx, ncomp);
-            FArrayBox velx_fab(bx_x, ncomp);
-            FArrayBox vely_fab(bx_y, ncomp);
-            FArrayBox velz_fab(bx_z, ncomp);
+            FArrayBox velx_fab(gbx, ncomp);
+            FArrayBox vely_fab(gbx, ncomp);
+            FArrayBox velz_fab(gbx, ncomp);
 
             Elixir dcoeff_fab_eli = dcoeff_fab.elixir();
             Elixir velx_fab_eli = velx_fab.elixir();
@@ -1088,15 +1088,15 @@ void echemAMR::compute_fluxes(int lev, const int num_grow, MultiFab& Sborder,
             vely_fab.setVal<RunOn::Device>(0.0);
             velz_fab.setVal<RunOn::Device>(0.0);
 
-            amrex::ParallelFor(bx_x, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
+            amrex::ParallelFor(gbx, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
                 electrochem_transport::compute_vel(i, j, k, 0, sborder_arr, velx_arr, prob_lo, prob_hi, dx, time, *localprobparm);
             });
 
-            amrex::ParallelFor(bx_y, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
+            amrex::ParallelFor(gbx, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
                 electrochem_transport::compute_vel(i, j, k, 1, sborder_arr, vely_arr, prob_lo, prob_hi, dx, time, *localprobparm);
             });
 
-            amrex::ParallelFor(bx_z, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
+            amrex::ParallelFor(gbx, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
                 electrochem_transport::compute_vel(i, j, k, 2, sborder_arr, velz_arr, prob_lo, prob_hi, dx, time, *localprobparm);
             });
 

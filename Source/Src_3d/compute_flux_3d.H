@@ -60,11 +60,14 @@ void compute_flux(
     Real r_right = (phi(right, n) - phi(left, n)) / dtr;
     Real lim_right = std::max(0.0, std::min(1.0, r_right));
 
-    Real phi_L = phi(left, n) + 0.5 * lim_left * (phi(left, n) - phi(left1, n));
-    Real phi_R = phi(right, n) - 0.5 * lim_right * (phi(right1, n) - phi(right, n));
+    Real flx_L = phi(left, n)*vel(left, n)  + 0.5 * lim_left * (phi(left, n)*vel(left, n) - phi(left1, n)*vel(left1, n));
+    Real flx_R = phi(right, n)*vel(right,n) - 0.5 * lim_right * (phi(right1, n)*vel(right1,n) - phi(right, n)*vel(right,n));
+    
+    
+    Real vel_sgn = std::copysign(1.0, 0.5*(vel(left,n)+vel(right,n)) );
 
-    Real vel_mid = vel(i, j, k, n);
-    fx(i, j, k, n) = phi_L * 0.5 * (vel_mid + fabs(vel_mid)) + phi_R * 0.5 * (vel_mid - fabs(vel_mid));
+    //fx(i, j, k, n) = phi_L * 0.5 * (vel_mid + fabs(vel_mid)) + phi_R * 0.5 * (vel_mid - fabs(vel_mid));
+    fx(i, j, k, n) = flx_L * 0.5 * (1.0 + vel_sgn) + flx_R * 0.5 * (1.0 - vel_sgn);
 
     if(!implicit_diffusion)
     {

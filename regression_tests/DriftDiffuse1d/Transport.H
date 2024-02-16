@@ -151,7 +151,7 @@ namespace electrochem_transport
         if(flowdir==dir)
         {
             vel(i,j,k,S1_ID)
-            =0.5*(phi(i-1,j,k,EFX_ID+dir)+phi(i,j,k,EFX_ID+dir));
+            = phi(i,j,k,EFX_ID+dir);
         }
     }
     AMREX_GPU_DEVICE AMREX_INLINE
