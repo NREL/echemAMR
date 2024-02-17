@@ -5,8 +5,8 @@ stop_time = 4000.0
 geometry.is_periodic =  0  0  0
 geometry.coord_sys   =  0       # 0 => cart
 geometry.prob_lo     =  0.0   0.0    0.0 
-geometry.prob_hi     =  70e-6 2.1875e-6  2.1875e-6
-amr.n_cell           =  64 2 2
+geometry.prob_hi     =  70e-6 4.375e-6  4.375e-6
+amr.n_cell           =  64 4 4
 
 # VERBOSITY
 amr.v              = 1       # verbosity in Amr
@@ -19,11 +19,12 @@ amr.max_grid_size   = 8
 amr.regrid_int      = 1       # how often to regrid
 
 # TIME STEP CONTROL
-echemamr.cfl            = 0.8    
+echemamr.cfl            = 0.8 
 
 echemamr.do_reflux = 1
 echemamr.potential_solve = 1
 echemamr.potential_solve_int = 100
+echemamr.species_implicit_solve = 1
 
 #periodic 0
 #extdir 3

@@ -26,7 +26,7 @@ void compute_flux(
         Array4<Real> const& fx,
         const GpuArray<Real, AMREX_SPACEDIM>& dx,
         ProbParm const& prob_parm,int implicit_diffusion,
-        int bvflux,int lset_id,const int bvspec[NUM_SPECIES],int lsgrad_tol)
+        int bvflux,int lset_id,const int bvspec[NVAR],int lsgrad_tol)
 {
 
     //|--left1--|--left--|--right--|--right1--|
@@ -79,10 +79,9 @@ void compute_flux(
         //arithmetic mean case
         //fx(i, j, k, n) += -0.5*(d1 + d2) * (phi(right, n) - phi(left, n)) / dx[sweepdir];
     }
-
+    
     if(bvflux)
     {
-
         if(bvspec[n]==1)
         {
             Real mod_gradc=0.0;

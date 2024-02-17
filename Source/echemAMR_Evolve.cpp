@@ -981,7 +981,8 @@ void echemAMR::compute_dsdt(int lev, const int num_grow, MultiFab& Sborder,
 
             amrex::ParallelFor(bx, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
                 electrochem_reactions::compute_react_source(i, j, k, sborder_arr, 
-                                                            reactsource_arr, prob_lo, prob_hi, dx, time, *localprobparm);
+                                                            reactsource_arr, prob_lo, 
+                                                            prob_hi, dx, time, *localprobparm);
             });
 
             // update residual
@@ -1040,7 +1041,12 @@ void echemAMR::compute_fluxes(int lev, const int num_grow, MultiFab& Sborder,
     ProbParm const* localprobparm = d_prob_parm;
 
     int bvflux = buttler_vohlmer_flux;
-    int bvspec[NUM_SPECIES]={0};
+
+    //FIXME: this is a bit ugly
+    //ideally use transported_species_list 
+    //and not solve for unwanted variables in the 
+    //state like potential and efx/efy/efz
+    int bvspec[NVAR]={0};
 
     for(unsigned int i=0;i<bv_specid_list.size();i++)
     {
@@ -1060,7 +1066,7 @@ void echemAMR::compute_fluxes(int lev, const int num_grow, MultiFab& Sborder,
         for (MFIter mfi(Sborder, TilingIfNotGPU()); mfi.isValid(); ++mfi)
         {
             const Box& bx = mfi.tilebox();
-            const Box& gbx = amrex::grow(bx, 1);
+            const Box& gbx = amrex::grow(bx, 2);
             Box bx_x = convert(bx, {1, 0, 0});
             Box bx_y = convert(bx, {0, 1, 0});
             Box bx_z = convert(bx, {0, 0, 1});
@@ -1081,7 +1087,8 @@ void echemAMR::compute_fluxes(int lev, const int num_grow, MultiFab& Sborder,
             Array4<Real> vely_arr = vely_fab.array();
             Array4<Real> velz_arr = velz_fab.array();
 
-            GpuArray<Array4<Real>, AMREX_SPACEDIM> flux_arr{AMREX_D_DECL(flux[0].array(mfi), flux[1].array(mfi), flux[2].array(mfi))};
+            GpuArray<Array4<Real>, AMREX_SPACEDIM> flux_arr{AMREX_D_DECL(flux[0].array(mfi), 
+                                    flux[1].array(mfi), flux[2].array(mfi))};
 
             dcoeff_fab.setVal<RunOn::Device>(0.0);
             velx_fab.setVal<RunOn::Device>(0.0);
@@ -1089,15 +1096,18 @@ void echemAMR::compute_fluxes(int lev, const int num_grow, MultiFab& Sborder,
             velz_fab.setVal<RunOn::Device>(0.0);
 
             amrex::ParallelFor(gbx, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
-                electrochem_transport::compute_vel(i, j, k, 0, sborder_arr, velx_arr, prob_lo, prob_hi, dx, time, *localprobparm);
+                electrochem_transport::compute_vel(i, j, k, 0, sborder_arr, velx_arr, 
+                                                   prob_lo, prob_hi, dx, time, *localprobparm);
             });
 
             amrex::ParallelFor(gbx, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
-                electrochem_transport::compute_vel(i, j, k, 1, sborder_arr, vely_arr, prob_lo, prob_hi, dx, time, *localprobparm);
+                electrochem_transport::compute_vel(i, j, k, 1, sborder_arr, vely_arr, 
+                                                   prob_lo, prob_hi, dx, time, *localprobparm);
             });
 
             amrex::ParallelFor(gbx, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
-                electrochem_transport::compute_vel(i, j, k, 2, sborder_arr, velz_arr, prob_lo, prob_hi, dx, time, *localprobparm);
+                electrochem_transport::compute_vel(i, j, k, 2, sborder_arr, velz_arr, 
+                                                   prob_lo, prob_hi, dx, time, *localprobparm);
             });
 
             if(!implicit_diffusion)

@@ -81,13 +81,13 @@ namespace electrochem_transport {
         const Real time,
         ProbParm const& prob_parm)
     {
+        for(int c=0;c<NVAR;c++)
+        {
+          dcoeff(i, j, k, c) = 0.0;
+        }
         dcoeff(i,j,k,CO_ID) =  prob_parm.anode_dcoeff*phi(i,j,k,A_ID)
         + prob_parm.cathode_dcoeff*phi(i,j,k,C_ID)
         + prob_parm.electrolyte_dcoeff*phi(i,j,k,E_ID);
-        dcoeff(i, j, k, A_ID) = 0.0;
-        dcoeff(i, j, k, C_ID) = 0.0;
-        dcoeff(i, j, k, E_ID) = 0.0;
-        dcoeff(i, j, k, LS_ID) = 0.0;
     }
 
     AMREX_GPU_DEVICE AMREX_INLINE void compute_eps(
@@ -113,11 +113,10 @@ namespace electrochem_transport {
         const Real time,
         ProbParm const& prob_parm)
     {
-        vel(i, j, k, CO_ID) = 0.0;
-        vel(i, j, k, A_ID) = 0.0;
-        vel(i, j, k, C_ID) = 0.0;
-        vel(i, j, k, E_ID) = 0.0;
-        vel(i, j, k, LS_ID) = 0.0;
+        for(int c=0;c<NVAR;c++)
+        {
+          vel(i, j, k, c) = 0.0;
+        }
     }
     AMREX_GPU_DEVICE AMREX_INLINE void compute_potential_dcoeff(
         int i,
