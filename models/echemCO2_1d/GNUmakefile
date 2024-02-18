@@ -19,6 +19,6 @@ USE_HYPRE  = TRUE
 Bpack   := ./Make.package 
 Blocs   := . 
 
-HYPRE_DIR?=/projects/biocon/echem/hypre/src/hypre
+HYPRE_DIR?=../../hypre/src/hypre
 
 include ../Make.echemAMR

@@ -20,7 +20,7 @@ namespace electrochem_reactions {
             const Real time,
             ProbParm const& prob_parm)
     {
-        for(int n=0;n<NUM_SPECIES;n++)
+        for(int n=0;n<NVAR;n++)
         {
           reactsource(i, j, k, n) = 0.0;
         }

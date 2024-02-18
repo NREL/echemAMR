@@ -81,6 +81,11 @@ namespace electrochem_transport {
         const Real time,
         ProbParm const& prob_parm)
     {
+        for(int c=0;c<NVAR;c++)
+        {
+          dcoeff(i,j,k,c)=0.0;
+        }
+
         dcoeff(i,j,k,CO2_ID) =  prob_parm.cathode_dcoeff*phi(i,j,k,C_ID)
         + prob_parm.electrolyte_dcoeff*phi(i,j,k,E_ID);
 
@@ -92,10 +97,6 @@ namespace electrochem_transport {
 
         dcoeff(i,j,k,HCOOM_ID) =  prob_parm.cathode_dcoeff*phi(i,j,k,C_ID)
         + prob_parm.electrolyte_dcoeff*phi(i,j,k,E_ID);
-
-        dcoeff(i, j, k, C_ID) = 0.0;
-        dcoeff(i, j, k, E_ID) = 0.0;
-        dcoeff(i, j, k, LS_ID) = 0.0;
     }
 
     AMREX_GPU_DEVICE AMREX_INLINE void compute_vel(
@@ -111,7 +112,7 @@ namespace electrochem_transport {
         const Real time,
         ProbParm const& prob_parm)
     {
-        for(int n=0;n<NUM_SPECIES;n++)
+        for(int n=0;n<NVAR;n++)
         {
             vel(i, j, k, n) = 0.0;
         }
@@ -123,6 +124,10 @@ namespace electrochem_transport {
         Array4<Real> const& phi,
         Array4<Real> const& ecoeff)
     {
+        for(int n=0;n<NVAR;n++)
+        {
+            ecoeff(i, j, k, n) = 1.0;
+        }
         // set the nanoporosity per cell
         ecoeff(i, j, k, CO_ID) = 1.0;
     }

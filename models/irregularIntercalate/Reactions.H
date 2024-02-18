@@ -19,8 +19,10 @@ namespace electrochem_reactions
                 const Real time,
                 ProbParm const& prob_parm)
         {
-            reactsource(i,j,k,S1_ID)=0.0;
-            reactsource(i,j,k,LS_ID)=0.0;
+            for(int c=0;c<NVAR;c++)
+            {
+                reactsource(i,j,k,c)=0.0;
+            }
         }
 
     AMREX_GPU_DEVICE AMREX_INLINE
