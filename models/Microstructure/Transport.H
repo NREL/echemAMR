@@ -101,6 +101,10 @@ namespace electrochem_transport {
         const Real time,
         ProbParm const& prob_parm)
     {
+        for(int c=0;c<NVAR;c++)
+        {
+           dcoeff(i, j, k, c) = 0.0;
+        }
 
         // Concentration
         Real C = phi(i, j, k, CO_ID);
@@ -138,16 +142,6 @@ namespace electrochem_transport {
             dcoeff(i,j,k,CO_ID) = dcoeff(i,j,k,CO_ID) + (electrochem::De_bulk(C, prob_parm)/phi(i,j,k,MAC_ID)) * phi(i,j,k,LS_ID);
         }        
 
-        dcoeff(i, j, k, A_AM_ID) = 0.0;
-        dcoeff(i, j, k, A_E_ID) = 0.0;
-        dcoeff(i, j, k, A_CBD_ID) = 0.0;
-        dcoeff(i, j, k, S_ID) = 0.0;
-        dcoeff(i, j, k, C_AM_ID) = 0.0;
-        dcoeff(i, j, k, C_E_ID) = 0.0;
-        dcoeff(i, j, k, C_CBD_ID) = 0.0;        
-        dcoeff(i, j, k, NP_ID) = 0.0;
-        dcoeff(i, j, k, MAC_ID) = 0.0;  
-        dcoeff(i, j, k, LS_ID) = 0.0;
     }
 
     AMREX_GPU_DEVICE AMREX_INLINE void compute_eps(
@@ -157,6 +151,10 @@ namespace electrochem_transport {
         Array4<Real> const& phi,
         Array4<Real> const& ecoeff)
     {
+        for(int c=0;c<NVAR;c++)
+        {
+           ecoeff(i, j, k, c) = 1.0;
+        }
         // set the nanoporosity per cell
         ecoeff(i, j, k, CO_ID) = (
             phi(i, j, k, A_AM_ID)  * phi(i,j,k,NP_ID)
@@ -182,30 +180,26 @@ namespace electrochem_transport {
         const Real time,
         ProbParm const& prob_parm)
     {
-        for (int n = 0; n < phi.nComp(); ++n)
+        for (int c = 0; c < NVAR; ++c)
         {
-            vel(i, j, k, n) = 0.0;
+            vel(i, j, k, c) = 0.0;
         }
 
         if (electrochem::Cphi_ele_coupling(prob_parm)==1) 
         {
             // Intermediate coefficient
-            IntVect left(i, j, k);
-            IntVect right(i, j, k);
-            left[dir] -= 1;
+            IntVect cellid(i, j, k);
 
-            Real Cleft = phi(left, CO_ID);
-            Real Cright = phi(right, CO_ID);
-            Real ls_face = 0.5*(phi(left,LS_ID) + phi(right,LS_ID));
+            Real C = phi(cellid, CO_ID);
+            Real ls = phi(cellid,LS_ID);
 
             //has electrolyte
-            if(ls_face > 0.0)
+            if(ls == 1.0)
             {
-                Real C=0.5*(Cleft*phi(left,LS_ID)+Cright*phi(right,LS_ID));
-                Real Ke  =  electrochem::Ke_bulk(C, prob_parm) * phi(i,j,k,LS_ID) / phi(i,j,k,MAC_ID);
-                Real Ac  = electrochem::A_c(C, prob_parm) * phi(i,j,k,LS_ID);
-                Real tplus  = electrochem::t_plus(C, prob_parm) * phi(i,j,k,LS_ID);
-                Real efield = -(phi(right,POT_ID)-phi(left,POT_ID))/dx[dir];
+                Real Ke  =  electrochem::Ke_bulk(C, prob_parm) / phi(i,j,k,MAC_ID);
+                Real Ac  = electrochem::A_c(C, prob_parm);
+                Real tplus  = electrochem::t_plus(C, prob_parm);
+                Real efield = phi(cellid,EFX_ID+dir);
             
                 //species flux Ne = -De grad(c) + t+/F je
                 //je=(-Ke grad(phi) + Kd grad(lnc))
@@ -221,7 +215,7 @@ namespace electrochem_transport {
                 //v = (t+/F)(Ke/C)E
                 //Deff = (De - (t+/F) Kdstar)
 
-                vel(i,j,k,CO_ID) = tplus/FARADCONST*Ke/C * efield;
+                vel(cellid,CO_ID) = tplus/FARADCONST*Ke/C * efield;
             } 
         }
     }
