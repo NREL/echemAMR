@@ -22,5 +22,6 @@ void update_residual(
     // remember, we are solve dudt + del.F = S
     dsdt(i, j, k, n) = (flxx(i, j, k, n) - flxx(i + 1, j, k, n)) / dx[0] + (flxy(i, j, k, n) - flxy(i, j + 1, k, n)) / dx[1] +
                        (flxz(i, j, k, n) - flxz(i, j, k + 1, n)) / dx[2] + source(i, j, k, n);
+
 }
 #endif

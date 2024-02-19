@@ -19,4 +19,4 @@ USE_CUDA   = FALSE
 Bpack   := ./Make.package 
 Blocs   := . 
 
-include /home/hsitaram/gitrepos/echemAMR/models/Make.echemAMR
+include ../Make.echemAMR

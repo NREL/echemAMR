@@ -26,7 +26,7 @@ void compute_flux(
         Array4<Real> const& fx,
         const GpuArray<Real, AMREX_SPACEDIM>& dx,
         ProbParm const& prob_parm,int implicit_diffusion,
-        int bvflux,int lset_id,const int bvspec[NUM_SPECIES],int lsgrad_tol)
+        int bvflux,int lset_id,const int bvspec[NVAR],int lsgrad_tol)
 {
 
     //|--left1--|--left--|--right--|--right1--|
@@ -60,11 +60,14 @@ void compute_flux(
     Real r_right = (phi(right, n) - phi(left, n)) / dtr;
     Real lim_right = std::max(0.0, std::min(1.0, r_right));
 
-    Real phi_L = phi(left, n) + 0.5 * lim_left * (phi(left, n) - phi(left1, n));
-    Real phi_R = phi(right, n) - 0.5 * lim_right * (phi(right1, n) - phi(right, n));
+    Real flx_L = phi(left, n)*vel(left, n)  + 0.5 * lim_left * (phi(left, n)*vel(left, n) - phi(left1, n)*vel(left1, n));
+    Real flx_R = phi(right, n)*vel(right,n) - 0.5 * lim_right * (phi(right1, n)*vel(right1,n) - phi(right, n)*vel(right,n));
+    
+    
+    Real vel_sgn = std::copysign(1.0, 0.5*(vel(left,n)+vel(right,n)) );
 
-    Real vel_mid = vel(i, j, k, n);
-    fx(i, j, k, n) = phi_L * 0.5 * (vel_mid + fabs(vel_mid)) + phi_R * 0.5 * (vel_mid - fabs(vel_mid));
+    //fx(i, j, k, n) = phi_L * 0.5 * (vel_mid + fabs(vel_mid)) + phi_R * 0.5 * (vel_mid - fabs(vel_mid));
+    fx(i, j, k, n) = flx_L * 0.5 * (1.0 + vel_sgn) + flx_R * 0.5 * (1.0 - vel_sgn);
 
     if(!implicit_diffusion)
     {
@@ -76,10 +79,9 @@ void compute_flux(
         //arithmetic mean case
         //fx(i, j, k, n) += -0.5*(d1 + d2) * (phi(right, n) - phi(left, n)) / dx[sweepdir];
     }
-
+    
     if(bvflux)
     {
-
         if(bvspec[n]==1)
         {
             Real mod_gradc=0.0;

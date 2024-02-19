@@ -76,8 +76,11 @@ namespace electrochem_transport
                 const Real time,
                 ProbParm const& prob_parm)
         {
+            for(int c=0;c<NVAR;c++)
+            {
+              dcoeff(i,j,k,c)=0.0;
+            }
             dcoeff(i,j,k,S1_ID)   = 1.0e-6;
-            dcoeff(i,j,k,LS_ID)   = 0.0;
         }
 
     AMREX_GPU_DEVICE AMREX_INLINE
@@ -90,8 +93,10 @@ namespace electrochem_transport
                 const Real time,
                 ProbParm const& prob_parm)
         {
-            vel(i,j,k,S1_ID)=0.0;
-            vel(i,j,k,LS_ID)=0.0;
+            for(int c=0;c<NVAR;c++)
+            {
+              vel(i,j,k,c)=0.0;
+            }
         }
 
     AMREX_GPU_DEVICE AMREX_INLINE
@@ -115,6 +120,10 @@ namespace electrochem_transport
         Array4<Real> const& phi,
         Array4<Real> const& ecoeff)
     {
+        for(int c=0;c<NVAR;c++)
+        {
+            ecoeff(i,j,k,c)=1.0;
+        }
 
     }
     
