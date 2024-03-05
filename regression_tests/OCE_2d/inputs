@@ -1,0 +1,75 @@
+max_step  = 1
+stop_time = 1.0
+
+# PROBLEM SIZE & GEOMETRY
+geometry.is_periodic =  0  0  0
+geometry.coord_sys   =  0       # 0 => cart
+geometry.prob_lo     =  0.000  0.000  0.000 
+geometry.prob_hi     =  1.000  1.000  0.125
+amr.n_cell           =  128    128      2
+prob.angle       =  85
+prob.f0          = 0.25
+prob.spltcell_x  = 32
+prob.spltcell_y  = 32
+
+# VERBOSITY
+amr.v              = 1       # verbosity in Amr
+
+# REFINEMENT
+amr.max_level       = 0       # maximum level number allowed
+amr.blocking_factor = 2       # block factor in grid generation
+amr.max_grid_size   = 8
+
+amr.regrid_int      = 1       # how often to regrid
+
+# TIME STEP CONTROL
+echemamr.cfl            = 0.8    
+
+echemamr.do_reflux = 1
+echemamr.potential_solve = 1
+echemamr.potential_solve_int = 1
+
+#periodic 0
+#extdir 3
+#foextrap 2 
+#highorderextrap 5
+echemamr.lo_bc_spec = 2 2 2
+echemamr.hi_bc_spec = 2 2 2
+
+#periodic 0
+#dirichlet 3
+#homogenous Neumann 2 
+#mixed (robin) 5
+#inhomogenous Neumann 6
+echemamr.lo_bc_pot = 5 5 2
+echemamr.hi_bc_pot = 5 5 2
+
+# Tagging
+echemamr.tagged_vars = levelset
+echemamr.levelset_refine = 1e20
+echemamr.levelset_refinegrad = 0.2
+
+#buttler vohlmer flux
+echemamr.buttler_vohlmer_flux=1
+echemamr.bv_species_ids =0
+echemamr.bv_levelset_id=1
+echemamr.bv_nonlinear_iters=1000
+echemamr.dtmax=1e-3
+echemamr.bv_relaxation_factor=20
+
+echemamr.bv_nonlinear_reltol=1e-8
+echemamr.bv_nonlinear_abstol=1e-18
+echemamr.linsolve_maxiter=200
+echemamr.linsolve_reltol=1e-8
+echemamr.linsolve_abstol=1e-9
+echemamr.linsolve_num_pre_smooth=10 
+echemamr.linsolve_num_post_smooth=10
+echemamr.linsolve_max_coarsening_level=0
+
+# PLOTFILES
+amr.plot_file  = plt    # root name of plot file
+amr.plot_int   = 10000     # number of timesteps between plot files
+
+# CHECKPOINT
+amr.chk_file = chk      # root name of checkpoint file
+amr.chk_int  = -1       # number of timesteps between checkpoint files
