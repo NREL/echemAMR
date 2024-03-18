@@ -28,7 +28,7 @@ echemAMR::echemAMR()
     h_prob_parm = new ProbParm{};
     d_prob_parm = (ProbParm*)The_Arena()->alloc(sizeof(ProbParm));
     host_global_storage = new GlobalStorage{};
-    amrex_probinit(*h_prob_parm, *d_prob_parm);
+    amrex_probinit(h_prob_parm, d_prob_parm);
 
 
     // Geometry on all levels has been defined already.
