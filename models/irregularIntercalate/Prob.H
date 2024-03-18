@@ -10,16 +10,12 @@
 using namespace amrex;
 
 AMREX_INLINE
-void amrex_probinit (ProbParm & h_prob_parm, ProbParm & d_prob_parm)
+void amrex_probinit (ProbParm * h_prob_parm, ProbParm * d_prob_parm)
 {
     amrex::ParmParse pp("prob");
-    pp.query("currenthalfdecaytime", h_prob_parm.currenthalfdecaytime );
-#ifdef AMREX_USE_GPU
-    amrex::Gpu::htod_memcpy(&d_prob_parm, &h_prob_parm, sizeof(ProbParm));
-#else
-    std::memcpy(&d_prob_parm, &h_prob_parm, sizeof(ProbParm));
-#endif
-
+    pp.query("currenthalfdecaytime", h_prob_parm->currenthalfdecaytime );
+    amrex::Gpu::copy(amrex::Gpu::hostToDevice, h_prob_parm, 
+                     h_prob_parm+1,d_prob_parm);
 }
 
 AMREX_GPU_DEVICE
