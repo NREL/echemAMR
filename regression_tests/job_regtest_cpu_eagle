@@ -4,7 +4,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=32
 #SBATCH --time=01:00:00
-#SBATCH --account=exabatt
+#SBATCH --account=gas2fuels
 #SBATCH --output=regout
 #SBATCH --error=regerr
 
