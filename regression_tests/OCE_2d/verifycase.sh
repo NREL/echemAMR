@@ -1,2 +1,2 @@
-python exactcompare.py "plt00001"
+python exactcompare.py "finalplt"
 gnuplot pic_oce_2d.gp 
