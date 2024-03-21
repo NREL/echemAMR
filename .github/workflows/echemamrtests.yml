@@ -44,29 +44,29 @@ jobs:
       working-directory: ./regression_tests
       run: |
           cd DriftDiffuse1d
-          mpirun -n 2 ./echemAMR3d.gnu.MPI.ex inputs_x
-          mpirun -n 2 ./echemAMR3d.gnu.MPI.ex inputs_y
-          mpirun -n 2 ./echemAMR3d.gnu.MPI.ex inputs_z
+          mpirun -n 1 ./echemAMR3d.gnu.MPI.ex inputs_x
+          mpirun -n 1 ./echemAMR3d.gnu.MPI.ex inputs_y
+          mpirun -n 1 ./echemAMR3d.gnu.MPI.ex inputs_z
           cd ..
           cd openCircuitElectrode
-          mpirun -n 2 ./echemAMR3d.gnu.MPI.ex inputs_x
-          mpirun -n 2 ./echemAMR3d.gnu.MPI.ex inputs_y
-          mpirun -n 2 ./echemAMR3d.gnu.MPI.ex inputs_z
+          mpirun -n 1 ./echemAMR3d.gnu.MPI.ex inputs_x
+          mpirun -n 1 ./echemAMR3d.gnu.MPI.ex inputs_y
+          mpirun -n 1 ./echemAMR3d.gnu.MPI.ex inputs_z
           cd ..
           cd anodeElectrolyte
-          mpirun -n 2 ./echemAMR3d.gnu.MPI.ex inputs_x
-          mpirun -n 2 ./echemAMR3d.gnu.MPI.ex inputs_y
-          mpirun -n 2 ./echemAMR3d.gnu.MPI.ex inputs_z
+          mpirun -n 1 ./echemAMR3d.gnu.MPI.ex inputs_x
+          mpirun -n 1 ./echemAMR3d.gnu.MPI.ex inputs_y
+          mpirun -n 1 ./echemAMR3d.gnu.MPI.ex inputs_z
           cd ..
           cd CEA
-          mpirun -n 2 ./echemAMR3d.gnu.MPI.ex inputs_x
-          mpirun -n 2 ./echemAMR3d.gnu.MPI.ex inputs_y
-          mpirun -n 2 ./echemAMR3d.gnu.MPI.ex inputs_z
+          mpirun -n 1 ./echemAMR3d.gnu.MPI.ex inputs_x
+          mpirun -n 1 ./echemAMR3d.gnu.MPI.ex inputs_y
+          mpirun -n 1 ./echemAMR3d.gnu.MPI.ex inputs_z
     - name: Run Model
       working-directory: ./models
       run: |
           cd Microstructure
-          mpirun -n 2 ./echemAMR3d.gnu.TPROF.MPI.ex inputs_CESEA_case1
+          mpirun -n 1 ./echemAMR3d.gnu.TPROF.MPI.ex inputs_CESEA_case1
   gputest:
     runs-on: ubuntu-latest
     steps:

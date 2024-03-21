@@ -385,7 +385,7 @@ void echemAMR::solve_potential(Real current_time)
 #ifdef AMREX_USE_HYPRE
         if (use_hypre)
         {
-            mlmg.setHypreOptionsNamespace("hypre");
+            mlmg.setHypreOptionsNamespace("echemamr.hypre");
             mlmg.setBottomSolver(MLMG::BottomSolver::hypre);
             mlmg.setHypreInterface(hypre_interface);
         }
@@ -1179,7 +1179,7 @@ void echemAMR::implicit_solve_species(Real current_time,Real dt,int spec_id,
     const Real tol_abs = linsolve_abstol;
 
 #ifdef AMREX_USE_HYPRE
-    Hypre::Interface hypre_interface = Hypre::Interface::ij;
+    //Hypre::Interface hypre_interface = Hypre::Interface::ij;
     if(use_hypre)
     {
         amrex::Print()<<"using hypre\n";
@@ -1269,9 +1269,9 @@ void echemAMR::implicit_solve_species(Real current_time,Real dt,int spec_id,
 #ifdef AMREX_USE_HYPRE
     if (use_hypre)
     {
-        mlmg.setHypreOptionsNamespace("hypre");
+        mlmg.setHypreOptionsNamespace("echemamr.hypre");
         mlmg.setBottomSolver(MLMG::BottomSolver::hypre);
-        mlmg.setHypreInterface(hypre_interface);
+        //mlmg.setHypreInterface(hypre_interface);
     }
 #endif
 #ifdef AMREX_USE_PETSC
