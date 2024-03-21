@@ -69,6 +69,8 @@ echemamr.linsolve_num_pre_smooth=10
 echemamr.linsolve_num_post_smooth=10
 echemamr.linsolve_max_coarsening_level=0
 echemamr.use_hypre=1
+echemamr.hypre.hypre_solver=GMRES
+echemamr.hypre.hypre_preconditioner=BoomerAMG
 
 # PLOTFILES
 amr.plot_file  = plt    # root name of plot file

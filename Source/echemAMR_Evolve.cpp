@@ -239,7 +239,6 @@ void echemAMR::solve_potential(Real current_time)
     const Real tol_abs = linsolve_abstol;
 
 #ifdef AMREX_USE_HYPRE
-    Hypre::Interface hypre_interface = Hypre::Interface::ij;
     if(use_hypre)
     {
         amrex::Print()<<"using hypre\n";
@@ -376,6 +375,7 @@ void echemAMR::solve_potential(Real current_time)
         mlmg.setBottomVerbose(bottom_verbose);
         mlmg.setBottomTolerance(linsolve_bot_reltol);
         mlmg.setBottomToleranceAbs(linsolve_bot_abstol);
+        mlmg.setBottomMaxIter(linsolve_bottom_maxiter);
 
         mlmg.setPreSmooth(linsolve_num_pre_smooth);
         mlmg.setPostSmooth(linsolve_num_post_smooth);
@@ -387,7 +387,6 @@ void echemAMR::solve_potential(Real current_time)
         {
             mlmg.setHypreOptionsNamespace("echemamr.hypre");
             mlmg.setBottomSolver(MLMG::BottomSolver::hypre);
-            mlmg.setHypreInterface(hypre_interface);
         }
 #endif
 #ifdef AMREX_USE_PETSC
