@@ -17,7 +17,7 @@ RESULTS_DIR=${4:-~/echemamr_results_cpu}
 MAKEFILE_OPTIONS=${5:-}
 rm -rf ${RESULTS_DIR}
 
-declare -a allcases=('DriftDiffuse1d' 'CEA' 'openCircuitElectrode' 'anodeElectrolyte' 'CEA_with_kdterm')
+declare -a allcases=('DriftDiffuse1d' 'CEA' 'openCircuitElectrode' 'anodeElectrolyte' 'CEA_with_kdterm' 'CEA_2d' 'OCE_2d')
 
 #clean directories
 for case in "${allcases[@]}";
@@ -52,4 +52,4 @@ do
 done
 
 cd ${RESULTS_DIR}
-convert *.png regtest_results.pdf
+convert *.png regtest_results_$(date '+%d_%b_%Y_%H').pdf

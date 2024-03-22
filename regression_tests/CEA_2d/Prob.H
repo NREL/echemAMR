@@ -10,24 +10,21 @@
 using namespace amrex;
 
 AMREX_INLINE
-void amrex_probinit (ProbParm & h_prob_parm, ProbParm & d_prob_parm)
+void amrex_probinit (ProbParm * h_prob_parm, ProbParm * d_prob_parm)
 {
     // read problem specific parmparse parameters here
     amrex::ParmParse pp("prob");
-    pp.query("angle", h_prob_parm.angle );
-    pp.query("anode_conductivity",h_prob_parm.anode_conductivity);
-    pp.query("cathode_conductivity",h_prob_parm.cathode_conductivity);
-    pp.query("electrolyte_conductivity",h_prob_parm.electrolyte_conductivity);
-    pp.query("spltcell_x",h_prob_parm.spltcell_x);
-    pp.query("spltcell_y",h_prob_parm.spltcell_y);
-    pp.query("spltcell_z",h_prob_parm.spltcell_z);
-    pp.query("f0",h_prob_parm.f0);
-
-#ifdef AMREX_USE_GPU
-    amrex::Gpu::htod_memcpy(&d_prob_parm, &h_prob_parm, sizeof(ProbParm));
-#else
-    std::memcpy(&d_prob_parm, &h_prob_parm, sizeof(ProbParm));
-#endif
+    pp.query("angle", h_prob_parm->angle );
+    pp.query("anode_conductivity",h_prob_parm->anode_conductivity);
+    pp.query("cathode_conductivity",h_prob_parm->cathode_conductivity);
+    pp.query("electrolyte_conductivity",h_prob_parm->electrolyte_conductivity);
+    pp.query("spltcell_x",h_prob_parm->spltcell_x);
+    pp.query("spltcell_y",h_prob_parm->spltcell_y);
+    pp.query("spltcell_z",h_prob_parm->spltcell_z);
+    pp.query("f0",h_prob_parm->f0);
+    
+    amrex::Gpu::copy(amrex::Gpu::hostToDevice, h_prob_parm, 
+                     h_prob_parm+1,d_prob_parm);
 
 }
 

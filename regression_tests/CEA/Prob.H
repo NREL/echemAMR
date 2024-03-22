@@ -10,23 +10,17 @@
 using namespace amrex;
 
 AMREX_INLINE
-void amrex_probinit (ProbParm & h_prob_parm, ProbParm & d_prob_parm)
+void amrex_probinit (ProbParm * h_prob_parm, ProbParm * d_prob_parm)
 {
     // read problem specific parmparse parameters here
     amrex::ParmParse pp("prob");
-    pp.query("interface1", h_prob_parm.int1 );
-    pp.query("interface2", h_prob_parm.int2 );
-    pp.query("interface_sharpness", h_prob_parm.sharpness_factor);
-    pp.query("direction", h_prob_parm.direction);
+    pp.query("interface1", h_prob_parm->int1 );
+    pp.query("interface2", h_prob_parm->int2 );
+    pp.query("interface_sharpness", h_prob_parm->sharpness_factor);
+    pp.query("direction", h_prob_parm->direction);
 
-
-
-#ifdef AMREX_USE_GPU
-    amrex::Gpu::htod_memcpy(&d_prob_parm, &h_prob_parm, sizeof(ProbParm));
-#else
-    std::memcpy(&d_prob_parm, &h_prob_parm, sizeof(ProbParm));
-#endif
-
+    amrex::Gpu::copy(amrex::Gpu::hostToDevice, h_prob_parm, 
+                     h_prob_parm+1,d_prob_parm);
 }
 
 AMREX_GPU_DEVICE

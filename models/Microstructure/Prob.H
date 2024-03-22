@@ -13,65 +13,71 @@
 using namespace amrex;
 
 AMREX_INLINE
-void amrex_probinit (ProbParm & h_prob_parm, ProbParm & d_prob_parm)
+void amrex_probinit (ProbParm * h_prob_parm, ProbParm * d_prob_parm)
 {
     // read problem specific parmparse parameters here. Input overwrittes ProbParm default values.
     // See ProbParm.H for definitions
     amrex::ParmParse pp("prob");
+    std::string geometry_filename = "CEAtest.txt";
+    std::string nanoporosity_filename = "CEAtest_nanoporosity.txt";
+    std::string macmullin_filename = "CEAtest_macmullin.txt";
 
     // Geometry
-    pp.query("geometry_filename", h_prob_parm.geometry_filename );
+    pp.query("geometry_filename", geometry_filename );
     // Nanoporosity
-    pp.query("nanoporosity_filename", h_prob_parm.nanoporosity_filename );    
+    pp.query("nanoporosity_filename", nanoporosity_filename );    
     // Macmullin number
-    pp.query("macmullin_filename", h_prob_parm.macmullin_filename );        
+    pp.query("macmullin_filename", macmullin_filename );        
     // Loading
-    pp.query("Crate", h_prob_parm.Crate);
-    pp.query("Temperature", h_prob_parm.Temperature);    
+    pp.query("Crate", h_prob_parm->Crate);
+    pp.query("Temperature", h_prob_parm->Temperature);    
     // Initialization
-    pp.query("ce_atrest", h_prob_parm.ce_atrest);
-    pp.query("soc_anode_t0", h_prob_parm.soc_anode_t0);
-    pp.query("soc_cathode_t0", h_prob_parm.soc_cathode_t0);
-    pp.query("phi_reference", h_prob_parm.phi_reference);
+    pp.query("ce_atrest", h_prob_parm->ce_atrest);
+    pp.query("soc_anode_t0", h_prob_parm->soc_anode_t0);
+    pp.query("soc_cathode_t0", h_prob_parm->soc_cathode_t0);
+    pp.query("phi_reference", h_prob_parm->phi_reference);
     // SOC
-    pp.query("cathode_soc_min", h_prob_parm.cathode_soc_min);
-    pp.query("cathode_soc_max", h_prob_parm.cathode_soc_max);
-    pp.query("anode_soc_min", h_prob_parm.anode_soc_min);
-    pp.query("anode_soc_max", h_prob_parm.anode_soc_max);  
+    pp.query("cathode_soc_min", h_prob_parm->cathode_soc_min);
+    pp.query("cathode_soc_max", h_prob_parm->cathode_soc_max);
+    pp.query("anode_soc_min", h_prob_parm->anode_soc_min);
+    pp.query("anode_soc_max", h_prob_parm->anode_soc_max);  
     // Materials
-    pp.query("mater_cathode", h_prob_parm.mater_cathode);
-    pp.query("Sp_corr_cathode", h_prob_parm.Sp_corr_cathode);
-    pp.query("mater_anode", h_prob_parm.mater_anode);
-    pp.query("Sp_corr_anode", h_prob_parm.Sp_corr_anode);
-    pp.query("mater_electrolyte", h_prob_parm.mater_electrolyte);
-    pp.query("mater_electrolyte_tpAc", h_prob_parm.mater_electrolyte_tpAc);
-    pp.query("mater_CBD", h_prob_parm.mater_CBD); 
+    pp.query("mater_cathode", h_prob_parm->mater_cathode);
+    pp.query("Sp_corr_cathode", h_prob_parm->Sp_corr_cathode);
+    pp.query("mater_anode", h_prob_parm->mater_anode);
+    pp.query("Sp_corr_anode", h_prob_parm->Sp_corr_anode);
+    pp.query("mater_electrolyte", h_prob_parm->mater_electrolyte);
+    pp.query("mater_electrolyte_tpAc", h_prob_parm->mater_electrolyte_tpAc);
+    pp.query("mater_CBD", h_prob_parm->mater_CBD); 
     // Mechanics parameters
-    pp.query("mater_mech_anode", h_prob_parm.mater_mech_anode);
-    pp.query("mater_mech_cathode", h_prob_parm.mater_mech_cathode);
-    pp.query("mater_mech_separator", h_prob_parm.mater_mech_separator);
-    pp.query("mater_mech_electrolyte", h_prob_parm.mater_mech_electrolyte);
-    pp.query("mater_mech_CBD", h_prob_parm.mater_mech_CBD);
+    pp.query("mater_mech_anode", h_prob_parm->mater_mech_anode);
+    pp.query("mater_mech_cathode", h_prob_parm->mater_mech_cathode);
+    pp.query("mater_mech_separator", h_prob_parm->mater_mech_separator);
+    pp.query("mater_mech_electrolyte", h_prob_parm->mater_mech_electrolyte);
+    pp.query("mater_mech_CBD", h_prob_parm->mater_mech_CBD);
     // Nanoscale coefficients modificators
-    pp.query("Nanoscale_coefficients_txtimport_CBD", h_prob_parm.Nanoscale_coefficients_txtimport_CBD);  
-    pp.query("Nanoscale_coefficients_txtimport_separator", h_prob_parm.Nanoscale_coefficients_txtimport_separator);  
+    pp.query("Nanoscale_coefficients_txtimport_CBD", h_prob_parm->Nanoscale_coefficients_txtimport_CBD);  
+    pp.query("Nanoscale_coefficients_txtimport_separator", h_prob_parm->Nanoscale_coefficients_txtimport_separator);  
     // CBD transport behavior
-    pp.query("CBD_transport", h_prob_parm.CBD_transport);  
+    pp.query("CBD_transport", h_prob_parm->CBD_transport);  
     // Replace electrolyte with CBD
-    pp.query("ELEisCBD", h_prob_parm.ELEisCBD);      
+    pp.query("ELEisCBD", h_prob_parm->ELEisCBD);      
 
     // Full cell or half-cell
-    pp.query("halfcell_case", h_prob_parm.halfcell_case);
+    pp.query("halfcell_case", h_prob_parm->halfcell_case);
    
     // Physics
-    pp.query("Cphi_electrolyte_coupling", h_prob_parm.Cphi_electrolyte_coupling);   
+    pp.query("Cphi_electrolyte_coupling", h_prob_parm->Cphi_electrolyte_coupling);   
     
     // 0D validation
-    pp.query("zeroDmodel", h_prob_parm.zeroDmodel);
-
+    pp.query("zeroDmodel", h_prob_parm->zeroDmodel);
+    
+    amrex::Vector<int> geo1d;
+    amrex::Vector<amrex::Real> np1d;
+    amrex::Vector<amrex::Real> mm1d;
 
     // CREATE 3D ARRAY GEOMETRY READ FILE
-    std::string inFileName = h_prob_parm.geometry_filename;
+    std::string inFileName = geometry_filename;
     Vector<char> fileCharPtr;
     ParallelDescriptor::ReadAndBcastFile(inFileName, fileCharPtr);
     std::string fileCharPtrString(fileCharPtr.dataPtr());
@@ -80,22 +86,24 @@ void amrex_probinit (ProbParm & h_prob_parm, ProbParm & d_prob_parm)
     // 1: Get dimension: first 3 integers
     for (int i = 0; i < 3; i++)
     {
-        inFile >> h_prob_parm.dimension_geometry[i];
+        inFile >> h_prob_parm->dimension_geometry[i];
     }
-    int geo_N = h_prob_parm.dimension_geometry[0]*h_prob_parm.dimension_geometry[1]*h_prob_parm.dimension_geometry[2];
+    int geo_N = h_prob_parm->dimension_geometry[0]*h_prob_parm->dimension_geometry[1]*h_prob_parm->dimension_geometry[2];
+    geo1d.resize(geo_N);
+    np1d.resize(geo_N);
+    mm1d.resize(geo_N);
     // std::vector<int> geo1D(geo_N);
-    // h_prob_parm.geo1D.clear();
-    // h_prob_parm.geo1D.resize(geo_N);
-
+    // h_prob_parm->geo1D.clear();
+    // h_prob_parm->geo1D.resize(geo_N);
 
     // 2: Get domain id
     for (int i = 0; i < geo_N ; i++)
     {
-        inFile >> h_prob_parm.geo1D[i];
+        inFile >> geo1d[i];
     }
 
     // CREATE 3D ARRAY NANOPOROSITY READ FILE
-    std::string inFileName_np = h_prob_parm.nanoporosity_filename;
+    std::string inFileName_np = nanoporosity_filename;
     Vector<char> fileCharPtr_np;
     ParallelDescriptor::ReadAndBcastFile(inFileName_np, fileCharPtr_np);
     std::string fileCharPtrString_np(fileCharPtr_np.dataPtr());
@@ -104,11 +112,11 @@ void amrex_probinit (ProbParm & h_prob_parm, ProbParm & d_prob_parm)
     // 3: Get nanoporosity
     for (int i = 0; i < geo_N ; i++)
     {
-        inFile_np >> h_prob_parm.Nanoporosity1D[i];
+        inFile_np >> np1d[i];
     }    
 
     // CREATE 3D ARRAY MACMULLIN READ FILE
-    std::string inFileName_mm = h_prob_parm.macmullin_filename;
+    std::string inFileName_mm = macmullin_filename;
     Vector<char> fileCharPtr_mm;
     ParallelDescriptor::ReadAndBcastFile(inFileName_mm, fileCharPtr_mm);
     std::string fileCharPtrString_mm(fileCharPtr_mm.dataPtr());
@@ -117,15 +125,30 @@ void amrex_probinit (ProbParm & h_prob_parm, ProbParm & d_prob_parm)
     // 3: Get MacMullin number
     for (int i = 0; i < geo_N ; i++)
     {
-        inFile_mm >> h_prob_parm.MacMullin1D[i];
+        inFile_mm >> mm1d[i];
     }    
+    
+    h_prob_parm->geo1D = (int *) amrex::The_Arena()->alloc(geo_N*sizeof(int));
+    h_prob_parm->Nanoporosity1D = (amrex::Real *) amrex::The_Arena()->alloc(geo_N*sizeof(amrex::Real));
+    h_prob_parm->MacMullin1D = (amrex::Real *) amrex::The_Arena()->alloc(geo_N*sizeof(amrex::Real));
 
-
-#ifdef AMREX_USE_GPU
-    amrex::Gpu::htod_memcpy(&d_prob_parm, &h_prob_parm, sizeof(ProbParm));
-#else
-    std::memcpy(&d_prob_parm, &h_prob_parm, sizeof(ProbParm));
-#endif
+    amrex::Gpu::copy(amrex::Gpu::hostToDevice,
+                                geo1d.begin(),
+                                geo1d.end(),
+                       h_prob_parm->geo1D);
+    
+    amrex::Gpu::copy(amrex::Gpu::hostToDevice,
+                                np1d.begin(),
+                                np1d.end(),
+                       h_prob_parm->Nanoporosity1D);
+    
+    amrex::Gpu::copy(amrex::Gpu::hostToDevice,
+                                mm1d.begin(),
+                                mm1d.end(),
+                       h_prob_parm->MacMullin1D);
+    
+    amrex::Gpu::copy(amrex::Gpu::hostToDevice, h_prob_parm, 
+                     h_prob_parm+1,d_prob_parm);
 
 }
 

@@ -28,7 +28,7 @@ echemAMR::echemAMR()
     h_prob_parm = new ProbParm{};
     d_prob_parm = (ProbParm*)The_Arena()->alloc(sizeof(ProbParm));
     host_global_storage = new GlobalStorage{};
-    amrex_probinit(*h_prob_parm, *d_prob_parm);
+    amrex_probinit(h_prob_parm, d_prob_parm);
 
 
     // Geometry on all levels has been defined already.
@@ -314,6 +314,7 @@ void echemAMR::ReadParameters()
         pp.query("linsolve_num_bottom_smooth",linsolve_num_bottom_smooth);
 
         pp.query("linsolve_maxiter",linsolve_maxiter);
+        pp.query("linsolve_bottom_maxiter",linsolve_bottom_maxiter);
         pp.query("linsolve_max_coarsening_level",linsolve_max_coarsening_level);
         pp.query("lsgrad_tol",lsgrad_tolerance);
         pp.query("species_implicit_solve",species_implicit_solve);

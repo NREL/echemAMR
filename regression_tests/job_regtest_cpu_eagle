@@ -1,0 +1,22 @@
+#!/bin/bash
+#SBATCH --job-name=regtestcpu
+#SBATCH --partition=debug
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=32
+#SBATCH --time=01:00:00
+#SBATCH --account=gas2fuels
+#SBATCH --output=regout
+#SBATCH --error=regerr
+
+TOPDIR=${PWD}
+REGTEST_FOLDER=${TOPDIR}/$(date '+%d_%b_%Y_%H')
+mkdir ${REGTEST_FOLDER}
+
+source ~/loadcuda.sh
+export ECHEM_DIR=/scratch/hsitaram/echemAMR/
+export AMREX_HOME=/home/hsitaram/gitrepos/ECP_codes/amrex
+REGTEST_FOLDER=${TOPDIR}/$(date '+%d_%b_%Y_%H')
+. ./script_reg_testing.sh 16 srun ~/ytenv.sh ${REGTEST_FOLDER}/results
+
+cd ${TOPDIR}
+mv regerr regout ${REGTEST_FOLDER}

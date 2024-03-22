@@ -4,7 +4,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=32
 #SBATCH --time=01:00:00
-#SBATCH --account=exabatt
+#SBATCH --account=extrubatt
 #SBATCH --output=regout
 #SBATCH --error=regerr
 
@@ -12,11 +12,13 @@ TOPDIR=${PWD}
 REGTEST_FOLDER=${TOPDIR}/$(date '+%d_%b_%Y_%H')
 mkdir ${REGTEST_FOLDER}
 
-source ~/loadcuda.sh
-export ECHEM_DIR=/home/hsitaram/gitrepos/echemAMR
-export AMREX_HOME=/home/hsitaram/gitrepos/ECP_codes/amrex
+module purge
+module load PrgEnv-gnu
+#source ~/loadcuda.sh
+export ECHEM_DIR=/home/hsitaram/codes/echemAMR
+#export AMREX_HOME=/home/hsitaram/gitrepos/ECP_codes/amrex
 REGTEST_FOLDER=${TOPDIR}/$(date '+%d_%b_%Y_%H')
-. ./script_reg_testing.sh 16 srun ~/ytenv.sh ${REGTEST_FOLDER}/results
+. ./script_reg_testing.sh 16 srun ~/harienv.sh ${REGTEST_FOLDER}/results COMP=gnu
 
 cd ${TOPDIR}
 mv regerr regout ${REGTEST_FOLDER}

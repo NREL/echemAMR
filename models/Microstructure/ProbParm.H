@@ -91,13 +91,10 @@ struct ProbParm
     // --------------
     // GEOMETRY
     // --------------
-    std::string geometry_filename = "CEAtest.txt";
-    std::string nanoporosity_filename = "CEAtest_nanoporosity.txt";
-    std::string macmullin_filename = "CEAtest_macmullin.txt";
     int dimension_geometry[3];
-    int* geo1D = new int[150000000]();
-    amrex::Real* Nanoporosity1D = new amrex::Real[150000000]();
-    amrex::Real* MacMullin1D = new amrex::Real[150000000]();
+    int* geo1D = nullptr;
+    amrex::Real* Nanoporosity1D = nullptr;
+    amrex::Real* MacMullin1D = nullptr;
 
     // std::vector<int> geo1D;
     // amrex::Vector<int> geo1D;

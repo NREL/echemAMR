@@ -225,6 +225,7 @@ private:
     int linsolve_num_bottom_smooth = 0;
 
     int linsolve_maxiter=100;
+    int linsolve_bottom_maxiter=100;
     int linsolve_max_coarsening_level=0;
 
     // how often each level regrids the higher levels of refinement
