@@ -26,7 +26,7 @@ namespace electrochem_integral_utils
                     val = val * phi(i,j,k,comp2);
 
             if( phi(i,j,k,domain) > 0 )
-                return val*dx[0]*dx[1]*dx[2];
+                return val*dx[0]*dx[1]*dx[2]*phi(i,j,k,domain);
             else
                 return 0.0;
 
@@ -79,12 +79,12 @@ namespace electrochem_integral_utils
             // adjacent cell is domain2 or boundary
             if( (phi(i,j,k,domain1) > 0) )
             {
-                if ( same_domain*x_prev > 0) out += val*dx[1]*dx[2];
-                if ( same_domain*x_next > 0) out += val*dx[1]*dx[2];
-                if ( same_domain*y_prev > 0) out += val*dx[0]*dx[2];
-                if ( same_domain*y_next > 0) out += val*dx[0]*dx[2];
-                if ( same_domain*z_prev > 0) out += val*dx[0]*dx[1];
-                if ( same_domain*z_next > 0) out += val*dx[0]*dx[1];
+                if ( same_domain*x_prev > 0) out += val*dx[1]*dx[2]*phi(i,j,k,domain1);
+                if ( same_domain*x_next > 0) out += val*dx[1]*dx[2]*phi(i,j,k,domain1);
+                if ( same_domain*y_prev > 0) out += val*dx[0]*dx[2]*phi(i,j,k,domain1);
+                if ( same_domain*y_next > 0) out += val*dx[0]*dx[2]*phi(i,j,k,domain1);
+                if ( same_domain*z_prev > 0) out += val*dx[0]*dx[1]*phi(i,j,k,domain1);
+                if ( same_domain*z_next > 0) out += val*dx[0]*dx[1]*phi(i,j,k,domain1);
             }
 
             return out;
@@ -112,8 +112,8 @@ namespace electrochem_integral_utils
             // Check if we are in the right domain and at one of the x extremes
             if( (phi(i,j,k,domain) > 0) )
             {
-                if (i-1 < domlo[0]) out += val*dx[1]*dx[2];
-                if (i+1 > domhi[0]) out += val*dx[1]*dx[2];
+                if (i-1 < domlo[0]) out += val*dx[1]*dx[2]*phi(i,j,k,domain);
+                if (i+1 > domhi[0]) out += val*dx[1]*dx[2]*phi(i,j,k,domain);
             }
 
             return out;
