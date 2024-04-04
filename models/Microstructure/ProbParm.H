@@ -9,6 +9,9 @@ using namespace amrex::literals;
 
 struct ProbParm
 {
+    int spltcell_x=1;
+    int spltcell_y=1;
+    int spltcell_z=1;
     // NOTE: All values are overwritten by inputs
     // --------------
     // MATERIAL SELECTION

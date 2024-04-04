@@ -58,6 +58,10 @@ void amrex_probinit (ProbParm * h_prob_parm, ProbParm * d_prob_parm)
     // Nanoscale coefficients modificators
     pp.query("Nanoscale_coefficients_txtimport_CBD", h_prob_parm->Nanoscale_coefficients_txtimport_CBD);  
     pp.query("Nanoscale_coefficients_txtimport_separator", h_prob_parm->Nanoscale_coefficients_txtimport_separator);  
+    pp.query("spltcell_x",h_prob_parm->spltcell_x);
+    pp.query("spltcell_y",h_prob_parm->spltcell_y);
+    pp.query("spltcell_z",h_prob_parm->spltcell_z);
+    
     // CBD transport behavior
     pp.query("CBD_transport", h_prob_parm->CBD_transport);  
     // Replace electrolyte with CBD
@@ -170,6 +174,7 @@ void initdomaindata(Box const& bx, Array4<Real> const& phi, GeometryData const& 
     const Real Lz = prob_hi[2] - prob_lo[2];
 
     const int ncomp = phi.nComp();
+    int spltcell[3]={prob_parm->spltcell_x,prob_parm->spltcell_y,prob_parm->spltcell_z};
 
     /*
     amrex::Print() << "prob_lo[0]=" << prob_lo[0] << " prob_lo[1]=" << prob_lo[1] << " prob_lo[2]=" << prob_lo[2] << std::endl;
@@ -195,96 +200,137 @@ void initdomaindata(Box const& bx, Array4<Real> const& phi, GeometryData const& 
 
     for (int k = lo.z; k <= hi.z; ++k) 
     {
-        const Real z = prob_lo[2] + (k+0.5)*dx[2];
-        int idz = std::round( (prob_parm->dimension_geometry[2]-1) / Lz * z + 1 ) -1; // Convert z in the index of imported geometry geo3D 
         for (int j = lo.y; j <= hi.y; ++j)
         {
-            const Real y = prob_lo[1] + (j+0.5)*dx[1];
-            int idy = std::round( (prob_parm->dimension_geometry[1]-1) / Ly * y +1) -1; // Convert y in the index of imported geometry geo3D 
             for (int i = lo.x; i <= hi.x; ++i) 
             {
-                const Real x = prob_lo[0] + (i+0.5)*dx[0];
-                int idx = std::round( (prob_parm->dimension_geometry[0]-1) / Lx * x +1 ) -1; // Convert x in the index of imported geometry geo3D 
                 AMREX_PRAGMA_SIMD
                 for (int n = 0; n < ncomp; ++n)
                 {
                     phi(i, j, k, n) = 0.0; // Initialize all composant to 0
                 }
 
-                int id = (idx+1 + (idy+1-1)*(prob_parm->dimension_geometry[0]) + (idz+1-1)*(prob_parm->dimension_geometry[1])*(prob_parm->dimension_geometry[0]))-1;
-                
+                for(int kk=0;kk<spltcell[2];kk++)
+                {
+                    for(int jj=0;jj<spltcell[1];jj++)
+                    {
+                        for(int ii=0;ii<spltcell[0];ii++)
+                        {
+                            Real xx= prob_lo[0]+(i+(ii+0.5)/spltcell[0])*dx[0];
+                            Real yy= prob_lo[1]+(j+(jj+0.5)/spltcell[1])*dx[1];
+                            Real zz= prob_lo[2]+(k+(kk+0.5)/spltcell[2])*dx[2];
+
+                            int idx = std::round( (prob_parm->dimension_geometry[0]-1) / Lx * xx +1 ) -1; // Convert x in the index of imported geometry geo3D 
+                            int idy = std::round( (prob_parm->dimension_geometry[1]-1) / Ly * yy +1) -1; // Convert y in the index of imported geometry geo3D 
+                            int idz = std::round( (prob_parm->dimension_geometry[2]-1) / Lz * zz + 1 ) -1; // Convert z in the index of imported geometry geo3D 
+                            int id = (idx+1 + (idy+1-1)*(prob_parm->dimension_geometry[0]) 
+                                      + (idz+1-1)*(prob_parm->dimension_geometry[1])*(prob_parm->dimension_geometry[0]))-1;
+                            
+                            if (prob_parm->geo1D[id] == Anode_AM_ID) 
+                            {
+                                phi(i,j,k,A_AM_ID) += 1.0;
+                            } 
+                            else if (prob_parm->geo1D[id] == Cathode_AM_ID) 
+                            {
+                                phi(i,j,k,C_AM_ID) += 1.0;
+                            } 
+                            else if (prob_parm->geo1D[id] == Anode_E_ID && prob_parm->ELEisCBD==0) 
+                            {
+                                phi(i,j,k,A_E_ID) += 1.0;
+                                phi(i,j,k,LS_ID) += 1.0;
+                            } 
+                            else if (prob_parm->geo1D[id] == Cathode_E_ID && prob_parm->ELEisCBD==0) 
+                            {
+                                phi(i,j,k,C_E_ID) += 1.0;
+                                phi(i,j,k,LS_ID) += 1.0;
+                            } 
+                            else if (prob_parm->geo1D[id] == Sep_ID) 
+                            {
+                                phi(i,j,k,S_ID) += 1.0;
+                                phi(i,j,k,LS_ID) += 1.0;
+                            } 
+                            else if (prob_parm->geo1D[id] == Anode_CBD_ID 
+                                     || (prob_parm->geo1D[id] == Anode_E_ID && prob_parm->ELEisCBD==1)) 
+                            {
+                                phi(i,j,k,A_CBD_ID) += 1.0;
+                                if (prob_parm->CBD_transport==1) 
+                                { 
+                                    // Mixed domain - Intercalation reaction between CBD and active material
+                                    phi(i,j,k,LS_ID) += 1.0;
+                                } 
+                                else 
+                                { 
+                                    // Purely solid domain - no intercalation reaction between CBD and active material
+                                    phi(i,j,k,LS_ID) += 0.0; 
+                                } 
+                            } 
+                            else if (prob_parm->geo1D[id] == Cathode_CBD_ID 
+                                     || (prob_parm->geo1D[id] == Cathode_E_ID && prob_parm->ELEisCBD==1)) 
+                            {
+                                phi(i,j,k,C_CBD_ID) = 1.0;
+                                if (prob_parm->CBD_transport==1) 
+                                { 
+                                    // Mixed domain - Intercalation reaction between CBD and active material
+                                    phi(i,j,k,LS_ID) += 1.0;
+                                } 
+                                else 
+                                { 
+                                    // Purely solid domain - no intercalation reaction between CBD and active material
+                                    phi(i,j,k,LS_ID) += 0.0;
+                                } 
+                            } 
+                            // Nanoporosity and MacMullin number 
+                            if (prob_parm->geo1D[id] != Sep_ID) 
+                            {   
+                                if (prob_parm->Nanoscale_coefficients_txtimport_CBD==1) 
+                                {
+                                    phi(i,j,k,NP_ID) += prob_parm->Nanoporosity1D[id];
+                                    phi(i,j,k,MAC_ID) += prob_parm->MacMullin1D[id];
+                                } 
+                                else 
+                                {
+                                    phi(i,j,k,NP_ID)  += 1.0;
+                                    phi(i,j,k,MAC_ID) += 1.0;
+                                }
+                            } 
+                            else 
+                            { 
+                                // Separator
+                                if (prob_parm->Nanoscale_coefficients_txtimport_separator==1) 
+                                {
+                                    phi(i,j,k,NP_ID) += prob_parm->Nanoporosity1D[id];
+                                    phi(i,j,k,MAC_ID) += prob_parm->MacMullin1D[id];
+                                } 
+                                else 
+                                {
+                                    phi(i,j,k,NP_ID) += 1.0;
+                                    phi(i,j,k,MAC_ID) += 1.0;
+                                }
+                            }            
+
+                        }
+                    }
+                }
+
+
                 // You can not use amrex::Print(), as it will only show the print process
                 /*
-                std::cout << "i=" << i << " j=" << j << " k=" << k << std::endl;
-                std::cout << "x=" << x << " y=" << y << " z=" << z << std::endl;
-                std::cout << "idx=" << idx << " idy=" << idy << " idz=" << idz << std::endl;
-                std::cout << "id=" << id << " geo[id]=" << geo1D[id] << std::endl;
-                */
-
-                if (prob_parm->geo1D[id] == Anode_AM_ID) {
-                    phi(i,j,k,A_AM_ID) = 1;
-                    //std::cout << "i=" << i << " j=" << j << " k=" << k << " -> ANODE active material" << std::endl;
-                } else if (prob_parm->geo1D[id] == Cathode_AM_ID) {
-                    phi(i,j,k,C_AM_ID) = 1;
-                    //std::cout << "i=" << i << " j=" << j << " k=" << k << " -> CATHODE active material" << std::endl;                    
-                } else if (prob_parm->geo1D[id] == Anode_E_ID && prob_parm->ELEisCBD==0) {
-                    phi(i,j,k,A_E_ID) = 1;
-                    phi(i,j,k,LS_ID) = 1;
-                    //std::cout << "i=" << i << " j=" << j << " k=" << k << " -> ANODE electrolyte" << std::endl;
-                } else if (prob_parm->geo1D[id] == Cathode_E_ID && prob_parm->ELEisCBD==0) {
-                    phi(i,j,k,C_E_ID) = 1;
-                    phi(i,j,k,LS_ID) = 1;
-                    //std::cout << "i=" << i << " j=" << j << " k=" << k << " -> CATHODE electrolyte" << std::endl;                    
-                } else if (prob_parm->geo1D[id] == Sep_ID) {
-                    phi(i,j,k,S_ID) = 1;
-                    phi(i,j,k,LS_ID) = 1;
-                    //std::cout << "i=" << i << " j=" << j << " k=" << k << " -> SEPARATOR" << std::endl;
-                } else if (prob_parm->geo1D[id] == Anode_CBD_ID || (prob_parm->geo1D[id] == Anode_E_ID && prob_parm->ELEisCBD==1)) {
-                    phi(i,j,k,A_CBD_ID) = 1;
-                    if (prob_parm->CBD_transport==1) { // Mixed domain - Intercalation reaction between CBD and active material
-                        phi(i,j,k,LS_ID) = 1;
-                    } else { // Purely solid domain - no intercalation reaction between CBD and active material
-                        phi(i,j,k,LS_ID) = 0; 
-                    } 
-                    //std::cout << "i=" << i << " j=" << j << " k=" << k << " -> ANODE CBD" << std::endl;
-                } else if (prob_parm->geo1D[id] == Cathode_CBD_ID || (prob_parm->geo1D[id] == Cathode_E_ID && prob_parm->ELEisCBD==1)) {
-                    phi(i,j,k,C_CBD_ID) = 1;
-                    if (prob_parm->CBD_transport==1) { // Mixed domain - Intercalation reaction between CBD and active material
-                        phi(i,j,k,LS_ID) = 1;
-                    } else { // Purely solid domain - no intercalation reaction between CBD and active material
-                        phi(i,j,k,LS_ID) = 0;
-                    } 
-                    //std::cout << "i=" << i << " j=" << j << " k=" << k << " -> CATHODE CBD" << std::endl;                    
-                } 
-                // we cannot print on gpu
-                // else {
-                //     std::cout << "Error for idx= " << idx << " idy= " << idy << " idz= " << idz << " geo1D[id]= " << prob_parm->geo1D[id] << std::endl;
-                //     //phi(i,j,k,A_ID) = 1;
-                // }
-
-                // Nanoporosity and MacMullin number 
-                if (phi(i,j,k,S_ID)==0) { // (electrodes)
-
-                    if (prob_parm->Nanoscale_coefficients_txtimport_CBD==1) {
-                        phi(i,j,k,NP_ID) = prob_parm->Nanoporosity1D[id];
-                        phi(i,j,k,MAC_ID) = prob_parm->MacMullin1D[id];
-                    } else {
-                        phi(i,j,k,NP_ID) = 1.0;
-                        phi(i,j,k,MAC_ID) = 1.0;
-                    }
-                    
-                } else { // Separator
-
-                    if (prob_parm->Nanoscale_coefficients_txtimport_separator==1) {
-                        phi(i,j,k,NP_ID) = prob_parm->Nanoporosity1D[id];
-                        phi(i,j,k,MAC_ID) = prob_parm->MacMullin1D[id];
-                    } else {
-                        phi(i,j,k,NP_ID) = 1.0;
-                        phi(i,j,k,MAC_ID) = 1.0;
-                    }
-
-                }            
-
+                   std::cout << "i=" << i << " j=" << j << " k=" << k << std::endl;
+                   std::cout << "x=" << x << " y=" << y << " z=" << z << std::endl;
+                   std::cout << "idx=" << idx << " idy=" << idy << " idz=" << idz << std::endl;
+                   std::cout << "id=" << id << " geo[id]=" << geo1D[id] << std::endl;
+                   */
+                
+                phi(i,j,k,A_AM_ID)/=(spltcell[0]*spltcell[1]*spltcell[2]);
+                phi(i,j,k,C_AM_ID)/=(spltcell[0]*spltcell[1]*spltcell[2]);
+                phi(i,j,k,A_E_ID)/=(spltcell[0]*spltcell[1]*spltcell[2]);
+                phi(i,j,k,C_E_ID)/=(spltcell[0]*spltcell[1]*spltcell[2]);
+                phi(i,j,k,S_ID)/=(spltcell[0]*spltcell[1]*spltcell[2]);
+                phi(i,j,k,LS_ID)/=(spltcell[0]*spltcell[1]*spltcell[2]);
+                phi(i,j,k,NP_ID)/=(spltcell[0]*spltcell[1]*spltcell[2]);
+                phi(i,j,k,MAC_ID)/=(spltcell[0]*spltcell[1]*spltcell[2]);
+                phi(i,j,k,A_CBD_ID)/=(spltcell[0]*spltcell[1]*spltcell[2]);
+                phi(i,j,k,C_CBD_ID)/=(spltcell[0]*spltcell[1]*spltcell[2]);
 
             }
         }
@@ -294,7 +340,7 @@ void initdomaindata(Box const& bx, Array4<Real> const& phi, GeometryData const& 
 AMREX_INLINE
 void initialconditions(ProbParm & h_prob_parm, ProbParm & d_prob_parm)
 {
-        // INITIAL POTENTIAL
+    // INITIAL POTENTIAL
     // Calculate active material volumes
     const amrex::Real volume_anode = echemAMR::host_global_storage->anode_AM_volume; // [m3]
     const amrex::Real volume_cathode = echemAMR::host_global_storage->cathode_AM_volume; // [m3]
@@ -338,7 +384,7 @@ void initialconditions(ProbParm & h_prob_parm, ProbParm & d_prob_parm)
 
     const amrex::Real surfaceanodeside_currentcollector_CBDsolid = tmp1;
     const amrex::Real surfacecathodeside_currentcollector_CBDsolid = tmp2;
-      
+
     // Applied current density at the interface active material - current collector, w/ sign
     // These are the two Neumann Boundary conditions value applies at the left and right extremities of the cell
     amrex::Real Applied_current_density_anode = -Applied_current / (surfaceanodeside_currentcollector_activematerial + surfaceanodeside_currentcollector_CBDsolid); // [A.m-2]
@@ -397,9 +443,9 @@ void initialconditions(ProbParm & h_prob_parm, ProbParm & d_prob_parm)
 
 
 AMREX_GPU_DEVICE
-    AMREX_INLINE
+AMREX_INLINE
 void initproblemdata(Box const& bx, Array4<Real> const& phi, GeometryData const& geomdata,
-        ProbParm* prob_parm)
+                     ProbParm* prob_parm)
 {
     const auto lo = lbound(bx);
     const auto hi = ubound(bx);    
@@ -416,44 +462,67 @@ void initproblemdata(Box const& bx, Array4<Real> const& phi, GeometryData const&
         {
             for (int i = lo.x; i <= hi.x; ++i) 
             {
-                 
-                if (phi(i,j,k,C_AM_ID) == 1) { // Within cathode
+
+                if (phi(i,j,k,C_AM_ID) > 0.0) 
+                { 
                     phi(i,j,k,CO_ID) = prob_parm->cs_c_to;
                     phi(i,j,k,POT_ID) = prob_parm->phis_c_to;
-                } else if (phi(i,j,k,A_AM_ID) == 1) { // Within anode
+                } 
+                else if (phi(i,j,k,A_AM_ID) > 0.0) 
+                { 
+                    // Within anode
                     phi(i,j,k,CO_ID) = prob_parm->cs_a_to;
                     phi(i,j,k,POT_ID) = prob_parm->phis_a_to;
-                } else if (phi(i,j,k,A_E_ID) == 1 || phi(i,j,k,C_E_ID) == 1 || phi(i,j,k,S_ID) == 1) { // Within electrolyte and separator
+                } 
+                else if (phi(i,j,k,A_E_ID) > 0.0 || 
+                         phi(i,j,k,C_E_ID) > 0.0 || 
+                         phi(i,j,k,S_ID) > 0.0) 
+                { 
+                    // Within electrolyte and separator
                     phi(i,j,k,CO_ID) = prob_parm->ce_to;
                     phi(i,j,k,POT_ID) = prob_parm->phie_to;
-                } else if (phi(i,j,k,A_CBD_ID) == 1) { // Within CBD (anode)
-                if (prob_parm->CBD_transport==1) { // Mixed domain
-                    phi(i,j,k,CO_ID) = prob_parm->ce_to; // electrolyte concentration
-                    phi(i,j,k,POT_ID) = prob_parm->phie_to; // electrolyte potential 
-                    phi(i,j,k,POTs_ID) = prob_parm->phis_a_to; // solid potential    
-                } else { // Purely solid domain
-                    phi(i,j,k,CO_ID) = prob_parm->cs_a_to;
-                    phi(i,j,k,POT_ID) = prob_parm->phis_a_to; // solid potential 
-                }       
-                } else if (phi(i,j,k,C_CBD_ID) == 1) { // Within CBD (cathode)
-                if (prob_parm->CBD_transport==1) { // Mixed domain
-                    phi(i,j,k,CO_ID) = prob_parm->ce_to;  // electrolyte concentration
-                    phi(i,j,k,POT_ID) = prob_parm->phie_to; // electrolyte potential
-                    phi(i,j,k,POTs_ID) = prob_parm->phis_c_to; // solid potential    
-                } else { // Purely solid domain
-                    phi(i,j,k,CO_ID) = prob_parm->cs_c_to;
-                    phi(i,j,k,POT_ID) = prob_parm->phis_c_to; // solid potential 
-                }                     
-                                        
+                } 
+                else if (phi(i,j,k,A_CBD_ID) > 0.0) 
+                { 
+                    // Within CBD (anode)
+                    if (prob_parm->CBD_transport==1) 
+                    { 
+                        // Mixed domain
+                        phi(i,j,k,CO_ID) = prob_parm->ce_to; // electrolyte concentration
+                        phi(i,j,k,POT_ID) = prob_parm->phie_to; // electrolyte potential 
+                        phi(i,j,k,POTs_ID) = prob_parm->phis_a_to; // solid potential    
+                    } 
+                    else 
+                    { // Purely solid domain
+                        phi(i,j,k,CO_ID) = prob_parm->cs_a_to;
+                        phi(i,j,k,POT_ID) = prob_parm->phis_a_to; // solid potential 
+                    }       
+                } 
+                else if (phi(i,j,k,C_CBD_ID) > 0.0) 
+                { 
+                    // Within CBD (cathode)
+                    if (prob_parm->CBD_transport==1) 
+                    { 
+                        // Mixed domain
+                        phi(i,j,k,CO_ID) = prob_parm->ce_to;  // electrolyte concentration
+                        phi(i,j,k,POT_ID) = prob_parm->phie_to; // electrolyte potential
+                        phi(i,j,k,POTs_ID) = prob_parm->phis_c_to; // solid potential    
+                    } 
+                    else 
+                    { 
+                        // Purely solid domain
+                        phi(i,j,k,CO_ID) = prob_parm->cs_c_to;
+                        phi(i,j,k,POT_ID) = prob_parm->phis_c_to; // solid potential 
+                    }                     
                 }
-                 
+
             }
         }
     }
 
 }
 
-    AMREX_INLINE
+AMREX_INLINE
 void print_init_data(ProbParm* prob_parm)
 {
 
@@ -494,7 +563,7 @@ void print_init_data(ProbParm* prob_parm)
     }
     const amrex::Real surfaceanodeside_currentcollector_CBDsolid = tmp1;
     const amrex::Real surfacecathodeside_currentcollector_CBDsolid = tmp2;
-      
+
     // Applied current density at the interface active material - current collector, w/ sign
     // These are the two Neumann Boundary conditions value applies at the left and right extremities of the cell
     amrex::Real Applied_current_density_anode = -Applied_current / (surfaceanodeside_currentcollector_activematerial + surfaceanodeside_currentcollector_CBDsolid); // [A.m-2]
@@ -570,14 +639,14 @@ void print_init_data(ProbParm* prob_parm)
     amrex::Print() << "- Cathode potential         : " << phi_c_to << " [V] " << std::endl;
 }
 
-    AMREX_INLINE
+AMREX_INLINE
 void print_coefficients(ProbParm* prob_parm)
 {
     int num_points=100;
     Real soc_min = -0.01; Real soc_max = 1.01; // Go slighly below and above min-max to check expression is robust
     Real Ce_normalized_min = -0.01; Real Ce_normalized_max = 5; 
     Real Ce_atrest = prob_parm->ce_atrest;
-    
+
     if (amrex::ParallelDescriptor::IOProcessor()) // only IO Processor outputs file
     {
         // Anode
@@ -592,11 +661,11 @@ void print_coefficients(ProbParm* prob_parm)
         }
         std::ofstream out_a("Anode_coefficients.csv");
         for (auto& row : coeffs_a) {
-        for (auto col : row)
-            out_a << col <<',';
-        out_a << '\n';
+            for (auto col : row)
+                out_a << col <<',';
+            out_a << '\n';
         }
-        
+
         // Electrolyte
         double coeffs_e[num_points][6];
         for (int i = 0; i < num_points; ++i){
@@ -610,9 +679,9 @@ void print_coefficients(ProbParm* prob_parm)
         }
         std::ofstream out_e("Electrolyte_coefficients.csv");
         for (auto& row : coeffs_e) {
-        for (auto col : row)
-            out_e << col <<',';
-        out_e << '\n';
+            for (auto col : row)
+                out_e << col <<',';
+            out_e << '\n';
         }      
 
         // Cathode
@@ -627,23 +696,23 @@ void print_coefficients(ProbParm* prob_parm)
         }
         std::ofstream out_c("Cathode_coefficients.csv");
         for (auto& row : coeffs_c) {
-        for (auto col : row)
-            out_c << col <<',';
-        out_c << '\n';
+            for (auto col : row)
+                out_c << col <<',';
+            out_c << '\n';
         }            
-    
+
     }
 }
 
 AMREX_GPU_DEVICE
-    AMREX_FORCE_INLINE
+AMREX_FORCE_INLINE
 void externalbc(const amrex::Real x[AMREX_SPACEDIM],
-        const amrex::Real s_int[],
-        amrex::Real s_ext[],
-        const int idir,
-        const int sgn,
-        const amrex::Real time,
-        amrex::GeometryData const& geomdata)
+                const amrex::Real s_int[],
+                amrex::Real s_ext[],
+                const int idir,
+                const int sgn,
+                const amrex::Real time,
+                amrex::GeometryData const& geomdata)
 {
     //default to extrapolation
     for(int c=0;c<NVAR;c++)

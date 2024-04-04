@@ -90,6 +90,7 @@ namespace electrochem
     {
         if(prob_parm.zeroDmodel==1) {
             amrex::Real Dsbulkanode = 1.0e-10; // Very high
+            //amrex::Real Dsbulkanode = 1.0e-11; // Very high
             return Dsbulkanode;
         } else if (prob_parm.halfcell_case==1) {    
             amrex::Real Dsbulkanode = 1.0e-13; // High
@@ -288,6 +289,7 @@ namespace electrochem
     {
         if(prob_parm.zeroDmodel==1) {
             amrex::Real Dsbulkcathode = 1.0e-10; // Very high
+            //amrex::Real Dsbulkcathode = 1.0e-11; // Very high
             return Dsbulkcathode;
         } else if (prob_parm.halfcell_case==2) {    
                 amrex::Real Dsbulkcathode = 1.0e-13; // High
@@ -506,6 +508,7 @@ namespace electrochem
         amrex::Real Debulk_cutoff = 1e-12;
         if(prob_parm.zeroDmodel==1) {
             amrex::Real Debulk = 1.0e-9; // Very high
+            //amrex::Real Debulk = 1.0e-11; // Very high
             return Debulk;
         } else {          
             if(prob_parm.mater_electrolyte==0) {
@@ -720,19 +723,28 @@ namespace electrochem
     {
         //Phi_jump = -Phi_jump; // In  source Phi_jump is noted phi e - phi s
         amrex::Real jumphi=-Phi_jump;
+        amrex::Real limfactor=100.0;
         const amrex::Real ioa = Io_a(Ca, Ce, prob_parm);
         const amrex::Real Spa = Spcorr_anode(prob_parm);
         const amrex::Real OCPa = OCP_a(Ca, prob_parm);
         const amrex::Real eta = jumphi - OCPa; // Phi_jump = phi_a - phi_e
         const amrex::Real FRT = FARADCONST/(GASCONST * prob_parm.Temperature);
         bool use_sinh = true;
+        amrex::Real jbv;
         if(use_sinh) {
             //amrex::Print() << "- Anode. ioa=" << ioa << " OCPa=" << OCPa << " Phi_jump=" << jumphi << " eta=" << eta << " FRT=" << FRT << " jbv=" << 2.0 * ioa * std::sinh(0.5 * FRT * eta) << std::endl;
-            return 2.0 * Spa * ioa * std::sinh(0.5 * FRT * eta);
+            jbv= 2.0 * Spa * ioa * std::sinh(0.5 * FRT * eta);
         } else {
             amrex::Real A = 0.5 * FRT * eta;
-            return Spa * ioa * ( exp(A) - exp(-A) ); // equivalent expression
+            jbv = Spa * ioa * ( exp(A) - exp(-A) ); // equivalent expression
         }
+        //limiter
+        if(amrex::Math::abs(jbv)>amrex::Math::abs(limfactor*ioa))
+        {
+            jbv=limfactor*std::copysign(1.0,jbv)*amrex::Math::abs(ioa);
+        }
+        return(jbv);
+
     }
 
     // Linearization of jbv is used to solve the nonlinear potential equation, (~Newton method)
@@ -741,19 +753,27 @@ namespace electrochem
     amrex::Real intercalation_reaction_anode_derivative(amrex::Real Ca, amrex::Real Ce, amrex::Real Phi_jump, const ProbParm& prob_parm)
     {
         //Phi_jump = -Phi_jump; // In  source Phi_jump is noted phi e - phi s
+        amrex::Real limfactor=100.0;
         amrex::Real jumphi=-Phi_jump;
         const amrex::Real ioa = Io_a(Ca, Ce, prob_parm);
         const amrex::Real Spa = Spcorr_anode(prob_parm);
         const amrex::Real OCPa = OCP_a(Ca, prob_parm);
         const amrex::Real eta = jumphi - OCPa; // Phi_jump = phi_a - phi_e
         const amrex::Real FRT = FARADCONST/(GASCONST * prob_parm.Temperature);
-        return -2.0 * Spa * ioa * std::cosh(0.5 * FRT * eta) * 0.5*FRT; // chain rule of A*sinh(B*x) = A*cosh(Bx)*B
+        amrex::Real jbvder;
+        jbvder=-2.0 * Spa * ioa * std::cosh(0.5 * FRT * eta) * 0.5*FRT; // chain rule of A*sinh(B*x) = A*cosh(Bx)*B
+        if(amrex::Math::abs(jbvder)>amrex::Math::abs(limfactor*ioa*0.5*FRT))
+        {
+            jbvder=std::copysign(1.0,jbvder)*amrex::Math::abs(limfactor*ioa*0.5*FRT);
+        }
+        return(jbvder);
     }
 
     AMREX_GPU_DEVICE AMREX_FORCE_INLINE
     amrex::Real intercalation_reaction_cathode(amrex::Real Cc, amrex::Real Ce, amrex::Real Phi_jump, const ProbParm& prob_parm)
     {
         //Phi_jump = -Phi_jump; // In  source Phi_jump is noted phi e - phi s
+        amrex::Real limfactor=100.0;
         amrex::Real jumphi=-Phi_jump;
         const amrex::Real ioc = Io_c(Cc, Ce, prob_parm);
         const amrex::Real Spc = Spcorr_anode(prob_parm);
@@ -761,35 +781,41 @@ namespace electrochem
         const amrex::Real eta = jumphi - OCPc; // Phi_jump = phi_c - phi_e
         const amrex::Real FRT = FARADCONST/(GASCONST * prob_parm.Temperature);
         bool use_sinh = true;
+        amrex::Real jbv;
         if(use_sinh) {
             //amrex::Print() << "- Cathode. ioc=" << ioc << " OCPc=" << OCPc << " Phi_jump=" << jumphi << " eta=" << eta << " FRT=" << FRT << " jbv=" << 2.0 * ioc * std::sinh(0.5 * FRT * eta) << std::endl;
-            return 2.0 * Spc * ioc * std::sinh(0.5 * FRT * eta);
+            jbv = 2.0 * Spc * ioc * std::sinh(0.5 * FRT * eta);
         } else {
             amrex::Real A = 0.5 * FRT * eta;
-            return Spc * ioc * ( exp(A) - exp(-A) ); // equivalent expression
+            jbv = Spc * ioc * ( exp(A) - exp(-A) ); // equivalent expression
         }
+        //limiter
+        if(amrex::Math::abs(jbv)>amrex::Math::abs(limfactor*ioc))
+        {
+            jbv=limfactor*std::copysign(1.0,jbv)*amrex::Math::abs(ioc);
+        }
+        return(jbv);
     }
 
     AMREX_GPU_DEVICE AMREX_FORCE_INLINE
     amrex::Real intercalation_reaction_cathode_derivative(amrex::Real Ca, amrex::Real Ce, amrex::Real Phi_jump, const ProbParm& prob_parm)
     {
         //Phi_jump = -Phi_jump; // In  source Phi_jump is noted phi e - phi s
+        amrex::Real limfactor=100.0;
         amrex::Real jumphi=-Phi_jump;
         const amrex::Real ioc = Io_c(Ca, Ce, prob_parm);
         const amrex::Real Spc = Spcorr_anode(prob_parm);
         const amrex::Real OCPc = OCP_c(Ca, prob_parm);
         const amrex::Real eta = jumphi - OCPc; // Phi_jump = phi_a - phi_e
         const amrex::Real FRT = FARADCONST/(GASCONST * prob_parm.Temperature);
-        return -2.0 * Spc * ioc * std::cosh(0.5 * FRT * eta) * 0.5*FRT; // chain rule of A*sinh(B*x) = A*cosh(Bx)*B
+        amrex::Real jbvder;
+        jbvder=-2.0 * Spc * ioc * std::cosh(0.5 * FRT * eta) * 0.5*FRT; // chain rule of A*sinh(B*x) = A*cosh(Bx)*B
+        if(amrex::Math::abs(jbvder)>amrex::Math::abs(limfactor*ioc*0.5*FRT))
+        {
+            jbvder=limfactor*std::copysign(1.0,jbvder)*amrex::Math::abs(ioc*0.5*FRT);
+        }
+        return(jbvder);
     }
-
-
-
-
-
-
-
-
 
     // ------------------------------------------------------
     //                 MECHANICAL PROPERTIES
