@@ -564,10 +564,10 @@ void echemAMR::solve_potential(Real current_time)
 
                             explterms_arr(i, j, k) = 0.0;
                             explterms_arr_res(i, j, k) = 0.0;
+                            Real activ_func = electrochem_reactions::bv_activation_function(facecolor, mod_gradc, gradc_cutoff);
 
-                            if (mod_gradc > gradc_cutoff)
+                            if (mod_gradc > gradc_cutoff && activ_func > 0.0)
                             {
-                                Real activ_func = electrochem_reactions::bv_activation_function(facecolor, mod_gradc, gradc_cutoff);
 
                                 //if(fabs(potjump) > 1)
                                 //{
@@ -1380,28 +1380,28 @@ void echemAMR::implicit_solve_species(Real current_time,Real dt,int spec_id,
                     Array4<Real> dcoeff_arr = face_bcoeff[idim].array(mfi);
 
                     amrex::ParallelFor(fbox, [=] AMREX_GPU_DEVICE(int i, int j, int k) 
-                                       {
+                    {
 
-                                           int normaldir = idim;
-                                           Real mod_gradc=0.0;
-                                           Real facecolor=0.0;
-                                           Real potjump=0.0;
-                                           Real gradc_cutoff=0.0;
-                                           Real dphidn = 0.0;
-                                           Real dphidt1 = 0.0;
-                                           Real dphidt2 = 0.0;
-                                           Real n_ls[AMREX_SPACEDIM];
+                        int normaldir = idim;
+                        Real mod_gradc=0.0;
+                        Real facecolor=0.0;
+                        Real potjump=0.0;
+                        Real gradc_cutoff=0.0;
+                        Real dphidn = 0.0;
+                        Real dphidt1 = 0.0;
+                        Real dphidt2 = 0.0;
+                        Real n_ls[AMREX_SPACEDIM];
 
-                                           bv_get_grads_and_jumps(i, j, k, normaldir, lset_id, dx, phi_arr, gradctol,
-                                                                  mod_gradc, gradc_cutoff, facecolor, potjump, dphidn, dphidt1, dphidt2, n_ls);
+                        bv_get_grads_and_jumps(i, j, k, normaldir, lset_id, dx, phi_arr, gradctol,
+                                               mod_gradc, gradc_cutoff, facecolor, potjump, dphidn, dphidt1, dphidt2, n_ls);
 
 
-                                           if (mod_gradc > gradc_cutoff)
-                                           {
-                                               Real activ_func = electrochem_reactions::bv_activation_function(facecolor, mod_gradc, gradc_cutoff);
-                                               dcoeff_arr(i, j, k) *= (1.0 - activ_func);
-                                           }
-                                       });
+                        if (mod_gradc > gradc_cutoff)
+                        {
+                            Real activ_func = electrochem_reactions::bv_activation_function(facecolor, mod_gradc, gradc_cutoff);
+                            dcoeff_arr(i, j, k) *= (1.0 - activ_func);
+                        }
+                    });
                 }
             }
         }
