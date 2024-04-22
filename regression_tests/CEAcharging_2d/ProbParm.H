@@ -8,14 +8,17 @@ using namespace amrex::literals;
 
 struct ProbParm
 {
-    amrex::Real int1 = 0.357; // interface 1
-    amrex::Real int2 = 0.5;   // interface 2
     amrex::Real electrolyte_dcoeff       = 1.0e-10;
     amrex::Real anode_dcoeff             = 1.0e-10; 
     amrex::Real cathode_dcoeff           = 1.0e-10;  
     amrex::Real anode_conductivity       = 20.0;   
     amrex::Real cathode_conductivity     = 20.0; 
     amrex::Real electrolyte_conductivity = 20.0;  
+    amrex::Real angle = 45;
+    int spltcell_x=1;
+    int spltcell_y=1;
+    int spltcell_z=1;
+    amrex::Real f0=0.25;
 
     amrex::Real crate=1.0;
     amrex::Real Temp=300.0;

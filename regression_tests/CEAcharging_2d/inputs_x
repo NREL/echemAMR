@@ -2,11 +2,13 @@ max_step  = 100000
 stop_time = 400.0
 
 # PROBLEM SIZE & GEOMETRY
-geometry.is_periodic =  0  0  0
+geometry.is_periodic =  0  1  1
 geometry.coord_sys   =  0       # 0 => cart
 geometry.prob_lo     =  0.0   0.0    0.0 
-geometry.prob_hi     =  70e-6 4.375e-6  4.375e-6
-amr.n_cell           =  64 4 4
+geometry.prob_hi     =  70e-6 17.5e-6  17.5e-6
+amr.n_cell           =  128 32 32
+#geometry.prob_hi     =  70e-6 2.1875e-6  2.1875e-6
+#amr.n_cell           =  128 4 4
 
 # VERBOSITY
 amr.v              = 1       # verbosity in Amr
@@ -14,7 +16,7 @@ amr.v              = 1       # verbosity in Amr
 # REFINEMENT
 amr.max_level       = 0      # maximum level number allowed
 amr.blocking_factor = 2       # block factor in grid generation
-amr.max_grid_size   = 8
+amr.max_grid_size   = 32
 
 amr.regrid_int      = 1       # how often to regrid
 
@@ -32,16 +34,16 @@ echemamr.dtmin=1.0
 #extdir 3
 #foextrap 2 
 #highorderextrap 5
-echemamr.lo_bc_spec = 2 2 2
-echemamr.hi_bc_spec = 2 2 2
+echemamr.lo_bc_spec = 2 0 0
+echemamr.hi_bc_spec = 2 0 0
 
 #periodic 0
 #dirichlet 3
 #homogenous Neumann 2 
 #mixed (robin) 5
 #inhomogenous Neumann 6
-echemamr.lo_bc_pot = 6 2 2
-echemamr.hi_bc_pot = 3 2 2
+echemamr.lo_bc_pot = 6 0 0
+echemamr.hi_bc_pot = 3 0 0
 
 echemamr.dtmax=2000.0
 
@@ -54,10 +56,10 @@ echemamr.levelset_refinegrad = 0.2
 echemamr.buttler_vohlmer_flux=1
 echemamr.bv_species_ids =0
 echemamr.bv_levelset_id=4
-echemamr.bv_nonlinear_iters=30
+echemamr.bv_nonlinear_iters=10
 
 #echemamr.bv_relaxation_factor=1e5
-echemamr.bv_nonlinear_reltol=1e-12
+echemamr.bv_nonlinear_reltol=1e-7
 echemamr.bv_nonlinear_abstol=1e-18
 echemamr.linsolve_maxiter=2000
 echemamr.linsolve_reltol=1e-8
@@ -112,3 +114,5 @@ prob.C_e_init=1000.0
 prob.Csmax_a=20000.0
 prob.Csmax_c=40000.0
 prob.jin=20.0
+prob.f0=0.3
+prob.angle=90

@@ -144,9 +144,10 @@ namespace electrochem_reactions {
         }
 
         j0=amrex::max(j0,jcutoff);
-        //amrex::Print()<<"normaldir,j0,phi0,ocp,phijump,anodefrac,cathodefrac:"
-          //  <<"\t"<<normaldir<<"\t"<<j0<<"\t"<<phi0<<"\t"
-           // <<ocp<<"\t"<<phi_jump<<"\t"<<anodefrac<<"\t"<<cathodefrac<<"\n";
+        //amrex::Print()<<"normaldir,j0,phi0,ocp,phijump,anodefrac,cathodefrac,i,j,k,ls_l,ls_r:"
+        //    <<"\t"<<normaldir<<"\t"<<j0<<"\t"<<phi0<<"\t"
+        //    <<ocp<<"\t"<<phi_jump<<"\t"<<anodefrac<<"\t"<<cathodefrac<<"\t"<<
+        //    i<<"\t"<<j<<"\t"<<k<<"\t"<<phi(left,LS_ID)<<"\t"<<phi(right,LS_ID)<<"\n";
 
         // sinh definition
         jbv = -j0*sinh((phi_jump+ocp)/phi0);

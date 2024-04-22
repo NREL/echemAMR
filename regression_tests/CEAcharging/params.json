@@ -1,0 +1,15 @@
+{
+    "finaltime": 400.0,
+    "nsteps": 1000,
+    "cathodevolume": 334.961e-18,
+    "anodevolume": 334.961e-18,
+    "electrolytevolume": 669.922e-18,
+    "area": 19.1406e-12,
+    "inputcurrent": 20.0,
+    "temperature": 300.0,
+    "camax": 20000.0,
+    "ccmax": 40000.0,
+    "ca_init": 4000.0,
+    "ce_init": 1000.0,
+    "cc_init": 30000.0
+}

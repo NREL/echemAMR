@@ -24,9 +24,19 @@ void amrex_probinit (ProbParm * h_prob_parm, ProbParm * d_prob_parm)
     amrex::ParmParse pp("prob");
     pp.query("interface1", h_prob_parm->int1 );
     pp.query("interface2", h_prob_parm->int2 );
+    pp.query("C_c_init", h_prob_parm->C_c_init );
+    pp.query("C_a_init", h_prob_parm->C_a_init );
+    pp.query("C_e_init", h_prob_parm->C_e_init );
+    pp.query("Csmax_a", h_prob_parm->Csmax_a );
+    pp.query("Csmax_c", h_prob_parm->Csmax_c );
+    pp.query("jin", h_prob_parm->jin);
 
     amrex::Gpu::copy(amrex::Gpu::hostToDevice, h_prob_parm, 
                      h_prob_parm+1,d_prob_parm);
+
+    echemAMR::host_global_storage->pot_bc_lo[0]
+    =-h_prob_parm->jin/h_prob_parm->cathode_conductivity;
+    amrex::Print()<<"lo bc:"<<echemAMR::host_global_storage->pot_bc_lo[0]<<"\n";
 }
 
 AMREX_GPU_DEVICE
@@ -72,7 +82,7 @@ void initdomaindata(Box const& bx, Array4<Real> const& phi, GeometryData const& 
                     phi(i,j,k,EFX_ID) = 0.0;
                     phi(i,j,k,EFY_ID) = 0.0;
                     phi(i,j,k,EFZ_ID) = 0.0;
-                    phi(i,j,k,POT_ID) = 4.0;
+                    phi(i,j,k,POT_ID) = 0.8544717964762112;
                 }
                 else if(x>xi1 && x<=xi2)
                 {
@@ -84,7 +94,7 @@ void initdomaindata(Box const& bx, Array4<Real> const& phi, GeometryData const& 
                     phi(i,j,k,EFX_ID) = 0.0;
                     phi(i,j,k,EFY_ID) = 0.0;
                     phi(i,j,k,EFZ_ID) = 0.0;
-                    phi(i,j,k,POT_ID) = 0.0;
+                    phi(i,j,k,POT_ID) = -0.5183664734256028;
                 }
                 else 
                 {
@@ -96,7 +106,7 @@ void initdomaindata(Box const& bx, Array4<Real> const& phi, GeometryData const& 
                     phi(i,j,k,EFX_ID) = 0.0;
                     phi(i,j,k,EFY_ID) = 0.0;
                     phi(i,j,k,EFZ_ID) = 0.0;
-                    phi(i,j,k,POT_ID) = 0.3;
+                    phi(i,j,k,POT_ID) = 0.0;
                 } 
             }
         }
