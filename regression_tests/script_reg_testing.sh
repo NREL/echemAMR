@@ -17,7 +17,7 @@ RESULTS_DIR=${4:-~/echemamr_results_cpu}
 MAKEFILE_OPTIONS=${5:-}
 rm -rf ${RESULTS_DIR}
 
-declare -a allcases=('DriftDiffuse1d' 'CEA' 'openCircuitElectrode' 'anodeElectrolyte' 'CEA_with_kdterm' 'CEA_2d' 'OCE_2d')
+declare -a allcases=('DriftDiffuse1d' 'CEA' 'openCircuitElectrode' 'anodeElectrolyte' 'CEA_with_kdterm' 'CEA_2d' 'OCE_2d' 'CEAcharging' 'CEAcharging_2d')
 
 #clean directories
 for case in "${allcases[@]}";
