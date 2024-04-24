@@ -14,15 +14,17 @@ using namespace amrex;
 AMREX_INLINE
 void amrex_probinit (ProbParm * h_prob_parm, ProbParm * d_prob_parm)
 {
-    amrex::Vector<amrex::Real> plo;
-    amrex::Vector<amrex::Real> phi;
-
-    amrex::Real lenx,leny,lenz,vol;
-    amrex::Real phi_c,phi_a,phi_cell,time_charge;
-
     // read problem specific parmparse parameters here
     amrex::ParmParse pp("prob");
     pp.query("angle", h_prob_parm->angle );
+    pp.query("anode_conductivity",h_prob_parm->anode_conductivity);
+    pp.query("cathode_conductivity",h_prob_parm->cathode_conductivity);
+    pp.query("electrolyte_conductivity",h_prob_parm->electrolyte_conductivity);
+
+    pp.query("anode_dcoeff",h_prob_parm->anode_dcoeff);
+    pp.query("cathode_dcoeff",h_prob_parm->cathode_dcoeff);
+    pp.query("electrolyte_dcoeff",h_prob_parm->electrolyte_dcoeff);
+    
     pp.query("spltcell_x",h_prob_parm->spltcell_x);
     pp.query("spltcell_y",h_prob_parm->spltcell_y);
     pp.query("spltcell_z",h_prob_parm->spltcell_z);
@@ -33,16 +35,13 @@ void amrex_probinit (ProbParm * h_prob_parm, ProbParm * d_prob_parm)
     pp.query("Csmax_a", h_prob_parm->Csmax_a );
     pp.query("Csmax_c", h_prob_parm->Csmax_c );
     pp.query("jin", h_prob_parm->jin);
-    pp.query("anode_cond", h_prob_parm->anode_conductivity);
-    pp.query("cathode_cond", h_prob_parm->cathode_conductivity);
-    pp.query("electrolyte_cond", h_prob_parm->electrolyte_conductivity);
-
+    
     amrex::Gpu::copy(amrex::Gpu::hostToDevice, h_prob_parm, 
                      h_prob_parm+1,d_prob_parm);
-
     echemAMR::host_global_storage->pot_bc_lo[0]
     =-h_prob_parm->jin/h_prob_parm->cathode_conductivity;
     amrex::Print()<<"lo bc:"<<echemAMR::host_global_storage->pot_bc_lo[0]<<"\n";
+
 }
 
 AMREX_GPU_DEVICE
@@ -56,44 +55,39 @@ void initdomaindata(Box const& bx, Array4<Real> const& phi, GeometryData const& 
     const Real* AMREX_RESTRICT prob_lo = geomdata.ProbLo();
     const Real* AMREX_RESTRICT prob_hi = geomdata.ProbHi();
     const Real* AMREX_RESTRICT dx      = geomdata.CellSize();
-
-    amrex::Real lenx=prob_hi[0]-prob_lo[0];
-    amrex::Real midx=0.5*(prob_lo[0]+prob_hi[0]);
     
+    amrex::Real potc=1.3;
+    amrex::Real pote=-0.2;
+    amrex::Real pota=0.0;
+
     amrex::Real x0=prob_lo[0]+prob_parm->f0*(prob_hi[0]-prob_lo[0]);
     amrex::Real y0=prob_lo[1];
     
     amrex::Real x1=prob_lo[0]+(1.0-prob_parm->f0)*(prob_hi[0]-prob_lo[0]);
     amrex::Real y1=prob_hi[1];
 
-    //default
-    amrex::Real potc=1.0;
-    amrex::Real pote=-0.8;
-    amrex::Real pota=0.0;
-    
-    /*amrex::Real potc=0.8421815436274815;
-    amrex::Real pote=-0.5245087478495647;
-    amrex::Real pota=0.0;*/
-
     amrex::Real tan_theta=std::tan(prob_parm->angle*3.14159265359/180.0);
     amrex::Real plo_sgn=std::copysign(1.0,(prob_lo[1]-y0)+tan_theta*(prob_lo[0]-x0));
     amrex::Real phi_sgn=std::copysign(1.0,(prob_hi[1]-y1)+tan_theta*(prob_hi[0]-x1));
     int spltcell[3]={prob_parm->spltcell_x,prob_parm->spltcell_y,prob_parm->spltcell_z};
-    
-    
+
 #ifdef _OPENMP
 #pragma omp parallel for collapse(2) if (GPU::notInLaunchRegion)
 #endif
     for (int k = lo.z; k <= hi.z; ++k) 
     {
+        Real z = prob_lo[2] + (0.5+k) * dx[2];
         for (int j = lo.y; j <= hi.y; ++j) 
         {
+            Real y = prob_lo[1] + (0.5+j) * dx[1];
             AMREX_PRAGMA_SIMD
             for (int i = lo.x; i <= hi.x; ++i) 
             {
                 Real x = prob_lo[0] + (0.5+i) * dx[0];
                 phi(i,j,k,LS_ID)=0.0;
+                phi(i,j,k,C_ID)=0.0;
                 phi(i,j,k,E_ID)=0.0;
+                phi(i,j,k,A_ID)=0.0;
 
                 for(int kk=0;kk<spltcell[2];kk++)
                 {
@@ -104,28 +98,21 @@ void initdomaindata(Box const& bx, Array4<Real> const& phi, GeometryData const& 
                             Real xx= prob_lo[0]+(i+(ii+0.5)/spltcell[0])*dx[0];
                             Real yy= prob_lo[1]+(j+(jj+0.5)/spltcell[1])*dx[1];
 
-                            if( (std::copysign(1.0,(yy-y0)+tan_theta*(xx-x0))*plo_sgn > 0.0) 
-                               || (std::copysign(1.0,(yy-y1)+tan_theta*(xx-x1))*phi_sgn > 0.0) )
+                            if(std::copysign(1.0,(yy-y0)+tan_theta*(xx-x0))*plo_sgn > 0.0 && x<=0.5*(prob_lo[0]+prob_hi[0]) ) 
                             {
-                                phi(i,j,k,LS_ID)+=1.0;
-                                phi(i,j,k,E_ID)+=1.0;
+                                phi(i,j,k,C_ID)+=1.0;
+                            }
+                            if (std::copysign(1.0,(yy-y1)+tan_theta*(xx-x1))*phi_sgn > 0.0 && x>0.5*(prob_lo[0]+prob_hi[0]) )
+                            {
+                                phi(i,j,k,A_ID)+=1.0;
                             }
                         }
                     }
                 }
-
-                phi(i,j,k,LS_ID) = phi(i,j,k,LS_ID)/Real(spltcell[0]*spltcell[1]*spltcell[2]);
-                phi(i,j,k,LS_ID) = 1.0-phi(i,j,k,LS_ID);
-                phi(i,j,k,E_ID)  = phi(i,j,k,E_ID)/Real(spltcell[0]*spltcell[1]*spltcell[2]);
-                phi(i,j,k,E_ID) = 1.0-phi(i,j,k,E_ID);
-                if(x > midx)
-                {
-                    phi(i,j,k,A_ID)=1.0-phi(i,j,k,LS_ID);
-                }
-                else
-                {
-                    phi(i,j,k,C_ID)=1.0-phi(i,j,k,LS_ID);
-                }
+                phi(i,j,k,C_ID)=phi(i,j,k,C_ID)/Real(spltcell[0]*spltcell[1]*spltcell[2]);
+                phi(i,j,k,A_ID)=phi(i,j,k,A_ID)/Real(spltcell[0]*spltcell[1]*spltcell[2]);
+                phi(i,j,k,E_ID)=1.0-phi(i,j,k,C_ID)-phi(i,j,k,A_ID);
+                phi(i,j,k,LS_ID)=phi(i,j,k,E_ID);
                 
                 phi(i,j,k,CO_ID) = phi(i,j,k,C_ID)*prob_parm->C_c_init + 
                                    phi(i,j,k,E_ID)*prob_parm->C_e_init + 
@@ -134,7 +121,7 @@ void initdomaindata(Box const& bx, Array4<Real> const& phi, GeometryData const& 
                 phi(i,j,k,POT_ID) = phi(i,j,k,C_ID)*potc + 
                                     phi(i,j,k,E_ID)*pote +
                                     phi(i,j,k,A_ID)*pota;
-                
+
                 phi(i,j,k,EFX_ID) = 0.0;
                 phi(i,j,k,EFY_ID) = 0.0;
                 phi(i,j,k,EFZ_ID) = 0.0;

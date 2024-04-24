@@ -22,6 +22,22 @@ namespace electrochem_transport {
                            const Real bclo,
                            const Real bchi)
     {
+        const int im1 = (dir == 0) ? i-1 : i;
+        const int jm1 = (dir == 1) ? j-1 : j;
+        const int km1 = (dir == 2) ? k-1 : k;
+
+        if(sgn == -1) 
+        { // lo sides
+            robin_a(im1,jm1,km1)=1.0-phi(i,j,k,LS_ID);
+            robin_b(im1,jm1,km1)=phi(i,j,k,LS_ID);
+            robin_f(im1,jm1,km1)=bclo;
+        } 
+        else 
+        { // hi sides
+            robin_a(i,j,k)=1.0-phi(im1,jm1,km1,LS_ID);
+            robin_b(i,j,k)=phi(im1,jm1,km1,LS_ID);
+            robin_f(i,j,k)=bchi;
+        }
 
     }
     AMREX_GPU_DEVICE AMREX_INLINE
@@ -50,23 +66,17 @@ namespace electrochem_transport {
         const Real bclo,
         const Real bchi)
     {
-        Real xlen, ylen, zlen, maxlen;
-        int axialdir = 0;
-
-        const int im1 = (dir == 0) ? i - 1 : i;
-        const int jm1 = (dir == 1) ? j - 1 : j;
-        const int km1 = (dir == 2) ? k - 1 : k;
+        const int im1 = (dir == 0) ? i-1 : i;
+        const int jm1 = (dir == 1) ? j-1 : j;
+        const int km1 = (dir == 2) ? k-1 : k;
 
         if (sgn == -1)
-        { 
-            // lo sides
-            bc(im1, jm1, km1) = (dir == 0) ? bclo : 0.0;
-        }
-        if(sgn == 1)
+        { // lo sides
+            bc(im1, jm1, km1) = bclo;
+        } else
         { // hi sides
-            bc(i, j, k) = (dir == 0) ? bchi : 0.0;
+            bc(i, j, k) = bchi;
         }
-
     }
 
     AMREX_GPU_DEVICE AMREX_INLINE void compute_dcoeff(
@@ -83,7 +93,7 @@ namespace electrochem_transport {
     {
         for(int c=0;c<NVAR;c++)
         {
-          dcoeff(i, j, k, c) = 0.0;
+          dcoeff(i,j,k,c)=0.0;
         }
         dcoeff(i,j,k,CO_ID) =  prob_parm.anode_dcoeff*phi(i,j,k,A_ID)
         + prob_parm.cathode_dcoeff*phi(i,j,k,C_ID)
@@ -97,7 +107,10 @@ namespace electrochem_transport {
         Array4<Real> const& phi,
         Array4<Real> const& ecoeff)
     {
-
+        for(int c=0;c<NVAR;c++)
+        {
+          ecoeff(i,j,k,c)=1.0;
+        }
     }
 
     AMREX_GPU_DEVICE AMREX_INLINE void compute_vel(
@@ -115,9 +128,10 @@ namespace electrochem_transport {
     {
         for(int c=0;c<NVAR;c++)
         {
-          vel(i, j, k, c) = 0.0;
+          vel(i,j,k,c)=0.0;
         }
     }
+
     AMREX_GPU_DEVICE AMREX_INLINE void compute_potential_dcoeff(
         int i,
         int j,
@@ -135,6 +149,7 @@ namespace electrochem_transport {
         + prob_parm.cathode_conductivity*phi(i,j,k,C_ID)
         + prob_parm.electrolyte_conductivity*phi(i,j,k,E_ID);
     }
+
     AMREX_GPU_DEVICE AMREX_INLINE
     amrex::Real compute_kdstar_atface(int i, int j, int k, int idim,
                                       Array4<Real> const &phi, 
