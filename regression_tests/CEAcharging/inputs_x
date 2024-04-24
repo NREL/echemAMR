@@ -21,6 +21,7 @@ amr.regrid_int      = 1       # how often to regrid
 # TIME STEP CONTROL
 echemamr.cfl            = 0.8 
 
+echemamr.potential_solve_init=1
 echemamr.do_reflux = 1
 echemamr.potential_solve = 1
 echemamr.potential_solve_int = 1

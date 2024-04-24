@@ -26,14 +26,22 @@ void echemAMR::Evolve()
 {
     Real cur_time = t_new[0];
     int last_plot_file_step = 0;
+    if(potential_solve_init)
+    {
+        solve_potential(cur_time);
+    }
+    if (plot_int > 0)
+    {
+        WritePlotFile();
+    }
     postprocess(cur_time, 0, 0.0, echemAMR::host_global_storage);
 
     for (int step = istep[0]; step < max_step && cur_time < stop_time; ++step)
     {
         amrex::Print() << "\nCoarse STEP " << step + 1 << " starts ..." << std::endl;
-    
+
         // BL_PROFILE_TINY_FLUSH()
-        
+
         ComputeDt();
 
         int lev = 0;
@@ -45,7 +53,7 @@ void echemAMR::Evolve()
         }
         if(!species_implicit_solve)
         {
-           timeStep(lev, cur_time, iteration);
+            timeStep(lev, cur_time, iteration);
         }
         else
         {
@@ -56,14 +64,14 @@ void echemAMR::Evolve()
                     regrid(0, cur_time);
                 }
             }
-            
+
             for (int lev = 0; lev <= finest_level; lev++)
             {
                 amrex::Print() << "[Level " << lev << " step " << istep[lev]+1 << "] ";
                 amrex::Print() << "ADVANCE with time = " << t_new[lev]
-                    << " dt = " << dt[0] << std::endl;
+                << " dt = " << dt[0] << std::endl;
             }
-            
+
             Vector< Array<MultiFab,AMREX_SPACEDIM> > flux(finest_level+1);
             for (int lev = 0; lev <= finest_level; lev++)
             {
@@ -75,7 +83,7 @@ void echemAMR::Evolve()
                     flux[lev][idim].setVal(0.0);
                 }
             }
-            
+
             Vector<MultiFab> expl_src(finest_level+1);
             for(int lev=0;lev<=finest_level;lev++)
             {
@@ -94,8 +102,8 @@ void echemAMR::Evolve()
             for (int lev = finest_level; lev > 0; lev--)
             {
                 average_down_faces(amrex::GetArrOfConstPtrs(flux[lev  ]),
-                        amrex::GetArrOfPtrs(flux[lev-1]),
-                        refRatio(lev-1), Geom(lev-1));
+                                   amrex::GetArrOfPtrs(flux[lev-1]),
+                                   refRatio(lev-1), Geom(lev-1));
             }
             for(int lev=0;lev<=finest_level;lev++)
             {
@@ -107,7 +115,7 @@ void echemAMR::Evolve()
                 //FIXME: need to avoid this fillpatch
                 FillPatch(lev, cur_time, Sborder, 0, Sborder.nComp());
                 compute_dsdt(lev, num_grow, Sborder,flux[lev], expl_src[lev], 
-                        cur_time, dt[0], false);
+                             cur_time, dt[0], false);
             }
 
             for(unsigned int ind=0;ind<transported_species_list.size();ind++)
@@ -115,7 +123,7 @@ void echemAMR::Evolve()
                 implicit_solve_species(cur_time,dt[0],transported_species_list[ind],expl_src);
             }
             AverageDown ();
-            
+
             for (int lev = 0; lev <= finest_level; lev++)
                 ++istep[lev];
 
@@ -327,7 +335,7 @@ void echemAMR::solve_potential(Real current_time)
     Vector<MultiFab> robin_b(finest_level+1);
     Vector<MultiFab> robin_f(finest_level+1);
 
-    const int num_grow = 1;
+    const int num_grow = 2;
     for (int ilev = 0; ilev <= finest_level; ilev++)
     {
         potential[ilev].define(grids[ilev], dmap[ilev], 1, num_grow);
@@ -533,6 +541,12 @@ void echemAMR::solve_potential(Real current_time)
                     for (MFIter mfi(phi_new[ilev], TilingIfNotGPU()); mfi.isValid(); ++mfi)
                     {
                         const auto dx = geom[ilev].CellSizeArray();
+                        auto plo = geom[ilev].ProbLoArray();
+                        auto phi = geom[ilev].ProbHiArray();
+                        const int* domlo_arr = geom[ilev].Domain().loVect();
+                        const int* domhi_arr = geom[ilev].Domain().hiVect();
+                        GpuArray<int,AMREX_SPACEDIM> domlo={AMREX_D_DECL(domlo_arr[0], domlo_arr[1], domlo_arr[2])};
+                        GpuArray<int,AMREX_SPACEDIM> domhi={AMREX_D_DECL(domhi_arr[0], domhi_arr[1], domhi_arr[2])};
                         const Box& bx = mfi.tilebox();
                         Real min_dx = amrex::min(dx[0], amrex::min(dx[1], dx[2]));
 
@@ -557,9 +571,13 @@ void echemAMR::solve_potential(Real current_time)
                             Real dphidt1 = 0.0;
                             Real dphidt2 = 0.0;
                             Real n_ls[AMREX_SPACEDIM];
+                            Real intloc[AMREX_SPACEDIM];
+
 
                             bv_get_grads_and_jumps(i, j, k, normaldir, lset_id, dx, phi_arr, gradctol,
-                                                   mod_gradc, gradc_cutoff, facecolor, potjump, dphidn, dphidt1, dphidt2, n_ls);
+                                                   mod_gradc, gradc_cutoff, facecolor, potjump, dphidn, 
+                                                   dphidt1, dphidt2, n_ls, intloc, 
+                                                   plo, phi);
 
 
                             explterms_arr(i, j, k) = 0.0;
@@ -587,7 +605,7 @@ void echemAMR::solve_potential(Real current_time)
 
                                 // dcoeff_arr(i,j,k) += -jdash_bv*activ_func/pow(mod_gradc,3.0) * dcdn*dcdn;
                                 dcoeff_arr(i, j, k) += -jdash_bv * activ_func / mod_gradc * n_ls[0] * n_ls[0];
-                                
+
 
                                 // expl term1
                                 // explterms_arr(i,j,k) =   j_bv*activ_func*dcdn/mod_gradc;
@@ -625,7 +643,7 @@ void echemAMR::solve_potential(Real current_time)
                     Array4<Real> term_x_res = bv_explicit_terms_res[0].array(mfi);
                     Array4<Real> term_y_res = bv_explicit_terms_res[1].array(mfi);
                     Array4<Real> term_z_res = bv_explicit_terms_res[2].array(mfi);
-                    
+
                     Array4<Real> kdterm_x = kdterm[0].array(mfi);
                     Array4<Real> kdterm_y = kdterm[1].array(mfi);
                     Array4<Real> kdterm_z = kdterm[2].array(mfi);
@@ -948,7 +966,7 @@ void echemAMR::Advance(int lev, Real time, Real dt_lev, int iteration, int ncycl
 // to account for nano divide dsdt by NP_ID
 void echemAMR::compute_dsdt(int lev, const int num_grow, MultiFab& Sborder, 
                             Array<MultiFab,AMREX_SPACEDIM>& flux, MultiFab& dsdt,
-                            Real time, Real dt, bool reflux_this_stage)
+                            Real time, Real delt, bool reflux_this_stage)
 {
     const auto dx = geom[lev].CellSizeArray();
     auto prob_lo = geom[lev].ProbLoArray();
@@ -1012,7 +1030,7 @@ void echemAMR::compute_dsdt(int lev, const int num_grow, MultiFab& Sborder,
             {
                 // update the lev+1/lev flux register (index lev+1)
                 const Real dA = (i == 0) ? dx[1] * dx[2] : ((i == 1) ? dx[0] * dx[2] : dx[0] * dx[1]);
-                const Real scale = -dt * dA;
+                const Real scale = -delt * dA;
                 flux_reg[lev + 1]->CrseInit(flux[i], i, 0, 0, ncomp, scale);
             }
         }
@@ -1022,7 +1040,7 @@ void echemAMR::compute_dsdt(int lev, const int num_grow, MultiFab& Sborder,
             {
                 // update the lev/lev-1 flux register (index lev)
                 const Real dA = (i == 0) ? dx[1] * dx[2] : ((i == 1) ? dx[0] * dx[2] : dx[0] * dx[1]);
-                const Real scale = dt * dA;
+                const Real scale = delt * dA;
                 flux_reg[lev]->FineAdd(flux[i], i, 0, 0, ncomp, scale);
             }
         }
@@ -1118,18 +1136,18 @@ void echemAMR::compute_fluxes(int lev, const int num_grow, MultiFab& Sborder,
             }
 
             amrex::ParallelFor(bx_x, ncomp, [=] AMREX_GPU_DEVICE(int i, int j, int k, int n) {
-                compute_flux(i, j, k, n, 0, sborder_arr, velx_arr, dcoeff_arr, flux_arr[0], dx, *localprobparm, 
-                             implicit_diffusion, bvflux, bvlset, bvspec, lsgrad_tol);
+                compute_flux(i, j, k, n, 0, sborder_arr, velx_arr, dcoeff_arr, flux_arr[0], dx, prob_lo, prob_hi,
+                             *localprobparm, implicit_diffusion, bvflux, bvlset, bvspec, lsgrad_tol);
             });
 
             amrex::ParallelFor(bx_y, ncomp, [=] AMREX_GPU_DEVICE(int i, int j, int k, int n) {
-                compute_flux(i, j, k, n, 1, sborder_arr, vely_arr, dcoeff_arr, flux_arr[1], dx, *localprobparm, 
-                             implicit_diffusion, bvflux, bvlset, bvspec, lsgrad_tol);
+                compute_flux(i, j, k, n, 1, sborder_arr, vely_arr, dcoeff_arr, flux_arr[1], dx, prob_lo, prob_hi,
+                             *localprobparm, implicit_diffusion, bvflux, bvlset, bvspec, lsgrad_tol);
             });
 
             amrex::ParallelFor(bx_z, ncomp, [=] AMREX_GPU_DEVICE(int i, int j, int k, int n) {
-                compute_flux(i, j, k, n, 2, sborder_arr, velz_arr, dcoeff_arr, flux_arr[2], dx, *localprobparm, 
-                             implicit_diffusion, bvflux, bvlset, bvspec, lsgrad_tol);
+                compute_flux(i, j, k, n, 2, sborder_arr, velz_arr, dcoeff_arr, flux_arr[2], dx, prob_lo, prob_hi, 
+                             *localprobparm, implicit_diffusion, bvflux, bvlset, bvspec, lsgrad_tol);
             });
         }
     }
@@ -1250,7 +1268,7 @@ void echemAMR::implicit_solve_species(Real current_time,Real dt,int spec_id,
     solution.resize(finest_level + 1);
     rhs.resize(finest_level + 1);
 
-    const int num_grow = 1;
+    const int num_grow = 2;
 
     MLMG mlmg(mlabec);
     mlmg.setMaxIter(linsolve_maxiter);
@@ -1378,9 +1396,14 @@ void echemAMR::implicit_solve_species(Real current_time,Real dt,int spec_id,
                     Box fbox = convert(bx, IntVect::TheDimensionVector(idim));
                     Array4<Real> phi_arr = Sborder.array(mfi);
                     Array4<Real> dcoeff_arr = face_bcoeff[idim].array(mfi);
+                    auto plo = geom[ilev].ProbLoArray();
+                    auto phi = geom[ilev].ProbHiArray();
+                    const int* domlo_arr = geom[ilev].Domain().loVect();
+                    const int* domhi_arr = geom[ilev].Domain().hiVect();
+                    GpuArray<int,AMREX_SPACEDIM> domlo={AMREX_D_DECL(domlo_arr[0], domlo_arr[1], domlo_arr[2])};
+                    GpuArray<int,AMREX_SPACEDIM> domhi={AMREX_D_DECL(domhi_arr[0], domhi_arr[1], domhi_arr[2])};
 
-                    amrex::ParallelFor(fbox, [=] AMREX_GPU_DEVICE(int i, int j, int k) 
-                    {
+                    amrex::ParallelFor(fbox, [=] AMREX_GPU_DEVICE(int i, int j, int k) { 
 
                         int normaldir = idim;
                         Real mod_gradc=0.0;
@@ -1391,14 +1414,16 @@ void echemAMR::implicit_solve_species(Real current_time,Real dt,int spec_id,
                         Real dphidt1 = 0.0;
                         Real dphidt2 = 0.0;
                         Real n_ls[AMREX_SPACEDIM];
+                        Real intloc[AMREX_SPACEDIM];
 
                         bv_get_grads_and_jumps(i, j, k, normaldir, lset_id, dx, phi_arr, gradctol,
-                                               mod_gradc, gradc_cutoff, facecolor, potjump, dphidn, dphidt1, dphidt2, n_ls);
+                                               mod_gradc, gradc_cutoff, facecolor, potjump, 
+                                               dphidn, dphidt1, dphidt2, n_ls, intloc, 
+                                               plo,phi);
+                       Real activ_func = electrochem_reactions::bv_activation_function(facecolor, mod_gradc, gradc_cutoff);
 
-
-                        if (mod_gradc > gradc_cutoff)
+                        if (mod_gradc > gradc_cutoff && activ_func > 0.0)
                         {
-                            Real activ_func = electrochem_reactions::bv_activation_function(facecolor, mod_gradc, gradc_cutoff);
                             dcoeff_arr(i, j, k) *= (1.0 - activ_func);
                         }
                     });
@@ -1473,7 +1498,7 @@ void echemAMR::solve_mechanics(Real current_time)
     amrex::Print() << "Performing Mechanics Solve: "<< std::endl;
 
     // Set parameters
-    const int num_grow = 1;
+    const int num_grow = 2;
     int max_coarsening_level = 30;//linsolve_max_coarsening_level;
     int verbose = 2;
     int bottom_verbose = 2;
@@ -1651,21 +1676,21 @@ void echemAMR::solve_mechanics(Real current_time)
             amrex::Array4<amrex::Real const> const& lamG_deltaT_arr = lamG_deltaT[ilev].const_array(mfi);
 
             AMREX_HOST_DEVICE_PARALLEL_FOR_3D( bx, i, j, k,
-            {
-                amrex::Real s11 = amrex::Real(0.5) * -( fx(i,j,k,0) + fx(i+1,j,k,0) ) + lamG_deltaT_arr(i,j,k);
-                amrex::Real s12 = amrex::Real(0.5) * -( fx(i,j,k,1) + fx(i+1,j,k,1) );
-                amrex::Real s13 = amrex::Real(0.5) * -( fx(i,j,k,2) + fx(i+1,j,k,2) );
+                                              {
+                                                  amrex::Real s11 = amrex::Real(0.5) * -( fx(i,j,k,0) + fx(i+1,j,k,0) ) + lamG_deltaT_arr(i,j,k);
+                                                  amrex::Real s12 = amrex::Real(0.5) * -( fx(i,j,k,1) + fx(i+1,j,k,1) );
+                                                  amrex::Real s13 = amrex::Real(0.5) * -( fx(i,j,k,2) + fx(i+1,j,k,2) );
 
-                amrex::Real s21 = amrex::Real(0.5) * -( fy(i,j,k,0) + fy(i,j+1,k,0) );
-                amrex::Real s22 = amrex::Real(0.5) * -( fy(i,j,k,1) + fy(i,j+1,k,1) ) + lamG_deltaT_arr(i,j,k);
-                amrex::Real s23 = amrex::Real(0.5) * -( fy(i,j,k,2) + fy(i,j+1,k,2) );
+                                                  amrex::Real s21 = amrex::Real(0.5) * -( fy(i,j,k,0) + fy(i,j+1,k,0) );
+                                                  amrex::Real s22 = amrex::Real(0.5) * -( fy(i,j,k,1) + fy(i,j+1,k,1) ) + lamG_deltaT_arr(i,j,k);
+                                                  amrex::Real s23 = amrex::Real(0.5) * -( fy(i,j,k,2) + fy(i,j+1,k,2) );
 
-                amrex::Real s31 = amrex::Real(0.5) * -( fz(i,j,k,0) + fz(i,j,k+1,0) );
-                amrex::Real s32 = amrex::Real(0.5) * -( fz(i,j,k,1) + fz(i,j,k+1,1) );
-                amrex::Real s33 = amrex::Real(0.5) * -( fz(i,j,k,2) + fz(i,j,k+1,2) ) + lamG_deltaT_arr(i,j,k);
+                                                  amrex::Real s31 = amrex::Real(0.5) * -( fz(i,j,k,0) + fz(i,j,k+1,0) );
+                                                  amrex::Real s32 = amrex::Real(0.5) * -( fz(i,j,k,1) + fz(i,j,k+1,1) );
+                                                  amrex::Real s33 = amrex::Real(0.5) * -( fz(i,j,k,2) + fz(i,j,k+1,2) ) + lamG_deltaT_arr(i,j,k);
 
-                von(i,j,k) = sqrt( 0.5*( (s11-s22)*(s11-s22)+(s22-s33)*(s22-s33)+(s33-s11)*(s33-s11) + 6.0*(s23*s23+s31*s31+s12*s12) ) );
-            });
+                                                  von(i,j,k) = sqrt( 0.5*( (s11-s22)*(s11-s22)+(s22-s33)*(s22-s33)+(s33-s11)*(s33-s11) + 6.0*(s23*s23+s31*s31+s12*s12) ) );
+                                              });
         }
     }
 
@@ -1701,10 +1726,10 @@ void echemAMR::solve_mechanics(Real current_time)
             amrex::Array4<amrex::Real const> const& lamG_deltaT_arr = lamG_deltaT[ilev].const_array(mfi);
 
             AMREX_HOST_DEVICE_PARALLEL_FOR_3D( bx, i, j, k,
-            {
-                amrex::Real s11_value = amrex::Real(0.5) * -( fx(i,j,k,0) + fx(i+1,j,k,0) ) + lamG_deltaT_arr(i,j,k);
-                s11(i,j,k) = s11_value;
-            });
+                                              {
+                                                  amrex::Real s11_value = amrex::Real(0.5) * -( fx(i,j,k,0) + fx(i+1,j,k,0) ) + lamG_deltaT_arr(i,j,k);
+                                                  s11(i,j,k) = s11_value;
+                                              });
         }
     }
     // compute stress tensor (sigma 22)
@@ -1739,10 +1764,10 @@ void echemAMR::solve_mechanics(Real current_time)
             amrex::Array4<amrex::Real const> const& lamG_deltaT_arr = lamG_deltaT[ilev].const_array(mfi);
 
             AMREX_HOST_DEVICE_PARALLEL_FOR_3D( bx, i, j, k,
-            {
-                amrex::Real s22_value = amrex::Real(0.5) * -( fy(i,j,k,1) + fy(i,j+1,k,1) ) + lamG_deltaT_arr(i,j,k);
-                s22(i,j,k) = s22_value;
-            });
+                                              {
+                                                  amrex::Real s22_value = amrex::Real(0.5) * -( fy(i,j,k,1) + fy(i,j+1,k,1) ) + lamG_deltaT_arr(i,j,k);
+                                                  s22(i,j,k) = s22_value;
+                                              });
         }
     }    
     // compute stress tensor (sigma 33)
@@ -1777,10 +1802,10 @@ void echemAMR::solve_mechanics(Real current_time)
             amrex::Array4<amrex::Real const> const& lamG_deltaT_arr = lamG_deltaT[ilev].const_array(mfi);
 
             AMREX_HOST_DEVICE_PARALLEL_FOR_3D( bx, i, j, k,
-            {
-                amrex::Real s33_value = amrex::Real(0.5) * -( fz(i,j,k,2) + fz(i,j,k+1,2) ) + lamG_deltaT_arr(i,j,k);
-                s33(i,j,k) = s33_value;
-            });
+                                              {
+                                                  amrex::Real s33_value = amrex::Real(0.5) * -( fz(i,j,k,2) + fz(i,j,k+1,2) ) + lamG_deltaT_arr(i,j,k);
+                                                  s33(i,j,k) = s33_value;
+                                              });
         }
     }
     // compute stress tensor (sigma 12)
@@ -1815,13 +1840,13 @@ void echemAMR::solve_mechanics(Real current_time)
             amrex::Array4<amrex::Real const> const& lamG_deltaT_arr = lamG_deltaT[ilev].const_array(mfi);
 
             AMREX_HOST_DEVICE_PARALLEL_FOR_3D( bx, i, j, k,
-            {
-                amrex::Real s12_value = amrex::Real(0.5) * -( fx(i,j,k,1) + fx(i+1,j,k,1) );
-                s12(i,j,k) = s12_value;
-            });
+                                              {
+                                                  amrex::Real s12_value = amrex::Real(0.5) * -( fx(i,j,k,1) + fx(i+1,j,k,1) );
+                                                  s12(i,j,k) = s12_value;
+                                              });
         }
     }         
-   // compute stress tensor (sigma 13)
+    // compute stress tensor (sigma 13)
     Vector<MultiFab> sigma13;  
     sigma13.resize(finest_level + 1);
 
@@ -1853,10 +1878,10 @@ void echemAMR::solve_mechanics(Real current_time)
             amrex::Array4<amrex::Real const> const& lamG_deltaT_arr = lamG_deltaT[ilev].const_array(mfi);
 
             AMREX_HOST_DEVICE_PARALLEL_FOR_3D( bx, i, j, k,
-            {
-                amrex::Real s13_value = amrex::Real(0.5) * -( fx(i,j,k,2) + fx(i+1,j,k,2) );
-                s13(i,j,k) = s13_value;
-            });
+                                              {
+                                                  amrex::Real s13_value = amrex::Real(0.5) * -( fx(i,j,k,2) + fx(i+1,j,k,2) );
+                                                  s13(i,j,k) = s13_value;
+                                              });
         }
     }         
     // compute stress tensor (sigma 23)
@@ -1891,10 +1916,10 @@ void echemAMR::solve_mechanics(Real current_time)
             amrex::Array4<amrex::Real const> const& lamG_deltaT_arr = lamG_deltaT[ilev].const_array(mfi);
 
             AMREX_HOST_DEVICE_PARALLEL_FOR_3D( bx, i, j, k,
-            {
-                amrex::Real s23_value = amrex::Real(0.5) * -( fx(i,j,k,2) + fx(i+1,j,k,2) );
-                s23(i,j,k) = s23_value;
-            });
+                                              {
+                                                  amrex::Real s23_value = amrex::Real(0.5) * -( fx(i,j,k,2) + fx(i+1,j,k,2) );
+                                                  s23(i,j,k) = s23_value;
+                                              });
         }
     }  
 

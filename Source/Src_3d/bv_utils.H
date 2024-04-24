@@ -10,15 +10,26 @@
 using namespace amrex;
 
 AMREX_GPU_DEVICE
-    AMREX_FORCE_INLINE
+AMREX_FORCE_INLINE
 void bv_get_grads_and_jumps(int i,int j,int k,int normaldir,int lset_id,
-        const GpuArray<Real, AMREX_SPACEDIM>& dx,
-        Array4<Real> const& phi_arr, Real gradc_tolfac,
-        Real& mod_gradc, Real &gradc_cutoff,
-        Real &facecolor, Real &potjump, Real &dphidn, Real &dphidt1, Real &dphidt2,
-        Real n_ls[AMREX_SPACEDIM])
+                            const GpuArray<Real, AMREX_SPACEDIM>& dx,
+                            Array4<Real> const& phi_arr, Real gradc_tolfac,
+                            Real& mod_gradc, Real &gradc_cutoff,
+                            Real &facecolor, Real &potjump, Real &dphidn, Real &dphidt1, Real &dphidt2,
+                            Real n_ls[AMREX_SPACEDIM],
+                            Real interfaceloc[AMREX_SPACEDIM],
+                            GpuArray<Real, AMREX_SPACEDIM> prob_lo,
+                            GpuArray<Real, AMREX_SPACEDIM> prob_hi
+                           )
 {
+    Real facecoords[AMREX_SPACEDIM];
+    facecoords[0]=prob_lo[0]+(i+0.5)*dx[0];
+    facecoords[1]=prob_lo[1]+(j+0.5)*dx[1];
+    facecoords[2]=prob_lo[2]+(k+0.5)*dx[2];
+    facecoords[normaldir]-=0.5*dx[normaldir];
     Real min_dx = amrex::min(dx[0], amrex::min(dx[1], dx[2]));
+    amrex::Real c_interface=0.5;
+
     IntVect left(i, j, k);
     IntVect right(i, j, k);
 
@@ -82,10 +93,12 @@ void bv_get_grads_and_jumps(int i,int j,int k,int normaldir,int lset_id,
     dphidt2 = (pot_frnt - pot_back) / (2.0 * dx[trans2dir]);
 
     Real gradc_max = 1.0 / min_dx; // maximum gradient possible on the current grid
-    
+
     gradc_cutoff = gradc_tolfac * gradc_max;
     mod_gradc = sqrt(dcdn * dcdn + dcdt1 * dcdt1 + dcdt2 * dcdt2);
     facecolor = 0.5*(c_left+c_right);
+
+    int nsteps=10;
 
     //some default values
     potjump   = 0.0;
@@ -93,15 +106,26 @@ void bv_get_grads_and_jumps(int i,int j,int k,int normaldir,int lset_id,
     n_ls[1]   = 0.0;
     n_ls[2]   = 0.0;
 
+    //some default point that is outside the domain
+    interfaceloc[0]=prob_lo[0]-(prob_hi[0]-prob_lo[0]);
+    interfaceloc[1]=prob_lo[1]-(prob_hi[1]-prob_lo[1]);
+    interfaceloc[2]=prob_lo[2]-(prob_hi[2]-prob_lo[2]);
+
     if (mod_gradc > gradc_cutoff)
     {
         n_ls[0] = dcdn / mod_gradc;
         n_ls[1] = dcdt1 / mod_gradc;
         n_ls[2] = dcdt2 / mod_gradc;
+
         // jump along the level set normal (phi_electrolyte-phi_electrode)
         potjump = (dphidn * n_ls[0] + dphidt1 * n_ls[1] + dphidt2 * n_ls[2]) / mod_gradc;
         /*Print()<<"dphidn,dphidt1,dphidt2:"<<dphidn<<"\t"<<dphidt1<<"\t"<<dphidt2<<"\n";
-        Print()<<"n_ls:"<<n_ls[0]<<"\t"<<n_ls[1]<<"\t"<<n_ls[2]<<"\n";*/
+          Print()<<"n_ls:"<<n_ls[0]<<"\t"<<n_ls[1]<<"\t"<<n_ls[2]<<"\n";*/
+        amrex::Real d_interface=(c_interface-facecolor)/mod_gradc;
+        interfaceloc[0]=facecoords[0]+d_interface*n_ls[GET_XDIR(normaldir)];
+        interfaceloc[1]=facecoords[1]+d_interface*n_ls[GET_YDIR(normaldir)];
+        interfaceloc[2]=facecoords[2]+d_interface*n_ls[GET_ZDIR(normaldir)];
     }
+
 }
 #endif

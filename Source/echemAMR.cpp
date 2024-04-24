@@ -163,10 +163,6 @@ void echemAMR::InitData()
         ReadCheckpointFile();
     }
 
-    if (plot_int > 0)
-    {
-        WritePlotFile();
-    }
 }
 
 // tag all cells for refinement
@@ -288,6 +284,7 @@ void echemAMR::ReadParameters()
         pp.query("fixed_timestep",fixed_timestep);
         pp.query("do_reflux", do_reflux);
         pp.query("potential_solve", potential_solve);
+        pp.query("potential_solve_init", potential_solve_init);
         pp.query("potential_solve_int", pot_solve_int);
         pp.query("potential_initial_guess", pot_initial_guess);
 

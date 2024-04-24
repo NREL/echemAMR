@@ -67,8 +67,8 @@ void initdomaindata(Box const& bx, Array4<Real> const& phi, GeometryData const& 
     amrex::Real y1=prob_hi[1];
 
     //default
-    amrex::Real potc=0.8544717964762112;
-    amrex::Real pote=-0.5183664734256028;
+    amrex::Real potc=1.0;
+    amrex::Real pote=-0.8;
     amrex::Real pota=0.0;
     
     /*amrex::Real potc=0.8421815436274815;

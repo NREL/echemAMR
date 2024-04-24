@@ -82,7 +82,7 @@ void initdomaindata(Box const& bx, Array4<Real> const& phi, GeometryData const& 
                     phi(i,j,k,EFX_ID) = 0.0;
                     phi(i,j,k,EFY_ID) = 0.0;
                     phi(i,j,k,EFZ_ID) = 0.0;
-                    phi(i,j,k,POT_ID) = 0.8544717964762112;
+                    phi(i,j,k,POT_ID) = 1.0;
                 }
                 else if(x>xi1 && x<=xi2)
                 {
@@ -94,7 +94,7 @@ void initdomaindata(Box const& bx, Array4<Real> const& phi, GeometryData const& 
                     phi(i,j,k,EFX_ID) = 0.0;
                     phi(i,j,k,EFY_ID) = 0.0;
                     phi(i,j,k,EFZ_ID) = 0.0;
-                    phi(i,j,k,POT_ID) = -0.5183664734256028;
+                    phi(i,j,k,POT_ID) = -0.7;
                 }
                 else 
                 {
