@@ -12,4 +12,14 @@
 #define EPS0       8.854187817e-12
 #define FBYR FARADCONST/GASCONST
 
+//these functions are to get x,y,z directions
+//given a sweep direction
+//these are used for viscous flux calculation
+//if sweep direction is 0, normal-x, t1-y, t2-z
+//if sweep direction is 1, normal-y, t1-z, t2-x
+//if sweep direction is 2, normal-z, t1-x, t2-y
+#define GET_XDIR(a) (a*(a-1)/2     - 2*a*(a-2))
+#define GET_YDIR(a) ((a-1)*(a-2)/2 + a*(a-1))
+#define GET_ZDIR(a) ((a-1)*(a-2)   - a*(a-2))
+
 #endif

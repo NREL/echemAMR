@@ -241,6 +241,8 @@ private:
     int pot_solve_int = 1;
     // use old solution as initial guess for potential
     int pot_initial_guess = 0;
+    //potential solve on init
+    int potential_solve_init=0;
 
     int species_implicit_solve=0;
     int reset_species_in_solid=0;

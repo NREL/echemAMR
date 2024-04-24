@@ -67,7 +67,7 @@ def get_electrolyte_voltage(c,camax,phia,j,phi0):
     return(phie)
 
 if __name__ == "__main__":
-    infile=open("params.json")
+    infile=open(argv[1])
     inpt = json.load(infile)
     finaltime=inpt["finaltime"]
     nsteps=inpt["nsteps"]

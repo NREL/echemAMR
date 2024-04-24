@@ -13,20 +13,22 @@ using namespace amrex;
 #define heps 1.0e-30
 
 AMREX_GPU_DEVICE
-    AMREX_FORCE_INLINE
+AMREX_FORCE_INLINE
 void compute_flux(
-        int i,
-        int j,
-        int k,
-        int n,
-        int sweepdir,
-        Array4<Real> const& phi, // state variable
-        Array4<Real> const& vel,
-        Array4<Real> const& dcoeff,
-        Array4<Real> const& fx,
-        const GpuArray<Real, AMREX_SPACEDIM>& dx,
-        ProbParm const& prob_parm,int implicit_diffusion,
-        int bvflux,int lset_id,const int bvspec[NVAR],int lsgrad_tol)
+    int i,
+    int j,
+    int k,
+    int n,
+    int sweepdir,
+    Array4<Real> const& phi, // state variable
+    Array4<Real> const& vel,
+    Array4<Real> const& dcoeff,
+    Array4<Real> const& fx,
+    const GpuArray<Real, AMREX_SPACEDIM>& dx,
+    GpuArray<Real, AMREX_SPACEDIM> prob_lo,
+    GpuArray<Real, AMREX_SPACEDIM> prob_hi,
+    ProbParm const& prob_parm,int implicit_diffusion,
+    int bvflux,int lset_id,const int bvspec[NVAR],int lsgrad_tol)
 {
 
     //|--left1--|--left--|--right--|--right1--|
@@ -62,8 +64,8 @@ void compute_flux(
 
     Real flx_L = phi(left, n)*vel(left, n)  + 0.5 * lim_left * (phi(left, n)*vel(left, n) - phi(left1, n)*vel(left1, n));
     Real flx_R = phi(right, n)*vel(right,n) - 0.5 * lim_right * (phi(right1, n)*vel(right1,n) - phi(right, n)*vel(right,n));
-    
-    
+
+
     Real vel_sgn = std::copysign(1.0, 0.5*(vel(left,n)+vel(right,n)) );
 
     //fx(i, j, k, n) = phi_L * 0.5 * (vel_mid + fabs(vel_mid)) + phi_R * 0.5 * (vel_mid - fabs(vel_mid));
@@ -79,7 +81,7 @@ void compute_flux(
         //arithmetic mean case
         //fx(i, j, k, n) += -0.5*(d1 + d2) * (phi(right, n) - phi(left, n)) / dx[sweepdir];
     }
-    
+
     if(bvflux)
     {
         if(bvspec[n]==1)
@@ -89,16 +91,18 @@ void compute_flux(
             Real potjump=0.0;
             Real gradc_cutoff=0.0;
             Real n_ls[AMREX_SPACEDIM];
+            Real intloc[AMREX_SPACEDIM];
             Real dphidn=0.0;
             Real dphidt1=0.0;
             Real dphidt2=0.0;
 
             bv_get_grads_and_jumps(i, j, k, sweepdir, lset_id, dx, phi, lsgrad_tol, 
-                    mod_gradc, gradc_cutoff, facecolor, potjump, dphidn, dphidt1, dphidt2, n_ls);
+                                   mod_gradc, gradc_cutoff, facecolor, potjump, dphidn, dphidt1, dphidt2, n_ls, intloc,
+                                   prob_lo, prob_hi);
+            Real activ_func = electrochem_reactions::bv_activation_function(facecolor, mod_gradc, gradc_cutoff);
 
-            if(mod_gradc > gradc_cutoff)
+            if(mod_gradc > gradc_cutoff && activ_func > 0.0)
             {
-                Real activ_func = electrochem_reactions::bv_activation_function(facecolor, mod_gradc, gradc_cutoff);
                 fx(i,j,k,n)=fx(i,j,k,n)*(1.0-activ_func);
                 Real j_bv;
 

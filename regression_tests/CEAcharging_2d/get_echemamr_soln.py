@@ -47,6 +47,8 @@ for i, fn in enumerate(fn_list):
     fld_conc = lb["Concentration"]
     timearr[i]=ds.current_time
     cellvolt[i]=fld_pot[0]-fld_pot[-1]
+    fld_cathode[fld_cathode < 1]=0.0
+    fld_anode[fld_anode < 1]=0.0
     conc_c[i]=np.sum(fld_conc*fld_cathode)/np.sum(fld_cathode)
     conc_a[i]=np.sum(fld_conc*fld_anode)/np.sum(fld_anode)
 
