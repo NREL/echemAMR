@@ -12,7 +12,7 @@ amr.n_cell           =  128     128      2
 prob.angle       =  80.0
 
 #straight case
-#prob.angle       =  80.0
+#prob.angle       =  90.0
 
 prob.f0          = 0.35
 prob.spltcell_x  = 32

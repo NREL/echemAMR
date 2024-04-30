@@ -82,6 +82,17 @@ if __name__ == "__main__":
     cc_init=inpt["cc_init"]
     ce_init=inpt["ce_init"]
     temperature=inpt["temperature"]
+    angle=inpt["angle"]*np.pi/180.0
+
+    #correct jin to jbv
+    #note: by current continuity
+    #jin*l=jbv*l/cos(th) 
+    #l is the thickness of battery in y
+    jin=jin*np.cos(angle)
+
+    #species flux = jbv*l/cos(th)/F=jl/F
+    area=area/np.cos(angle)
+
 
     phi0=2.0*GASCONST*temperature/FARADCONST
     print("phi0:",phi0)
