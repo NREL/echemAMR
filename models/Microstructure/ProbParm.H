@@ -27,7 +27,8 @@ struct ProbParm
     int mater_cathode = 2; 
     int mater_mech_cathode = 0;
     // Specific surface area correction
-    amrex::Real Sp_corr_cathode = 1.0;    
+    amrex::Real Sp_corr_cathode = 1.0;   
+    amrex::Real current_limit_factor=1e8; 
     
     // Anode
     //    0=constant diffusion, conductivity, OCP, and io

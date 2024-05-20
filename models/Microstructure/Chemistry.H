@@ -723,7 +723,7 @@ namespace electrochem
     {
         //Phi_jump = -Phi_jump; // In  source Phi_jump is noted phi e - phi s
         amrex::Real jumphi=-Phi_jump;
-        amrex::Real limfactor=100.0;
+        amrex::Real limfactor=prob_parm.current_limit_factor;
         const amrex::Real ioa = Io_a(Ca, Ce, prob_parm);
         const amrex::Real Spa = Spcorr_anode(prob_parm);
         const amrex::Real OCPa = OCP_a(Ca, prob_parm);
@@ -753,7 +753,7 @@ namespace electrochem
     amrex::Real intercalation_reaction_anode_derivative(amrex::Real Ca, amrex::Real Ce, amrex::Real Phi_jump, const ProbParm& prob_parm)
     {
         //Phi_jump = -Phi_jump; // In  source Phi_jump is noted phi e - phi s
-        amrex::Real limfactor=100.0;
+        amrex::Real limfactor=prob_parm.current_limit_factor;
         amrex::Real jumphi=-Phi_jump;
         const amrex::Real ioa = Io_a(Ca, Ce, prob_parm);
         const amrex::Real Spa = Spcorr_anode(prob_parm);
@@ -773,7 +773,7 @@ namespace electrochem
     amrex::Real intercalation_reaction_cathode(amrex::Real Cc, amrex::Real Ce, amrex::Real Phi_jump, const ProbParm& prob_parm)
     {
         //Phi_jump = -Phi_jump; // In  source Phi_jump is noted phi e - phi s
-        amrex::Real limfactor=100.0;
+        amrex::Real limfactor=prob_parm.current_limit_factor;
         amrex::Real jumphi=-Phi_jump;
         const amrex::Real ioc = Io_c(Cc, Ce, prob_parm);
         const amrex::Real Spc = Spcorr_anode(prob_parm);
@@ -801,7 +801,7 @@ namespace electrochem
     amrex::Real intercalation_reaction_cathode_derivative(amrex::Real Ca, amrex::Real Ce, amrex::Real Phi_jump, const ProbParm& prob_parm)
     {
         //Phi_jump = -Phi_jump; // In  source Phi_jump is noted phi e - phi s
-        amrex::Real limfactor=100.0;
+        amrex::Real limfactor=prob_parm.current_limit_factor;
         amrex::Real jumphi=-Phi_jump;
         const amrex::Real ioc = Io_c(Ca, Ce, prob_parm);
         const amrex::Real Spc = Spcorr_anode(prob_parm);

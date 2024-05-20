@@ -61,6 +61,7 @@ void amrex_probinit (ProbParm * h_prob_parm, ProbParm * d_prob_parm)
     pp.query("spltcell_x",h_prob_parm->spltcell_x);
     pp.query("spltcell_y",h_prob_parm->spltcell_y);
     pp.query("spltcell_z",h_prob_parm->spltcell_z);
+    pp.query("current_limit_factor",h_prob_parm->current_limit_factor);
     
     // CBD transport behavior
     pp.query("CBD_transport", h_prob_parm->CBD_transport);  
