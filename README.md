@@ -1,5 +1,6 @@
 # echemAMR
 ## A 3D microstructure resolving electrochemical transport and interfacial chemistry solver
+<img src="https://github.com/user-attachments/assets/54859857-0559-45e5-bb36-f8dfe798d549" width="500" />
 
 EchemAMR is a coupled transport-reaction solver that simulates 
 electrochemical transport and interfacial chemistry at the microstructure scale. EchenAMR 
