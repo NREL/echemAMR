@@ -8,7 +8,7 @@ can simulate lithium ion battery microstructures and has been applied to other e
 such as electrochemical CO2 reduciton. An immersed interface formulation in echemAMR 
 enables rapid representation of complex electrode geometries. Buttler-Volmer flux conditions are 
 imposed at electrode-electrolyte interfaces using an iterative non-linear solve within the immersed interface method. 
-The solver is developed on top of open-source performance portable library, AMReX, providing mesh adaptivity and 
+The solver is developed on top of open-source performance portable library, AMReX (https://amrex-codes.github.io/amrex/), providing mesh adaptivity and 
 parallel execution capabilities on current and upcoming high-performance-computing (HPC) architectures. 
 
 # Build instructions
