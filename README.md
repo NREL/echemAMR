@@ -28,9 +28,12 @@ built following these instructions - https://amrex-codes.github.io/amrex/docs_ht
 * For GPU execution make sure the number of ranks match the number of GPUs on the machine. 
   For example, if you have 2 GPUs on a node, do $mpirun -n 2 echemAMR3d.gnu.MPI.CUDA.ex inputs
   
-  
 # Visualization instructions
   
 * The outputs for a case are in the form of AMReX plotfiles
 * These plot files can be open usine AMReX grid reader in ParaView (see https://amrex-codes.github.io/amrex/docs_html/Visualization.html#paraview)
 * Alternatively yt or visit can also be used. see https://amrex-codes.github.io/amrex/docs_html/Visualization_Chapter.html
+
+# Acknowledgments
+
+This work was authored by the National Renewable Energy Laboratory (NREL), operated by Alliance for Sustainable Energy, LLC, for the U.S. Department of Energy (DOE) under Contract No. DE-AC36-08GO28308. This work was supported by funding from DOE Laboratory Directed Research and Development (LDRD). The research was performed using computational resources sponsored by the Department of Energy's Office of Energy Efficiency and Renewable Energy and located at the National Renewable Energy Laboratory. 
