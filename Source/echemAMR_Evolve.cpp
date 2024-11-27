@@ -47,10 +47,13 @@ void echemAMR::Evolve()
         int lev = 0;
         int iteration = 1;
 
+        amrex::Real potsolve_time = -amrex::second();
         if (potential_solve == 1 && step % pot_solve_int == 0)
         {
             solve_potential(cur_time);
         }
+        potsolve_time += amrex::second();
+        amrex::Real specsolve_time = -amrex::second();
         if(!species_implicit_solve)
         {
             timeStep(lev, cur_time, iteration);
@@ -133,10 +136,17 @@ void echemAMR::Evolve()
                 amrex::Print() << "Advanced " << CountCells(lev) << " cells" << std::endl;
             }
         }
+        specsolve_time += amrex::second();
+        amrex::Real mechsolve_time = -amrex::second();
         if (mechanics_solve == 1)
         {
             solve_mechanics(cur_time);
         }
+        mechsolve_time += amrex::second();
+
+        amrex::Print() <<"Wall clock time (Potential solve):"<<potsolve_time<<"\n";
+        amrex::Print() <<"Wall clock time (Species solve):"<<specsolve_time<<"\n";
+        amrex::Print() <<"Wall clock time (Mechanics solve):"<<mechsolve_time<<"\n";
 
 
         cur_time += dt[0];
