@@ -5,7 +5,6 @@
 #include <AMReX_PlotFileUtil.H>
 #include <AMReX_VisMF.H>
 #include <AMReX_PhysBCFunct.H>
-#include <Kernels_3d.H>
 #include <echemAMR.H>
 #include <Chemistry.H>
 #include <Transport.H>
@@ -116,19 +115,27 @@ Real echemAMR::EstTimeStep(int lev)
             Array4<Real> velzarray = velz_fab.array();
 
             amrex::ParallelFor(bx, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
-                electrochem_transport::compute_dcoeff(i, j, k, statearray, dcoeffarray, prob_lo, prob_hi, dx, cur_time, *localprobparm);
+                electrochem_transport::compute_dcoeff(i, j, k, statearray, 
+                                                      dcoeffarray, prob_lo, 
+                                                      prob_hi, dx, cur_time, *localprobparm);
             });
 
             amrex::ParallelFor(bx_x, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
-                electrochem_transport::compute_vel(i, j, k, 0, statearray, velxarray, prob_lo, prob_hi, dx, cur_time, *localprobparm);
+                electrochem_transport::compute_vel(i, j, k, 0, statearray, 
+                                                   velxarray, prob_lo, prob_hi, 
+                                                   dx, cur_time, *localprobparm);
             });
 
             amrex::ParallelFor(bx_y, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
-                electrochem_transport::compute_vel(i, j, k, 1, statearray, velyarray, prob_lo, prob_hi, dx, cur_time, *localprobparm);
+                electrochem_transport::compute_vel(i, j, k, 1, statearray, 
+                                                   velyarray, prob_lo, prob_hi, 
+                                                   dx, cur_time, *localprobparm);
             });
 
             amrex::ParallelFor(bx_z, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
-                electrochem_transport::compute_vel(i, j, k, 2, statearray, velzarray, prob_lo, prob_hi, dx, cur_time, *localprobparm);
+                electrochem_transport::compute_vel(i, j, k, 2, statearray, velzarray, 
+                                                   prob_lo, prob_hi, dx, 
+                                                   cur_time, *localprobparm);
             });
 
             amrex::ParallelFor(bx, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
@@ -150,7 +157,7 @@ Real echemAMR::EstTimeStep(int lev)
     {
         Real diffcomp = dcoeff.norm0(comp, 0, true);
         ParallelDescriptor::ReduceRealMax(diffcomp);
-        
+
         if (diffcomp > maxdcoeff)
         {
             maxdcoeff = diffcomp;
@@ -166,7 +173,7 @@ Real echemAMR::EstTimeStep(int lev)
     {
         Real velcomp = vel.norm0(comp, 0, true);
         ParallelDescriptor::ReduceRealMax(velcomp);
-        
+
         if (velcomp > maxvel)
         {
             maxvel = velcomp;
@@ -179,7 +186,7 @@ Real echemAMR::EstTimeStep(int lev)
             dt_est = std::min(dt_est, (dx[i] / maxvel));
         }
     }
-    
+
     Real maxcon = S_new.norm0(0, 0, true);
     ParallelDescriptor::ReduceRealMax(maxcon);
     amrex::Print() << "max concentration: " << maxcon << std::endl;
@@ -192,7 +199,7 @@ Real echemAMR::EstTimeStep(int lev)
     ParallelDescriptor::ReduceRealMin(dt_est);
 
     dt_est *= cfl;
-   
+
     dt_est = amrex::min(amrex::max(dt_est, dtmin), dtmax);
     if (dt_est == dtmin) amrex::Print() << "*****Using minimum timestep specified****\n";
     if (dt_est == dtmax) amrex::Print() << "*****Using maximum timestep specified****\n";

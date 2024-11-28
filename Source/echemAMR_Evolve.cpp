@@ -6,7 +6,8 @@
 #include <AMReX_VisMF.H>
 #include <AMReX_PhysBCFunct.H>
 #include <AMReX_MLTensorOp.H>
-#include <Kernels_3d.H>
+#include <compute_flux.H>
+#include <bv_utils.H>
 
 #ifdef AMREX_MEM_PROFILING
 #include <AMReX_MemProfiler.H>
@@ -1146,17 +1147,20 @@ void echemAMR::compute_fluxes(int lev, const int num_grow, MultiFab& Sborder,
             }
 
             amrex::ParallelFor(bx_x, ncomp, [=] AMREX_GPU_DEVICE(int i, int j, int k, int n) {
-                compute_flux(i, j, k, n, 0, sborder_arr, velx_arr, dcoeff_arr, flux_arr[0], dx, prob_lo, prob_hi,
+                compute_flux(i, j, k, n, 0, sborder_arr, velx_arr, 
+                             dcoeff_arr, flux_arr[0], dx, prob_lo, prob_hi,
                              *localprobparm, implicit_diffusion, bvflux, bvlset, bvspec, lsgrad_tol);
             });
 
             amrex::ParallelFor(bx_y, ncomp, [=] AMREX_GPU_DEVICE(int i, int j, int k, int n) {
-                compute_flux(i, j, k, n, 1, sborder_arr, vely_arr, dcoeff_arr, flux_arr[1], dx, prob_lo, prob_hi,
+                compute_flux(i, j, k, n, 1, sborder_arr, vely_arr, 
+                             dcoeff_arr, flux_arr[1], dx, prob_lo, prob_hi,
                              *localprobparm, implicit_diffusion, bvflux, bvlset, bvspec, lsgrad_tol);
             });
 
             amrex::ParallelFor(bx_z, ncomp, [=] AMREX_GPU_DEVICE(int i, int j, int k, int n) {
-                compute_flux(i, j, k, n, 2, sborder_arr, velz_arr, dcoeff_arr, flux_arr[2], dx, prob_lo, prob_hi, 
+                compute_flux(i, j, k, n, 2, sborder_arr, velz_arr, 
+                             dcoeff_arr, flux_arr[2], dx, prob_lo, prob_hi, 
                              *localprobparm, implicit_diffusion, bvflux, bvlset, bvspec, lsgrad_tol);
             });
         }

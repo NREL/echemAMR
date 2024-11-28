@@ -5,7 +5,6 @@
 #include <AMReX_PlotFileUtil.H>
 #include <AMReX_VisMF.H>
 #include <AMReX_PhysBCFunct.H>
-#include <Kernels_3d.H>
 #include <echemAMR.H>
 #include <Chemistry.H>
 
@@ -17,7 +16,8 @@ void echemAMR::GotoNextLine(std::istream& is)
 }
 
 // get plotfile name
-std::string echemAMR::PlotFileName(int lev) const { return amrex::Concatenate(plot_file, lev, 5); }
+std::string echemAMR::PlotFileName(int lev) const 
+{ return amrex::Concatenate(plot_file, lev, 5); }
 
 // put together an array of multifabs for writing
 Vector<const MultiFab*> echemAMR::PlotFileMF() const

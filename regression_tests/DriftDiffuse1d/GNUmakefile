@@ -1,4 +1,5 @@
 AMREX_HOME ?= ../../amrex
+ECHEM_DIR   ?= ../../../echemAMR
 
 PRECISION  = DOUBLE
 PROFILE    = FALSE
@@ -18,4 +19,4 @@ USE_CUDA   = FALSE
 Bpack   := ./Make.package 
 Blocs   := . 
 
-include ../Make.echemAMR
+include ${ECHEM_DIR}/regression_tests/Make.echemAMR
