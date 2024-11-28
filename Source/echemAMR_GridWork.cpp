@@ -7,6 +7,8 @@
 #include <AMReX_PhysBCFunct.H>
 #include <echemAMR.H>
 #include <Chemistry.H>
+#include <Prob.H>
+#include <echemAMR_BCFill.H>
 
 // Make a new level using provided BoxArray and DistributionMapping and
 // fill with interpolated coarse level data.

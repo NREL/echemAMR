@@ -8,7 +8,7 @@
 #include <Prob.H>
 #include <echemAMR.H>
 #include <Chemistry.H>
-#include <ProbParm.H>
+#include <echemAMR_Tagging.H>
 
 using namespace amrex;
 

@@ -6,12 +6,6 @@
 #include <AMReX_VisMF.H>
 #include <AMReX_PhysBCFunct.H>
 #include <AMReX_MLTensorOp.H>
-#include <compute_flux.H>
-#include <bv_utils.H>
-
-#ifdef AMREX_MEM_PROFILING
-#include <AMReX_MemProfiler.H>
-#endif
 
 #include <echemAMR.H>
 #include <Chemistry.H>
@@ -19,8 +13,9 @@
 #include <Reactions.H>
 #include <Mechanics.H>
 #include <PostProcessing.H>
-#include <ProbParm.H>
 #include <AMReX_MLABecLaplacian.H>
+#include <compute_flux.H>
+#include <bv_utils.H>
 
 // advance solution to final time
 void echemAMR::Evolve()
