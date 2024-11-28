@@ -2,6 +2,15 @@
 #define echemAMR_H_
 
 #include <AMReX_MLMG.H>
+#include <AMReX_ParallelDescriptor.H>
+#include <AMReX_ParmParse.H>
+#include <AMReX_MultiFabUtil.H>
+#include <AMReX_FillPatchUtil.H>
+#include <AMReX_PlotFileUtil.H>
+#include <AMReX_VisMF.H>
+#include <AMReX_PhysBCFunct.H>
+#include <AMReX_MLTensorOp.H>
+#include <AMReX_MLABecLaplacian.H>
 
 #include <string>
 #include <limits>
