@@ -1,5 +1,4 @@
 AMREX_HOME ?= ../../amrex
-ECHEM_DIR   ?= ../../../echemAMR
 
 PRECISION  = DOUBLE
 PROFILE    = FALSE

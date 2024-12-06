@@ -419,7 +419,8 @@ void echemAMR::solve_potential(Real current_time)
 
                                 // expl term3 (mix derivative terms from tensor product)
                                 // explterms_arr(i,j,k) +=  jdash_bv*activ_func/pow(mod_gradc,3.0)*(dcdn*dcdt1*dphidt1+dcdn*dcdt2*dphidt2);
-                                explterms_arr(i, j, k) += jdash_bv * activ_func / mod_gradc * (n_ls[0] * n_ls[1] * dphidt1 + n_ls[0] * n_ls[2] * dphidt2);
+                                explterms_arr(i, j, k) += jdash_bv * activ_func / mod_gradc * 
+                                (n_ls[0] * n_ls[1] * dphidt1 + n_ls[0] * n_ls[2] * dphidt2);
                                 kdterm_arr(i,j,k) *= (1.0-activ_func);
                                 explterms_arr_res(i, j, k) += kdterm_arr(i, j, k);
                             }
@@ -455,15 +456,18 @@ void echemAMR::solve_potential(Real current_time)
 
                         rhs_arr_res(i,j,k) = rhs_arr(i,j,k);
 
-                        rhs_arr(i, j, k) += (term_x(i, j, k) - term_x(i + 1, j, k)) / dx[0] + (term_y(i, j, k) - term_y(i, j + 1, k)) / dx[1] +
+                        rhs_arr(i, j, k) += (term_x(i, j, k) - term_x(i + 1, j, k)) / dx[0] 
+                        + (term_y(i, j, k) - term_y(i, j + 1, k)) / dx[1] +
                         (term_z(i, j, k) - term_z(i, j, k + 1)) / dx[2];
 
                         rhs_arr(i, j, k) += phi_arr(i, j, k, POT_ID) * relax_fac;
 
-                        rhs_arr(i, j, k) += (kdterm_x(i, j, k) - kdterm_x(i + 1, j, k)) / dx[0] + (kdterm_y(i, j, k) - kdterm_y(i, j + 1, k)) / dx[1] +
+                        rhs_arr(i, j, k) += (kdterm_x(i, j, k) - kdterm_x(i + 1, j, k)) / dx[0] 
+                        + (kdterm_y(i, j, k) - kdterm_y(i, j + 1, k)) / dx[1] +
                         (kdterm_z(i, j, k) - kdterm_z(i, j, k + 1)) / dx[2];
 
-                        rhs_arr_res(i, j, k) += (term_x_res(i, j, k) - term_x_res(i + 1, j, k)) / dx[0] + (term_y_res(i, j, k) - term_y_res(i, j + 1, k)) / dx[1] +
+                        rhs_arr_res(i, j, k) += (term_x_res(i, j, k) - term_x_res(i + 1, j, k)) / dx[0] 
+                        + (term_y_res(i, j, k) - term_y_res(i, j + 1, k)) / dx[1] +
                         (term_z_res(i, j, k) - term_z_res(i, j, k + 1)) / dx[2];
 
                     });
@@ -498,13 +502,15 @@ void echemAMR::solve_potential(Real current_time)
                         if (bx.smallEnd(idim) == domain.smallEnd(idim))
                         {
                             amrex::ParallelFor(amrex::bdryLo(bx, idim), [=] AMREX_GPU_DEVICE(int i, int j, int k) noexcept {
-                                electrochem_transport::potential_bc(i, j, k, idim, -1, phi_arr, bc_arr, prob_lo, prob_hi, dx, time, bclo, bchi);
+                                electrochem_transport::potential_bc(i, j, k, idim, -1, phi_arr, bc_arr, 
+                                                                    prob_lo, prob_hi, dx, time, bclo, bchi);
                             });
                         }
                         if (bx.bigEnd(idim) == domain.bigEnd(idim))
                         {
                             amrex::ParallelFor(amrex::bdryHi(bx, idim), [=] AMREX_GPU_DEVICE(int i, int j, int k) noexcept {
-                                electrochem_transport::potential_bc(i, j, k, idim, +1, phi_arr, bc_arr, prob_lo, prob_hi, dx, time, bclo, bchi);
+                                electrochem_transport::potential_bc(i, j, k, idim, +1, phi_arr, 
+                                                                    bc_arr, prob_lo, prob_hi, dx, time, bclo, bchi);
                             });
                         }
 
@@ -584,7 +590,8 @@ void echemAMR::solve_potential(Real current_time)
         {
             amrex::MultiFab level_mask;
             if (ilev < finest_level) {
-                level_mask = makeFineMask(grids[ilev],dmap[ilev],grids[ilev+1], amrex::IntVect(2), 1.0, 0.0);
+                level_mask = makeFineMask(grids[ilev],dmap[ilev],
+                                          grids[ilev+1], amrex::IntVect(2), 1.0, 0.0);
             } else {
                 level_mask.define(grids[ilev], dmap[ilev], 1, 0,
                                   amrex::MFInfo());
@@ -600,7 +607,8 @@ void echemAMR::solve_potential(Real current_time)
             errnorm_1st_iter=total_nl_res;
         }
 
-        amrex::Print() <<"BV NON-LINEAR RESIDUAL (rel,abs): " <<  total_nl_res/errnorm_1st_iter << ' ' << total_nl_res << std::endl;
+        amrex::Print() <<"BV NON-LINEAR RESIDUAL (rel,abs): " <<  
+        total_nl_res/errnorm_1st_iter << ' ' << total_nl_res << std::endl;
 
         if(total_nl_res < bv_nonlinear_abstol ||
            total_nl_res/errnorm_1st_iter < bv_nonlinear_reltol)

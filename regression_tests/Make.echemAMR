@@ -1,3 +1,4 @@
+ECHEM_DIR   ?= ../../../echemAMR
 TOP := $(ECHEM_DIR)
 
 EBASE := echemAMR
