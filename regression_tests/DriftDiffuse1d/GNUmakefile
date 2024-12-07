@@ -18,4 +18,4 @@ USE_CUDA   = FALSE
 Bpack   := ./Make.package 
 Blocs   := . 
 
-include ${ECHEM_DIR}/regression_tests/Make.echemAMR
+include ../Make.echemAMR
