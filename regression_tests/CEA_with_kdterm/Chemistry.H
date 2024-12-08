@@ -8,6 +8,7 @@
 #include <AMReX_Geometry.H>
 #include <AMReX_FArrayBox.H>
 #include <AMReX_Box.H>
+#include <echemAMR_constants.H>
 
 #define NUM_SPECIES 5
 #define CO_ID   0
