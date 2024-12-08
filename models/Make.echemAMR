@@ -1,6 +1,4 @@
-AMREX_HOME ?= ../../../..
 ECHEM_DIR   ?= ../../../echemAMR
-
 TOP := $(ECHEM_DIR)
 
 EBASE := echemAMR
@@ -8,7 +6,7 @@ EBASE := echemAMR
 BL_NO_FORT=TRUE
 include $(AMREX_HOME)/Tools/GNUMake/Make.defs
 
-Bdirs 	:= Source Source/Src_$(DIM)d
+Bdirs 	:= Source
 Bpack	+= $(foreach dir, $(Bdirs), $(TOP)/$(dir)/Make.package)
 Blocs   += $(foreach dir, $(Bdirs), $(TOP)/$(dir))
 
@@ -29,4 +27,3 @@ all: $(executable)
 	@echo SUCCESS
 
 include $(AMREX_HOME)/Tools/GNUMake/Make.rules
-
