@@ -5,11 +5,10 @@
 #include <AMReX_PlotFileUtil.H>
 #include <AMReX_VisMF.H>
 #include <AMReX_PhysBCFunct.H>
-#include <Kernels_3d.H>
+#include <Prob.H>
 #include <echemAMR.H>
 #include <Chemistry.H>
-#include <ProbParm.H>
-#include <stdio.h>
+#include <echemAMR_Tagging.H>
 
 using namespace amrex;
 

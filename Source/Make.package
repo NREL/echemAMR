@@ -1,4 +1,6 @@
 CEXE_sources += main.cpp echemAMR.cpp echemAMR_Evolve.cpp echemAMR_Plot.cpp
 CEXE_sources += echemAMR_GridWork.cpp echemAMR_TimeStep.cpp echemAMR_Integrate.cpp
+CEXE_sources += echemAMR_PotentialSolve.cpp echemAMR_MechanicsSolve.cpp echemAMR_SpeciesSolve.cpp
 
 CEXE_headers += echemAMR.H Kernels_3d.H echemAMR_Tagging.H echemAMR_BCfill.H echemAMR_constants.H
+CEXE_headers += advance.H compute_flux.H bv_utils.H

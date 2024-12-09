@@ -5,14 +5,17 @@
 #include <AMReX_PlotFileUtil.H>
 #include <AMReX_VisMF.H>
 #include <AMReX_PhysBCFunct.H>
-#include <Kernels_3d.H>
 #include <echemAMR.H>
 #include <Chemistry.H>
+#include <Prob.H>
+#include <echemAMR_BCFill.H>
 
 // Make a new level using provided BoxArray and DistributionMapping and
 // fill with interpolated coarse level data.
 // overrides the pure virtual function in AmrCore
-void echemAMR::MakeNewLevelFromCoarse(int lev, Real time, const BoxArray& ba, const DistributionMapping& dm)
+void echemAMR::MakeNewLevelFromCoarse(int lev, Real time, 
+                                      const BoxArray& ba, 
+                                      const DistributionMapping& dm)
 {
     const int ncomp = phi_new[lev - 1].nComp();
     const int nghost = phi_new[lev - 1].nGrow();
@@ -100,7 +103,7 @@ void echemAMR::MakeNewLevelFromScratch(int lev, Real time, const BoxArray& ba, c
             initdomaindata(tbx, fab, geomData, localprobparm);
         });
     }
-    
+
     amrex::MultiFab::Copy(phi_old[lev], phi_new[lev], 0, 0, ncomp, 0);
 }
 
