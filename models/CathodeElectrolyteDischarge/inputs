@@ -1,4 +1,4 @@
-max_step  = 1000
+max_step  = 200
 stop_time = 30000.0
 
 # PROBLEM SIZE & GEOMETRY
