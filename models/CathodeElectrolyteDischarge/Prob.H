@@ -90,7 +90,7 @@ void initdomaindata(Box const& bx, Array4<Real> const& phi, GeometryData const& 
                         {
                             Real xx= prob_lo[0]+(i+(ii+0.5)/spltcell[0])*dx[0];
                             Real yy= prob_lo[1]+(j+(jj+0.5)/spltcell[1])*dx[1];
-                            Real zz= prob_lo[2]+(j+(kk+0.5)/spltcell[2])*dx[2];
+                            Real zz= prob_lo[2]+(k+(kk+0.5)/spltcell[2])*dx[2];
 
                             Real dist1_2=pow((xx-center1[0]),2.0)+pow((yy-center1[1]),2.0)+pow((zz-center1[2]),2.0);
                             Real dist2_2=pow((xx-center2[0]),2.0)+pow((yy-center2[1]),2.0)+pow((zz-center2[2]),2.0);
