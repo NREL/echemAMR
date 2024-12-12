@@ -11,7 +11,7 @@
 #include <echemAMR_constants.H>
 
 #define NUM_SPECIES 2
-#define S1_ID   0
+#define LI_ID   0
 #define LS_ID   1
 #define EFX_ID  2
 #define EFY_ID  3

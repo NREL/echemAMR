@@ -8,6 +8,7 @@
 #include <AMReX_Geometry.H>
 #include <AMReX_FArrayBox.H>
 #include <AMReX_Box.H>
+#include <echemAMR_constants.H>
 
 #define NUM_SPECIES 7
 #define NUM_SURF_REACTIONS 2
