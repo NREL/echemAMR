@@ -320,6 +320,46 @@ void echemAMR::compute_fluxes(int lev, const int num_grow, MultiFab& Sborder,
     }
 }
 
+void echemAMR::update_interface_cells(Real current_time)
+{
+    int bvspec[NVAR]={0};
+
+    for(unsigned int i=0;i<bv_specid_list.size();i++)
+    {
+        bvspec[bv_specid_list[i]]=1;
+    }
+    int bvlset    = bv_levset_id;
+    
+    for(int it=0;it<interface_update_iters;it++)
+    {
+        for (int ilev = 0; ilev <= finest_level; ilev++)
+        {
+            int num_grow=1;
+            MultiFab Sborder(grids[ilev], dmap[ilev], phi_new[ilev].nComp(), num_grow);
+            FillPatch(ilev, current_time, Sborder, 0, Sborder.nComp());
+
+            for (MFIter mfi(phi_new[ilev], TilingIfNotGPU()); mfi.isValid(); ++mfi)
+            {
+                const Box& bx = mfi.tilebox();
+                const Box& gbx = amrex::grow(bx, 1);
+                const auto dx = geom[ilev].CellSizeArray();
+                auto prob_lo = geom[ilev].ProbLoArray();
+                auto prob_hi = geom[ilev].ProbHiArray();
+                const Box& domain = geom[ilev].Domain();
+
+                Real time = current_time; // for GPU capture
+
+                Array4<Real> sb_arr = Sborder.array(mfi);
+                Array4<Real> phi_arr = phi_new[ilev].array(mfi);
+
+                amrex::ParallelFor(bx, [=] AMREX_GPU_DEVICE(int i, int j, int k) {
+                    stitch_interfacial_celldata(i, j, k, bvlset, bvspec, sb_arr, phi_arr);
+                });
+            }
+        }
+    }
+}
+
 void echemAMR::implicit_solve_species(Real current_time,Real dt,int spec_id, 
                                       Vector<MultiFab>& dsdt_expl)
 {
@@ -588,7 +628,7 @@ void echemAMR::implicit_solve_species(Real current_time,Real dt,int spec_id,
                                                mod_gradc, gradc_cutoff, facecolor, potjump, 
                                                dphidn, dphidt1, dphidt2, n_ls, intloc, 
                                                plo,phi);
-                       Real activ_func = electrochem_reactions::bv_activation_function(facecolor, mod_gradc, gradc_cutoff);
+                        Real activ_func = electrochem_reactions::bv_activation_function(facecolor, mod_gradc, gradc_cutoff);
 
                         if (mod_gradc > gradc_cutoff && activ_func > 0.0)
                         {

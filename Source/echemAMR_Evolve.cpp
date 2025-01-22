@@ -33,6 +33,7 @@ void echemAMR::Evolve()
             solve_potential(cur_time);
         }
         potsolve_time += amrex::second();
+
         amrex::Real specsolve_time = -amrex::second();
         if(!species_implicit_solve)
         {
@@ -109,18 +110,20 @@ void echemAMR::Evolve()
 
             for (int lev = 0; lev <= finest_level; lev++)
                 ++istep[lev];
-
-            for (int lev = 0; lev <= finest_level; lev++)
-            {
-                amrex::Print() << "[Level " << lev << " step " << istep[lev] << "] ";
-                amrex::Print() << "Advanced " << CountCells(lev) << " cells" << std::endl;
-            }
         }
+
+        if(buttler_vohlmer_flux && update_species_interface)
+        {
+            update_interface_cells(cur_time);
+            AverageDown();
+        }
+
         specsolve_time += amrex::second();
         amrex::Real mechsolve_time = -amrex::second();
         if (mechanics_solve == 1)
         {
             solve_mechanics(cur_time);
+            AverageDown ();
         }
         mechsolve_time += amrex::second();
 

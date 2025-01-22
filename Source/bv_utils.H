@@ -11,6 +11,44 @@ using namespace amrex;
 
 AMREX_GPU_DEVICE
 AMREX_FORCE_INLINE
+void stitch_interfacial_celldata(int i,int j,int k,int lset_id,
+                              const int bvspec[NVAR], 
+                              Array4<Real> const &sb_arr,
+                              Array4<Real> const &phi_arr)
+{
+
+    if(phi_arr(i,j,k,lset_id)>0.0 && phi_arr(i,j,k,lset_id)<1.0)
+    {
+
+        for(int n=0;n<NVAR;n++)
+        {
+            if(bvspec[n]==1)
+            {
+                Real nadds=0.0;
+                for(int kk=-1;kk<=1;kk++)
+                {
+                    for(int jj=-1;jj<=1;jj++)
+                    {
+                        for(int ii=-1;ii<=1;ii++)
+                        {
+                            if(!(ii==0 && jj==0 && kk==0))
+                            {
+                                nadds=nadds+1.0;
+                                phi_arr(i,j,k,n) += sb_arr(i+ii,j+jj,k+kk,n);
+                            }
+                        }
+                    }
+                }
+
+                //nadds should be 26
+                phi_arr(i,j,k,n)=phi_arr(i,j,k,n)/nadds;
+            }
+        } 
+    }
+}
+
+AMREX_GPU_DEVICE
+AMREX_FORCE_INLINE
 void bv_get_grads_and_jumps(int i,int j,int k,int normaldir,int lset_id,
                             const GpuArray<Real, AMREX_SPACEDIM>& dx,
                             Array4<Real> const& phi_arr, Real gradc_tolfac,
