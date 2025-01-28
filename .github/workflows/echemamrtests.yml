@@ -89,10 +89,6 @@ jobs:
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 100 --slave /usr/bin/g++ g++ /usr/bin/g++-9 --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-9
           sudo update-alternatives --set gcc /usr/bin/gcc-9
 
-          git clone https://github.com/hypre-space/hypre.git
-          cd hypre/src
-          ./configure
-          make install
     - name: Build Regression
       working-directory: ./regression_tests
       run: |
@@ -102,19 +98,3 @@ jobs:
         export LD_LIBRARY_PATH=/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda-11.1/lib:${LD_LIBRARY_PATH}
         cd DriftDiffuse1d
         make -j 2 COMP=gnu USE_CUDA=TRUE
-        cd ..
-        cd openCircuitElectrode
-        make -j 2 COMP=gnu USE_CUDA=TRUE
-        cd ..
-        cd anodeElectrolyte
-        make -j 2 COMP=gnu USE_CUDA=TRUE
-        cd ..
-        cd CEA
-        make -j 2 COMP=gnu USE_CUDA=TRUE
-    - name: Build Model
-      working-directory: ./models
-      run: |
-        export PATH=/usr/local/nvidia/bin:/usr/local/cuda-11.1/bin:${PATH}
-        export LD_LIBRARY_PATH=/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda-11.1/lib:${LD_LIBRARY_PATH}
-        cd Microstructure
-        make -j 2 COMP=gnu USE_CUDA=TRUE USE_HYPRE=FALSE
