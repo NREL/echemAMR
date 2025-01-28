@@ -68,9 +68,9 @@ jobs:
           cd Microstructure
           mpirun -n 1 ./echemAMR3d.gnu.TPROF.MPI.ex inputs_CESEA_case1
   gputest:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v2
       with:
         submodules: true
     - name: System Dependencies
@@ -79,23 +79,27 @@ jobs:
           wget -q -O - https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub | sudo apt-key add -
           echo "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64 /" | sudo tee /etc/apt/sources.list.d/cuda.list
           echo "deb https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64 /" | sudo tee /etc/apt/sources.list.d/nvidia-ml.list
-          wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-keyring_1.1-1_all.deb
-          sudo dpkg -i cuda-keyring_1.1-1_all.deb
+          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A4B469963BF863CC
           sudo apt-get update
-          sudo apt-get install -y cuda-command-line-tools-12-6 \
-              cuda-compiler-12-6 cuda-minimal-build-12-6 \
-              cuda-nvml-dev-12-6 cuda-nvtx-12-6 \
-              libcurand-dev-12-6 cuda-cupti-dev-12-6 \
-              libcusolver-dev-12-6 libcusparse-dev-12-6 \
-              libcublas-dev-12-6 libcurand-dev-12-6 libnvjitlink-12-6
+          sudo apt-get install -y --no-install-recommends \
+          gcc-9 g++-9 gfortran-9 libopenmpi-dev openmpi-bin cuda-command-line-tools-11-1 \
+          cuda-compiler-11-1 cuda-minimal-build-11-1 \
+          cuda-nvml-dev-11-1 cuda-nvtx-11-1 libcurand-dev-11-1 cuda-cupti-dev-11-1
 
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 100 --slave /usr/bin/g++ g++ /usr/bin/g++-9 --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-9
+          sudo update-alternatives --set gcc /usr/bin/gcc-9
+
+          git clone https://github.com/hypre-space/hypre.git
+          cd hypre/src
+          ./configure
+          make install
     - name: Build Regression
       working-directory: ./regression_tests
       run: |
         g++ --version
         gfortran --version
-        export PATH=/usr/local/nvidia/bin:/usr/local/cuda-12.6/bin:${PATH}
-        export LD_LIBRARY_PATH=/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda-12.6/lib:${LD_LIBRARY_PATH}
+        export PATH=/usr/local/nvidia/bin:/usr/local/cuda-11.1/bin:${PATH}
+        export LD_LIBRARY_PATH=/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda-11.1/lib:${LD_LIBRARY_PATH}
         cd DriftDiffuse1d
         make -j 2 COMP=gnu USE_CUDA=TRUE
         cd ..
