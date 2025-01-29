@@ -1,0 +1,20 @@
+1) Figures 6,7 and 8 can be obtained by running python codes and 
+gnuplot scripts in BVTester/Py_version
+  a. Figure 6 in BVTester/Py_version/electrode_electrolyte
+  b. Figure 7 in BVTester/Py_version/electrode_electrolyte_electrode
+  c. Figure 8 in BVTester/Py_version/electrode_electrolyte by varying 
+  the activation function in code trode_lyte.py
+
+2) Figures 9, 10, 11, 12 and 13 can be obtained by running C++ codes and 
+   py scripts in regression_tests 
+   a. Figure 9 in regression_tests/OCE_2d with exactcompare.py script as well as the 
+      gnuplot script
+   b. Figure 10 in regression_tests/CEA_2d with py and gnuplot scripts
+   c. Figuer 11,12, and 13 are from regression_tests/CEAcharging_2d
+
+3) Figure 14 and 15 are from models/CathodeElectrolyteDischarge/. Note that 
+the GPU runs will need compilation for specific architecture and need the 
+required hardware (NVIDIA/AMD). 
+
+4) Figure 16 and 17 are for a large microstructure case. A similar one can be 
+run using models/MicroStructure/inputs_SphereSphere_Contact
