@@ -140,12 +140,12 @@ namespace electrochem_reactions
                         ls   = phi(curid, LS_ID);
                         conc = phi(curid, LI_ID);
 
-                        amrex::Print()<<"solid not found curid,ls,conc,normaldir: "<<curid<<"\t"
-                        <<ls<<"\t"<<conc<<"\t"<<normaldir<<"\t"<<i<<"\t"<<j<<"\t"<<k<<"\n";
+                        //amrex::Print()<<"solid not found curid,ls,conc,normaldir: "<<curid<<"\t"
+                        //<<ls<<"\t"<<conc<<"\t"<<normaldir<<"\t"<<i<<"\t"<<j<<"\t"<<k<<"\n";
                     }
                 }
             }
-            amrex::Print()<<"\n===================\n";
+            //amrex::Print()<<"\n===================\n";
         }
 
         j0=0.0;
