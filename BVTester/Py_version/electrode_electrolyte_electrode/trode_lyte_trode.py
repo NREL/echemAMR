@@ -302,6 +302,7 @@ if __name__ == "__main__":
     ctol=float(argv[2])
     x1=float(argv[3])
     x2=float(argv[4])
+    showplots=int(argv[5])
     ocp_a=0.2
     ocp_c=1.0
     sigma_c=5.0
@@ -329,15 +330,19 @@ if __name__ == "__main__":
     phi_exact_e=phi_exact[(xdomain>x1) & (xdomain<x2)]
     #print("error electrolyte:",np.sqrt(np.mean(phi_fd_e-phi_exact_e)**2))
     print(ncells,np.sqrt(np.mean(phi_fd-phi_exact)**2),np.sqrt(np.mean(phi_fd_e-phi_exact_e)**2))
+    plt.figure()
+    plt.title("Potential solution")
     plt.plot(xdomain,phi_fd,label="computed")
     plt.plot(xdomain,phi_exact,'r-*',label="exact")
     plt.xlabel("distance (non-dim)")
     plt.ylabel("potential (non-dim)")
     plt.figure()
+    plt.title("Color field")
     plt.plot(xdomain,levset_field,'k*-')
-    #plt.show()
     np.savetxt("lsetfield_"+argv[1]+".dat",np.transpose(np.vstack((xdomain,levset_field))),delimiter="   ")
     np.savetxt("soln_exact.dat",np.transpose(np.vstack((xdomain,phi_exact))),delimiter="   ")
     np.savetxt("soln_fd_"+argv[1]+".dat",np.transpose(np.vstack((xdomain,phi_fd))),delimiter="   ")
     #plt.savefig("compare_soln.png")
     plt.legend()
+    if(showplots):
+        plt.show()

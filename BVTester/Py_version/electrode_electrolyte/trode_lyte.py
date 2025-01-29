@@ -263,6 +263,7 @@ if __name__ == "__main__":
     nfaces=int(argv[1])
     ctol=float(argv[2])
     x1=float(argv[3])
+    showplots=int(argv[4])
     ocp_c=0.2
     sigma_c=3.0
     sigma_e=1.0
@@ -284,16 +285,19 @@ if __name__ == "__main__":
     
 
     print(ncells,np.sqrt(np.mean(phi_fd-phi_exact)**2))
+    plt.figure()
+    plt.title("potential solution")
     plt.plot(xdomain,phi_fd,label="computed")
     plt.plot(xdomain,phi_exact,'r-*',label="exact")
     plt.xlabel("distance (non-dim)")
     plt.ylabel("potential (non-dim)")
     plt.legend()
     plt.figure()
+    plt.title("Color field")
     plt.plot(xdomain,levset_field,'k*-')
-    #plt.show()
     np.savetxt("lsetfield_"+argv[1]+".dat",np.transpose(np.vstack((xdomain,levset_field))),delimiter="   ")
     np.savetxt("soln_exact.dat",np.transpose(np.vstack((xdomain,phi_exact))),delimiter="   ")
     np.savetxt("soln_fd_"+argv[1]+".dat",np.transpose(np.vstack((xdomain,phi_fd))),delimiter="   ")
-    #plt.savefig("compare_soln.png")
     plt.legend()
+    if(showplots):
+        plt.show()
