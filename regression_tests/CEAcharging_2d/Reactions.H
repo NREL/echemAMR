@@ -216,7 +216,7 @@ namespace electrochem_reactions {
     {
         Real f;
         Real maxval = 0.25;
-        Real tol = 1e-1;
+        Real tol = 1e-3;
 
         // f=(gradc > gradc_cutoff)?1.0:0.0;
         f = (c * (1 - c) > tol * maxval) ? 1.0 : 0.0;
