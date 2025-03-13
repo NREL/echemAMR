@@ -16,15 +16,14 @@ void stitch_interfacial_celldata(int i,int j,int k,int lset_id,
                               Array4<Real> const &sb_arr,
                               Array4<Real> const &phi_arr)
 {
-
-    if(phi_arr(i,j,k,lset_id)>0.0 && phi_arr(i,j,k,lset_id)<1.0)
+    if(sb_arr(i,j,k,lset_id)>0.0 && sb_arr(i,j,k,lset_id)<1.0)
     {
-
         for(int n=0;n<NVAR;n++)
         {
             if(bvspec[n]==1)
             {
                 Real nadds=0.0;
+                Real neighborsum=0.0;
                 for(int kk=-1;kk<=1;kk++)
                 {
                     for(int jj=-1;jj<=1;jj++)
@@ -34,14 +33,13 @@ void stitch_interfacial_celldata(int i,int j,int k,int lset_id,
                             if(!(ii==0 && jj==0 && kk==0))
                             {
                                 nadds=nadds+1.0;
-                                phi_arr(i,j,k,n) += sb_arr(i+ii,j+jj,k+kk,n);
+                                neighborsum += sb_arr(i+ii,j+jj,k+kk,n);
                             }
                         }
                     }
                 }
-
                 //nadds should be 26
-                phi_arr(i,j,k,n)=phi_arr(i,j,k,n)/nadds;
+                phi_arr(i,j,k,n)=neighborsum/nadds;
             }
         } 
     }

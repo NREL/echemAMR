@@ -10,6 +10,13 @@ void echemAMR::Evolve()
     {
         solve_potential(cur_time);
     }
+
+    if(update_species_interface)
+    {
+        update_interface_cells(cur_time);
+        AverageDown();
+    }
+    
     if (plot_int > 0)
     {
         WritePlotFile();
