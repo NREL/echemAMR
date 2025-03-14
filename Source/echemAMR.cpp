@@ -317,6 +317,11 @@ void echemAMR::ReadParameters()
         pp.query("reset_species_in_solid",reset_species_in_solid);
 
         pp.query("mechanics_solve",mechanics_solve);
+        pp.query("interface_update_iters",interface_update_iters);
+        if(interface_update_iters > 0)
+        {
+           update_species_interface=1;
+        }
 
         pp.queryarr("transported_species_list",transported_species_list);
         if(fixed_timestep && !species_implicit_solve)

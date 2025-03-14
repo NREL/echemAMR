@@ -88,6 +88,8 @@ public:
     void implicit_solve_species(Real current_time,Real dt,int spec_id,
             Vector<MultiFab>& dsdt_expl);
 
+    void update_interface_cells(Real current_time);
+
     void solve_mechanics(Real current_time);   
 
     // compute dt from CFL considerations
@@ -218,6 +220,8 @@ private:
     amrex::Real dtgpfactor=1.0;
 
     int fixed_timestep=0;
+    int interface_update_iters=-1;
+    int update_species_interface=0;
 
     // by default no relaxation for
     // BV poisson solves
