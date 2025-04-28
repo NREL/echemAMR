@@ -40,12 +40,7 @@ Vector<std::string> echemAMR::PlotFileVarNames() const
     for (int i = 0; i < NVAR; i++)
     {
         allnames[i] = electrochem::specnames[i];
-        // amrex::Print() << "Writing allnames[i] " << allnames[i] << "\n";
-
     }
-    //allnames[NVAR - 3] = "Efieldx";
-    //allnames[NVAR - 2] = "Efieldy";
-    //allnames[NVAR - 1] = "Efieldz";
     return {allnames};
 }
 
@@ -217,7 +212,7 @@ void echemAMR::ReadCheckpointFile()
         SetDistributionMap(lev, dm);
 
         // build MultiFab and FluxRegister data
-        int ncomp = 1;
+        int ncomp = NVAR;
         int nghost = 0;
         phi_old[lev].define(grids[lev], dmap[lev], ncomp, nghost);
         phi_new[lev].define(grids[lev], dmap[lev], ncomp, nghost);
