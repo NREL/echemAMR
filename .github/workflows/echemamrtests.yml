@@ -67,3 +67,50 @@ jobs:
       run: |
           cd Microstructure
           mpirun -n 1 ./echemAMR3d.gnu.TPROF.MPI.ex inputs_CESEA_case1
+  GPU-Nvidia:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Setup
+        run: |
+          echo "NPROCS=$(nproc)" >> $GITHUB_ENV
+          echo "CCACHE_COMPRESS=1" >> $GITHUB_ENV
+          echo "CCACHE_COMPRESSLEVEL=10" >> $GITHUB_ENV
+          echo "CCACHE_LOGFILE=${{github.workspace}}/ccache.log.txt" >> $GITHUB_ENV
+          echo "CCACHE_MAXSIZE=300M" >> $GITHUB_ENV
+      - name: Dependencies
+        run: |
+          wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-keyring_1.1-1_all.deb
+          sudo dpkg -i cuda-keyring_1.1-1_all.deb
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+          build-essential g++ gfortran libopenmpi-dev openmpi-bin
+          sudo apt-get install -y cuda-command-line-tools-12-6 \
+              cuda-compiler-12-6 cuda-minimal-build-12-6 \
+              cuda-nvml-dev-12-6 cuda-nvtx-12-6 \
+              libcurand-dev-12-6 cuda-cupti-dev-12-6 \
+              libcusolver-dev-12-6 libcusparse-dev-12-6 \
+              libcublas-dev-12-6 libcurand-dev-12-6 libnvjitlink-12-6
+      - name: Install Ccache
+        run: |
+          wget https://github.com/ccache/ccache/releases/download/v4.8/ccache-4.8-linux-x86_64.tar.xz
+          tar xvf ccache-4.8-linux-x86_64.tar.xz
+          sudo cp -f ccache-4.8-linux-x86_64/ccache /usr/local/bin/
+      - name: Set Up Ccache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ccache
+          key: ccache-${{github.workflow}}-${{github.job}}-git-${{github.sha}}
+          restore-keys: |
+               ccache-${{github.workflow}}-${{github.job}}-git-
+      - name: build case
+        working-directory: ./models
+        run: |
+          export PATH=/usr/local/nvidia/bin:/usr/local/cuda-12.6/bin:${PATH}
+          export LD_LIBRARY_PATH=/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda-12.6/lib:${LD_LIBRARY_PATH}
+          ccache -z
+          cd CathodeElectrolyteDischarge
+          make -j 2 USE_HYPRE=FALSE USE_CUDA=TRUE
