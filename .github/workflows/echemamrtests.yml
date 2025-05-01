@@ -1,9 +1,9 @@
 name: CI_echemamr                                                                                                                                          
 on: 
    push:
-     branches: [ gpuci ]
+     branches: [ main ]
    pull_request:
-     branches: [ gpuci ]
+     branches: [ main ]
 
 jobs:
   cputest:
