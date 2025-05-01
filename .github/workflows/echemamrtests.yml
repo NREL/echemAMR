@@ -1,9 +1,9 @@
 name: CI_echemamr                                                                                                                                          
 on: 
    push:
-     branches: [ main ]
+     branches: [ gpuci ]
    pull_request:
-     branches: [ main ]
+     branches: [ gpuci ]
 
 jobs:
   cputest:
@@ -69,10 +69,8 @@ jobs:
           mpirun -n 1 ./echemAMR3d.gnu.TPROF.MPI.ex inputs_CESEA_case1
   GPU-Nvidia:
     name: GPU-CUDA
-    needs: [Formatting, CPU-GNUmake]
     runs-on: ubuntu-latest
     steps:
-      - name: Clone
         uses: actions/checkout@v4
         with:
           submodules: true
