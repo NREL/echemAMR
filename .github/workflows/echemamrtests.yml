@@ -68,9 +68,9 @@ jobs:
           cd Microstructure
           mpirun -n 1 ./echemAMR3d.gnu.TPROF.MPI.ex inputs_CESEA_case1
   GPU-Nvidia:
-    name: GPU-CUDA
     runs-on: ubuntu-latest
     steps:
+      - name: Clone
         uses: actions/checkout@v4
         with:
           submodules: true
