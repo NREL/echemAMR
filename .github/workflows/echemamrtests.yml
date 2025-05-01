@@ -112,4 +112,4 @@ jobs:
           export PATH=/usr/local/nvidia/bin:/usr/local/cuda-12.6/bin:${PATH}
           export LD_LIBRARY_PATH=/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda-12.6/lib:${LD_LIBRARY_PATH}
           cd CathodeElectrolyteDischarge
-          make -j USE_HYPRE=FALSE USE_CUDA=TRUE
+          make -j USE_HYPRE=FALSE USE_CUDA=TRUE USE_MPI=FALSE
