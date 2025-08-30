@@ -79,7 +79,7 @@ print(x1,x2)
 
 #linear solution
 data=[sigma_c,sigma_e,sigma_a,ocp_c,ocp_a,j0,phi0,x1,x2,oned_length]
-a1=fsolve(nonlinsolve_func,0.0,args=data)
+a1=fsolve(nonlinsolve_func,0.0,args=data)[0]
 a2=sigma_c/sigma_e*a1
 a3=sigma_c/sigma_a*a1
 

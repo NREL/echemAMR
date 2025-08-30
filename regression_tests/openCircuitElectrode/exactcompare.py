@@ -40,7 +40,7 @@ exactsoln[x>0.75]=0.0
 #=======================================
 fig,ax=plt.subplots(1,1,figsize=(4,4))
 ax.plot(x,exactsoln,'r-',label="Exact solution")
-ax.plot(x,fld_pot,'k-',label="echemAMR",markersize=2)
+ax.plot(x,fld_pot,'ko-',label="echemAMR",markersize=2,linewidth=0.2)
 ax.legend(loc="best")
 
 dir_char=chr(ord('x')+int(axialdir))

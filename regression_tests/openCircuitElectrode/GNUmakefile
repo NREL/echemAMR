@@ -14,6 +14,7 @@ COMP	   = gnu
 USE_MPI    = TRUE
 USE_OMP    = FALSE 
 USE_CUDA   = FALSE
+USE_HYPRE  = FALSE
 
 Bpack   := ./Make.package 
 Blocs   := . 

@@ -10,7 +10,7 @@ struct ProbParm
 {
     amrex::Real int1 = 0.25; // interface 1
     amrex::Real int2 = 0.75; // interface 2
-    amrex::Real sharpness_factor=100.0;
+    amrex::Real sharpness_factor=500.0;
     int direction = 0;   
 };
 struct GlobalStorage

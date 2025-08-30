@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 def bvfunction_inv(jbv,j0):
-    
     #sinh definition
     finv=-np.arcsinh(jbv/j0)
     #linear case
