@@ -1,7 +1,7 @@
 # Three dimensional half cell with adaptive meshing
 
 This case simulates the time dependent potential and species 
-distribution in a half cell during charging. The interface is 
+distribution in a half cell with an irregular interface during charging. The interface is 
 also resolved using AMR.
 
 ### Build instructions
@@ -31,3 +31,6 @@ Run in parallel with inputs
 
 You can open the various plotfiles in
 paraview/visit. 
+
+<img width="421" height="268" alt="irr_intercalate_pic" src="https://github.com/user-attachments/assets/b36d7165-f320-4de5-afc5-c532b63a68e0" />
+
