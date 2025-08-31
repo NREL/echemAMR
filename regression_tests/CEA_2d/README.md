@@ -3,7 +3,7 @@
 This case simulates the potential distribution in a
 simplified battery with three 
 domains of different conductivities in a 2D domain. The 
-interface are set at an angle to include fraction cells. 
+interfaces are set at an angle to include cells with fractional volume fractions. 
 Butler Volmer conditions are applied at each interface. 
 A comparison with analytic solution can also be done with 
 the final plot file for a 1d case. 
@@ -51,3 +51,4 @@ higher conductivity case as opposed to the lower conductivity case.
 This is mainly because the transverse gradients are more 
 pronounced in the lower conductivity case.
 
+<img width="600" alt="cea_2dpic" src="https://github.com/user-attachments/assets/6723cd67-df56-4ff9-bb66-d51c838c6c25" />
