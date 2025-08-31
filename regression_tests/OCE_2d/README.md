@@ -46,3 +46,6 @@ the calculated solution with the analytic solution.
 `$. ./verifycase.sh` generates an image
 file called `oce_soln_2d.png` for the baseline case.
 
+<img width="600" alt="oce2dpic" src="https://github.com/user-attachments/assets/989a6dbd-6a3e-436b-9354-916b3c237eee" />
+
+
