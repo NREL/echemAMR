@@ -3,7 +3,7 @@
 This case simulates the time dependent 
 potential and species distribution in a
 simplified battery with three 
-domains of different conductivities. The interfaces in this 
+domains of different conductivities in two dimensions. The interfaces in this 
 case are slanted and tests the robustness of the immersed interface
 method. Butler Volmer 
 conditions are applied at each interface for both species 
@@ -50,3 +50,7 @@ plot files and then plots are made using `gnuplot`.
 files called `zerodsoln_cellvolt_2d.png` and 
 `zerodsoln_conc_2d.png` showing cell voltage and species 
 concentration variation with time. 
+
+<img width="600" alt="cea_charge_2d" src="https://github.com/user-attachments/assets/24e23a00-85cc-4b7f-9e65-8e0812ecc027" />
+<img width="600" alt="cea_charge2d_1" src="https://github.com/user-attachments/assets/0865fba6-52ae-4965-9bd9-dc5651c2f191" />
+
