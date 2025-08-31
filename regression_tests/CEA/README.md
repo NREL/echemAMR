@@ -42,3 +42,6 @@ plot files and then plots are made using `matplotlib`.
 `$python exactcompare.py "plt00001"` generates an image
 file called `pot_x_CEA.png` for inputs_x case
 
+
+<img width="300" alt="pot_x_CEA" src="https://github.com/user-attachments/assets/2aa83d52-8ffd-4269-b505-52fe89cf5d12" />
+
