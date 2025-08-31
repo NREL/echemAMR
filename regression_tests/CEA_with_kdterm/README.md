@@ -3,8 +3,7 @@
 This case simulates the potential distribution in a
 simplified battery with three 
 domains of different conductivities. Butler Volmer 
-conditions are applied at each interface along with 
-higher resolutions using adaptive meshing. The difference 
+conditions are applied at each interface. The difference 
 between this case and the `CEA` case is the presence of 
 a diffusional conductivity (`kd`) term.
 A comparison with a 1d finite difference solution is also done with 
@@ -43,4 +42,7 @@ plot files and then plots are made using `matplotlib`.
 
 `$python exactcompare.py "plt00001"` generates an image
 file called `pot_x_CEAkd.png` for inputs_x case.
+
+
+<img width="300" alt="pot_x_CEAkd" src="https://github.com/user-attachments/assets/28c85329-f1b5-46df-aa8e-3c31d4e31244" />
 
