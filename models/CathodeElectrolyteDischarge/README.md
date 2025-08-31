@@ -33,3 +33,7 @@ Run in parallel with inputs
 
 You can open the various plotfiles in
 paraview/visit. 
+
+<img width="600" alt="cathodeEdisch_pic" src="https://github.com/user-attachments/assets/c945194e-b146-48ae-81ac-68d2a837c896" />
+
+
