@@ -18,7 +18,10 @@ parallel execution capabilities on current and upcoming high-performance-computi
 * This tool depends on the AMReX library - which is included as a submodule
 * This tool also depends on the HYPRE library for some of the stiff electrochemical simulations, which can be obtained 
 built following these instructions - https://amrex-codes.github.io/amrex/docs_html/LinearSolvers.html#external-solvers
-* go to any of the test cases in tests or model folder (e.g. cd regression_tests/CEAcharging) and follow the `README` file
+It is best to build hypre in the `echemAMR` folder itself as several test cases have `HYPRE_DIR` set to relative path within the
+parent folder
+* Each simulation case needs to be built by linking problem specific c++ files with the main source code.
+  Go to any of the test cases in `regression_tests` or `models` folder (e.g. cd regression_tests/CEAcharging) and follow the `README` file
 * build executable using the GNUMakefile - do $make for CPU build or do $make USE_CUDA=TRUE for GPU build
 
 # Run instructions
