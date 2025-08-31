@@ -5,7 +5,8 @@ potential and species distribution in a
 simplified battery with three 
 domains of different conductivities. Butler Volmer 
 conditions are applied at each interface for both species 
-and potential equations. A comparison with analytic solution can also be done with 
+and potential equations. A comparison with analytic solution assuming uniform distribution of 
+species and potential can be done with 
 the time history of plot files.
 This case
 requires the use of HYPRE library to solve linear systems 
@@ -48,3 +49,8 @@ plot files and then plots are made using `gnuplot` here.
 files called `zerodsoln_cellvolt_1d.png` and 
 `zerodsoln_conc_1d.png` showing cell voltage and species 
 concentration variation with time. 
+
+<img width="300" alt="zerodsoln_cellvolt_1d" src="https://github.com/user-attachments/assets/ac417081-b98f-430b-a273-2517c5aaa011" />
+<img width="300" alt="zerodsoln_conc_1d" src="https://github.com/user-attachments/assets/3ee56079-f305-4a74-b064-cf4a0a031a32" />
+
+
