@@ -50,3 +50,6 @@ impact on the accuracy of the solution. It is currently set
 at 500 which gives a very accurate solution. If it is reduced to 
 100 the accuracy reduces.
 
+<img width="300" alt="pot_x_OCE" src="https://github.com/user-attachments/assets/2339d0fb-828d-4206-bf88-736b33a5e5fc" />
+
+
