@@ -39,3 +39,6 @@ Run in parallel with inputs
 
 You can open the various plotfiles in
 paraview/visit. 
+
+
+<img width="600" alt="microstr_case" src="https://github.com/user-attachments/assets/3f8afaa0-9016-46b4-82dd-31302d0eb0b7" />
