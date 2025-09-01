@@ -3,21 +3,25 @@
 <img src="https://github.com/user-attachments/assets/54859857-0559-45e5-bb36-f8dfe798d549" width="500" />
 
 EchemAMR is a coupled transport-reaction solver that simulates 
-electrochemical transport and interfacial chemistry at the microstructure scale. EchenAMR 
+electrochemical transport and interfacial chemistry at the microstructure scale. EchemAMR 
 can simulate lithium ion battery microstructures and has been applied to other electrochemical applications 
-such as electrochemical CO2 reduciton. An immersed interface formulation in echemAMR 
+such as electrochemical CO2 reduction. An immersed interface formulation in echemAMR 
 enables rapid representation of complex electrode geometries. Buttler-Volmer flux conditions are 
 imposed at electrode-electrolyte interfaces using an iterative non-linear solve within the immersed interface method. 
 The solver is developed on top of open-source performance portable library, AMReX (https://amrex-codes.github.io/amrex/), providing mesh adaptivity and 
 parallel execution capabilities on current and upcoming high-performance-computing (HPC) architectures. 
 
 # Build instructions
+
 * echemAMR uses submodules, please clone with git clone --recursive https://github.com/NREL/echemAMR.git (or update your existing clone with git submodule update --init --recursive)
 * gcc and an MPI library (openMPI/MPICH) for CPU builds. cuda > 11.0 is also required for GPU builds
 * This tool depends on the AMReX library - which is included as a submodule
 * This tool also depends on the HYPRE library for some of the stiff electrochemical simulations, which can be obtained 
 built following these instructions - https://amrex-codes.github.io/amrex/docs_html/LinearSolvers.html#external-solvers
-* go to any of the test cases in tests or model folder (e.g. cd regression_tests/CEAcharging)
+It is best to build hypre in the `echemAMR` folder itself as several test cases have `HYPRE_DIR` set to relative path within the
+parent folder
+* Each simulation case needs to be built by linking problem specific c++ files with the main source code.
+  Go to any of the test cases in `regression_tests` or `models` folder (e.g. cd regression_tests/CEAcharging) and follow the `README` file
 * build executable using the GNUMakefile - do $make for CPU build or do $make USE_CUDA=TRUE for GPU build
 
 # Run instructions
@@ -31,8 +35,9 @@ built following these instructions - https://amrex-codes.github.io/amrex/docs_ht
 # Visualization instructions
   
 * The outputs for a case are in the form of AMReX plotfiles
-* These plot files can be open usine AMReX grid reader in ParaView (see https://amrex-codes.github.io/amrex/docs_html/Visualization.html#paraview)
-* Alternatively yt or visit can also be used. see https://amrex-codes.github.io/amrex/docs_html/Visualization_Chapter.html
+* These plot files can be open usine AMReX grid reader in `ParaView` (see https://amrex-codes.github.io/amrex/docs_html/Visualization.html#paraview)
+* Alternatively `yt` or `visit` can also be used. see https://amrex-codes.github.io/amrex/docs_html/Visualization_Chapter.html
+* Most of the cases in `regression_tests` use `yt` and `gnuplot` for post-processing and plotting purposes
 
 # Acknowledgments
 
